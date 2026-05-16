@@ -112,7 +112,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
             // QUICK ACTIONS
             Padding(
-              padding: AppSpacing.paddingHorizontalMd,
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
               child: Row(
                 children: [
                   Expanded(
@@ -156,7 +156,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             const SizedBox(height: AppSpacing.sm),
 
             Padding(
-              padding: AppSpacing.paddingHorizontalMd,
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
               child: Row(
                 children: [
                   Expanded(
@@ -262,7 +262,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // SECTION HEADER
   Widget _sectionHeader(BuildContext context, String title) {
     return Padding(
-      padding: AppSpacing.paddingHorizontalMd,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

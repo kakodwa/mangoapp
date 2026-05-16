@@ -182,7 +182,7 @@ class ProductCard extends ConsumerWidget {
 
             // ================= INFO =================
             Padding(
-              padding: AppSpacing.paddingMd,
+              padding: const EdgeInsets.all(AppSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

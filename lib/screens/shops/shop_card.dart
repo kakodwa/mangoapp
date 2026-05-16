@@ -40,12 +40,7 @@ class _ShopCardState extends State<ShopCard> {
                     CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
                   ),
                   child: child,
-                ),
-              );
-            },
-          ),
-        );
-      },
+            ),
           ),
         );
       },
@@ -144,7 +139,7 @@ class _ShopCardState extends State<ShopCard> {
 
               // ================= INFO =================
               Padding(
-                padding: AppSpacing.paddingMd,
+                padding: const EdgeInsets.all(AppSpacing.md),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

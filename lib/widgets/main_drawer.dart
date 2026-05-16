@@ -25,7 +25,7 @@ class MainDrawer extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           onTap: onTap,
           child: Container(
-            padding: AppSpacing.paddingMd,
+            padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(14),
@@ -182,7 +182,7 @@ class MainDrawer extends StatelessWidget {
 
           // VERSION FOOTER
           Padding(
-            padding: AppSpacing.paddingMd,
+            padding: const EdgeInsets.all(AppSpacing.md),
             child: Text(
               "Version 1.0.0",
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
