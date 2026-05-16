@@ -142,17 +142,12 @@ class AppToast {
       backgroundColor: colors['background'] as Color,
       foregroundColor: colors['foreground'] as Color,
       autoCloseDuration: duration,
-      dismissible: dismissible,
       showProgressBar: true,
-      progressBarTheme: ProgressBarThemeData(
-        backgroundColor: colors['foreground']!.withOpacity(0.3),
-        foregroundColor: colors['foreground'] as Color,
-      ),
       icon: _getToastIcon(type, colors['foreground'] as Color),
       leading: leading ?? _getDefaultIcon(type, colors['foreground'] as Color),
       trailing: dismissible
           ? GestureDetector(
-              onTap: () => toastification.dismiss(),
+              onTap: () => toastification.dismissAll(),
               child: Icon(
                 Icons.close,
                 color: colors['foreground'],

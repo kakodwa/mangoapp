@@ -40,7 +40,9 @@ class _ShopCardState extends State<ShopCard> {
                     CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
                   ),
                   child: child,
-            ),
+                ),
+              );
+            },
           ),
         );
       },

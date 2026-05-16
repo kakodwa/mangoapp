@@ -181,10 +181,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                     SizedBox(
                       width: double.infinity,
-                      child: AppButton.primary(
-                        label: authState.isLoading ? 'Logging in...' : 'Login',
+                      child: AppButton(
+                        text: authState.isLoading ? 'Logging in...' : 'Login',
                         onPressed: authState.isLoading ? null : _handleLogin,
-                        isLoading: authState.isLoading,
+                        loading: authState.isLoading,
+                        fullWidth: true,
                       ),
                     ),
                   ],

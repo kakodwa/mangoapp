@@ -434,7 +434,7 @@ class _QuickActionButtonState extends State<_QuickActionButton> {
             borderRadius: BorderRadius.circular(16),
             onTap: widget.onTap,
             child: Padding(
-              padding: AppSpacing.paddingMd,
+              padding: const EdgeInsets.all(AppSpacing.md),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
