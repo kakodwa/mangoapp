@@ -1,4 +1,4 @@
-# MultiConnect - E-Commerce & Real Estate Platform
+# MangoMart - E-Commerce & Real Estate Platform
 
 A comprehensive full-stack application built with Django REST Framework backend and Flutter mobile frontend, integrating e-commerce, real estate marketplace, and digital wallet services.
 
