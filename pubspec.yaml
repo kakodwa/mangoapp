@@ -1,0 +1,98 @@
+name: mangochi_marketplace
+description: "A comprehensive multi-vendor marketplace app for Mangochi, Malawi with e-commerce, real estate, and wallet features."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.0.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # State Management
+  riverpod: ^2.4.0
+  flutter_riverpod: ^2.4.0
+  hooks_riverpod: ^2.4.0
+
+  # HTTP & API
+  http: ^1.1.0
+  dio: ^5.3.0
+
+  carousel_slider: ^5.0.0
+
+
+  # Local Storage & Security
+  flutter_secure_storage: ^9.0.0
+  shared_preferences: ^2.2.0
+  local_auth: ^2.1.0
+
+  # Authentication & JWT
+  jwt_decoder: ^2.0.1
+
+  # Maps & Location
+  google_maps_flutter: ^2.5.0
+  flutter_polyline_points: ^2.0.0
+  geolocator: ^9.0.2
+  flutter_tts: ^4.0.2
+
+  # WebSocket
+  web_socket_channel: ^2.4.0
+
+  # UI & Widgets
+  flutter_svg: ^2.0.5
+  cached_network_image: ^3.4.0
+  shimmer: ^3.0.0
+  smooth_page_indicator: ^1.1.0
+  pinput: ^2.3.0
+
+  # Date & Time
+  intl: ^0.19.0
+
+  # Image Handling
+  image_picker: ^1.0.4
+  file_picker: ^8.0.0
+  #image_cropper:^5.0.1
+
+  # Payment
+  flutter_stripe: ^10.0.0
+
+  # Notifications
+  firebase_core: ^2.24.0
+  #firebase_messaging:^14.7.0
+
+  fluttertoast: ^8.2.6
+  toastification: ^2.0.0
+
+  # URL Launcher
+  url_launcher: ^6.2.0
+
+  # Logging
+  logger: ^2.0.1
+
+
+  flutter_map: ^6.1.0
+  flutter_map_cancellable_tile_provider: 2.0.0
+  latlong2: ^0.9.1
+  photo_view: ^0.15.0
+
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+
+
+  assets:
+    - assets/images/logo.png
+    - assets/images/logo2.png
+    - assets/images/tnm.png
+    - assets/images/airtel.png
+    - assets/images/changu.png
+    - assets/images/visa.png

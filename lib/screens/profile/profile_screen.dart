@@ -1,0 +1,385 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../providers/auth_provider.dart';
+import '../../providers/wallet_provider.dart';
+import '../../providers/shops_provider.dart';
+
+import '../../theme/app_colors.dart';
+import '../../widgets/main_app_bar.dart';
+
+import '../properties/add_property_screen.dart';
+import '../properties/my_properties_screen.dart';
+import '../payments/payment_history_screen.dart';
+import '../wallet/wallet_transactions_screen.dart';
+import '../delivery/seller_delivery_screen.dart';
+
+import '../cart/cart_screen.dart';
+import '../profile/profile_screen.dart';
+import '../orders/orders_screen.dart';
+import '../auth/login_screen.dart';
+import '../products/add_product_screen.dart';
+import '../shops/create_shop_screen.dart';
+import '../shops/my_shop_screen.dart';
+import '../hospitality/lodge_owner_dashboard.dart';
+
+import '../../utils/user_role_utils.dart';
+
+class ProfileScreen extends ConsumerWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authProvider);
+    final user = authState.user;
+
+
+
+    final walletAsync = ref.watch(walletProvider);
+    final username = user?.username;
+
+    // ✅ SAFE ROLE CHECK
+    final isLoggedIn = authState.isAuthenticated;
+    final isShopOwner = user?.userType == "shop_owner";
+
+
+    final isHospitalityOwner = user?.userType == 'hospitality_owner';
+
+    // ⚠️ IMPORTANT: ensure fallback false if null
+    final hasShop = ref.watch(hasShopProvider) == true;
+
+    return Scaffold(
+      backgroundColor: Colors.grey.shade100,
+
+      appBar: MainAppBar(
+        title: username ?? 'Profile',
+      ),
+
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 45),
+
+            // ================= HEADER =================
+            Stack(
+              alignment: Alignment.center,
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  margin: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.fromLTRB(20, 70, 20, 20),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        AppColors.mangoOrange,
+                        AppColors.leafGreen,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(22),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        user?.firstName ?? "User Name",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        user?.email ?? "",
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                          ),
+                        decoration: BoxDecoration(
+                          color: UserRoleUtils.getColor(user?.userType ?? ''),
+                          borderRadius: BorderRadius.circular(20),
+                          ),
+                        child: Text(
+                          UserRoleUtils.getLabel(user?.userType ?? ''),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      const SizedBox(height: 20),
+
+                      walletAsync.when(
+                        data: (wallet) => Row(
+                          mainAxisAlignment:
+                              MainAxisAlignment.spaceBetween,
+                          children: [
+                            _stat("Balance",
+                                "${wallet.currency} ${wallet.balance}"),
+                            _stat("Earnings",
+                                "${wallet.currency} ${wallet.totalEarnings}"),
+                            _stat("Withdrawn",
+                                "${wallet.currency} ${wallet.totalWithdrawn}"),
+                          ],
+                        ),
+                        loading: () =>
+                            const CircularProgressIndicator(
+                          color: Colors.white,
+                        ),
+                        error: (_, __) =>
+                            const Text("Wallet error"),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const Positioned(
+                  top: -35,
+                  child: CircleAvatar(
+                    radius: 40,
+                    backgroundColor: AppColors.mangoOrange,
+                    child: Icon(Icons.person,
+                        size: 40, color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 20),
+
+            // ================= MENU =================
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                children: [
+
+                  _menuTile(
+                    context,
+                    Icons.shopping_bag,
+                    "My Orders",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const OrdersScreen(),
+                        ),
+                      );
+                    },
+                  ),
+
+                  _menuTile(
+                    context,
+                    Icons.payment,
+                    "My Payments",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              const PaymentHistoryScreen(),
+                        ),
+                      );
+                    },
+                  ),
+
+                  if (isLoggedIn && isHospitalityOwner)
+                  _menuTile(
+                    context,
+                    Icons.dashboard,
+                    "Lodge Dashboard",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const LodgeOwnerDashboard(),
+                          ),
+                        );
+                      },
+                      ),
+
+                  _menuTile(
+                    context,
+                    Icons.home_work,
+                    "My Properties",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              const MyPropertiesScreen(),
+                        ),
+                      );
+                    },
+                  ),
+
+                  _menuTile(
+                    context,
+                    Icons.account_balance_wallet,
+                    "Wallet Transactions",
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              const WalletTransactionsScreen(),
+                        ),
+                      );
+                    },
+                  ),
+
+                  // ================= SHOP SECTION (FIXED LOGIC) =================
+
+                  if (isLoggedIn && isShopOwner && !hasShop)
+                    _menuTile(
+                      context,
+                      Icons.add_business,
+                      "Create Shop",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const CreateShopScreen(),
+                          ),
+                        );
+                      },
+                    ),
+
+                  if (isLoggedIn && isShopOwner && hasShop) ...[
+                    _menuTile(
+                      context,
+                      Icons.store,
+                      "My Shop",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const MyShopScreen(),
+                          ),
+                        );
+                      },
+                    ),
+
+                    _menuTile(
+                      context,
+                      Icons.local_shipping,
+                      "Manage Deliveries",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const SellerDeliveryScreen(),
+                          ),
+                        );
+                      },
+                    ),
+
+                    _menuTile(
+                      context,
+                      Icons.add_box,
+                      "Add Product",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const AddProductScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+
+                  _menuTile(
+                    context,
+                    Icons.settings,
+                    "Settings",
+                  ),
+
+                  _menuTile(
+                    context,
+                    Icons.logout,
+                    "Logout",
+                    onTap: () async {
+                      await ref
+                          .read(authProvider.notifier)
+                          .logout();
+
+                      if (context.mounted) {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const LoginScreen()),
+                          (route) => false,
+                        );
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 40),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ================= WALLET STAT =================
+  Widget _stat(String title, String value) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 15,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          title,
+          style: const TextStyle(
+            color: Colors.white70,
+            fontSize: 12,
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ================= MENU TILE =================
+  Widget _menuTile(
+    BuildContext context,
+    IconData icon,
+    String title, {
+    VoidCallback? onTap,
+  }) {
+    return Card(
+      elevation: 1,
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: ListTile(
+        leading: Icon(icon, color: AppColors.mangoOrange),
+        title: Text(title),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        onTap: onTap ?? () {},
+      ),
+    );
+  }
+}
