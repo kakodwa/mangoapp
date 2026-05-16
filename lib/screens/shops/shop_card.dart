@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../models/shop_model.dart';
+import '../../theme/design_system/app_badge.dart';
+import '../../theme/design_system/app_icon_button.dart';
+import '../../theme/design_system/app_spacing.dart';
 import 'shop_details_screen.dart';
 
 class ShopCard extends StatefulWidget {
@@ -23,7 +26,8 @@ class _ShopCardState extends State<ShopCard> {
       onTapUp: (_) => setState(() => _pressed = false),
       onTapCancel: () => setState(() => _pressed = false),
       onTap: () {
-        Navigator.of(context).push(
+        Navigator.push(
+          context,
           PageRouteBuilder(
             transitionDuration: const Duration(milliseconds: 250),
             pageBuilder: (_, __, ___) =>
@@ -32,11 +36,16 @@ class _ShopCardState extends State<ShopCard> {
               return FadeTransition(
                 opacity: animation,
                 child: ScaleTransition(
-                  scale: Tween(begin: 0.98, end: 1.0).animate(animation),
+                  scale: Tween(begin: 0.95, end: 1.0).animate(
+                    CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+                  ),
                   child: child,
                 ),
               );
             },
+          ),
+        );
+      },
           ),
         );
       },
@@ -107,37 +116,26 @@ class _ShopCardState extends State<ShopCard> {
                     ),
                   ),
 
-                  // 🏷 CATEGORY (glass badge)
+                  // BADGES
                   Positioned(
-                    top: 10,
-                    left: 10,
-                    child: _badge(
-                      text: shop.category,
-                      color: Colors.orange,
-                    ),
-                  ),
-
-                  // ✅ VERIFIED
-                  Positioned(
-                    top: 10,
-                    right: 10,
-                    child: _badge(
-                      text: shop.isActive ? "VERIFIED" : "INACTIVE",
-                      color: shop.isActive ? Colors.green : Colors.red,
-                    ),
-                  ),
-
-                  // ⚡ QUICK ACTIONS (TikTok style)
-                  Positioned(
-                    bottom: 10,
-                    right: 10,
-                    child: Column(
+                    top: AppSpacing.sm,
+                    left: AppSpacing.sm,
+                    right: AppSpacing.sm,
+                    child: Row(
                       children: [
-                        _circleIcon(Icons.store),
-                        const SizedBox(height: 8),
-                        _circleIcon(Icons.favorite_border),
-                        const SizedBox(height: 8),
-                        _circleIcon(Icons.share_outlined),
+                        AppBadge(
+                          text: shop.category,
+                          type: BadgeType.primary,
+                          fontSize: 9,
+                        ),
+                        const Spacer(),
+                        AppBadge(
+                          text: shop.isActive ? "VERIFIED" : "INACTIVE",
+                          type: shop.isActive
+                              ? BadgeType.success
+                              : BadgeType.error,
+                          fontSize: 9,
+                        ),
                       ],
                     ),
                   ),
@@ -146,11 +144,11 @@ class _ShopCardState extends State<ShopCard> {
 
               // ================= INFO =================
               Padding(
-                padding: const EdgeInsets.all(14),
+                padding: AppSpacing.paddingMd,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 🏪 SHOP NAME + PRODUCT COUNT
+                    // SHOP NAME + PRODUCT COUNT
                     Row(
                       children: [
                         Expanded(
@@ -158,50 +156,59 @@ class _ShopCardState extends State<ShopCard> {
                             shop.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                         ),
                         Text(
-                          "${shop.productCount ?? 0} products",
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey.shade600,
-                          ),
+                          "${shop.productCount ?? 0}",
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelSmall
+                              ?.copyWith(
+                                color: Colors.grey.shade600,
+                              ),
                         ),
                       ],
                     ),
 
-                    const SizedBox(height: 6),
+                    const SizedBox(height: AppSpacing.xs),
 
-                    // 📍 LOCATION + ⭐ RATING
+                    // LOCATION + RATING
                     Row(
                       children: [
-                        const Icon(Icons.location_on,
-                            size: 14, color: Colors.grey),
-                        const SizedBox(width: 4),
+                        Icon(Icons.location_on,
+                            size: 13,
+                            color: Colors.grey.shade600),
+                        const SizedBox(width: 3),
                         Expanded(
                           child: Text(
                             shop.district,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey.shade600,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  color: Colors.grey.shade600,
+                                ),
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: 6),
                         const Icon(Icons.star,
-                            size: 14, color: Colors.amber),
-                        const SizedBox(width: 4),
+                            size: 13, color: Colors.amber),
+                        const SizedBox(width: 3),
                         Text(
                           "${shop.rating}",
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey.shade600,
-                          ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelSmall
+                              ?.copyWith(
+                                color: Colors.grey.shade600,
+                              ),
                         ),
                       ],
                     ),
@@ -215,34 +222,4 @@ class _ShopCardState extends State<ShopCard> {
     );
   }
 
-  // ================= GLASS BADGE =================
-  Widget _badge({required String text, required Color color}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.8),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
-  // ================= QUICK ACTION =================
-  Widget _circleIcon(IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(7),
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.4),
-        shape: BoxShape.circle,
-      ),
-      child: Icon(icon, size: 18, color: Colors.white),
-    );
-  }
 }

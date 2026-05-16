@@ -8,15 +8,13 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../providers/products_provider.dart';
 import '../../providers/shops_provider.dart';
 import '../../providers/properties_provider.dart';
-
-
+import '../../theme/design_system/app_spacing.dart';
+import '../../theme/design_system/app_typography.dart';
 import '../shops/shop_card.dart';
 import '../products/product_card.dart';
 import '../properties/property_card.dart';
 import '../../screens/delivery/delivery_code_entry_screen.dart';
 import '../../screens/hospitality/lodge_list_screen.dart';
-
-
 import '../../widgets/main_drawer.dart';
 import '../../widgets/main_app_bar.dart';
 
@@ -110,93 +108,90 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               error: (_, __) => const SizedBox(),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.lg),
 
-            /// QUICK ACTIONS
+            // QUICK ACTIONS
             Padding(
-  padding: const EdgeInsets.symmetric(horizontal: 16),
-  child: Row(
-    children: [
-      Expanded(
-        child: _QuickActionButton(
-          icon: Icons.store,
-          label: 'Shops',
-          onTap: () {
-            // TODO: navigate to shops screen
-          },
-        ),
-      ),
-      const SizedBox(width: 12),
-
-      Expanded(
-        child: _QuickActionButton(
-          icon: Icons.home_work,
-          label: 'Properties',
-          onTap: () {
-            // TODO: navigate to properties screen
-          },
-        ),
-      ),
-      const SizedBox(width: 12),
-
-      Expanded(
-        child: _QuickActionButton(
-          icon: Icons.local_shipping,
-          label: 'Delivery',
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const DeliveryCodeScreen(),
+              padding: AppSpacing.paddingHorizontalMd,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _QuickActionButton(
+                      icon: Icons.store,
+                      label: 'Shops',
+                      onTap: () {
+                        // TODO: navigate to shops screen
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: _QuickActionButton(
+                      icon: Icons.home_work,
+                      label: 'Properties',
+                      onTap: () {
+                        // TODO: navigate to properties screen
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: _QuickActionButton(
+                      icon: Icons.local_shipping,
+                      label: 'Delivery',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const DeliveryCodeScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
-            );
-          },
-        ),
-      ),
-    ],
-  ),
-),
-            const SizedBox(height: 12),
+            ),
 
-Padding(
-  padding: const EdgeInsets.symmetric(horizontal: 16),
-  child: Row(
-    children: [
-      Expanded(
-        child: _QuickActionButton(
-          icon: Icons.hotel,
-          label: 'Hospitality',
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const LodgeListScreen(),
+            const SizedBox(height: AppSpacing.sm),
+
+            Padding(
+              padding: AppSpacing.paddingHorizontalMd,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _QuickActionButton(
+                      icon: Icons.hotel,
+                      label: 'Hospitality',
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LodgeListScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: _QuickActionButton(
+                      icon: Icons.more_horiz,
+                      label: 'More',
+                      onTap: () {
+                        // future features
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  const Expanded(child: SizedBox()),
+                ],
               ),
-            );
-          },
-        ),
-      ),
-      const SizedBox(width: 12),
+            ),
 
-      Expanded(
-        child: _QuickActionButton(
-          icon: Icons.more_horiz,
-          label: 'More',
-          onTap: () {
-            // future features
-          },
-        ),
-      ),
-      const SizedBox(width: 12),
+            const SizedBox(height: AppSpacing.lg),
 
-      const Expanded(child: SizedBox()), // keeps layout balanced
-    ],
-  ),
-),
-
-            const SizedBox(height: 24),
-
-            /// SHOPS
+            // SHOPS
             _sectionHeader(context, 'Popular Shops'),
             shopsAsync.when(
               data: (shops) {
@@ -214,9 +209,9 @@ Padding(
               error: (_, __) => const SizedBox(),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.lg),
 
-            /// PRODUCTS
+            // PRODUCTS
             _sectionHeader(context, 'Featured Products'),
             productsAsync.when(
               data: (products) {
@@ -237,9 +232,9 @@ Padding(
               error: (_, __) => const SizedBox(),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.lg),
 
-            /// PROPERTIES
+            // PROPERTIES
             _sectionHeader(context, 'Featured Properties'),
             propertiesAsync.when(
               data: (properties) {
@@ -257,27 +252,35 @@ Padding(
               error: (_, __) => const SizedBox(),
             ),
 
-            const SizedBox(height: 32),
+            const SizedBox(height: AppSpacing.xl),
           ],
         ),
       ),
     );
   }
 
-  /// SECTION HEADER
+  // SECTION HEADER
   Widget _sectionHeader(BuildContext context, String title) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: AppSpacing.paddingHorizontalMd,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          TextButton(onPressed: () {}, child: const Text('View All')),
+          TextButton(
+            onPressed: () {},
+            child: Text(
+              'View All',
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -386,8 +389,8 @@ Widget _buildBanner(
   );
 }
 
-/// QUICK BUTTON
-class _QuickActionButton extends StatelessWidget {
+// QUICK ACTION BUTTON
+class _QuickActionButton extends StatefulWidget {
   final IconData icon;
   final String label;
   final VoidCallback onTap;
@@ -399,20 +402,56 @@ class _QuickActionButton extends StatelessWidget {
   });
 
   @override
+  State<_QuickActionButton> createState() => _QuickActionButtonState();
+}
+
+class _QuickActionButtonState extends State<_QuickActionButton> {
+  bool _isPressed = false;
+
+  @override
   Widget build(BuildContext context) {
-    return Card(
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              Icon(icon,
-                  size: 32,
-                  color: Theme.of(context).colorScheme.primary),
-              const SizedBox(height: 8),
-              Text(label, textAlign: TextAlign.center),
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _isPressed = true),
+      onTapUp: (_) => setState(() => _isPressed = false),
+      onTapCancel: () => setState(() => _isPressed = false),
+      onTap: widget.onTap,
+      child: AnimatedScale(
+        scale: _isPressed ? 0.95 : 1.0,
+        duration: const Duration(milliseconds: 100),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              )
             ],
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: widget.onTap,
+            child: Padding(
+              padding: AppSpacing.paddingMd,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    widget.icon,
+                    size: 28,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    widget.label,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/auth_provider.dart';
 import '../providers/products_provider.dart';
-
+import '../theme/design_system/app_spacing.dart';
 import '../screens/cart/cart_screen.dart';
 import '../screens/profile/profile_screen.dart';
 import '../screens/auth/login_screen.dart';
@@ -25,16 +25,20 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
 
     return AppBar(
       centerTitle: false,
-      titleSpacing: 0,
-      title: Text(title),
-
+      titleSpacing: AppSpacing.md,
+      title: Text(
+        title,
+        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
       actions: [
-        // 🛒 CART
+        // CART BUTTON
         Stack(
           clipBehavior: Clip.none,
           children: [
             IconButton(
-              icon: const Icon(Icons.shopping_cart),
+              icon: const Icon(Icons.shopping_cart_outlined),
               onPressed: () {
                 Navigator.push(
                   context,
@@ -43,12 +47,12 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
                   ),
                 );
               },
+              tooltip: 'Shopping Cart',
             ),
-
             if (cartItems.isNotEmpty)
               Positioned(
-                right: 6,
-                top: 6,
+                right: 4,
+                top: 4,
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: const BoxDecoration(
@@ -59,7 +63,7 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     '${cartItems.length}',
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 10,
+                      fontSize: 9,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

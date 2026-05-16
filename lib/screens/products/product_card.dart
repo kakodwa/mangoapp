@@ -7,6 +7,9 @@ import '../../providers/auth_provider.dart';
 import '../auth/login_screen.dart';
 import '../products/edit_product_screen.dart';
 import '../../theme/design_system/app_card.dart';
+import '../../theme/design_system/app_badge.dart';
+import '../../theme/design_system/app_icon_button.dart';
+import '../../theme/design_system/app_spacing.dart';
 import '../../utils/app_toast.dart';
 
 class ProductCard extends ConsumerWidget {
@@ -32,9 +35,21 @@ class ProductCard extends ConsumerWidget {
       borderRadius: BorderRadius.circular(16),
       onTap: () {
         Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (_) =>
+          PageRouteBuilder(
+            transitionDuration: const Duration(milliseconds: 250),
+            pageBuilder: (_, __, ___) =>
                 ProductDetailsScreen(productId: product.id),
+            transitionsBuilder: (_, animation, __, child) {
+              return FadeTransition(
+                opacity: animation,
+                child: ScaleTransition(
+                  scale: Tween(begin: 0.95, end: 1.0).animate(
+                    CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+                  ),
+                  child: child,
+                ),
+              );
+            },
           ),
         );
       },
@@ -103,24 +118,11 @@ class ProductCard extends ConsumerWidget {
 
                 // CATEGORY BADGE
                 Positioned(
-                  top: 12,
-                  left: 12,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      color: Colors.black.withOpacity(0.65),
-                    ),
-                    child: Text(
-                      product.category,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
+                  top: AppSpacing.sm,
+                  left: AppSpacing.sm,
+                  child: AppBadge(
+                    text: product.category,
+                    type: BadgeType.primary,
                   ),
                 ),
 
@@ -180,56 +182,48 @@ class ProductCard extends ConsumerWidget {
 
             // ================= INFO =================
             Padding(
-              padding: const EdgeInsets.all(14),
+              padding: AppSpacing.paddingMd,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
                   Text(
                     product.name,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      height: 1.3,
-                      fontSize: 15,
+                    style: theme.textTheme.titleMedium?.copyWith(
                       color: const Color(0xFF212121),
                     ),
                   ),
 
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.xs),
 
                   // RATING
                   Row(
                     children: [
                       const Icon(Icons.star,
-                          size: 15, color: Color(0xFFFFC107)),
-                      const SizedBox(width: 5),
+                          size: 14, color: Color(0xFFFFC107)),
+                      const SizedBox(width: 4),
                       Text(
                         product.rating.toString(),
                         style: theme.textTheme.labelSmall?.copyWith(
                           fontWeight: FontWeight.w600,
-                          fontSize: 13,
                         ),
                       ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 4),
                       Text(
-                        "(${product.totalReviews} reviews)",
-                        style: const TextStyle(
-                          color: Color(0xFF999999),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
+                        "(${product.totalReviews})",
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: Colors.grey.shade600,
                         ),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: AppSpacing.sm),
 
                   // PRICE + ACTION
                   Row(
                     children: [
-                      // LEFT SIDE (takes remaining space safely)
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -237,21 +231,17 @@ class ProductCard extends ConsumerWidget {
                             if (product.hasDiscount)
                               Text(
                                 'MWK ${product.originalPrice?.toStringAsFixed(2)}',
-                                style: const TextStyle(
+                                style: theme.textTheme.labelSmall?.copyWith(
                                   decoration: TextDecoration.lineThrough,
-                                  fontSize: 12,
-                                  color: Color(0xFFBBBBBB),
-                                  fontWeight: FontWeight.w500,
+                                  color: Colors.grey.shade500,
                                 ),
                               ),
 
                             Text(
                               'MWK ${product.price.toStringAsFixed(2)}',
-                              style: TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.bold,
+                              style: theme.textTheme.titleMedium?.copyWith(
                                 color: Theme.of(context).primaryColor,
-                                letterSpacing: 0.3,
+                                fontWeight: FontWeight.bold,
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -259,22 +249,24 @@ class ProductCard extends ConsumerWidget {
                         ),
                       ),
 
-                      const SizedBox(width: 10),
+                      const SizedBox(width: AppSpacing.sm),
 
-                      // RIGHT BUTTON (fixed safe area)
-                      _circleButton(
-                        icon: isOwner
-                            ? Icons.edit
-                            : Icons.shopping_cart_outlined,
+                      // Right Button
+                      AppIconButton(
+                        icon: isOwner ? Icons.edit : Icons.shopping_cart_outlined,
                         color: isOwner
                             ? const Color(0xFF1976D2)
-                            : (product.isInStock ? const Color(0xFFFF8C00) : Colors.grey),
+                            : (product.isInStock
+                                ? const Color(0xFFFF8C00)
+                                : Colors.grey),
+                        style: IconButtonStyle.filled,
                         onTap: isOwner
                             ? () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => EditProductScreen(product: product),
+                                    builder: (_) =>
+                                        EditProductScreen(product: product),
                                   ),
                                 );
                               }
@@ -290,7 +282,9 @@ class ProductCard extends ConsumerWidget {
                                       return;
                                     }
 
-                                    ref.read(addToCartProvider).call(product, 1);
+                                    ref
+                                        .read(addToCartProvider)
+                                        .call(product, 1);
 
                                     AppToast.success(
                                       context,
@@ -310,29 +304,4 @@ class ProductCard extends ConsumerWidget {
     );
   }
 
-  // ================= BUTTON =================
-  Widget _circleButton({
-    required IconData icon,
-    required Color color,
-    VoidCallback? onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: color.withOpacity(0.15),
-          boxShadow: [
-            BoxShadow(
-              color: color.withOpacity(0.2),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            )
-          ],
-        ),
-        child: Icon(icon, size: 20, color: color),
-      ),
-    );
-  }
 }

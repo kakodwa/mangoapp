@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../models/property_model.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/design_system/app_badge.dart';
+import '../../theme/design_system/app_spacing.dart';
 import 'property_details_screen.dart';
-import 'property_card.dart';
 
 class PropertyCard extends StatefulWidget {
   final Property property;
@@ -39,7 +40,9 @@ class _PropertyCardState extends State<PropertyCard>
               return FadeTransition(
                 opacity: animation,
                 child: ScaleTransition(
-                  scale: Tween(begin: 0.98, end: 1.0).animate(animation),
+                  scale: Tween(begin: 0.95, end: 1.0).animate(
+                    CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+                  ),
                   child: child,
                 ),
               );
@@ -51,7 +54,8 @@ class _PropertyCardState extends State<PropertyCard>
         duration: const Duration(milliseconds: 120),
         scale: _pressed ? 0.98 : 1.0,
         child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          margin: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
             color: Colors.white,
@@ -88,93 +92,96 @@ class _PropertyCardState extends State<PropertyCard>
                     ),
                   ),
 
-                  // TYPE BADGE
+                  // BADGES
                   Positioned(
-                    top: 12,
-                    left: 12,
-                    child: _glassBadge(
-                      text: property.propertyType.toUpperCase(),
-                      color: AppColors.mangoOrange,
-                    ),
-                  ),
-
-                  // STATUS
-                  Positioned(
-                    top: 12,
-                    right: 12,
-                    child: _glassBadge(
-                      text: property.status.toUpperCase(),
-                      color: Colors.black,
+                    top: AppSpacing.sm,
+                    left: AppSpacing.sm,
+                    right: AppSpacing.sm,
+                    child: Row(
+                      children: [
+                        AppBadge(
+                          text: property.propertyType,
+                          type: BadgeType.primary,
+                          fontSize: 9,
+                        ),
+                        const Spacer(),
+                        AppBadge(
+                          text: property.status,
+                          type: BadgeType.warning,
+                          fontSize: 9,
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
 
               Padding(
-                padding: const EdgeInsets.all(14),
+                padding: AppSpacing.paddingMd,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ================= PRICE + LISTING TYPE =================
+                    // PRICE + LISTING TYPE
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          '${property.currency} ${property.price.toStringAsFixed(0)}',
-                          style: const TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.mangoOrange,
+                        Expanded(
+                          child: Text(
+                            '${property.currency} ${property.price.toStringAsFixed(0)}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
+                                  color: AppColors.mangoOrange,
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                         ),
-
-                        // 🔥 NEW: FOR SALE / RENT BADGE
-                        Container(
+                        const SizedBox(width: AppSpacing.sm),
+                        AppBadge(
+                          text: listingText,
+                          customColor: listingColor,
+                          fontSize: 9,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 5),
-                          decoration: BoxDecoration(
-                            color: listingColor,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            listingText,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            horizontal: 8,
+                            vertical: 4,
                           ),
                         ),
                       ],
                     ),
 
-                    const SizedBox(height: 6),
+                    const SizedBox(height: AppSpacing.xs),
 
                     Text(
                       property.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(fontWeight: FontWeight.w600),
                     ),
 
-                    const SizedBox(height: 6),
+                    const SizedBox(height: AppSpacing.xs),
 
                     Row(
                       children: [
-                        Icon(Icons.location_on,
-                            size: 14, color: Colors.grey.shade600),
-                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.location_on,
+                          size: 13,
+                          color: Colors.grey.shade600,
+                        ),
+                        const SizedBox(width: 3),
                         Expanded(
                           child: Text(
                             '${property.city}, ${property.district}',
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey.shade600,
-                            ),
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  color: Colors.grey.shade600,
+                                ),
                           ),
                         ),
                       ],
@@ -189,21 +196,4 @@ class _PropertyCardState extends State<PropertyCard>
     );
   }
 
-  Widget _glassBadge({required String text, required Color color}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.75),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 10,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
 }
