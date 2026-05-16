@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/api_provider.dart';
+import '../../theme/design_system/app_text_field.dart';
+import '../../theme/design_system/app_spacing.dart';
+import '../../theme/design_system/app_button.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -14,8 +17,6 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   late TextEditingController _usernameController;
   late TextEditingController _passwordController;
-
-  bool _obscurePassword = true;
   bool _logoErrorShown = false;
 
   @override
@@ -139,66 +140,51 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
               ),
 
-              const SizedBox(height: 32),
+              const SizedBox(height: AppSpacing.xl),
 
               ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 400),
                 child: Column(
                   children: [
-                    TextField(
+                    AppTextField(
+                      label: 'Username',
+                      hint: 'Enter your username',
                       controller: _usernameController,
-                      decoration: InputDecoration(
-                        labelText: 'Username',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        prefixIcon: const Icon(Icons.person),
-                      ),
+                      prefix: const Icon(Icons.person),
+                      isRequired: true,
+                      validator: (value) {
+                        if (value?.isEmpty ?? true) {
+                          return 'Username is required';
+                        }
+                        return null;
+                      },
                     ),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.lg),
 
-                    TextField(
+                    AppTextField(
+                      label: 'Password',
+                      hint: 'Enter your password',
                       controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      decoration: InputDecoration(
-                        labelText: 'Password',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        prefixIcon: const Icon(Icons.lock),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _obscurePassword = !_obscurePassword;
-                            });
-                          },
-                        ),
-                      ),
+                      type: TextFieldType.password,
+                      prefix: const Icon(Icons.lock),
+                      isRequired: true,
+                      validator: (value) {
+                        if (value?.isEmpty ?? true) {
+                          return 'Password is required';
+                        }
+                        return null;
+                      },
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.xl),
 
                     SizedBox(
                       width: double.infinity,
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed:
-                            authState.isLoading ? null : _handleLogin,
-                        child: authState.isLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Text('Login'),
+                      child: AppButton.primary(
+                        label: authState.isLoading ? 'Logging in...' : 'Login',
+                        onPressed: authState.isLoading ? null : _handleLogin,
+                        isLoading: authState.isLoading,
                       ),
                     ),
                   ],
