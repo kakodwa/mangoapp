@@ -91,7 +91,6 @@ class AppToast {
     required ToastType type,
     Duration duration = const Duration(seconds: 4),
     bool dismissible = true,
-    Widget? leading,
     VoidCallback? onTap,
   }) {
     _show(
@@ -101,7 +100,6 @@ class AppToast {
       message: message,
       duration: duration,
       dismissible: dismissible,
-      leading: leading,
       onTap: onTap,
     );
   }
@@ -114,7 +112,6 @@ class AppToast {
     required String message,
     Duration duration = const Duration(seconds: 4),
     bool dismissible = true,
-    Widget? leading,
     VoidCallback? onTap,
   }) {
     final colors = _getToastColors(type);
@@ -144,7 +141,6 @@ class AppToast {
       autoCloseDuration: duration,
       showProgressBar: true,
       icon: _getToastIcon(type, colors['foreground'] as Color),
-      leading: leading ?? _getDefaultIcon(type, colors['foreground'] as Color),
       trailing: dismissible
           ? GestureDetector(
               onTap: () => toastification.dismissAll(),
