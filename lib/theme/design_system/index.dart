@@ -12,9 +12,10 @@ export 'app_titled_card.dart';
 // Badge Component
 export 'app_badge.dart';
 
-// Info & Loader
+// Info & Loader & Notifications
 export 'app_info_box.dart';
 export 'app_loader.dart';
+export 'app_toast.dart';
 
 // Typography System
 export 'app_typography.dart';
