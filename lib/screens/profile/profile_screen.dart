@@ -13,7 +13,10 @@ import '../properties/my_properties_screen.dart';
 import '../payments/payment_history_screen.dart';
 import '../wallet/wallet_transactions_screen.dart';
 import '../delivery/seller_delivery_screen.dart';
+<<<<<<< HEAD
 import '../events/manage_events_screen.dart';
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
 import '../cart/cart_screen.dart';
 import '../profile/profile_screen.dart';
@@ -22,7 +25,10 @@ import '../auth/login_screen.dart';
 import '../products/add_product_screen.dart';
 import '../shops/create_shop_screen.dart';
 import '../shops/my_shop_screen.dart';
+<<<<<<< HEAD
 import '../events/my_tickets_screen.dart';
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 import '../hospitality/lodge_owner_dashboard.dart';
 
 import '../../utils/user_role_utils.dart';
@@ -48,9 +54,13 @@ class ProfileScreen extends ConsumerWidget {
     final isHospitalityOwner = user?.userType == 'hospitality_owner';
 
     // ⚠️ IMPORTANT: ensure fallback false if null
+<<<<<<< HEAD
     //final hasShop = ref.watch(hasShopProvider) == true;
     final hasShop = ref.watch(hasShopProvider);
     //final hasShopAsync = ref.watch(hasShopProvider);
+=======
+    final hasShop = ref.watch(hasShopProvider) == true;
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
@@ -195,6 +205,7 @@ class ProfileScreen extends ConsumerWidget {
                     },
                   ),
 
+<<<<<<< HEAD
                   _menuTile(
                     context,
                     Icons.confirmation_number,
@@ -209,6 +220,8 @@ class ProfileScreen extends ConsumerWidget {
                       },
                   ),
 
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                   if (isLoggedIn && isHospitalityOwner)
                   _menuTile(
                     context,
@@ -254,6 +267,7 @@ class ProfileScreen extends ConsumerWidget {
                     },
                   ),
 
+<<<<<<< HEAD
                   _menuTile(
                     context,
                     Icons.event,
@@ -336,6 +350,73 @@ if (isLoggedIn && isShopOwner && hasShop) ...[
         
 
         
+=======
+                  // ================= SHOP SECTION (FIXED LOGIC) =================
+
+                  if (isLoggedIn && isShopOwner && !hasShop)
+                    _menuTile(
+                      context,
+                      Icons.add_business,
+                      "Create Shop",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const CreateShopScreen(),
+                          ),
+                        );
+                      },
+                    ),
+
+                  if (isLoggedIn && isShopOwner && hasShop) ...[
+                    _menuTile(
+                      context,
+                      Icons.store,
+                      "My Shop",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const MyShopScreen(),
+                          ),
+                        );
+                      },
+                    ),
+
+                    _menuTile(
+                      context,
+                      Icons.local_shipping,
+                      "Manage Deliveries",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const SellerDeliveryScreen(),
+                          ),
+                        );
+                      },
+                    ),
+
+                    _menuTile(
+                      context,
+                      Icons.add_box,
+                      "Add Product",
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const AddProductScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                   _menuTile(
                     context,
                     Icons.settings,

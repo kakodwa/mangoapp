@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/wallet_provider.dart';
+<<<<<<< HEAD
 import '../../widgets/app_scaffold.dart';
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 import '../../theme/app_colors.dart';
 
 class WalletTransactionsScreen extends ConsumerWidget {
@@ -42,7 +45,11 @@ class WalletTransactionsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final txAsync = ref.watch(walletTransactionsProvider);
 
+<<<<<<< HEAD
     return AppScaffold(
+=======
+    return Scaffold(
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
       backgroundColor: const Color(0xFFF6F7FB),
 
       appBar: AppBar(

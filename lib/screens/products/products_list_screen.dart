@@ -6,8 +6,11 @@ import '../products/product_card.dart';
 import '../../widgets/main_drawer.dart';
 import '../../widgets/main_app_bar.dart';
 import '../../theme/app_colors.dart';
+<<<<<<< HEAD
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/search_filter_widgets.dart';
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
 class ProductsListScreen extends ConsumerStatefulWidget {
   const ProductsListScreen({Key? key}) : super(key: key);
@@ -20,7 +23,10 @@ class ProductsListScreen extends ConsumerStatefulWidget {
 class _ProductsListScreenState extends ConsumerState<ProductsListScreen> {
   final TextEditingController _searchController = TextEditingController();
 
+<<<<<<< HEAD
   bool _showFilters = false;
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
   String _selectedCategory = 'All';
   String _selectedDistrict = 'All';
 
@@ -71,7 +77,11 @@ class _ProductsListScreenState extends ConsumerState<ProductsListScreen> {
   Widget build(BuildContext context) {
     final productsAsync = ref.watch(productsProvider);
 
+<<<<<<< HEAD
     return AppScaffold(
+=======
+    return Scaffold(
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
       appBar: const MainAppBar(title: 'Products'),
       drawer: const MainDrawer(),
       backgroundColor: const Color(0xFFF6F7FB),
@@ -79,6 +89,7 @@ class _ProductsListScreenState extends ConsumerState<ProductsListScreen> {
       body: Column(
         children: [
 
+<<<<<<< HEAD
           // ================= SEARCH + FILTER TOGGLE =================
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
@@ -142,6 +153,68 @@ class _ProductsListScreenState extends ConsumerState<ProductsListScreen> {
           ),
 
           const SizedBox(height: 4),
+=======
+          // ================= SEARCH =================
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 10,
+                  )
+                ],
+              ),
+              child: TextField(
+                controller: _searchController,
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(
+                  hintText: 'Search products...',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() {});
+                          },
+                        )
+                      : null,
+                  border: InputBorder.none,
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 14),
+                ),
+              ),
+            ),
+          ),
+
+          // ================= CATEGORY FILTER =================
+          _buildSectionTitle("Category"),
+          _buildChipList(_categories, _selectedCategory, (val) {
+            setState(() => _selectedCategory = val);
+          }),
+
+          // ================= DISTRICT FILTER =================
+          _buildSectionTitle("District (Malawi)"),
+          _buildChipList(_districts, _selectedDistrict, (val) {
+            setState(() => _selectedDistrict = val);
+          }),
+
+          // ================= CLEAR FILTER =================
+          if (_selectedCategory != 'All' ||
+              _selectedDistrict != 'All' ||
+              _searchController.text.isNotEmpty)
+            TextButton.icon(
+              onPressed: _clearFilters,
+              icon: const Icon(Icons.clear),
+              label: const Text("Clear filters"),
+            ),
+
+          const SizedBox(height: 6),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
           // ================= PRODUCTS =================
           Expanded(
@@ -225,4 +298,65 @@ class _ProductsListScreenState extends ConsumerState<ProductsListScreen> {
       ),
     );
   }
+<<<<<<< HEAD
 }
+=======
+
+  // ================= UI HELPERS =================
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChipList(
+    List<String> items,
+    String selected,
+    Function(String) onSelect,
+  ) {
+    return SizedBox(
+      height: 50,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        itemCount: items.length,
+        itemBuilder: (context, index) {
+          final item = items[index];
+          final isSelected = selected == item;
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: ChoiceChip(
+              label: Text(item),
+              selected: isSelected,
+              onSelected: (_) => onSelect(item),
+              selectedColor: AppColors.mangoOrange.withOpacity(0.15),
+              backgroundColor: Colors.white,
+              labelStyle: TextStyle(
+                color: isSelected
+                    ? AppColors.mangoOrange
+                    : Colors.black87,
+                fontWeight: FontWeight.w600,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63

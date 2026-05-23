@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../models/property_model.dart';
 import '../../theme/app_colors.dart';
+<<<<<<< HEAD
 import '../../theme/design_system/app_badge.dart';
 import '../../theme/design_system/app_spacing.dart';
 import 'property_details_screen.dart';
+=======
+import 'property_details_screen.dart';
+import 'property_card.dart';
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
 class PropertyCard extends StatefulWidget {
   final Property property;
@@ -40,9 +45,13 @@ class _PropertyCardState extends State<PropertyCard>
               return FadeTransition(
                 opacity: animation,
                 child: ScaleTransition(
+<<<<<<< HEAD
                   scale: Tween(begin: 0.95, end: 1.0).animate(
                     CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
                   ),
+=======
+                  scale: Tween(begin: 0.98, end: 1.0).animate(animation),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                   child: child,
                 ),
               );
@@ -54,8 +63,12 @@ class _PropertyCardState extends State<PropertyCard>
         duration: const Duration(milliseconds: 120),
         scale: _pressed ? 0.98 : 1.0,
         child: Container(
+<<<<<<< HEAD
           margin: const EdgeInsets.symmetric(
               horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
+=======
+          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
             color: Colors.white,
@@ -92,6 +105,7 @@ class _PropertyCardState extends State<PropertyCard>
                     ),
                   ),
 
+<<<<<<< HEAD
                   // BADGES
                   Positioned(
                     top: AppSpacing.sm,
@@ -111,12 +125,32 @@ class _PropertyCardState extends State<PropertyCard>
                           fontSize: 9,
                         ),
                       ],
+=======
+                  // TYPE BADGE
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: _glassBadge(
+                      text: property.propertyType.toUpperCase(),
+                      color: AppColors.mangoOrange,
+                    ),
+                  ),
+
+                  // STATUS
+                  Positioned(
+                    top: 12,
+                    right: 12,
+                    child: _glassBadge(
+                      text: property.status.toUpperCase(),
+                      color: Colors.black,
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                     ),
                   ),
                 ],
               ),
 
               Padding(
+<<<<<<< HEAD
                 padding: const EdgeInsets.all(AppSpacing.md),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,17 +179,56 @@ class _PropertyCardState extends State<PropertyCard>
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
                             vertical: 4,
+=======
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ================= PRICE + LISTING TYPE =================
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '${property.currency} ${property.price.toStringAsFixed(0)}',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.mangoOrange,
+                          ),
+                        ),
+
+                        // 🔥 NEW: FOR SALE / RENT BADGE
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: listingColor,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            listingText,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                            ),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                           ),
                         ),
                       ],
                     ),
 
+<<<<<<< HEAD
                     const SizedBox(height: AppSpacing.xs),
+=======
+                    const SizedBox(height: 6),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
                     Text(
                       property.title,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
+<<<<<<< HEAD
                       style: Theme.of(context)
                           .textTheme
                           .titleMedium
@@ -172,16 +245,38 @@ class _PropertyCardState extends State<PropertyCard>
                           color: Colors.grey.shade600,
                         ),
                         const SizedBox(width: 3),
+=======
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    Row(
+                      children: [
+                        Icon(Icons.location_on,
+                            size: 14, color: Colors.grey.shade600),
+                        const SizedBox(width: 4),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                         Expanded(
                           child: Text(
                             '${property.city}, ${property.district}',
                             overflow: TextOverflow.ellipsis,
+<<<<<<< HEAD
                             style: Theme.of(context)
                                 .textTheme
                                 .labelSmall
                                 ?.copyWith(
                                   color: Colors.grey.shade600,
                                 ),
+=======
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                           ),
                         ),
                       ],
@@ -196,4 +291,25 @@ class _PropertyCardState extends State<PropertyCard>
     );
   }
 
+<<<<<<< HEAD
 }
+=======
+  Widget _glassBadge({required String text, required Color color}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.75),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+}
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63

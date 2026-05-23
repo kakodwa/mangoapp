@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/payment_model.dart';
 import '../../providers/payment_provider.dart';
+<<<<<<< HEAD
 import '../../widgets/app_scaffold.dart';
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
 class PaymentHistoryScreen extends ConsumerWidget {
   const PaymentHistoryScreen({super.key});
@@ -12,7 +15,11 @@ class PaymentHistoryScreen extends ConsumerWidget {
 
     final paymentsAsync = ref.watch(myPaymentsProvider);
 
+<<<<<<< HEAD
     return AppScaffold(
+=======
+    return Scaffold(
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
       appBar: AppBar(
         title: const Text("Payment History"),
       ),

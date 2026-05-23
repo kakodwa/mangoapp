@@ -1,7 +1,11 @@
 class PaymentModel {
   final int id;
   final String paymentReference;
+<<<<<<< HEAD
   final double amount;
+=======
+  final String amount;
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
   final String purpose;
   final String purposeDisplay;
@@ -38,11 +42,15 @@ class PaymentModel {
 
       paymentReference: json['payment_reference'] ?? '',
 
+<<<<<<< HEAD
    
 
       amount: double.tryParse(
   json['amount'].toString(),
 ) ?? 0.0,
+=======
+      amount: json['amount'].toString(),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
       purpose: json['purpose'] ?? '',
       purposeDisplay: json['purpose_display'] ?? '',

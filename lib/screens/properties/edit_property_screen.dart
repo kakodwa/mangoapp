@@ -1,5 +1,8 @@
+<<<<<<< HEAD
 import 'dart:typed_data';
 
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,11 +11,14 @@ import '../../models/property_model.dart';
 import '../../providers/properties_provider.dart';
 import '../../theme/app_colors.dart';
 
+<<<<<<< HEAD
 import '../../theme/design_system/app_text_field.dart';
 import '../../widgets/main_app_bar.dart';
 
 import '../../utils/app_toast.dart';
 
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 class PropertyFormScreen extends ConsumerStatefulWidget {
   final Property? property;
 
@@ -40,17 +46,27 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
   late TextEditingController sizeSqm;
   late TextEditingController price;
 
+<<<<<<< HEAD
   // ================= DROPDOWNS =================
   String listingPurpose = 'sale';
+=======
+  // ================= NEW FIELD =================
+  String listingPurpose = 'sale';
+
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
   String propertyType = 'house';
   String status = 'available';
 
   List<XFile> images = [];
+<<<<<<< HEAD
 
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
   bool isPublic = true;
   bool loading = false;
 
   final List<String> malawiDistricts = [
+<<<<<<< HEAD
     'Blantyre',
     'Lilongwe',
     'Mzuzu',
@@ -74,6 +90,12 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
     'Ntcheu',
     'Rumphi',
     'Likoma'
+=======
+    'Blantyre','Lilongwe','Mzuzu','Zomba','Mangochi','Salima',
+    'Kasungu','Mchinji','Dedza','Nkhotakota','Nkhatabay','Karonga',
+    'Chikwawa','Nsanje','Balaka','Neno','Phalombe','Mulanje',
+    'Thyolo','Chiradzulu','Ntcheu','Rumphi','Likoma'
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
   ];
 
   @override
@@ -98,7 +120,12 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
     status = p?.status ?? 'available';
     isPublic = p?.isPubliclyVisible ?? true;
 
+<<<<<<< HEAD
     listingPurpose = p?.listingPurpose ?? 'sale';
+=======
+    // ✅ NEW FIELD
+    listingPurpose = 'sale';
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
   }
 
   // ================= IMAGE PICKER =================
@@ -107,9 +134,13 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
 
     if (picked.isNotEmpty) {
       setState(() {
+<<<<<<< HEAD
         images = picked.length > 6
             ? picked.sublist(0, 6)
             : picked;
+=======
+        images = picked.length > 4 ? picked.sublist(0, 4) : picked;
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
       });
     }
   }
@@ -120,8 +151,11 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
       latitude.text = "-15.7861";
       longitude.text = "35.0058";
     });
+<<<<<<< HEAD
 
     AppToast.success(context, "GPS coordinates generated");
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
   }
 
   // ================= SUBMIT =================
@@ -138,7 +172,14 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
         description: description.text,
         propertyType: propertyType,
         status: status,
+<<<<<<< HEAD
         listingPurpose: listingPurpose,
+=======
+
+        // ✅ NEW FIELD
+        listingPurpose: listingPurpose,
+
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
         latitude: double.tryParse(latitude.text) ?? 0,
         longitude: double.tryParse(longitude.text) ?? 0,
         address: address.text,
@@ -156,8 +197,12 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
         ownerId: widget.property?.ownerId ?? 0,
         ownerName: widget.property?.ownerName ?? '',
         isUnlocked: widget.property?.isUnlocked ?? false,
+<<<<<<< HEAD
         createdAt:
             widget.property?.createdAt ?? DateTime.now(),
+=======
+        createdAt: widget.property?.createdAt ?? DateTime.now(),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
       );
 
       final actions = ref.read(propertyActionsProvider);
@@ -172,6 +217,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
         );
       }
 
+<<<<<<< HEAD
       if (mounted) {
         AppToast.success(
           context,
@@ -212,10 +258,29 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
           }
           return null;
         },
+=======
+      if (mounted) Navigator.pop(context);
+    } catch (e) {
+      debugPrint(e.toString());
+    } finally {
+      if (mounted) setState(() => loading = false);
+    }
+  }
+
+  // ================= FIELD =================
+  Widget _field(TextEditingController c, String label, {int max = 1}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: TextFormField(
+        controller: c,
+        maxLines: max,
+        decoration: InputDecoration(labelText: label),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
       ),
     );
   }
 
+<<<<<<< HEAD
   // ================= IMAGE PREVIEW =================
   Widget buildImagePreview(XFile image) {
     return FutureBuilder<Uint8List>(
@@ -275,11 +340,14 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
     );
   }
 
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
   @override
   Widget build(BuildContext context) {
     final isEdit = widget.property != null;
 
     return Scaffold(
+<<<<<<< HEAD
       backgroundColor: Colors.grey.shade100,
 
       appBar: MainAppBar(
@@ -288,12 +356,19 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
             : "Add Property",
       ),
 
+=======
+      appBar: AppBar(
+        title: Text(isEdit ? "Edit Property" : "Add Property"),
+        backgroundColor: AppColors.mangoOrange,
+      ),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
       body: Form(
         key: _formKey,
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
 
+<<<<<<< HEAD
             // ================= BASIC INFO =================
             Container(
               padding: const EdgeInsets.all(16),
@@ -425,11 +500,52 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
                   ),
                 ],
               ),
+=======
+            // ================= BASIC =================
+            const Text("Basic Information",
+                style: TextStyle(fontWeight: FontWeight.bold)),
+
+            _field(title, "Title"),
+            _field(description, "Description", max: 3),
+
+            DropdownButtonFormField(
+              value: propertyType,
+              items: const [
+                DropdownMenuItem(value: "house", child: Text("House")),
+                DropdownMenuItem(value: "apartment", child: Text("Apartment")),
+                DropdownMenuItem(value: "land", child: Text("Land")),
+                DropdownMenuItem(value: "commercial", child: Text("Commercial")),
+              ],
+              onChanged: (v) => setState(() => propertyType = v!),
+              decoration: const InputDecoration(labelText: "Type"),
+            ),
+
+            DropdownButtonFormField(
+              value: listingPurpose,
+              items: const [
+                DropdownMenuItem(value: "sale", child: Text("For Sale")),
+                DropdownMenuItem(value: "rent", child: Text("For Rent")),
+              ],
+              onChanged: (v) => setState(() => listingPurpose = v!),
+              decoration: const InputDecoration(labelText: "Listing Purpose"),
+            ),
+
+            DropdownButtonFormField(
+              value: status,
+              items: const [
+                DropdownMenuItem(value: "available", child: Text("Available")),
+                DropdownMenuItem(value: "sold", child: Text("Sold")),
+                DropdownMenuItem(value: "rented", child: Text("Rented")),
+              ],
+              onChanged: (v) => setState(() => status = v!),
+              decoration: const InputDecoration(labelText: "Status"),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
             ),
 
             const SizedBox(height: 20),
 
             // ================= LOCATION =================
+<<<<<<< HEAD
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -524,11 +640,41 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
                   ),
                 ],
               ),
+=======
+            const Text("Location",
+                style: TextStyle(fontWeight: FontWeight.bold)),
+
+            _field(address, "Address"),
+            _field(city, "City"),
+
+            DropdownButtonFormField(
+              value: district.text.isEmpty ? null : district.text,
+              items: malawiDistricts
+                  .map((d) => DropdownMenuItem(value: d, child: Text(d)))
+                  .toList(),
+              onChanged: (v) => setState(() => district.text = v!),
+              decoration: const InputDecoration(labelText: "District"),
+            ),
+
+            Row(
+              children: [
+                Expanded(child: _field(latitude, "Latitude")),
+                const SizedBox(width: 10),
+                Expanded(child: _field(longitude, "Longitude")),
+              ],
+            ),
+
+            ElevatedButton.icon(
+              onPressed: generateGPS,
+              icon: const Icon(Icons.my_location),
+              label: const Text("Generate GPS"),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
             ),
 
             const SizedBox(height: 20),
 
             // ================= DETAILS =================
+<<<<<<< HEAD
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -690,6 +836,72 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
             ),
 
             const SizedBox(height: 30),
+=======
+            const Text("Property Details",
+                style: TextStyle(fontWeight: FontWeight.bold)),
+
+            Row(
+              children: [
+                Expanded(child: _field(bedrooms, "Bedrooms")),
+                const SizedBox(width: 10),
+                Expanded(child: _field(bathrooms, "Bathrooms")),
+              ],
+            ),
+
+            _field(sizeSqm, "Size (sqm)"),
+            _field(price, "Price"),
+
+            const SizedBox(height: 20),
+
+            // ================= IMAGES =================
+            const Text("Images",
+                style: TextStyle(fontWeight: FontWeight.bold)),
+
+            const SizedBox(height: 10),
+
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+
+                // existing images
+                if (widget.property?.images != null)
+                  ...widget.property!.images.map(
+                    (img) => Image.network(
+                      img.image,
+                      width: 80,
+                      height: 80,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+
+                // new images
+                ...images.map(
+                  (img) => Image.network(
+                    img.path,
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+
+                IconButton(
+                  icon: const Icon(Icons.add_a_photo),
+                  onPressed: pickImages,
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 30),
+
+            ElevatedButton(
+              onPressed: loading ? null : submit,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.mangoOrange,
+              ),
+              child: Text(isEdit ? "Update Property" : "Create Property"),
+            )
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
           ],
         ),
       ),

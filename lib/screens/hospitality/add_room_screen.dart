@@ -3,8 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/api_provider.dart';
 import '../../theme/app_colors.dart';
+<<<<<<< HEAD
 import '../../theme/design_system/app_text_field.dart';
 import '../../theme/design_system/app_spacing.dart';
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
 class AddRoomScreen extends ConsumerStatefulWidget {
   final int lodgeId;
@@ -57,6 +60,10 @@ class _AddRoomScreenState extends ConsumerState<AddRoomScreen> {
           "price_per_night": double.parse(price.text),
           "capacity": int.parse(capacity.text),
           "total_rooms": int.parse(totalRooms.text),
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
           "has_wifi": hasWifi,
           "has_tv": hasTv,
           "has_ac": hasAc,
@@ -90,6 +97,7 @@ class _AddRoomScreenState extends ConsumerState<AddRoomScreen> {
         title: const Text("Add Room"),
         backgroundColor: AppColors.mangoOrange,
       ),
+<<<<<<< HEAD
       body: Form(
         key: _formKey,
         child: ListView(
@@ -196,12 +204,139 @@ class _AddRoomScreenState extends ConsumerState<AddRoomScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.mangoOrange,
                 ),
+=======
+
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+
+              /// ROOM NUMBER (IMPORTANT UNIQUE FIELD)
+              TextFormField(
+                controller: roomNumber,
+                decoration: const InputDecoration(labelText: "Room Number"),
+                validator: (v) =>
+                    v!.isEmpty ? "Room number required" : null,
+              ),
+
+              const SizedBox(height: 10),
+
+              /// TITLE
+              TextFormField(
+                controller: title,
+                decoration: const InputDecoration(labelText: "Title"),
+              ),
+
+              const SizedBox(height: 10),
+
+              /// DESCRIPTION
+              TextFormField(
+                controller: description,
+                decoration: const InputDecoration(labelText: "Description"),
+                maxLines: 3,
+              ),
+
+              const SizedBox(height: 10),
+
+              /// PRICE
+              TextFormField(
+                controller: price,
+                keyboardType: TextInputType.number,
+                decoration:
+                    const InputDecoration(labelText: "Price Per Night"),
+              ),
+
+              const SizedBox(height: 10),
+
+              /// CAPACITY
+              TextFormField(
+                controller: capacity,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: "Capacity"),
+              ),
+
+              const SizedBox(height: 10),
+
+              /// TOTAL ROOMS (NEW FIELD)
+              TextFormField(
+                controller: totalRooms,
+                keyboardType: TextInputType.number,
+                decoration:
+                    const InputDecoration(labelText: "Total Rooms"),
+              ),
+
+              const SizedBox(height: 15),
+
+              /// ROOM TYPE
+              DropdownButtonFormField<String>(
+                value: roomType,
+                decoration: const InputDecoration(labelText: "Room Type"),
+                items: const [
+                  DropdownMenuItem(value: "single", child: Text("Single")),
+                  DropdownMenuItem(value: "double", child: Text("Double")),
+                  DropdownMenuItem(value: "suite", child: Text("Suite")),
+                  DropdownMenuItem(value: "family", child: Text("Family")),
+                  DropdownMenuItem(value: "deluxe", child: Text("Deluxe")),
+                ],
+                onChanged: (v) => setState(() => roomType = v!),
+              ),
+
+              const SizedBox(height: 20),
+
+              /// FEATURES
+              SwitchListTile(
+                title: const Text("WiFi"),
+                value: hasWifi,
+                onChanged: (v) => setState(() => hasWifi = v),
+              ),
+
+              SwitchListTile(
+                title: const Text("TV"),
+                value: hasTv,
+                onChanged: (v) => setState(() => hasTv = v),
+              ),
+
+              SwitchListTile(
+                title: const Text("AC"),
+                value: hasAc,
+                onChanged: (v) => setState(() => hasAc = v),
+              ),
+
+              SwitchListTile(
+                title: const Text("Breakfast"),
+                value: hasBreakfast,
+                onChanged: (v) => setState(() => hasBreakfast = v),
+              ),
+
+              SwitchListTile(
+                title: const Text("Available"),
+                value: isAvailable,
+                onChanged: (v) => setState(() => isAvailable = v),
+              ),
+
+              const SizedBox(height: 25),
+
+              /// SUBMIT
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.mangoOrange,
+                  padding: const EdgeInsets.all(14),
+                ),
+                onPressed: loading ? null : submit,
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                 child: loading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : const Text("Add Room"),
               ),
+<<<<<<< HEAD
             ),
           ],
+=======
+            ],
+          ),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
         ),
       ),
     );

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../models/shop_model.dart';
+<<<<<<< HEAD
 import '../../theme/design_system/app_badge.dart';
 import '../../theme/design_system/app_icon_button.dart';
 import '../../theme/design_system/app_spacing.dart';
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 import 'shop_details_screen.dart';
 
 class ShopCard extends StatefulWidget {
@@ -26,8 +29,12 @@ class _ShopCardState extends State<ShopCard> {
       onTapUp: (_) => setState(() => _pressed = false),
       onTapCancel: () => setState(() => _pressed = false),
       onTap: () {
+<<<<<<< HEAD
         Navigator.push(
           context,
+=======
+        Navigator.of(context).push(
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
           PageRouteBuilder(
             transitionDuration: const Duration(milliseconds: 250),
             pageBuilder: (_, __, ___) =>
@@ -36,9 +43,13 @@ class _ShopCardState extends State<ShopCard> {
               return FadeTransition(
                 opacity: animation,
                 child: ScaleTransition(
+<<<<<<< HEAD
                   scale: Tween(begin: 0.95, end: 1.0).animate(
                     CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
                   ),
+=======
+                  scale: Tween(begin: 0.98, end: 1.0).animate(animation),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                   child: child,
                 ),
               );
@@ -113,6 +124,7 @@ class _ShopCardState extends State<ShopCard> {
                     ),
                   ),
 
+<<<<<<< HEAD
                   // BADGES
                   Positioned(
                     top: AppSpacing.sm,
@@ -133,6 +145,39 @@ class _ShopCardState extends State<ShopCard> {
                               : BadgeType.error,
                           fontSize: 9,
                         ),
+=======
+                  // 🏷 CATEGORY (glass badge)
+                  Positioned(
+                    top: 10,
+                    left: 10,
+                    child: _badge(
+                      text: shop.category,
+                      color: Colors.orange,
+                    ),
+                  ),
+
+                  // ✅ VERIFIED
+                  Positioned(
+                    top: 10,
+                    right: 10,
+                    child: _badge(
+                      text: shop.isActive ? "VERIFIED" : "INACTIVE",
+                      color: shop.isActive ? Colors.green : Colors.red,
+                    ),
+                  ),
+
+                  // ⚡ QUICK ACTIONS (TikTok style)
+                  Positioned(
+                    bottom: 10,
+                    right: 10,
+                    child: Column(
+                      children: [
+                        _circleIcon(Icons.store),
+                        const SizedBox(height: 8),
+                        _circleIcon(Icons.favorite_border),
+                        const SizedBox(height: 8),
+                        _circleIcon(Icons.share_outlined),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                       ],
                     ),
                   ),
@@ -141,11 +186,19 @@ class _ShopCardState extends State<ShopCard> {
 
               // ================= INFO =================
               Padding(
+<<<<<<< HEAD
                 padding: const EdgeInsets.all(AppSpacing.md),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // SHOP NAME + PRODUCT COUNT
+=======
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 🏪 SHOP NAME + PRODUCT COUNT
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                     Row(
                       children: [
                         Expanded(
@@ -153,6 +206,7 @@ class _ShopCardState extends State<ShopCard> {
                             shop.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
+<<<<<<< HEAD
                             style: Theme.of(context)
                                 .textTheme
                                 .titleMedium
@@ -169,10 +223,25 @@ class _ShopCardState extends State<ShopCard> {
                               ?.copyWith(
                                 color: Colors.grey.shade600,
                               ),
+=======
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          "${shop.productCount ?? 0} products",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                          ),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                         ),
                       ],
                     ),
 
+<<<<<<< HEAD
                     const SizedBox(height: AppSpacing.xs),
 
                     // LOCATION + RATING
@@ -182,10 +251,21 @@ class _ShopCardState extends State<ShopCard> {
                             size: 13,
                             color: Colors.grey.shade600),
                         const SizedBox(width: 3),
+=======
+                    const SizedBox(height: 6),
+
+                    // 📍 LOCATION + ⭐ RATING
+                    Row(
+                      children: [
+                        const Icon(Icons.location_on,
+                            size: 14, color: Colors.grey),
+                        const SizedBox(width: 4),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                         Expanded(
                           child: Text(
                             shop.district,
                             overflow: TextOverflow.ellipsis,
+<<<<<<< HEAD
                             style: Theme.of(context)
                                 .textTheme
                                 .labelSmall
@@ -206,6 +286,24 @@ class _ShopCardState extends State<ShopCard> {
                               ?.copyWith(
                                 color: Colors.grey.shade600,
                               ),
+=======
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.star,
+                            size: 14, color: Colors.amber),
+                        const SizedBox(width: 4),
+                        Text(
+                          "${shop.rating}",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade600,
+                          ),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                         ),
                       ],
                     ),
@@ -219,4 +317,38 @@ class _ShopCardState extends State<ShopCard> {
     );
   }
 
+<<<<<<< HEAD
 }
+=======
+  // ================= GLASS BADGE =================
+  Widget _badge({required String text, required Color color}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.8),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  // ================= QUICK ACTION =================
+  Widget _circleIcon(IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(7),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.4),
+        shape: BoxShape.circle,
+      ),
+      child: Icon(icon, size: 18, color: Colors.white),
+    );
+  }
+}
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63

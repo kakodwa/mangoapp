@@ -7,12 +7,17 @@ import '../../providers/delivery_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../models/delivery.dart';
 import 'rider_delivery_screen.dart';
+<<<<<<< HEAD
 
 import '../../theme/design_system/app_info_box.dart';
 import '../../theme/design_system/app_text_field.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_button.dart';
 import '../../widgets/app_scaffold.dart';
+=======
+import '../../theme/design_system/app_button.dart';
+import '../../theme/design_system/app_info_box.dart';
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
 class DeliveryCodeScreen extends ConsumerStatefulWidget {
   const DeliveryCodeScreen({super.key});
@@ -66,7 +71,11 @@ class _DeliveryCodeScreenState extends ConsumerState<DeliveryCodeScreen> {
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< HEAD
     return AppScaffold(
+=======
+    return Scaffold(
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
       backgroundColor: Colors.grey.shade100,
 
       appBar: AppBar(
@@ -95,6 +104,7 @@ class _DeliveryCodeScreenState extends ConsumerState<DeliveryCodeScreen> {
             // =========================
             // INPUT FIELD
             // =========================
+<<<<<<< HEAD
             AppTextField(
               label: 'Delivery Code',
               hint: 'Enter Delivery Code',
@@ -105,6 +115,17 @@ class _DeliveryCodeScreenState extends ConsumerState<DeliveryCodeScreen> {
                 if (value?.isEmpty ?? true) return 'Required';
                 return null;
                 },
+=======
+            TextField(
+              controller: codeController,
+              decoration: InputDecoration(
+                labelText: "Delivery Code",
+                prefixIcon: const Icon(Icons.qr_code),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
             ),
 
             const SizedBox(height: 20),

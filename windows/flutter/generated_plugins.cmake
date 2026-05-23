@@ -3,15 +3,21 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+<<<<<<< HEAD
   audioplayers_windows
   connectivity_plus
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
   file_selector_windows
   firebase_core
   flutter_secure_storage_windows
   flutter_tts
   geolocator_windows
   local_auth_windows
+<<<<<<< HEAD
   share_plus
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
   smart_auth
   url_launcher_windows
 )

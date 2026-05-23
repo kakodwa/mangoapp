@@ -173,6 +173,7 @@ Future<void> _loadRelated(int productId) async {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
+<<<<<<< HEAD
                           const SizedBox(height: 10),
 
 // ================= STOCK
@@ -216,6 +217,8 @@ Container(
     ],
   ),
 ),
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
                           const SizedBox(height: 10),
 

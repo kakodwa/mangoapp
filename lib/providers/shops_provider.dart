@@ -98,9 +98,12 @@ class ShopsNotifier extends StateNotifier<AsyncValue<List<Shop>>> {
   }
 }
 
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 final shopsNotifierProvider =
     StateNotifierProvider<ShopsNotifier, AsyncValue<List<Shop>>>((ref) {
   return ShopsNotifier(ref.watch(apiClientProvider));

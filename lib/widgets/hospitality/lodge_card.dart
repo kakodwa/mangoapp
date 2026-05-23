@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import '../../models/lodge_model.dart';
 import '../../screens/hospitality/lodge_detail_screen.dart';
 import '../../screens/hospitality/add_room_screen.dart';
+<<<<<<< HEAD
 import '../../screens/hospitality/edit_lodge_screen.dart';
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
 
 class LodgeCard extends StatefulWidget {
@@ -170,6 +173,7 @@ if (!widget.isOwner)
                         const SizedBox(height: 8),
 
                         /// EDIT
+<<<<<<< HEAD
                         /// EDIT
 _buildActionButton(
   icon: Icons.edit,
@@ -193,6 +197,16 @@ _buildActionButton(
     }
   },
 ),
+=======
+                        _buildActionButton(
+                          icon: Icons.edit,
+                          color: Colors.blue,
+                          tooltip: "Edit Lodge",
+                          onTap: () {
+                            debugPrint("Edit Lodge: ${lodge.id}");
+                          },
+                        ),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
                         const SizedBox(height: 8),
 

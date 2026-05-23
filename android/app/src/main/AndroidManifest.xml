@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<<<<<<< HEAD
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
@@ -9,6 +10,12 @@
       android:icon="@mipmap/ic_launcher"
       android:usesCleartextTraffic="true">
 
+=======
+    <application
+        android:label="mangochi_marketplace"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher">
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
         <activity
             android:name=".MainActivity"
             android:exported="true"

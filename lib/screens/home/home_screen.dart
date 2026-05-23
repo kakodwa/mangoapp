@@ -8,18 +8,31 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../providers/products_provider.dart';
 import '../../providers/shops_provider.dart';
 import '../../providers/properties_provider.dart';
+<<<<<<< HEAD
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_typography.dart';
+=======
+
+
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 import '../shops/shop_card.dart';
 import '../products/product_card.dart';
 import '../properties/property_card.dart';
 import '../../screens/delivery/delivery_code_entry_screen.dart';
+<<<<<<< HEAD
 import '../../screens/events/scan_ticket_screen.dart';
 import '../../screens/events/event_list_screen.dart';
 import '../../screens/hospitality/lodge_list_screen.dart';
 import '../../widgets/main_drawer.dart';
 import '../../widgets/main_app_bar.dart';
 import '../../widgets/app_scaffold.dart';
+=======
+import '../../screens/hospitality/lodge_list_screen.dart';
+
+
+import '../../widgets/main_drawer.dart';
+import '../../widgets/main_app_bar.dart';
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -48,7 +61,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final propertiesAsync = ref.watch(propertiesProvider);
     final bannersAsync = ref.watch(bannersProvider); // 👈 FROM BACKEND
 
+<<<<<<< HEAD
     return AppScaffold(
+=======
+    return Scaffold(
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
       appBar: const MainAppBar(title: 'MangoMart'),
       drawer: const MainDrawer(),
       body: SingleChildScrollView(
@@ -111,6 +128,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               error: (_, __) => const SizedBox(),
             ),
 
+<<<<<<< HEAD
             const SizedBox(height: AppSpacing.lg),
 
             // QUICK ACTIONS
@@ -164,6 +182,60 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     children: [
 
       /// HOSPITALITY
+=======
+            const SizedBox(height: 16),
+
+            /// QUICK ACTIONS
+            Padding(
+  padding: const EdgeInsets.symmetric(horizontal: 16),
+  child: Row(
+    children: [
+      Expanded(
+        child: _QuickActionButton(
+          icon: Icons.store,
+          label: 'Shops',
+          onTap: () {
+            // TODO: navigate to shops screen
+          },
+        ),
+      ),
+      const SizedBox(width: 12),
+
+      Expanded(
+        child: _QuickActionButton(
+          icon: Icons.home_work,
+          label: 'Properties',
+          onTap: () {
+            // TODO: navigate to properties screen
+          },
+        ),
+      ),
+      const SizedBox(width: 12),
+
+      Expanded(
+        child: _QuickActionButton(
+          icon: Icons.local_shipping,
+          label: 'Delivery',
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const DeliveryCodeScreen(),
+              ),
+            );
+          },
+        ),
+      ),
+    ],
+  ),
+),
+            const SizedBox(height: 12),
+
+Padding(
+  padding: const EdgeInsets.symmetric(horizontal: 16),
+  child: Row(
+    children: [
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
       Expanded(
         child: _QuickActionButton(
           icon: Icons.hotel,
@@ -178,6 +250,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           },
         ),
       ),
+<<<<<<< HEAD
 
       const SizedBox(width: AppSpacing.sm),
 
@@ -220,6 +293,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             const SizedBox(height: AppSpacing.lg),
 
             // SHOPS
+=======
+      const SizedBox(width: 12),
+
+      Expanded(
+        child: _QuickActionButton(
+          icon: Icons.more_horiz,
+          label: 'More',
+          onTap: () {
+            // future features
+          },
+        ),
+      ),
+      const SizedBox(width: 12),
+
+      const Expanded(child: SizedBox()), // keeps layout balanced
+    ],
+  ),
+),
+
+            const SizedBox(height: 24),
+
+            /// SHOPS
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
             _sectionHeader(context, 'Popular Shops'),
             shopsAsync.when(
               data: (shops) {
@@ -237,9 +333,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               error: (_, __) => const SizedBox(),
             ),
 
+<<<<<<< HEAD
             const SizedBox(height: AppSpacing.lg),
 
             // PRODUCTS
+=======
+            const SizedBox(height: 24),
+
+            /// PRODUCTS
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
             _sectionHeader(context, 'Featured Products'),
             productsAsync.when(
               data: (products) {
@@ -260,9 +362,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               error: (_, __) => const SizedBox(),
             ),
 
+<<<<<<< HEAD
             const SizedBox(height: AppSpacing.lg),
 
             // PROPERTIES
+=======
+            const SizedBox(height: 24),
+
+            /// PROPERTIES
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
             _sectionHeader(context, 'Featured Properties'),
             propertiesAsync.when(
               data: (properties) {
@@ -280,22 +388,34 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               error: (_, __) => const SizedBox(),
             ),
 
+<<<<<<< HEAD
             const SizedBox(height: AppSpacing.xl),
+=======
+            const SizedBox(height: 32),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
           ],
         ),
       ),
     );
   }
 
+<<<<<<< HEAD
   // SECTION HEADER
   Widget _sectionHeader(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+=======
+  /// SECTION HEADER
+  Widget _sectionHeader(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             title,
+<<<<<<< HEAD
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
             ),
@@ -309,6 +429,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
           ),
+=======
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          TextButton(onPressed: () {}, child: const Text('View All')),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
         ],
       ),
     );
@@ -417,8 +544,13 @@ Widget _buildBanner(
   );
 }
 
+<<<<<<< HEAD
 // QUICK ACTION BUTTON
 class _QuickActionButton extends StatefulWidget {
+=======
+/// QUICK BUTTON
+class _QuickActionButton extends StatelessWidget {
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
   final IconData icon;
   final String label;
   final VoidCallback onTap;
@@ -430,6 +562,7 @@ class _QuickActionButton extends StatefulWidget {
   });
 
   @override
+<<<<<<< HEAD
   State<_QuickActionButton> createState() => _QuickActionButtonState();
 }
 
@@ -481,8 +614,29 @@ class _QuickActionButtonState extends State<_QuickActionButton> {
               ),
             ),
           ),
+=======
+  Widget build(BuildContext context) {
+    return Card(
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Icon(icon,
+                  size: 32,
+                  color: Theme.of(context).colorScheme.primary),
+              const SizedBox(height: 8),
+              Text(label, textAlign: TextAlign.center),
+            ],
+          ),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
         ),
       ),
     );
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63

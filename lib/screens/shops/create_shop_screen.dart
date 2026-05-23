@@ -1,25 +1,41 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+<<<<<<< HEAD
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
+<<<<<<< HEAD
 
 import '../../widgets/main_app_bar.dart';
 import '../../theme/design_system/app_text_field.dart';
+=======
+import 'package:file_picker/file_picker.dart';
+import 'package:dio/dio.dart';
+
+import '../../widgets/main_drawer.dart';
+import '../../widgets/main_app_bar.dart';
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
 import '../../providers/shops_provider.dart';
 
 import '../../utils/app_toast.dart';
+<<<<<<< HEAD
+=======
+import '../../utils/api_response_handler.dart';
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
 class CreateShopScreen extends ConsumerStatefulWidget {
   const CreateShopScreen({super.key});
 
   @override
+<<<<<<< HEAD
   ConsumerState<CreateShopScreen> createState() =>
       _CreateShopScreenState();
 }
@@ -35,6 +51,17 @@ class _CreateShopScreenState
   final nameController = TextEditingController();
   final descriptionController =
       TextEditingController();
+=======
+  ConsumerState<CreateShopScreen> createState() => _CreateShopScreenState();
+}
+
+class _CreateShopScreenState extends ConsumerState<CreateShopScreen> {
+  final _formKey = GlobalKey<FormState>();
+
+  // TEXT CONTROLLERS
+  final nameController = TextEditingController();
+  final descriptionController = TextEditingController();
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
   final addressController = TextEditingController();
   final cityController = TextEditingController();
   final phoneController = TextEditingController();
@@ -45,6 +72,7 @@ class _CreateShopScreenState
 
   bool loading = false;
 
+<<<<<<< HEAD
   // ======================
   // LOCATION
   // ======================
@@ -56,12 +84,20 @@ class _CreateShopScreenState
   // IMAGES
   // ======================
 
+=======
+  // GPS
+  double? latitude;
+  double? longitude;
+
+  // IMAGES
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
   File? logoFile;
   File? bannerFile;
 
   Uint8List? logoWeb;
   Uint8List? bannerWeb;
 
+<<<<<<< HEAD
   final ImagePicker picker = ImagePicker();
 
   // ======================
@@ -137,10 +173,36 @@ class _CreateShopScreenState
 
     Position pos =
         await Geolocator.getCurrentPosition(
+=======
+  final ImagePicker _picker = ImagePicker();
+
+  // DISTRICTS
+  final List<String> districts = [
+    "Balaka","Blantyre","Chikwawa","Chiradzulu","Chitipa","Dedza",
+    "Dowa","Karonga","Kasungu","Likoma","Lilongwe","Machinga",
+    "Mangochi","Mchinji","Mulanje","Mwanza","Mzimba","Neno",
+    "Nkhata Bay","Nkhotakota","Nsanje","Ntcheu","Ntchisi",
+    "Phalombe","Rumphi","Salima","Thyolo","Zomba",
+  ];
+
+  // ================= GPS =================
+  Future<void> getLocation() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) return;
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) return;
+    }
+
+    Position pos = await Geolocator.getCurrentPosition(
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
       desiredAccuracy: LocationAccuracy.high,
     );
 
     setState(() {
+<<<<<<< HEAD
       latitude =
           double.parse(pos.latitude.toStringAsFixed(6));
 
@@ -180,11 +242,33 @@ class _CreateShopScreenState
       if (file != null) {
         logoFile = File(file.path);
 
+=======
+      latitude = double.parse(pos.latitude.toStringAsFixed(6));
+      longitude = double.parse(pos.longitude.toStringAsFixed(6));
+    });
+  }
+
+  // ================= PICK LOGO =================
+  Future<void> pickLogo() async {
+    if (kIsWeb) {
+      FilePickerResult? result =
+          await FilePicker.platform.pickFiles(type: FileType.image);
+
+      if (result != null) {
+        logoWeb = result.files.first.bytes;
+        setState(() {});
+      }
+    } else {
+      final file = await _picker.pickImage(source: ImageSource.gallery);
+      if (file != null) {
+        logoFile = File(file.path);
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
         setState(() {});
       }
     }
   }
 
+<<<<<<< HEAD
   // ======================
   // PICK BANNER
   // ======================
@@ -209,11 +293,28 @@ class _CreateShopScreenState
       if (file != null) {
         bannerFile = File(file.path);
 
+=======
+  // ================= PICK BANNER =================
+  Future<void> pickBanner() async {
+    if (kIsWeb) {
+      FilePickerResult? result =
+          await FilePicker.platform.pickFiles(type: FileType.image);
+
+      if (result != null) {
+        bannerWeb = result.files.first.bytes;
+        setState(() {});
+      }
+    } else {
+      final file = await _picker.pickImage(source: ImageSource.gallery);
+      if (file != null) {
+        bannerFile = File(file.path);
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
         setState(() {});
       }
     }
   }
 
+<<<<<<< HEAD
   // ======================
   // IMAGE PREVIEW
   // ======================
@@ -244,11 +345,24 @@ class _CreateShopScreenState
           fit: BoxFit.cover,
         ),
       );
+=======
+  // ================= IMAGE PREVIEW WIDGET =================
+  Widget buildImagePreview({File? file, Uint8List? bytes}) {
+    if (kIsWeb && bytes != null) {
+      return Image.memory(bytes,
+          height: 120, width: 120, fit: BoxFit.cover);
+    }
+
+    if (!kIsWeb && file != null) {
+      return Image.file(file,
+          height: 120, width: 120, fit: BoxFit.cover);
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
     }
 
     return const SizedBox();
   }
 
+<<<<<<< HEAD
   // ======================
   // SUBMIT
   // ======================
@@ -264,19 +378,33 @@ class _CreateShopScreenState
       return;
     }
 
+=======
+  // ================= SUBMIT =================
+  Future<void> submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
     setState(() => loading = true);
 
     try {
       FormData formData = FormData.fromMap({
         "name": nameController.text,
+<<<<<<< HEAD
         "description":
             descriptionController.text,
+=======
+        "description": descriptionController.text,
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
         "category": category,
         "address": addressController.text,
         "city": cityController.text,
         "district": selectedDistrict,
+<<<<<<< HEAD
         "phone_number":
             phoneController.text,
+=======
+        "phone_number": phoneController.text,
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
         "email": emailController.text,
         "latitude": latitude ?? 0,
         "longitude": longitude ?? 0,
@@ -284,6 +412,7 @@ class _CreateShopScreenState
 
       // LOGO
       if (kIsWeb && logoWeb != null) {
+<<<<<<< HEAD
         formData.files.add(
           MapEntry(
             "logo",
@@ -302,10 +431,22 @@ class _CreateShopScreenState
             ),
           ),
         );
+=======
+        formData.files.add(MapEntry(
+          "logo",
+          MultipartFile.fromBytes(logoWeb!, filename: "logo.jpg"),
+        ));
+      } else if (logoFile != null) {
+        formData.files.add(MapEntry(
+          "logo",
+          await MultipartFile.fromFile(logoFile!.path),
+        ));
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
       }
 
       // BANNER
       if (kIsWeb && bannerWeb != null) {
+<<<<<<< HEAD
         formData.files.add(
           MapEntry(
             "banner",
@@ -330,6 +471,20 @@ class _CreateShopScreenState
           .read(shopActionsProvider)
           .api
           .postMultipart(
+=======
+        formData.files.add(MapEntry(
+          "banner",
+          MultipartFile.fromBytes(bannerWeb!, filename: "banner.jpg"),
+        ));
+      } else if (bannerFile != null) {
+        formData.files.add(MapEntry(
+          "banner",
+          await MultipartFile.fromFile(bannerFile!.path),
+        ));
+      }
+
+      await ref.read(shopActionsProvider).api.postMultipart(
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
             "shops/",
             formData,
           );
@@ -337,6 +492,7 @@ class _CreateShopScreenState
       ref.invalidate(shopsProvider);
 
       if (mounted) {
+<<<<<<< HEAD
         AppToast.success(
           context,
           "Shop created successfully",
@@ -349,11 +505,19 @@ class _CreateShopScreenState
         context,
         "Error: ${e.toString()}",
       );
+=======
+        AppToast.success(context,"Shop created successfully");
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      AppToast.error(context,"Error: ${e.toString()}");
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
     } finally {
       setState(() => loading = false);
     }
   }
 
+<<<<<<< HEAD
   // ======================
   // UI
   // ======================
@@ -795,6 +959,138 @@ class _CreateShopScreenState
               ),
 
               const SizedBox(height: 30),
+=======
+  // ================= INPUT =================
+  Widget input(TextEditingController c, String label) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: TextFormField(
+        controller: c,
+        validator: (v) => v!.isEmpty ? "$label required" : null,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+      ),
+    );
+  }
+
+  // ================= UI =================
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: const MainAppBar(title: 'Create Shop'),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+
+              input(nameController, "Shop Name"),
+              input(descriptionController, "Description"),
+              input(addressController, "Address"),
+              input(cityController, "City"),
+
+              DropdownButtonFormField<String>(
+                value: selectedDistrict,
+                items: districts
+                    .map((d) => DropdownMenuItem(
+                          value: d,
+                          child: Text(d),
+                        ))
+                    .toList(),
+                onChanged: (v) => setState(() => selectedDistrict = v),
+                decoration: const InputDecoration(
+                  labelText: "District",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              input(phoneController, "Phone"),
+              input(emailController, "Email"),
+
+              const SizedBox(height: 15),
+
+              DropdownButtonFormField(
+                value: category,
+                items: const [
+                  DropdownMenuItem(value: "Electronics", child: Text("Electronics")),
+                  DropdownMenuItem(value: "Fashion", child: Text("Fashion")),
+                  DropdownMenuItem(value: "Groceries", child: Text("Groceries")),
+                  DropdownMenuItem(value: "Home", child: Text("Home")),
+                  DropdownMenuItem(value: "Beauty", child: Text("Beauty")),
+                ],
+                onChanged: (v) => setState(() => category = v!),
+                decoration: const InputDecoration(
+                  labelText: "Category",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              const Text(
+                "📍 Please pick GPS at the door of your shop/company",
+                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+              ),
+
+              ElevatedButton.icon(
+                onPressed: getLocation,
+                icon: const Icon(Icons.my_location),
+                label: const Text("Get Location"),
+              ),
+
+              if (latitude != null)
+                Text("Lat: $latitude, Lng: $longitude"),
+
+              const SizedBox(height: 20),
+
+              // LOGO
+              ElevatedButton.icon(
+                onPressed: pickLogo,
+                icon: const Icon(Icons.image),
+                label: const Text("Upload Logo"),
+              ),
+
+              if (logoFile != null || logoWeb != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: buildImagePreview(
+                    file: logoFile,
+                    bytes: logoWeb,
+                  ),
+                ),
+
+              const SizedBox(height: 15),
+
+              // BANNER
+              ElevatedButton.icon(
+                onPressed: pickBanner,
+                icon: const Icon(Icons.image),
+                label: const Text("Upload Banner"),
+              ),
+
+              if (bannerFile != null || bannerWeb != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: buildImagePreview(
+                    file: bannerFile,
+                    bytes: bannerWeb,
+                  ),
+                ),
+
+              const SizedBox(height: 20),
+
+              ElevatedButton(
+                onPressed: loading ? null : submit,
+                child: loading
+                    ? const CircularProgressIndicator()
+                    : const Text("Create Shop"),
+              ),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
             ],
           ),
         ),

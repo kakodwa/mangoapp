@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
@@ -9,6 +10,13 @@ import '../../providers/api_provider.dart';
 import '../payments/payment_checkout_screen.dart';
 
 class BookingCheckoutScreen extends ConsumerStatefulWidget {
+=======
+
+import '../../models/room_model.dart';
+import 'booking_success_screen.dart';
+
+class BookingCheckoutScreen extends StatefulWidget {
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
   final Room room;
 
   const BookingCheckoutScreen({
@@ -17,11 +25,16 @@ class BookingCheckoutScreen extends ConsumerStatefulWidget {
   });
 
   @override
+<<<<<<< HEAD
   ConsumerState<BookingCheckoutScreen> createState() =>
+=======
+  State<BookingCheckoutScreen> createState() =>
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
       _BookingCheckoutScreenState();
 }
 
 class _BookingCheckoutScreenState
+<<<<<<< HEAD
     extends ConsumerState<BookingCheckoutScreen> {
   DateTime? checkIn;
   DateTime? checkOut;
@@ -97,6 +110,18 @@ class _BookingCheckoutScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Booking Checkout')),
+=======
+    extends State<BookingCheckoutScreen> {
+  DateTime? checkIn;
+  DateTime? checkOut;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Booking Checkout'),
+      ),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -104,9 +129,13 @@ class _BookingCheckoutScreenState
             ListTile(
               title: const Text('Check In'),
               subtitle: Text(
+<<<<<<< HEAD
                 checkIn != null
                     ? formatDate(checkIn!)
                     : 'Select date',
+=======
+                checkIn?.toString() ?? 'Select date',
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
               ),
               trailing: const Icon(Icons.calendar_month),
               onTap: () async {
@@ -121,6 +150,7 @@ class _BookingCheckoutScreenState
                 }
               },
             ),
+<<<<<<< HEAD
 
             ListTile(
               title: const Text('Check Out'),
@@ -128,6 +158,12 @@ class _BookingCheckoutScreenState
                 checkOut != null
                     ? formatDate(checkOut!)
                     : 'Select date',
+=======
+            ListTile(
+              title: const Text('Check Out'),
+              subtitle: Text(
+                checkOut?.toString() ?? 'Select date',
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
               ),
               trailing: const Icon(Icons.calendar_month),
               onTap: () async {
@@ -142,6 +178,7 @@ class _BookingCheckoutScreenState
                 }
               },
             ),
+<<<<<<< HEAD
 
             const Spacer(),
 
@@ -153,6 +190,21 @@ class _BookingCheckoutScreenState
                 child: loading
                     ? const CircularProgressIndicator(color: Colors.white)
                     : const Text("Proceed To Payment"),
+=======
+            const Spacer(),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const BookingSuccessScreen(),
+                    ),
+                  );
+                },
+                child: const Text('Proceed To Payment'),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
               ),
             ),
           ],

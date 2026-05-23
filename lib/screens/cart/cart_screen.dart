@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/products_provider.dart';
+<<<<<<< HEAD
 import '../../theme/design_system/app_button.dart';
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 import '../../providers/api_provider.dart';
 import 'checkout_screen.dart';
 import '../../widgets/main_app_bar.dart';
@@ -145,6 +148,7 @@ class CartScreen extends ConsumerWidget {
                                   // =========================
                                   // QUANTITY CONTROL (MODERN)
                                   // =========================
+<<<<<<< HEAD
            
 Container(
   padding: const EdgeInsets.symmetric(
@@ -215,6 +219,60 @@ GestureDetector(
     ],
   ),
 ),
+=======
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[100],
+                                      borderRadius:
+                                          BorderRadius.circular(20),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+
+                                        GestureDetector(
+                                          onTap: () {
+                                            if (item.quantity > 1) {
+                                              item.quantity--;
+                                              ref.refresh(cartProvider);
+                                            }
+                                          },
+                                          child: const Icon(
+                                            Icons.remove,
+                                            size: 18,
+                                          ),
+                                        ),
+
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 10),
+                                          child: Text(
+                                            item.quantity.toString(),
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+
+                                        GestureDetector(
+                                          onTap: () {
+                                            if (item.quantity <
+                                                item.product.stock) {
+                                              item.quantity++;
+                                              ref.refresh(cartProvider);
+                                            }
+                                          },
+                                          child: const Icon(
+                                            Icons.add,
+                                            size: 18,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                                 ],
                               ),
                             ),
@@ -312,10 +370,24 @@ GestureDetector(
 
                       const SizedBox(height: 14),
 
+<<<<<<< HEAD
                       AppButton(
                         text: "Checkout",
                         fullWidth: true,
                          onPressed: () {
+=======
+                      SizedBox(
+                        width: double.infinity,
+                        height: 48,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          onPressed: () {
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (_) => CheckoutScreen(
@@ -325,7 +397,13 @@ GestureDetector(
                               ),
                             );
                           },
+<<<<<<< HEAD
                         ),
+=======
+                          child: const Text("Proceed to Checkout"),
+                        ),
+                      ),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                     ],
                   ),
                 ),

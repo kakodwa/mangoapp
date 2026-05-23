@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/api_provider.dart';
+<<<<<<< HEAD
 import '../../theme/design_system/app_text_field.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_button.dart';
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 import 'register_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -17,6 +20,11 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   late TextEditingController _usernameController;
   late TextEditingController _passwordController;
+<<<<<<< HEAD
+=======
+
+  bool _obscurePassword = true;
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
   bool _logoErrorShown = false;
 
   @override
@@ -140,12 +148,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
               ),
 
+<<<<<<< HEAD
               const SizedBox(height: AppSpacing.xl),
+=======
+              const SizedBox(height: 32),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
               ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 400),
                 child: Column(
                   children: [
+<<<<<<< HEAD
                     AppTextField(
                       label: 'Username',
                       hint: 'Enter your username',
@@ -186,6 +199,62 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         onPressed: authState.isLoading ? null : _handleLogin,
                         loading: authState.isLoading,
                         fullWidth: true,
+=======
+                    TextField(
+                      controller: _usernameController,
+                      decoration: InputDecoration(
+                        labelText: 'Username',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: const Icon(Icons.person),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    TextField(
+                      controller: _passwordController,
+                      obscureText: _obscurePassword,
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: const Icon(Icons.lock),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscurePassword = !_obscurePassword;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed:
+                            authState.isLoading ? null : _handleLogin,
+                        child: authState.isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text('Login'),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                       ),
                     ),
                   ],
@@ -225,4 +294,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ),
     );
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63

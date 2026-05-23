@@ -3,7 +3,10 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+<<<<<<< HEAD
   audioplayers_linux
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
   file_selector_linux
   flutter_secure_storage_linux
   smart_auth

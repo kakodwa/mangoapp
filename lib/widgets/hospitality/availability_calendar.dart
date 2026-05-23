@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+<<<<<<< HEAD
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:table_calendar/table_calendar.dart';
 
@@ -163,6 +164,18 @@ class _AvailabilityCalendarState
       error: (e, _) => Center(
         child: Text(e.toString()),
       ),
+=======
+
+class AvailabilityCalendar extends StatelessWidget {
+  const AvailabilityCalendar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 300,
+      alignment: Alignment.center,
+      child: const Text('Availability Calendar Coming Soon'),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
     );
   }
 }

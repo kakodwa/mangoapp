@@ -1,31 +1,41 @@
 import 'package:flutter/material.dart';
 
 import '../../models/room_model.dart';
+<<<<<<< HEAD
 
 import '../../theme/design_system/app_button.dart';
 import '../../theme/design_system/app_card.dart';
 import '../../theme/design_system/app_spacing.dart';
 
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 import '../../screens/hospitality/room_detail_screen.dart';
 
 class RoomCard extends StatelessWidget {
   final Room room;
+<<<<<<< HEAD
   final List<String> lodgeImages;
   final bool isOwner;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
   const RoomCard({
     super.key,
     required this.room,
+<<<<<<< HEAD
     required this.lodgeImages,
     this.isOwner = false,
     this.onEdit,
     this.onDelete,
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
   });
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< HEAD
     return SizedBox(
       width: 260,
       child: AppCard(
@@ -193,11 +203,44 @@ class RoomCard extends StatelessWidget {
                 ),
               ),
             ),
+=======
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              room.title,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(room.description),
+            const SizedBox(height: 12),
+            Text('MWK ${room.pricePerNight}/night'),
+            const SizedBox(height: 12),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => RoomDetailScreen(room: room),
+                  ),
+                );
+              },
+              child: const Text('View Room'),
+            ),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
           ],
         ),
       ),
     );
   }
+<<<<<<< HEAD
 
   static Widget _actionButton({
     required IconData icon,
@@ -217,4 +260,6 @@ class RoomCard extends StatelessWidget {
       ),
     );
   }
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 }

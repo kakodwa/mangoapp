@@ -20,6 +20,7 @@ dependencies:
   http: ^1.1.0
   dio: ^5.3.0
 
+<<<<<<< HEAD
 
   audioplayers: ^6.0.0
   vibration: ^1.8.4
@@ -34,6 +35,10 @@ dependencies:
   table_calendar: ^3.1.2
   mobile_scanner: ^5.0.0
 
+=======
+  carousel_slider: ^5.0.0
+
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
   # Local Storage & Security
   flutter_secure_storage: ^9.0.0
@@ -43,8 +48,11 @@ dependencies:
   # Authentication & JWT
   jwt_decoder: ^2.0.1
 
+<<<<<<< HEAD
   connectivity_plus: ^6.0.5
 
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
   # Maps & Location
   google_maps_flutter: ^2.5.0
   flutter_polyline_points: ^2.0.0
@@ -90,7 +98,10 @@ dependencies:
   flutter_map_cancellable_tile_provider: 2.0.0
   latlong2: ^0.9.1
   photo_view: ^0.15.0
+<<<<<<< HEAD
   webview_flutter: ^4.13.1
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
 
 
@@ -111,4 +122,7 @@ flutter:
     - assets/images/airtel.png
     - assets/images/changu.png
     - assets/images/visa.png
+<<<<<<< HEAD
     - assets/sounds/
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63

@@ -7,9 +7,12 @@ import '../../providers/auth_provider.dart';
 import '../auth/login_screen.dart';
 import '../products/edit_product_screen.dart';
 import '../../theme/design_system/app_card.dart';
+<<<<<<< HEAD
 import '../../theme/design_system/app_badge.dart';
 import '../../theme/design_system/app_icon_button.dart';
 import '../../theme/design_system/app_spacing.dart';
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 import '../../utils/app_toast.dart';
 
 class ProductCard extends ConsumerWidget {
@@ -35,6 +38,7 @@ class ProductCard extends ConsumerWidget {
       borderRadius: BorderRadius.circular(16),
       onTap: () {
         Navigator.of(context).push(
+<<<<<<< HEAD
           PageRouteBuilder(
             transitionDuration: const Duration(milliseconds: 250),
             pageBuilder: (_, __, ___) =>
@@ -50,6 +54,11 @@ class ProductCard extends ConsumerWidget {
                 ),
               );
             },
+=======
+          MaterialPageRoute(
+            builder: (_) =>
+                ProductDetailsScreen(productId: product.id),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
           ),
         );
       },
@@ -118,11 +127,32 @@ class ProductCard extends ConsumerWidget {
 
                 // CATEGORY BADGE
                 Positioned(
+<<<<<<< HEAD
                   top: AppSpacing.sm,
                   left: AppSpacing.sm,
                   child: AppBadge(
                     text: product.category,
                     type: BadgeType.primary,
+=======
+                  top: 12,
+                  left: 12,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.black.withOpacity(0.65),
+                    ),
+                    child: Text(
+                      product.category,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                   ),
                 ),
 
@@ -182,19 +212,35 @@ class ProductCard extends ConsumerWidget {
 
             // ================= INFO =================
             Padding(
+<<<<<<< HEAD
               padding: const EdgeInsets.all(AppSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+=======
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                   Text(
                     product.name,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
+<<<<<<< HEAD
                     style: theme.textTheme.titleMedium?.copyWith(
+=======
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      height: 1.3,
+                      fontSize: 15,
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                       color: const Color(0xFF212121),
                     ),
                   ),
 
+<<<<<<< HEAD
                   //const SizedBox(height: AppSpacing.xs),
 
                   // RATING
@@ -203,10 +249,21 @@ class ProductCard extends ConsumerWidget {
                       const Icon(Icons.star,
                           size: 14, color: Color(0xFFFFC107)),
                       const SizedBox(width: 4),
+=======
+                  const SizedBox(height: 8),
+
+                  // RATING
+                  Row(
+                    children: [
+                      const Icon(Icons.star,
+                          size: 15, color: Color(0xFFFFC107)),
+                      const SizedBox(width: 5),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                       Text(
                         product.rating.toString(),
                         style: theme.textTheme.labelSmall?.copyWith(
                           fontWeight: FontWeight.w600,
+<<<<<<< HEAD
                         ),
                       ),
                       const SizedBox(width: 4),
@@ -220,10 +277,32 @@ class ProductCard extends ConsumerWidget {
                   ),*/
 
                   const SizedBox(height: AppSpacing.sm),
+=======
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        "(${product.totalReviews} reviews)",
+                        style: const TextStyle(
+                          color: Color(0xFF999999),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 10),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
                   // PRICE + ACTION
                   Row(
                     children: [
+<<<<<<< HEAD
+=======
+                      // LEFT SIDE (takes remaining space safely)
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -231,17 +310,33 @@ class ProductCard extends ConsumerWidget {
                             if (product.hasDiscount)
                               Text(
                                 'MWK ${product.originalPrice?.toStringAsFixed(2)}',
+<<<<<<< HEAD
                                 style: theme.textTheme.labelSmall?.copyWith(
                                   decoration: TextDecoration.lineThrough,
                                   color: Colors.grey.shade500,
+=======
+                                style: const TextStyle(
+                                  decoration: TextDecoration.lineThrough,
+                                  fontSize: 12,
+                                  color: Color(0xFFBBBBBB),
+                                  fontWeight: FontWeight.w500,
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                                 ),
                               ),
 
                             Text(
                               'MWK ${product.price.toStringAsFixed(2)}',
+<<<<<<< HEAD
                               style: theme.textTheme.titleMedium?.copyWith(
                                 color: Theme.of(context).primaryColor,
                                 fontWeight: FontWeight.bold,
+=======
+                              style: TextStyle(
+                                fontSize: 17,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).primaryColor,
+                                letterSpacing: 0.3,
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -249,6 +344,7 @@ class ProductCard extends ConsumerWidget {
                         ),
                       ),
 
+<<<<<<< HEAD
                       const SizedBox(width: AppSpacing.sm),
 
                       // Right Button
@@ -260,13 +356,29 @@ class ProductCard extends ConsumerWidget {
                                 ? const Color(0xFFFF8C00)
                                 : Colors.grey),
                         style: IconButtonStyle.filled,
+=======
+                      const SizedBox(width: 10),
+
+                      // RIGHT BUTTON (fixed safe area)
+                      _circleButton(
+                        icon: isOwner
+                            ? Icons.edit
+                            : Icons.shopping_cart_outlined,
+                        color: isOwner
+                            ? const Color(0xFF1976D2)
+                            : (product.isInStock ? const Color(0xFFFF8C00) : Colors.grey),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                         onTap: isOwner
                             ? () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
+<<<<<<< HEAD
                                     builder: (_) =>
                                         EditProductScreen(product: product),
+=======
+                                    builder: (_) => EditProductScreen(product: product),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                                   ),
                                 );
                               }
@@ -282,9 +394,13 @@ class ProductCard extends ConsumerWidget {
                                       return;
                                     }
 
+<<<<<<< HEAD
                                     ref
                                         .read(addToCartProvider)
                                         .call(product, 1);
+=======
+                                    ref.read(addToCartProvider).call(product, 1);
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
                                     AppToast.success(
                                       context,
@@ -304,4 +420,32 @@ class ProductCard extends ConsumerWidget {
     );
   }
 
+<<<<<<< HEAD
+=======
+  // ================= BUTTON =================
+  Widget _circleButton({
+    required IconData icon,
+    required Color color,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color.withOpacity(0.15),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.2),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            )
+          ],
+        ),
+        child: Icon(icon, size: 20, color: color),
+      ),
+    );
+  }
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 }

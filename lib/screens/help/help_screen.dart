@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../widgets/main_app_bar.dart';
 import '../../theme/app_colors.dart';
+<<<<<<< HEAD
 import '../../widgets/app_scaffold.dart';
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
 class HelpSupportScreen extends StatelessWidget {
   const HelpSupportScreen({super.key});
@@ -64,7 +67,11 @@ class HelpSupportScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+<<<<<<< HEAD
     return AppScaffold(
+=======
+    return Scaffold(
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
       appBar: const MainAppBar(title: 'Help & Support'),
       backgroundColor: const Color(0xFFF6F7FB),
 

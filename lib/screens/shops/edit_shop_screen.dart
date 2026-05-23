@@ -1,25 +1,41 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+<<<<<<< HEAD
 import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
+<<<<<<< HEAD
 
 import '../../widgets/main_app_bar.dart';
 import '../../theme/design_system/app_text_field.dart';
+=======
+import 'package:file_picker/file_picker.dart';
+import 'package:dio/dio.dart';
+
+import '../../widgets/main_drawer.dart';
+import '../../widgets/main_app_bar.dart';
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
 import '../../providers/shops_provider.dart';
 import '../../models/shop_model.dart';
 
 import '../../utils/app_toast.dart';
+<<<<<<< HEAD
+=======
+import '../../utils/api_response_handler.dart';
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
 class EditShopScreen extends ConsumerStatefulWidget {
   final Shop shop;
 
+<<<<<<< HEAD
   const EditShopScreen({
     super.key,
     required this.shop,
@@ -32,6 +48,15 @@ class EditShopScreen extends ConsumerStatefulWidget {
 
 class _EditShopScreenState
     extends ConsumerState<EditShopScreen> {
+=======
+  const EditShopScreen({super.key, required this.shop});
+
+  @override
+  ConsumerState<EditShopScreen> createState() => _EditShopScreenState();
+}
+
+class _EditShopScreenState extends ConsumerState<EditShopScreen> {
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
   final _formKey = GlobalKey<FormState>();
 
   late TextEditingController nameController;
@@ -55,6 +80,7 @@ class _EditShopScreenState
   Uint8List? logoWeb;
   Uint8List? bannerWeb;
 
+<<<<<<< HEAD
   final ImagePicker picker = ImagePicker();
 
   final List<String> districts = [
@@ -94,12 +120,23 @@ class _EditShopScreenState
     "Groceries",
     "Home",
     "Beauty",
+=======
+  final ImagePicker _picker = ImagePicker();
+
+  final List<String> districts = [
+    "Balaka","Blantyre","Chikwawa","Chiradzulu","Chitipa","Dedza",
+    "Dowa","Karonga","Kasungu","Likoma","Lilongwe","Machinga",
+    "Mangochi","Mchinji","Mulanje","Mwanza","Mzimba","Neno",
+    "Nkhata Bay","Nkhotakota","Nsanje","Ntcheu","Ntchisi",
+    "Phalombe","Rumphi","Salima","Thyolo","Zomba",
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
   ];
 
   @override
   void initState() {
     super.initState();
 
+<<<<<<< HEAD
     nameController =
         TextEditingController(text: widget.shop.name);
 
@@ -119,6 +156,14 @@ class _EditShopScreenState
 
     emailController =
         TextEditingController(text: widget.shop.email);
+=======
+    nameController = TextEditingController(text: widget.shop.name);
+    descriptionController = TextEditingController(text: widget.shop.description);
+    addressController = TextEditingController(text: widget.shop.address);
+    cityController = TextEditingController(text: widget.shop.city);
+    phoneController = TextEditingController(text: widget.shop.phoneNumber);
+    emailController = TextEditingController(text: widget.shop.email);
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
     selectedDistrict = widget.shop.district;
     category = widget.shop.category;
@@ -127,6 +172,7 @@ class _EditShopScreenState
     longitude = widget.shop.longitude;
   }
 
+<<<<<<< HEAD
   // ======================
   // LOCATION
   // ======================
@@ -157,10 +203,25 @@ class _EditShopScreenState
 
     Position pos =
         await Geolocator.getCurrentPosition(
+=======
+  // ================= GPS (same as create) =================
+  Future<void> getLocation() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) return;
+
+    LocationPermission permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) return;
+    }
+
+    Position pos = await Geolocator.getCurrentPosition(
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
       desiredAccuracy: LocationAccuracy.high,
     );
 
     setState(() {
+<<<<<<< HEAD
       latitude =
           double.parse(pos.latitude.toStringAsFixed(6));
 
@@ -200,11 +261,33 @@ class _EditShopScreenState
       if (file != null) {
         logoFile = File(file.path);
 
+=======
+      latitude = double.parse(pos.latitude.toStringAsFixed(6));
+      longitude = double.parse(pos.longitude.toStringAsFixed(6));
+    });
+  }
+
+  // ================= PICK LOGO =================
+  Future<void> pickLogo() async {
+    if (kIsWeb) {
+      final result =
+          await FilePicker.platform.pickFiles(type: FileType.image);
+
+      if (result != null) {
+        logoWeb = result.files.first.bytes;
+        setState(() {});
+      }
+    } else {
+      final file = await _picker.pickImage(source: ImageSource.gallery);
+      if (file != null) {
+        logoFile = File(file.path);
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
         setState(() {});
       }
     }
   }
 
+<<<<<<< HEAD
   // ======================
   // PICK BANNER
   // ======================
@@ -229,11 +312,28 @@ class _EditShopScreenState
       if (file != null) {
         bannerFile = File(file.path);
 
+=======
+  // ================= PICK BANNER =================
+  Future<void> pickBanner() async {
+    if (kIsWeb) {
+      final result =
+          await FilePicker.platform.pickFiles(type: FileType.image);
+
+      if (result != null) {
+        bannerWeb = result.files.first.bytes;
+        setState(() {});
+      }
+    } else {
+      final file = await _picker.pickImage(source: ImageSource.gallery);
+      if (file != null) {
+        bannerFile = File(file.path);
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
         setState(() {});
       }
     }
   }
 
+<<<<<<< HEAD
   // ======================
   // IMAGE PREVIEW
   // ======================
@@ -273,6 +373,19 @@ class _EditShopScreenState
   // UPDATE SHOP
   // ======================
 
+=======
+  Widget buildImage(File? file, Uint8List? bytes) {
+    if (kIsWeb && bytes != null) {
+      return Image.memory(bytes, height: 120, width: 120, fit: BoxFit.cover);
+    }
+    if (!kIsWeb && file != null) {
+      return Image.file(file, height: 120, width: 120, fit: BoxFit.cover);
+    }
+    return const SizedBox();
+  }
+
+  // ================= UPDATE =================
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
   Future<void> updateShop() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -281,6 +394,7 @@ class _EditShopScreenState
     try {
       FormData formData = FormData.fromMap({
         "name": nameController.text,
+<<<<<<< HEAD
         "description":
             descriptionController.text,
         "category": category,
@@ -291,6 +405,14 @@ class _EditShopScreenState
                 widget.shop.district,
         "phone_number":
             phoneController.text,
+=======
+        "description": descriptionController.text,
+        "category": category,
+        "address": addressController.text,
+        "city": cityController.text,
+        "district": selectedDistrict ?? widget.shop.district,
+        "phone_number": phoneController.text,
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
         "email": emailController.text,
         "latitude": latitude ?? 0,
         "longitude": longitude ?? 0,
@@ -298,6 +420,7 @@ class _EditShopScreenState
 
       // LOGO
       if (kIsWeb && logoWeb != null) {
+<<<<<<< HEAD
         formData.files.add(
           MapEntry(
             "logo",
@@ -316,10 +439,22 @@ class _EditShopScreenState
             ),
           ),
         );
+=======
+        formData.files.add(MapEntry(
+          "logo",
+          MultipartFile.fromBytes(logoWeb!, filename: "logo.jpg"),
+        ));
+      } else if (logoFile != null) {
+        formData.files.add(MapEntry(
+          "logo",
+          await MultipartFile.fromFile(logoFile!.path),
+        ));
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
       }
 
       // BANNER
       if (kIsWeb && bannerWeb != null) {
+<<<<<<< HEAD
         formData.files.add(
           MapEntry(
             "banner",
@@ -344,6 +479,20 @@ class _EditShopScreenState
           .read(shopActionsProvider)
           .api
           .patchMultipart(
+=======
+        formData.files.add(MapEntry(
+          "banner",
+          MultipartFile.fromBytes(bannerWeb!, filename: "banner.jpg"),
+        ));
+      } else if (bannerFile != null) {
+        formData.files.add(MapEntry(
+          "banner",
+          await MultipartFile.fromFile(bannerFile!.path),
+        ));
+      }
+
+      await ref.read(shopActionsProvider).api.patchMultipart(
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
             "shops/${widget.shop.id}/",
             formData,
           );
@@ -351,6 +500,7 @@ class _EditShopScreenState
       ref.invalidate(userShopsProvider);
 
       if (mounted) {
+<<<<<<< HEAD
         AppToast.success(
           context,
           "Shop updated successfully",
@@ -363,11 +513,19 @@ class _EditShopScreenState
         context,
         "Error: ${e.toString()}",
       );
+=======
+        AppToast.success(context,"Shop updated successfully");
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      AppToast.error(context,"Error: ${e.toString()}");
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
     } finally {
       setState(() => loading = false);
     }
   }
 
+<<<<<<< HEAD
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -797,6 +955,89 @@ class _EditShopScreenState
               ),
 
               const SizedBox(height: 30),
+=======
+  Widget input(TextEditingController c, String label) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: TextFormField(
+        controller: c,
+        validator: (v) => v!.isEmpty ? "$label required" : null,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: const MainAppBar(title: 'Edit Shop'),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+
+              input(nameController, "Shop Name"),
+              input(descriptionController, "Description"),
+              input(addressController, "Address"),
+              input(cityController, "City"),
+
+              DropdownButtonFormField<String>(
+                value: selectedDistrict,
+                items: districts
+                    .map((d) => DropdownMenuItem(
+                          value: d,
+                          child: Text(d),
+                        ))
+                    .toList(),
+                onChanged: (v) => setState(() => selectedDistrict = v),
+                decoration: const InputDecoration(
+                  labelText: "District",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+
+              input(phoneController, "Phone"),
+              input(emailController, "Email"),
+
+              const SizedBox(height: 10),
+
+              ElevatedButton(
+                onPressed: getLocation,
+                child: const Text("Update Location"),
+              ),
+
+              Text("Lat: $latitude, Lng: $longitude"),
+
+              const SizedBox(height: 10),
+
+              ElevatedButton(
+                onPressed: pickLogo,
+                child: const Text("Change Logo"),
+              ),
+              buildImage(logoFile, logoWeb),
+
+              const SizedBox(height: 10),
+
+              ElevatedButton(
+                onPressed: pickBanner,
+                child: const Text("Change Banner"),
+              ),
+              buildImage(bannerFile, bannerWeb),
+
+              const SizedBox(height: 20),
+
+              ElevatedButton(
+                onPressed: loading ? null : updateShop,
+                child: loading
+                    ? const CircularProgressIndicator()
+                    : const Text("Update Shop"),
+              ),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
             ],
           ),
         ),

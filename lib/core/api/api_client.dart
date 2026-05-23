@@ -132,6 +132,10 @@ Future<Map<String, dynamic>> checkPaymentStatus(
     );
   }
 
+<<<<<<< HEAD
+=======
+  // Generic request methods
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 Future<T> get<T>(
   String path, {
   Map<String, dynamic>? queryParameters,
@@ -143,6 +147,7 @@ Future<T> get<T>(
       queryParameters: queryParameters,
     );
 
+<<<<<<< HEAD
     final data = response.data;
 
     if (data is Map<String, dynamic>) {
@@ -165,6 +170,12 @@ Future<T> get<T>(
 
     logger.e('DIO ERROR: $e');
     rethrow;
+=======
+    final data = Map<String, dynamic>.from(response.data);
+
+    return fromJson(data);
+
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
   } catch (e) {
     logger.e('GET $path failed: $e');
     rethrow;
@@ -207,8 +218,11 @@ Future<List<T>> getList<T>(
   }
 }
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 Future<dynamic> uploadMultipart({
   required String endpoint,
   required Map<String, String> fields,
@@ -258,6 +272,7 @@ Future<T> post<T>(
   try {
     final response = await _dio.post(path, data: data);
 
+<<<<<<< HEAD
     logger.i("✅ POST $path RESPONSE:");
     logger.i(response.data);
 
@@ -286,6 +301,24 @@ Future<T> post<T>(
         message = data;
       }
     }
+=======
+    return fromJson(response.data);
+  } on DioException catch (e) {
+
+    final responseData = e.response?.data;
+
+    logger.e('❌ POST $path failed');
+
+    logger.e('STATUS: ${e.response?.statusCode}');
+    logger.e('RESPONSE DATA: $responseData');
+
+    // 🔥 IMPORTANT: THROW CLEAN MESSAGE ONLY
+    final message = (responseData is Map)
+        ? (responseData['message'] ??
+           responseData['error'] ??
+           'Request failed')
+        : 'Request failed';
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
     throw Exception(message);
   } catch (e) {
@@ -293,8 +326,11 @@ Future<T> post<T>(
     throw Exception('Something went wrong');
   }
 }
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
   Future<T> put<T>(
     String path, {
     required Map<String, dynamic> data,
@@ -408,6 +444,7 @@ Future<T> patch<T>(
     }
   }
 
+<<<<<<< HEAD
 
 Future<void> createEvent(Map<String, dynamic> data) async {
   await post(
@@ -418,6 +455,8 @@ Future<void> createEvent(Map<String, dynamic> data) async {
 }
 
 
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
   Future<Response> postMultipart(
   String endpoint,
   FormData formData,

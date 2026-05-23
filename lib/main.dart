@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+<<<<<<< HEAD
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+=======
+
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 import 'providers/auth_provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
@@ -9,15 +13,21 @@ import 'screens/auth/register_screen.dart';
 import 'app/app.dart';
 
 import 'theme/app_colors.dart';
+<<<<<<< HEAD
 import 'widgets/no_internet_listener.dart';
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
+<<<<<<< HEAD
   if (WebViewPlatform.instance == null) {
     WebViewPlatform.instance = AndroidWebViewPlatform();
   }
 
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
     debugPrint("FLUTTER ERROR: ${details.exception}");
@@ -32,11 +42,17 @@ class MainApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+<<<<<<< HEAD
    
 
   return NoInternetListener(
     child: MaterialApp(
       scaffoldMessengerKey: scaffoldMessengerKey,
+=======
+    final authState = ref.watch(authProvider);
+
+    return MaterialApp(
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
       debugShowCheckedModeBanner: false,
       title: 'MangoMart',
 
@@ -107,7 +123,11 @@ class MainApp extends ConsumerWidget {
       ),
 
       // ======================
+<<<<<<< HEAD
       // DARK THEME
+=======
+      // 🌙 DARK THEME
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
       // ======================
       darkTheme: ThemeData(
         useMaterial3: true,
@@ -145,7 +165,10 @@ class MainApp extends ConsumerWidget {
         '/register': (context) => const RegisterScreen(),
         '/home': (context) => const MyApp(),
       },
+<<<<<<< HEAD
     ),
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
     );
   }
 }

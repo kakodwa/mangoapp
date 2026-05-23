@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import '../screens/about/about_screen.dart';
 import '../screens/help/help_screen.dart';
 import '../theme/app_colors.dart';
+<<<<<<< HEAD
 import '../theme/design_system/app_spacing.dart';
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
 class MainDrawer extends StatelessWidget {
   const MainDrawer({super.key});
@@ -15,6 +18,7 @@ class MainDrawer extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return Padding(
+<<<<<<< HEAD
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
         vertical: AppSpacing.xs,
@@ -64,6 +68,47 @@ class MainDrawer extends StatelessWidget {
                 ),
               ],
             ),
+=======
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, color: color, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const Spacer(),
+              const Icon(Icons.chevron_right, color: Colors.grey),
+            ],
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
           ),
         ),
       ),
@@ -79,6 +124,7 @@ class MainDrawer extends StatelessWidget {
       child: Column(
         children: [
 
+<<<<<<< HEAD
           // HEADER
           Container(
             width: double.infinity,
@@ -88,6 +134,14 @@ class MainDrawer extends StatelessWidget {
               AppSpacing.lg,
               AppSpacing.lg,
             ),
+=======
+          // =========================
+          // HEADER
+          // =========================
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
@@ -111,12 +165,18 @@ class MainDrawer extends StatelessWidget {
                     height: 40,
                   ),
                 ),
+<<<<<<< HEAD
                 const SizedBox(width: AppSpacing.md),
                 Column(
+=======
+                const SizedBox(width: 12),
+                const Column(
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'MangoMart',
+<<<<<<< HEAD
                       style: Theme.of(context)
                           .textTheme
                           .headlineSmall
@@ -134,6 +194,21 @@ class MainDrawer extends StatelessWidget {
                           ?.copyWith(
                             color: Colors.white70,
                           ),
+=======
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'Marketplace App',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                     ),
                   ],
                 ),
@@ -141,7 +216,11 @@ class MainDrawer extends StatelessWidget {
             ),
           ),
 
+<<<<<<< HEAD
           const SizedBox(height: AppSpacing.lg),
+=======
+          const SizedBox(height: 16),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
           // =========================
           // MENU ITEMS
@@ -180,6 +259,7 @@ class MainDrawer extends StatelessWidget {
 
           const Spacer(),
 
+<<<<<<< HEAD
           // VERSION FOOTER
           Padding(
             padding: const EdgeInsets.all(AppSpacing.md),
@@ -187,6 +267,18 @@ class MainDrawer extends StatelessWidget {
               "Version 1.0.0",
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: colorScheme.onSurface.withOpacity(0.5),
+=======
+          // =========================
+          // VERSION FOOTER
+          // =========================
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(
+              "Version 1.0.0",
+              style: TextStyle(
+                color: colorScheme.onSurface.withOpacity(0.5),
+                fontSize: 12,
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
               ),
             ),
           ),
@@ -194,4 +286,8 @@ class MainDrawer extends StatelessWidget {
       ),
     );
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63

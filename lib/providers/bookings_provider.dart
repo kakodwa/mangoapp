@@ -1,5 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+<<<<<<< HEAD
 import '../../models/requests/booking_create_request.dart';
+=======
+
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 import '../models/booking_model.dart';
 import 'api_provider.dart';
 
@@ -8,6 +12,7 @@ final bookingsProvider =
   final api = ref.watch(apiClientProvider);
 
   return api.getList(
+<<<<<<< HEAD
     'bookings/',
     fromJson: (json) => Booking.fromJson(json),
   );
@@ -32,3 +37,9 @@ final createBookingProvider =
     return response;
   },
 );
+=======
+    'hospitality/bookings/',
+    fromJson: (json) => Booking.fromJson(json),
+  );
+});
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63

@@ -3,7 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/auth_provider.dart';
 import '../providers/products_provider.dart';
+<<<<<<< HEAD
 import '../theme/design_system/app_spacing.dart';
+=======
+
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 import '../screens/cart/cart_screen.dart';
 import '../screens/profile/profile_screen.dart';
 import '../screens/auth/login_screen.dart';
@@ -25,6 +29,7 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
 
     return AppBar(
       centerTitle: false,
+<<<<<<< HEAD
       titleSpacing: AppSpacing.md,
       title: Text(
         title,
@@ -34,11 +39,22 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
       ),
       actions: [
         // CART BUTTON
+=======
+      titleSpacing: 0,
+      title: Text(title),
+
+      actions: [
+        // 🛒 CART
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
         Stack(
           clipBehavior: Clip.none,
           children: [
             IconButton(
+<<<<<<< HEAD
               icon: const Icon(Icons.shopping_cart_outlined),
+=======
+              icon: const Icon(Icons.shopping_cart),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
               onPressed: () {
                 Navigator.push(
                   context,
@@ -47,12 +63,21 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
                   ),
                 );
               },
+<<<<<<< HEAD
               tooltip: 'Shopping Cart',
             ),
             if (cartItems.isNotEmpty)
               Positioned(
                 right: 4,
                 top: 4,
+=======
+            ),
+
+            if (cartItems.isNotEmpty)
+              Positioned(
+                right: 6,
+                top: 6,
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: const BoxDecoration(
@@ -63,7 +88,11 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
                     '${cartItems.length}',
                     style: const TextStyle(
                       color: Colors.white,
+<<<<<<< HEAD
                       fontSize: 9,
+=======
+                      fontSize: 10,
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -141,4 +170,8 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63

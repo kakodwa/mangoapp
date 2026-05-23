@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import '../../models/room_model.dart';
@@ -8,21 +9,33 @@ import '../../theme/design_system/app_typography.dart';
 import '../../widgets/shop_map_modal.dart';
 import '../../widgets/hospitality/room_card.dart';
 import 'availability_calendar_screen.dart';
+=======
+import 'package:flutter/material.dart';
+
+import '../../models/room_model.dart';
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 import 'booking_checkout_screen.dart';
 
 class RoomDetailScreen extends StatelessWidget {
   final Room room;
+<<<<<<< HEAD
   final List<String> lodgeImages;
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
   const RoomDetailScreen({
     super.key,
     required this.room,
+<<<<<<< HEAD
     required this.lodgeImages,
+=======
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+<<<<<<< HEAD
       backgroundColor: const Color(0xFFF5F7FA),
       body: Stack(
         children: [
@@ -114,10 +127,35 @@ class RoomDetailScreen extends StatelessWidget {
                         ),
                       ),
                     ],
+=======
+      body: Stack(
+        children: [
+
+          /// ================= SCROLL CONTENT =================
+          CustomScrollView(
+            slivers: [
+
+              /// ===== IMAGE HEADER =====
+              SliverAppBar(
+                expandedHeight: 260,
+                pinned: true,
+                flexibleSpace: FlexibleSpaceBar(
+                  title: Text(room.title),
+                  background: Container(
+                    color: Colors.grey.shade300,
+                    child: const Center(
+                      child: Icon(
+                        Icons.hotel,
+                        size: 80,
+                        color: Colors.white,
+                      ),
+                    ),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                   ),
                 ),
               ),
 
+<<<<<<< HEAD
               /// ================= BODY =================
               SliverToBoxAdapter(
                 child: Padding(
@@ -135,12 +173,33 @@ class RoomDetailScreen extends StatelessWidget {
                               horizontal: 12,
                               vertical: 7,
                             ),
+=======
+              /// ===== BODY =====
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+
+                      /// STATUS + ROOM NUMBER
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 6),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                             decoration: BoxDecoration(
                               color: room.isAvailable
                                   ? Colors.green.withOpacity(.1)
                                   : Colors.red.withOpacity(.1),
+<<<<<<< HEAD
                               borderRadius:
                                   BorderRadius.circular(30),
+=======
+                              borderRadius: BorderRadius.circular(8),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                             ),
                             child: Text(
                               room.isAvailable
@@ -155,6 +214,7 @@ class RoomDetailScreen extends StatelessWidget {
                             ),
                           ),
 
+<<<<<<< HEAD
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 12,
@@ -171,11 +231,19 @@ class RoomDetailScreen extends StatelessWidget {
                                 color: Colors.orange,
                                 fontWeight: FontWeight.bold,
                               ),
+=======
+                          Text(
+                            "Room ${room.roomNumber}",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                             ),
                           ),
                         ],
                       ),
 
+<<<<<<< HEAD
                       const SizedBox(height: AppSpacing.lg),
 
                       /// ================= ROOM TITLE =================
@@ -183,16 +251,30 @@ class RoomDetailScreen extends StatelessWidget {
                         room.title,
                         style: const TextStyle(
                           fontSize: 28,
+=======
+                      const SizedBox(height: 14),
+
+                      /// TITLE
+                      Text(
+                        room.title,
+                        style: const TextStyle(
+                          fontSize: 24,
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                           fontWeight: FontWeight.bold,
                         ),
                       ),
 
+<<<<<<< HEAD
                       const SizedBox(height: AppSpacing.xs),
+=======
+                      const SizedBox(height: 6),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
 
                       Text(
                         room.roomType.toUpperCase(),
                         style: TextStyle(
                           color: Colors.grey.shade600,
+<<<<<<< HEAD
                           fontWeight: FontWeight.w600,
                           letterSpacing: 1,
                         ),
@@ -257,12 +339,33 @@ class RoomDetailScreen extends StatelessWidget {
                       const SizedBox(height: AppSpacing.lg),
 
                       /// ================= CAPACITY =================
+=======
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      /// PRICE
+                      Text(
+                        "MWK ${room.pricePerNight} / night",
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green,
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      /// CAPACITY CARD
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                       _infoCard(
                         icon: Icons.people,
                         title: "Capacity",
                         value: "${room.capacity} Guests",
                       ),
 
+<<<<<<< HEAD
                       const SizedBox(height: AppSpacing.lg),
 
                       /// ================= AMENITIES =================
@@ -270,10 +373,20 @@ class RoomDetailScreen extends StatelessWidget {
                         "Amenities",
                         style: TextStyle(
                           fontSize: 20,
+=======
+                      const SizedBox(height: 16),
+
+                      /// AMENITIES
+                      const Text(
+                        "Amenities",
+                        style: TextStyle(
+                          fontSize: 18,
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                           fontWeight: FontWeight.bold,
                         ),
                       ),
 
+<<<<<<< HEAD
                       const SizedBox(height: AppSpacing.md),
 
                       Wrap(
@@ -307,10 +420,37 @@ class RoomDetailScreen extends StatelessWidget {
                         "Description",
                         style: TextStyle(
                           fontSize: 20,
+=======
+                      const SizedBox(height: 12),
+
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: [
+                          if (room.hasWifi)
+                            _amenity(Icons.wifi, "WiFi"),
+                          if (room.hasTv)
+                            _amenity(Icons.tv, "TV"),
+                          if (room.hasAc)
+                            _amenity(Icons.ac_unit, "Air Conditioning"),
+                          if (room.hasBreakfast)
+                            _amenity(Icons.free_breakfast, "Breakfast"),
+                        ],
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      /// DESCRIPTION
+                      const Text(
+                        "Description",
+                        style: TextStyle(
+                          fontSize: 18,
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                           fontWeight: FontWeight.bold,
                         ),
                       ),
 
+<<<<<<< HEAD
                       const SizedBox(height: AppSpacing.md),
 
                       AppCard(
@@ -387,6 +527,17 @@ class RoomDetailScreen extends StatelessWidget {
                           ],
                         ),
                       ),
+=======
+                      const SizedBox(height: 8),
+
+                      Text(
+                        room.description.isEmpty
+                            ? "No description provided."
+                            : room.description,
+                        style: const TextStyle(height: 1.5),
+                      ),
+
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                       const SizedBox(height: 120),
                     ],
                   ),
@@ -401,14 +552,20 @@ class RoomDetailScreen extends StatelessWidget {
             left: 0,
             right: 0,
             child: Container(
+<<<<<<< HEAD
               padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.md,
                 vertical: AppSpacing.sm,
               ),
+=======
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
               decoration: const BoxDecoration(
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
+<<<<<<< HEAD
                     blurRadius: 12,
                     color: Colors.black12,
                   ),
@@ -438,6 +595,40 @@ class RoomDetailScreen extends StatelessWidget {
                           );
                         }
                       : null,
+=======
+                    blurRadius: 10,
+                    color: Colors.black12,
+                  )
+                ],
+              ),
+              child: SafeArea(
+                child: SizedBox(
+                  height: 50,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: room.isAvailable
+                          ? Colors.orange
+                          : Colors.grey,
+                    ),
+                    onPressed: room.isAvailable
+                        ? () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    BookingCheckoutScreen(room: room),
+                              ),
+                            );
+                          }
+                        : null,
+                    child: Text(
+                      room.isAvailable
+                          ? "Book Now"
+                          : "Room Not Available",
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
                 ),
               ),
             ),
@@ -453,6 +644,7 @@ class RoomDetailScreen extends StatelessWidget {
     required String title,
     required String value,
   }) {
+<<<<<<< HEAD
     return AppCard(
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Row(
@@ -478,6 +670,21 @@ class RoomDetailScreen extends StatelessWidget {
             ),
           ),
 
+=======
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.orange),
+          const SizedBox(width: 10),
+          Text("$title: ",
+              style:
+                  const TextStyle(fontWeight: FontWeight.bold)),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
           Text(value),
         ],
       ),
@@ -485,6 +692,7 @@ class RoomDetailScreen extends StatelessWidget {
   }
 
   /// ================= AMENITY CHIP =================
+<<<<<<< HEAD
   Widget _amenity(
     IconData icon,
     String label,
@@ -493,10 +701,20 @@ class RoomDetailScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.sm,
+=======
+  Widget _amenity(IconData icon, String label) {
+    return Container(
+      padding:
+          const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.grey.shade100,
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
+<<<<<<< HEAD
           Icon(
             icon,
             size: 18,
@@ -511,6 +729,11 @@ class RoomDetailScreen extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
+=======
+          Icon(icon, size: 18, color: Colors.orange),
+          const SizedBox(width: 6),
+          Text(label),
+>>>>>>> 0cfc4702230a362924a138a5e87e31febed75a63
         ],
       ),
     );
