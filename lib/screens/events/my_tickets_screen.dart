@@ -11,6 +11,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../providers/tickets_provider.dart';
 import '../../theme/app_colors.dart';
 import 'ticket_detail_screen.dart';
+import '../../widgets/main_app_bar.dart';
 import '../../widgets/app_scaffold.dart';
 
 import 'package:flutter/foundation.dart';
@@ -73,8 +74,8 @@ Future<void> captureTicket(GlobalKey key) async {
     final ticketsAsync = ref.watch(myTicketsProvider);
 
     return AppScaffold(
-      appBar: AppBar(
-        title: const Text("My Tickets"),
+      appBar: const MainAppBar(
+        title: 'My Tickets',
       ),
       body: ticketsAsync.when(
         data: (tickets) {
