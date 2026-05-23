@@ -180,10 +180,11 @@ class _ShopMapModalState extends State<ShopMapModal> {
                   ),
 
                   children: [
-                    TileLayer(
+                     TileLayer(
                       urlTemplate:
-                          "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                    ),
+                      "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                      userAgentPackageName: 'com.example.mangochi_marketplace',
+                      ),
 
                     PolylineLayer(
                       polylines: [

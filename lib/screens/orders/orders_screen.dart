@@ -392,6 +392,7 @@ class _OrdersScreenState
         ref.watch(userOrdersProvider);
 
     return AppScaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: const MainAppBar(
         title: 'My Orders',
       ),

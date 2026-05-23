@@ -47,8 +47,7 @@ class WalletTransactionsScreen extends ConsumerWidget {
     final txAsync = ref.watch(walletTransactionsProvider);
 
     return AppScaffold(
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: const MainAppBar(title: 'Wallet Activity'),
 
       body: txAsync.when(

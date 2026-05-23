@@ -136,8 +136,8 @@ class _AppTextFieldState extends State<AppTextField> {
             errorText: widget.errorText,
             filled: true,
             fillColor: widget.enabled
-                ? Colors.white
-                : Colors.grey.shade50,
+            ? const Color(0xFFFCFCFD)
+            : const Color(0xFFF3F4F6),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.md,
               vertical: AppSpacing.md,

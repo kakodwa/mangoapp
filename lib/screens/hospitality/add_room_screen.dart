@@ -86,6 +86,7 @@ class _AddRoomScreenState extends ConsumerState<AddRoomScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
         title: Text("Add Room"),
         backgroundColor: AppColors.mangoOrange,

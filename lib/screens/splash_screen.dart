@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../providers/auth_provider.dart';
 import '../../providers/api_provider.dart';
-import 'auth/login_screen.dart';
+import '../core/api/api_client.dart';
+import '../core/services/app_update_service.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -12,20 +14,33 @@ class SplashScreen extends ConsumerStatefulWidget {
 }
 
 class _SplashScreenState extends ConsumerState<SplashScreen> {
+  late final AppUpdateService updateService;
+
   @override
   void initState() {
     super.initState();
-    _navigateToNextScreen();
+
+    updateService = AppUpdateService(ApiClient());
+
+    _initFlow();
   }
 
- Future<void> _navigateToNextScreen() async {
-  await Future.delayed(const Duration(seconds: 3));
+Future<void> _initFlow() async {
+  await Future.delayed(const Duration(seconds: 2));
 
   if (!mounted) return;
 
+  final canContinue = await updateService.checkVersion(context);
+
+  if (!mounted) return;
+
+  if (!canContinue) {
+    // 🚨 STOP APP HERE (force update)
+    return;
+  }
+
   Navigator.of(context).pushReplacementNamed('/home');
 }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,11 +57,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                 color: Colors.blue.shade100,
               ),
               child: ClipOval(
-  child: Image.asset(
-    'assets/images/logo.png',
-    fit: BoxFit.cover,
-  ),
-),
+                child: Image.asset(
+                  'assets/images/logo.png',
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
             const SizedBox(height: 24),
             Text(
@@ -68,7 +83,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
               height: 40,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue.shade700),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  Colors.blue.shade700,
+                ),
               ),
             ),
           ],

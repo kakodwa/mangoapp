@@ -68,7 +68,7 @@ class HelpSupportScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppScaffold(
       appBar: const MainAppBar(title: 'Help & Support'),
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+      backgroundColor: const Color(0xFFF5F7FA),
 
       body: SingleChildScrollView(
         padding: EdgeInsets.all(AppSpacing.md),

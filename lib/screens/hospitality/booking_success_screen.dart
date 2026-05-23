@@ -6,6 +6,7 @@ class BookingSuccessScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
       body: Center(
         child: Padding(
           padding: EdgeInsets.all(AppSpacing.lg),

@@ -386,6 +386,7 @@ class _EditLodgeScreenState
         ref.watch(amenitiesProvider);
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
         title: Text("Edit Lodge"),
         backgroundColor: AppColors.mangoOrange,

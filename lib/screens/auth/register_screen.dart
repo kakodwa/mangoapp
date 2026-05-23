@@ -82,6 +82,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final auth = ref.watch(authProvider);
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(title: Text("Create Account")),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(AppSpacing.md),

@@ -71,9 +71,8 @@ class AboutScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: const MainAppBar(title: 'About App'),
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-
       body: SingleChildScrollView(
         padding: EdgeInsets.all(AppSpacing.md),
         child: Column(

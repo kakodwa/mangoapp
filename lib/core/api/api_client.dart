@@ -82,6 +82,19 @@ class ApiClient {
 }
 
 
+Future<Map<String, dynamic>> getAppVersion() async {
+  final response = await _dio.get('products/app_version/');
+
+  final data = response.data;
+
+  if (data is Map<String, dynamic>) {
+    return data;
+  }
+
+  throw Exception("Invalid app_version response: $data");
+}
+
+
 Future<Map<String, dynamic>> checkPaymentStatus(
   String paymentReference,
 ) async {

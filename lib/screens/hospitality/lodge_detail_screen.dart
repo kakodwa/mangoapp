@@ -34,6 +34,7 @@ class LodgeDetailScreen extends ConsumerWidget {
     final user = authState.user;
 
     return Scaffold(
+      
       appBar: roomsAsync.when(
         data: (_) => MainAppBar(title: lodge.name),
         loading: () => const MainAppBar(title: "Loading..."),

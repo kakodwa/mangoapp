@@ -49,6 +49,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final bannersAsync = ref.watch(bannersProvider); // 👈 FROM BACKEND
 
     return AppScaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: const MainAppBar(title: 'MangoMart'),
       drawer: const MainDrawer(),
       body: SingleChildScrollView(

@@ -27,6 +27,7 @@ class MyShopScreen extends ConsumerWidget {
     final myShopAsync = ref.watch(userShopsProvider);
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: const MainAppBar(title: 'My Shop'),
 
       // ================= FLOATING BUTTONS =================

@@ -161,6 +161,7 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
         title: Text("Scan Ticket"),
         actions: [

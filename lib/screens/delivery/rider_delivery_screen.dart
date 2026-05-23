@@ -63,8 +63,7 @@ class _RiderDeliveryScreenState
     final d = widget.delivery;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
-
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,

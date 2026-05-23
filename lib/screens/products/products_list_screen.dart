@@ -75,7 +75,7 @@ class _ProductsListScreenState extends ConsumerState<ProductsListScreen> {
     return AppScaffold(
       appBar: const MainAppBar(title: 'Products'),
       drawer: const MainDrawer(),
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+      backgroundColor: const Color(0xFFF5F7FA),
 
       body: Column(
         children: [

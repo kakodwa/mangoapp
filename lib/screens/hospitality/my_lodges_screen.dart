@@ -82,6 +82,7 @@ class _MyLodgesScreenState extends ConsumerState<MyLodgesScreen> {
     debugPrint("👤 CURRENT USER: ${user?.id}");
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
         title: Text("My Lodges"),
         backgroundColor: AppColors.mangoOrange,

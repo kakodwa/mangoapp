@@ -15,7 +15,7 @@ class PaymentHistoryScreen extends ConsumerWidget {
     final paymentsAsync = ref.watch(myPaymentsProvider);
 
     return AppScaffold(
-
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: const MainAppBar(title: 'Payment History'),
       body: paymentsAsync.when(
 

@@ -153,6 +153,7 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
     final amenitiesAsync = ref.watch(amenitiesProvider);
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
         title: Text("Create Lodge"),
         backgroundColor: AppColors.mangoOrange,

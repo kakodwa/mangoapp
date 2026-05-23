@@ -27,8 +27,7 @@ class ShopDetailsScreen extends ConsumerWidget {
         ref.watch(relatedShopsProvider(shopId));
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
-
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: shopAsync.when(
         data: (shop) => MainAppBar(title: shop.name),
         loading: () => const MainAppBar(title: 'Loading...'),

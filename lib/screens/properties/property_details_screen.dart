@@ -33,6 +33,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
 
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: propertyAsync.when(
         data: (property) => MainAppBar(title: property.title),
         loading: () => const MainAppBar(title: 'Loading...'),

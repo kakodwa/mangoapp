@@ -372,8 +372,7 @@ class _EditShopScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
-
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: const MainAppBar(
         title: 'Edit Shop',
       ),

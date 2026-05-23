@@ -37,6 +37,7 @@ class _EventListScreenState
     final eventsAsync = ref.watch(eventsProvider);
 
     return AppScaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: const MainAppBar(title: 'Events'),
       drawer: const MainDrawer(),
       body: Column(

@@ -100,6 +100,7 @@ class _BookingCheckoutScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: const MainAppBar(title: 'Booking Checkout'),
       body: Padding(
         padding: EdgeInsets.all(AppSpacing.md),

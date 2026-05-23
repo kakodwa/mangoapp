@@ -13,7 +13,7 @@ class TicketDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
         title: Text("My Ticket"),
         centerTitle: true,

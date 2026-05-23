@@ -73,7 +73,7 @@ class _LodgeListScreenState extends ConsumerState<LodgeListScreen> {
     final lodgesAsync = ref.watch(lodgesProvider);
 
     return AppScaffold(
-
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: const MainAppBar(title: 'Stays & Lodges'),
       drawer: const MainDrawer(),
 

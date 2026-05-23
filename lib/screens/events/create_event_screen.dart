@@ -237,6 +237,7 @@ for (final ticket in ticketTypes) {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: const MainAppBar(title: "Create Event"),
       body: Form(
         key: _formKey,

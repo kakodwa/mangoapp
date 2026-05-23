@@ -104,6 +104,7 @@ class _PropertyUnlockScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: const MainAppBar(title: 'Unlock Property'),
       body: Column(
         children: [

@@ -85,11 +85,11 @@ class _ShopsListScreenState extends ConsumerState<ShopsListScreen> {
     final shopsAsync = ref.watch(shopsProvider);
 
     return AppScaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
       appBar: MainAppBar(
         title: 'Shops',
       ),
       drawer: const MainDrawer(),
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
 
       body: Column(
         children: [

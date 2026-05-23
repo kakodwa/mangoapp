@@ -227,7 +227,7 @@ class _BuyTicketScreenState
     return Scaffold(
 
       appBar: const MainAppBar(title: 'Buy Ticket'),
-
+      backgroundColor: const Color(0xFFF5F7FA),
       body: Padding(
 
         padding: EdgeInsets.all(AppSpacing.md),
