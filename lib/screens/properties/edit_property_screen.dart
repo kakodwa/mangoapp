@@ -12,6 +12,7 @@ import '../../theme/design_system/app_text_field.dart';
 import '../../widgets/main_app_bar.dart';
 
 import '../../utils/app_toast.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class PropertyFormScreen extends ConsumerStatefulWidget {
   final Property? property;
@@ -199,7 +200,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
     int maxLines = 1,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.only(bottom: 16),
       child: AppTextField(
         label: label,
         controller: controller,
@@ -227,10 +228,10 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
             height: 90,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: Colors.grey.shade200,
+              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const CircularProgressIndicator(),
+            child: CircularProgressIndicator(),
           );
         }
 
@@ -256,14 +257,14 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
                   });
                 },
                 child: Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
+                  padding: EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.error,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.close,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     size: 16,
                   ),
                 ),
@@ -280,7 +281,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
     final isEdit = widget.property != null;
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
 
       appBar: MainAppBar(
         title: isEdit
@@ -291,21 +292,21 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(AppSpacing.md),
           children: [
 
             // ================= BASIC INFO =================
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
-                  const Text(
+                  Text(
                     "Basic Information",
                     style: TextStyle(
                       fontSize: 18,
@@ -313,7 +314,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.md),
 
                   buildField(title, "Property Title"),
 
@@ -329,7 +330,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
                     decoration: InputDecoration(
                       labelText: "Property Type",
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Theme.of(context).colorScheme.surface,
                       border: OutlineInputBorder(
                         borderRadius:
                             BorderRadius.circular(12),
@@ -360,14 +361,14 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
                     },
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.md),
 
                   DropdownButtonFormField<String>(
                     value: listingPurpose,
                     decoration: InputDecoration(
                       labelText: "Listing Purpose",
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Theme.of(context).colorScheme.surface,
                       border: OutlineInputBorder(
                         borderRadius:
                             BorderRadius.circular(12),
@@ -390,14 +391,14 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
                     },
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.md),
 
                   DropdownButtonFormField<String>(
                     value: status,
                     decoration: InputDecoration(
                       labelText: "Status",
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Theme.of(context).colorScheme.surface,
                       border: OutlineInputBorder(
                         borderRadius:
                             BorderRadius.circular(12),
@@ -427,20 +428,20 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.md),
 
             // ================= LOCATION =================
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
-                  const Text(
+                  Text(
                     "Location",
                     style: TextStyle(
                       fontSize: 18,
@@ -448,7 +449,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.md),
 
                   buildField(address, "Address"),
 
@@ -461,7 +462,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
                     decoration: InputDecoration(
                       labelText: "District",
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Theme.of(context).colorScheme.surface,
                       border: OutlineInputBorder(
                         borderRadius:
                             BorderRadius.circular(12),
@@ -482,7 +483,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
                     },
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.md),
 
                   Row(
                     children: [
@@ -494,7 +495,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
                         ),
                       ),
 
-                      const SizedBox(width: 12),
+                      const SizedBox(width: AppSpacing.sm),
 
                       Expanded(
                         child: buildField(
@@ -518,28 +519,28 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
                               BorderRadius.circular(12),
                         ),
                       ),
-                      icon: const Icon(Icons.my_location),
-                      label: const Text("Generate GPS"),
+                      icon: Icon(Icons.my_location),
+                      label: Text("Generate GPS"),
                     ),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.md),
 
             // ================= DETAILS =================
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
-                  const Text(
+                  Text(
                     "Property Details",
                     style: TextStyle(
                       fontSize: 18,
@@ -547,7 +548,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.md),
 
                   Row(
                     children: [
@@ -559,7 +560,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
                         ),
                       ),
 
-                      const SizedBox(width: 12),
+                      const SizedBox(width: AppSpacing.sm),
 
                       Expanded(
                         child: buildField(
@@ -585,7 +586,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
 
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text("Public Listing"),
+                    title: Text("Public Listing"),
                     value: isPublic,
                     onChanged: (v) {
                       setState(() {
@@ -597,13 +598,13 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.md),
 
             // ================= IMAGES =================
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Column(
@@ -614,7 +615,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
                     mainAxisAlignment:
                         MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         "Property Images",
                         style: TextStyle(
                           fontSize: 18,
@@ -624,13 +625,13 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
 
                       TextButton.icon(
                         onPressed: pickImages,
-                        icon: const Icon(Icons.add_a_photo),
-                        label: const Text("Add Images"),
+                        icon: Icon(Icons.add_a_photo),
+                        label: Text("Add Images"),
                       ),
                     ],
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.md),
 
                   Wrap(
                     spacing: 12,
@@ -674,8 +675,8 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
                   ),
                 ),
                 child: loading
-                    ? const CircularProgressIndicator(
-                        color: Colors.white,
+                    ? CircularProgressIndicator(
+                        color: Theme.of(context).colorScheme.surface,
                       )
                     : Text(
                         isEdit

@@ -2,25 +2,27 @@ import 'package:flutter/material.dart';
 import '../../widgets/main_app_bar.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/app_scaffold.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class HelpSupportScreen extends StatelessWidget {
   const HelpSupportScreen({super.key});
 
   Widget _contactCard({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required String value,
     required Color color,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
+      margin: EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           )
@@ -37,22 +39,22 @@ class HelpSupportScreen extends StatelessWidget {
             ),
             child: Icon(icon, color: color),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.sm),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xxs),
               Text(
                 value,
                 style: TextStyle(
-                  color: Colors.grey[600],
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -66,10 +68,10 @@ class HelpSupportScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppScaffold(
       appBar: const MainAppBar(title: 'Help & Support'),
-      backgroundColor: const Color(0xFFF6F7FB),
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
 
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -79,7 +81,7 @@ class HelpSupportScreen extends StatelessWidget {
             // =========================
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(18),
+              padding: EdgeInsets.all(18),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
@@ -91,13 +93,13 @@ class HelpSupportScreen extends StatelessWidget {
                 ),
                 borderRadius: BorderRadius.circular(18),
               ),
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     "Need Help?",
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surface,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
@@ -114,9 +116,9 @@ class HelpSupportScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.md),
 
-            const Text(
+            Text(
               "Contact Support",
               style: TextStyle(
                 fontSize: 18,
@@ -124,42 +126,44 @@ class HelpSupportScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
 
             _contactCard(
+              context: context,
               icon: Icons.email,
               title: "Email Support",
               value: "ikpixels.py@gmail.com",
-              color: Colors.blue,
+              color: Theme.of(context).colorScheme.primary,
             ),
 
             _contactCard(
+              context: context,
               icon: Icons.phone,
               title: "Phone Support",
               value: "0993 344 416",
-              color: Colors.green,
+              color: Theme.of(context).colorScheme.secondary,
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
 
             // =========================
             // SUPPORT HOURS CARD
             // =========================
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(14),
+              padding: EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.grey.shade200),
+                border: Border.all(color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25)),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.access_time, color: Colors.orange),
+                  Icon(Icons.access_time, color: Theme.of(context).colorScheme.primary),
                   const SizedBox(width: 10),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text(
                         "Support Hours",
                         style: TextStyle(fontWeight: FontWeight.bold),
@@ -167,7 +171,7 @@ class HelpSupportScreen extends StatelessWidget {
                       SizedBox(height: 4),
                       Text(
                         "Monday - Sunday: 8:00 AM - 6:00 PM",
-                        style: TextStyle(color: Colors.grey),
+                        style: TextStyle(color: Theme.of(context).colorScheme.outline),
                       ),
                     ],
                   ),
@@ -175,23 +179,23 @@ class HelpSupportScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.md),
 
             // =========================
             // QUICK HELP TIP
             // =========================
             Container(
-              padding: const EdgeInsets.all(14),
+              padding: EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.08),
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(14),
                 border: Border.all(
-                  color: Colors.orange.withOpacity(0.2),
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
                 ),
               ),
               child: Row(
-                children: const [
-                  Icon(Icons.info_outline, color: Colors.orange),
+                children: [
+                  Icon(Icons.info_outline, color: Theme.of(context).colorScheme.primary),
                   SizedBox(width: 10),
                   Expanded(
                     child: Text(

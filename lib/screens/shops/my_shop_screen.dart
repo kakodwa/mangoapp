@@ -11,6 +11,7 @@ import '../products/add_product_screen.dart';
 import '../../widgets/main_app_bar.dart';
 import '../../theme/app_colors.dart';
 import '../../core/api/api_client.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class MyShopScreen extends ConsumerWidget {
   const MyShopScreen({super.key});
@@ -51,10 +52,10 @@ class MyShopScreen extends ConsumerWidget {
                     ),
                   );
                 },
-                child: const Icon(Icons.edit),
+                child: Icon(Icons.edit),
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.sm),
 
               // ➕ ADD PRODUCT
               FloatingActionButton(
@@ -68,7 +69,7 @@ class MyShopScreen extends ConsumerWidget {
                     ),
                   );
                 },
-                child: const Icon(Icons.add),
+                child: Icon(Icons.add),
               ),
             ],
           );
@@ -102,7 +103,7 @@ class MyShopScreen extends ConsumerWidget {
                     Container(
                       height: 180,
                       width: double.infinity,
-                      color: Colors.grey.shade300,
+                      color: Theme.of(context).colorScheme.outline.withOpacity(0.38),
                       child: (shop.banner != null && shop.banner!.isNotEmpty)
                           ? Image.network(
                               fixImageUrl(shop.banner),
@@ -123,7 +124,7 @@ class MyShopScreen extends ConsumerWidget {
                       left: 16,
                       child: CircleAvatar(
                         radius: 35,
-                        backgroundColor: Colors.white,
+                        backgroundColor: Theme.of(context).colorScheme.surface,
                         child: (shop.logo != null && shop.logo!.isNotEmpty)
                             ? ClipOval(
                                 child: Image.network(
@@ -133,7 +134,7 @@ class MyShopScreen extends ConsumerWidget {
                                   fit: BoxFit.cover,
                                 ),
                               )
-                            : const Icon(Icons.store),
+                            : Icon(Icons.store),
                       ),
                     ),
                   ],
@@ -143,7 +144,7 @@ class MyShopScreen extends ConsumerWidget {
 
                 // ================= SHOP INFO =================
                 Padding(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(AppSpacing.md),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -157,9 +158,9 @@ class MyShopScreen extends ConsumerWidget {
                       const SizedBox(height: 10),
                       Text(shop.description),
 
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSpacing.md),
 
-                      const Text(
+                      Text(
                         "Contact Information",
                         style: TextStyle(
                           fontSize: 18,
@@ -170,22 +171,22 @@ class MyShopScreen extends ConsumerWidget {
                       const SizedBox(height: 10),
 
                       ListTile(
-                        leading: const Icon(Icons.phone),
-                        title: const Text("Phone"),
+                        leading: Icon(Icons.phone),
+                        title: Text("Phone"),
                         subtitle: Text(shop.phoneNumber),
                         contentPadding: EdgeInsets.zero,
                       ),
 
                       ListTile(
-                        leading: const Icon(Icons.email),
-                        title: const Text("Email"),
+                        leading: Icon(Icons.email),
+                        title: Text("Email"),
                         subtitle: Text(shop.email),
                         contentPadding: EdgeInsets.zero,
                       ),
 
                       ListTile(
-                        leading: const Icon(Icons.location_on),
-                        title: const Text("Location"),
+                        leading: Icon(Icons.location_on),
+                        title: Text("Location"),
                         subtitle:
                             Text("${shop.address}, ${shop.city}"),
                         contentPadding: EdgeInsets.zero,
@@ -223,7 +224,7 @@ class MyShopScreen extends ConsumerWidget {
                       itemBuilder: (context, index) {
                         final product = products[index];
                         return Card(
-  margin: const EdgeInsets.symmetric(
+  margin: EdgeInsets.symmetric(
       horizontal: 16, vertical: 6),
   child: ListTile(
     onTap: () {
@@ -244,13 +245,13 @@ class MyShopScreen extends ConsumerWidget {
         height: 50,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          return const Icon(Icons.image_not_supported);
+          return Icon(Icons.image_not_supported);
         },
       )
-    : const Icon(
+    : Icon(
         Icons.image_not_supported,
         size: 30,
-        color: Colors.grey,
+        color: Theme.of(context).colorScheme.outline,
       ),
 
     title: Text(product.name),
@@ -260,7 +261,7 @@ class MyShopScreen extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
-          icon: const Icon(Icons.edit, color: Colors.blue),
+          icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.primary),
           onPressed: () {
             Navigator.push(
               context,
@@ -272,7 +273,7 @@ class MyShopScreen extends ConsumerWidget {
           },
         ),
         IconButton(
-          icon: const Icon(Icons.delete, color: Colors.red),
+          icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
           onPressed: () async {
             await ref
                 .read(apiClientProvider)
@@ -294,23 +295,22 @@ class MyShopScreen extends ConsumerWidget {
                       const Center(child: CircularProgressIndicator()),
 
                   error: (e, _) => Padding(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(AppSpacing.md),
                     child: Column(
                       children: [
-                        const Icon(Icons.error,
-                            color: Colors.red, size: 40),
+                        Icon(Icons.error,
+                            color: Theme.of(context).colorScheme.error, size: 40),
                         const SizedBox(height: 10),
                         Text(
                           "Failed to load products:\n$e",
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: Colors.red),
+                          textAlign: TextAlign.center, style: TextStyle(color: Theme.of(context).colorScheme.error),
                         ),
                       ],
                     ),
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: AppSpacing.md),
               ],
             ),
           );
@@ -322,7 +322,7 @@ class MyShopScreen extends ConsumerWidget {
         error: (error, _) => Center(
           child: Text(
             "Error: $error",
-            style: const TextStyle(color: Colors.red),
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
         ),
       ),

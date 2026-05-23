@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/payment_model.dart';
 import '../../providers/payment_provider.dart';
+import '../../widgets/main_app_bar.dart';
+import '../../widgets/main_drawer.dart';
 import '../../widgets/app_scaffold.dart';
 
 class PaymentHistoryScreen extends ConsumerWidget {
@@ -13,10 +15,8 @@ class PaymentHistoryScreen extends ConsumerWidget {
     final paymentsAsync = ref.watch(myPaymentsProvider);
 
     return AppScaffold(
-      appBar: AppBar(
-        title: const Text("Payment History"),
-      ),
 
+      appBar: const MainAppBar(title: 'Payment History'),
       body: paymentsAsync.when(
 
         data: (payments) {
@@ -35,7 +35,7 @@ class PaymentHistoryScreen extends ConsumerWidget {
               final payment = payments[index];
 
               return Card(
-                margin: const EdgeInsets.symmetric(
+                margin: EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 6,
                 ),
@@ -48,8 +48,8 @@ class PaymentHistoryScreen extends ConsumerWidget {
                         : Icons.pending,
 
                     color: payment.status == "completed"
-                        ? Colors.green
-                        : Colors.orange,
+                        ? Theme.of(context).colorScheme.secondary
+                        : Theme.of(context).colorScheme.primary,
                   ),
 
                   title: Text(
@@ -85,8 +85,8 @@ class PaymentHistoryScreen extends ConsumerWidget {
                     payment.statusDisplay,
                     style: TextStyle(
                       color: payment.status == "completed"
-                          ? Colors.green
-                          : Colors.orange,
+                          ? Theme.of(context).colorScheme.secondary
+                          : Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ),

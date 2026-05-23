@@ -5,6 +5,8 @@ import 'package:vibration/vibration.dart';
 
 import '../../core/api/api_client.dart';
 import '../../utils/app_toast.dart';
+import '../../widgets/main_app_bar.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class ScanTicketScreen extends StatefulWidget {
   const ScanTicketScreen({super.key});
@@ -126,14 +128,14 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSuccess ? Colors.green : Colors.red,
+            color: isSuccess ? Theme.of(context).colorScheme.secondary : Theme.of(context).colorScheme.error,
             width: 3,
           ),
         ),
-        child: const Center(
+        child: Center(
           child: Icon(
             Icons.qr_code_scanner,
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             size: 40,
           ),
         ),
@@ -143,12 +145,12 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
 
   Widget _infoTile(String title, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.only(bottom: 8),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(AppSpacing.sm),
         decoration: BoxDecoration(
-          color: Colors.grey.shade100,
+          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Text("$title: ${value ?? ''}"),
@@ -160,12 +162,12 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Scan Ticket"),
+        title: Text("Scan Ticket"),
         actions: [
           if (ticketData != null)
             IconButton(
               onPressed: _resetScanner,
-              icon: const Icon(Icons.refresh),
+              icon: Icon(Icons.refresh),
             )
         ],
       ),
@@ -185,22 +187,22 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
           // RESULT MODE
           // =========================
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(AppSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Center(
+                  Center(
                     child: Text(
                       "CHECK-IN SUCCESSFUL",
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: Colors.green,
+                        color: Theme.of(context).colorScheme.secondary,
                       ),
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.md),
 
                   _infoTile("Event", ticketData!['event_title']),
                   _infoTile("Ticket", ticketData!['ticket_number']),
@@ -208,9 +210,9 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
                   //_infoTile("Seat", ticketData!['seat'] ?? 'N/A'),
                   //_infoTile("Type", ticketData!['type'] ?? 'Regular'),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.md),
 
-                  const Text(
+                  Text(
                     "Ticket Items",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
@@ -234,8 +236,8 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: _resetScanner,
-                      icon: const Icon(Icons.qr_code_scanner),
-                      label: const Text("Scan Next Ticket"),
+                      icon: Icon(Icons.qr_code_scanner),
+                      label: Text("Scan Next Ticket"),
                     ),
                   ),
                 ],

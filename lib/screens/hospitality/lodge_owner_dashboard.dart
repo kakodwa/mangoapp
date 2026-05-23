@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'create_lodge_screen.dart';
 import 'my_lodges_screen.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class LodgeOwnerDashboard extends StatelessWidget {
   const LodgeOwnerDashboard({super.key});
@@ -10,12 +11,12 @@ class LodgeOwnerDashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Lodge Dashboard'),
+        title: Text('Lodge Dashboard'),
       ),
 
       body: GridView.count(
         crossAxisCount: 2,
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(AppSpacing.md),
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
 
@@ -57,7 +58,7 @@ class LodgeOwnerDashboard extends StatelessWidget {
           _DashboardCard(
             title: 'Create Lodge',
             icon: Icons.add_business,
-            color: Colors.green,
+            color: Theme.of(context).colorScheme.secondary,
             onTap: () {
               Navigator.push(
                 context,
@@ -72,7 +73,7 @@ class LodgeOwnerDashboard extends StatelessWidget {
           _DashboardCard(
             title: 'My Lodges',
             icon: Icons.apartment,
-            color: Colors.orange,
+            color: Theme.of(context).colorScheme.primary,
             onTap: () {
               Navigator.push(
                 context,
@@ -127,7 +128,7 @@ class _DashboardCard extends StatelessWidget {
               color: color ?? Colors.black87,
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
 
             Text(
               title,

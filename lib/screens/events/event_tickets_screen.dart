@@ -5,6 +5,7 @@ import '../../models/event_model.dart';
 import '../../models/ticket_model.dart';
 import '../../providers/tickets_provider.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class EventTicketsScreen extends ConsumerStatefulWidget {
   final EventModel event;
@@ -35,13 +36,13 @@ class _EventTicketsScreenState
     );
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
 
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
         foregroundColor: AppColors.darkText,
-        title: const Text(
+        title: Text(
           "Sold Tickets",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
@@ -53,7 +54,7 @@ class _EventTicketsScreenState
 
         error: (error, stack) => Center(
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(20),
             child: Text(error.toString()),
           ),
         ),
@@ -114,7 +115,7 @@ class _EventTicketsScreenState
               physics:
                   const AlwaysScrollableScrollPhysics(),
 
-              padding: const EdgeInsets.only(bottom: 30),
+              padding: EdgeInsets.only(bottom: 30),
 
               child: Column(
                 children: [
@@ -123,8 +124,8 @@ class _EventTicketsScreenState
 
                   Container(
                     width: double.infinity,
-                    margin: const EdgeInsets.all(16),
-                    padding: const EdgeInsets.all(22),
+                    margin: EdgeInsets.all(AppSpacing.md),
+                    padding: EdgeInsets.all(22),
 
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -155,14 +156,14 @@ class _EventTicketsScreenState
 
                         Text(
                           widget.event.title,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.surface,
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
 
-                        const SizedBox(height: 8),
+                        const SizedBox(height: AppSpacing.xs),
 
                         Text(
                           "${widget.event.venue}, ${widget.event.city}",
@@ -184,7 +185,7 @@ class _EventTicketsScreenState
                               ),
                             ),
 
-                            const SizedBox(width: 12),
+                            const SizedBox(width: AppSpacing.sm),
 
                             Expanded(
                               child: _summaryCard(
@@ -202,7 +203,7 @@ class _EventTicketsScreenState
                   // ================= SEARCH =================
 
                   Padding(
-                    padding: const EdgeInsets.symmetric(
+                    padding: EdgeInsets.symmetric(
                       horizontal: 16,
                     ),
 
@@ -220,13 +221,13 @@ class _EventTicketsScreenState
                             "Search customer or ticket number",
 
                         prefixIcon:
-                            const Icon(Icons.search),
+                            Icon(Icons.search),
 
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: Theme.of(context).colorScheme.surface,
 
                         contentPadding:
-                            const EdgeInsets.symmetric(
+                            EdgeInsets.symmetric(
                           vertical: 0,
                         ),
 
@@ -239,19 +240,19 @@ class _EventTicketsScreenState
                     ),
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.md),
 
                   // ================= BREAKDOWN =================
 
                   Container(
-                    margin: const EdgeInsets.symmetric(
+                    margin: EdgeInsets.symmetric(
                       horizontal: 16,
                     ),
 
-                    padding: const EdgeInsets.all(18),
+                    padding: EdgeInsets.all(18),
 
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surface,
                       borderRadius:
                           BorderRadius.circular(22),
                     ),
@@ -262,7 +263,7 @@ class _EventTicketsScreenState
 
                       children: [
 
-                        const Text(
+                        Text(
                           "Ticket Breakdown",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
@@ -270,7 +271,7 @@ class _EventTicketsScreenState
                           ),
                         ),
 
-                        const SizedBox(height: 12),
+                        const SizedBox(height: AppSpacing.sm),
 
                         if (tickets.isEmpty)
                           const Padding(
@@ -286,15 +287,15 @@ class _EventTicketsScreenState
 
                           return Container(
                             margin:
-                                const EdgeInsets.only(
+                                EdgeInsets.only(
                               bottom: 10,
                             ),
 
                             padding:
-                                const EdgeInsets.all(14),
+                                EdgeInsets.all(14),
 
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade50,
+                              color: Theme.of(context).colorScheme.outline.withOpacity(0.05),
                               borderRadius:
                                   BorderRadius.circular(
                                       14),
@@ -318,7 +319,7 @@ class _EventTicketsScreenState
                                   ),
                                 ),
 
-                                const SizedBox(width: 12),
+                                const SizedBox(width: AppSpacing.sm),
 
                                 Expanded(
                                   child: Text(
@@ -348,7 +349,7 @@ class _EventTicketsScreenState
                     ),
                   ),
 
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.sm),
 
                   // ================= TICKETS =================
 
@@ -367,7 +368,7 @@ class _EventTicketsScreenState
                       physics:
                           const NeverScrollableScrollPhysics(),
 
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.all(AppSpacing.md),
 
                       itemBuilder: (context, i) {
 
@@ -375,19 +376,19 @@ class _EventTicketsScreenState
 
                         return Container(
                           margin:
-                              const EdgeInsets.only(
+                              EdgeInsets.only(
                             bottom: 14,
                           ),
 
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.surface,
                             borderRadius:
                                 BorderRadius.circular(
                                     24),
 
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black
+                                color: Theme.of(context).colorScheme.onSurface
                                     .withOpacity(.04),
                                 blurRadius: 12,
                                 offset:
@@ -398,7 +399,7 @@ class _EventTicketsScreenState
 
                           child: Padding(
                             padding:
-                                const EdgeInsets.all(18),
+                                EdgeInsets.all(18),
 
                             child: Column(
                               crossAxisAlignment:
@@ -470,7 +471,7 @@ class _EventTicketsScreenState
                                                 TextStyle(
                                               color: Colors
                                                   .grey
-                                                  .shade700,
+                                                  .withOpacity(0.8),
                                             ),
                                           ),
                                         ],
@@ -487,7 +488,7 @@ class _EventTicketsScreenState
 
                                       decoration:
                                           BoxDecoration(
-                                        color: Colors.green
+                                        color: Theme.of(context).colorScheme.secondary
                                             .withOpacity(
                                                 .1),
 
@@ -497,11 +498,11 @@ class _EventTicketsScreenState
                                                     30),
                                       ),
 
-                                      child: const Text(
+                                      child: Text(
                                         "PAID",
                                         style: TextStyle(
                                           color:
-                                              Colors.green,
+                                              Theme.of(context).colorScheme.secondary,
                                           fontWeight:
                                               FontWeight
                                                   .bold,
@@ -516,12 +517,12 @@ class _EventTicketsScreenState
 
                                 Container(
                                   padding:
-                                      const EdgeInsets.all(
+                                      EdgeInsets.all(
                                           14),
 
                                   decoration: BoxDecoration(
                                     color:
-                                        Colors.grey.shade50,
+                                        Theme.of(context).colorScheme.outline.withOpacity(0.05),
                                     borderRadius:
                                         BorderRadius
                                             .circular(16),
@@ -533,7 +534,7 @@ class _EventTicketsScreenState
                                       Row(
                                         children: [
 
-                                          const Icon(
+                                          Icon(
                                             Icons.payments,
                                             size: 18,
                                           ),
@@ -637,10 +638,10 @@ class _EventTicketsScreenState
     IconData icon,
   ) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(AppSpacing.md),
 
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(.15),
+        color: Theme.of(context).colorScheme.surface.withOpacity(.15),
         borderRadius: BorderRadius.circular(18),
       ),
 
@@ -649,7 +650,7 @@ class _EventTicketsScreenState
 
           Icon(
             icon,
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
           ),
 
           const SizedBox(height: 10),
@@ -657,8 +658,8 @@ class _EventTicketsScreenState
           Text(
             value,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.surface,
               fontWeight: FontWeight.bold,
               fontSize: 16,
             ),

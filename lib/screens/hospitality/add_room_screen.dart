@@ -87,13 +87,13 @@ class _AddRoomScreenState extends ConsumerState<AddRoomScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Add Room"),
+        title: Text("Add Room"),
         backgroundColor: AppColors.mangoOrange,
       ),
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(AppSpacing.md),
           children: [
 
             AppTextField(
@@ -162,27 +162,27 @@ class _AddRoomScreenState extends ConsumerState<AddRoomScreen> {
             const SizedBox(height: AppSpacing.lg),
 
             SwitchListTile(
-              title: const Text("WiFi"),
+              title: Text("WiFi"),
               value: hasWifi,
               onChanged: (v) => setState(() => hasWifi = v),
             ),
             SwitchListTile(
-              title: const Text("TV"),
+              title: Text("TV"),
               value: hasTv,
               onChanged: (v) => setState(() => hasTv = v),
             ),
             SwitchListTile(
-              title: const Text("AC"),
+              title: Text("AC"),
               value: hasAc,
               onChanged: (v) => setState(() => hasAc = v),
             ),
             SwitchListTile(
-              title: const Text("Breakfast"),
+              title: Text("Breakfast"),
               value: hasBreakfast,
               onChanged: (v) => setState(() => hasBreakfast = v),
             ),
             SwitchListTile(
-              title: const Text("Available"),
+              title: Text("Available"),
               value: isAvailable,
               onChanged: (v) => setState(() => isAvailable = v),
             ),
@@ -197,8 +197,8 @@ class _AddRoomScreenState extends ConsumerState<AddRoomScreen> {
                   backgroundColor: AppColors.mangoOrange,
                 ),
                 child: loading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("Add Room"),
+                    ? CircularProgressIndicator(color: Theme.of(context).colorScheme.surface)
+                    : Text("Add Room"),
               ),
             ),
           ],

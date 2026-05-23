@@ -7,6 +7,10 @@ import 'property_details_screen.dart';
 import 'edit_property_screen.dart';
 import 'add_property_screen.dart';
 
+import '../../widgets/main_app_bar.dart';
+import '../../widgets/main_drawer.dart';
+import '../../widgets/app_scaffold.dart';
+
 class MyPropertiesScreen extends ConsumerWidget {
   const MyPropertiesScreen({super.key});
 
@@ -14,15 +18,14 @@ class MyPropertiesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncProps = ref.watch(myPropertiesProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("My Properties"),
-      ),
+    return AppScaffold(
+  
+      appBar: const MainAppBar(title: 'My Properties'),
 
       // ✅ ADD PROPERTY BUTTON
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.orange,
-        child: const Icon(Icons.add),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        child: Icon(Icons.add),
         onPressed: () {
           Navigator.push(
             context,
@@ -60,7 +63,7 @@ class MyPropertiesScreen extends ConsumerWidget {
                 },
 
                 child: Card(
-                  margin: const EdgeInsets.all(10),
+                  margin: EdgeInsets.all(10),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -75,8 +78,8 @@ class MyPropertiesScreen extends ConsumerWidget {
                       else
                         Container(
                           height: 180,
-                          color: Colors.grey.shade200,
-                          child: const Icon(Icons.home, size: 50),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
+                          child: Icon(Icons.home, size: 50),
                         ),
 
                       // ================= CONTENT =================
@@ -92,9 +95,9 @@ class MyPropertiesScreen extends ConsumerWidget {
                           children: [
                             // ✏️ EDIT
                             IconButton(
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.edit,
-                                color: Colors.blue,
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                               onPressed: () {
                                Navigator.push(
@@ -108,28 +111,28 @@ class MyPropertiesScreen extends ConsumerWidget {
 
                             // 🗑 DELETE
                             IconButton(
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.delete,
-                                color: Colors.red,
+                                color: Theme.of(context).colorScheme.error,
                               ),
                               onPressed: () async {
                                 final confirm = await showDialog(
                                   context: context,
                                   builder: (_) => AlertDialog(
-                                    title: const Text("Delete Property?"),
-                                    content: const Text(
+                                    title: Text("Delete Property?"),
+                                    content: Text(
                                       "This action cannot be undone.",
                                     ),
                                     actions: [
                                       TextButton(
                                         onPressed: () =>
                                             Navigator.pop(context, false),
-                                        child: const Text("Cancel"),
+                                        child: Text("Cancel"),
                                       ),
                                       TextButton(
                                         onPressed: () =>
                                             Navigator.pop(context, true),
-                                        child: const Text("Delete"),
+                                        child: Text("Delete"),
                                       ),
                                     ],
                                   ),

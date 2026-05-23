@@ -6,7 +6,11 @@ import '../../models/room_model.dart';
 import '../../models/requests/booking_create_request.dart';
 import '../../providers/api_provider.dart';
 
+import '../../widgets/main_drawer.dart';
+import '../../widgets/main_app_bar.dart';
+
 import '../payments/payment_checkout_screen.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class BookingCheckoutScreen extends ConsumerStatefulWidget {
   final Room room;
@@ -96,19 +100,19 @@ class _BookingCheckoutScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Booking Checkout')),
+      appBar: const MainAppBar(title: 'Booking Checkout'),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(AppSpacing.md),
         child: Column(
           children: [
             ListTile(
-              title: const Text('Check In'),
+              title: Text('Check In'),
               subtitle: Text(
                 checkIn != null
                     ? formatDate(checkIn!)
                     : 'Select date',
               ),
-              trailing: const Icon(Icons.calendar_month),
+              trailing: Icon(Icons.calendar_month),
               onTap: () async {
                 final picked = await showDatePicker(
                   context: context,
@@ -123,13 +127,13 @@ class _BookingCheckoutScreenState
             ),
 
             ListTile(
-              title: const Text('Check Out'),
+              title: Text('Check Out'),
               subtitle: Text(
                 checkOut != null
                     ? formatDate(checkOut!)
                     : 'Select date',
               ),
-              trailing: const Icon(Icons.calendar_month),
+              trailing: Icon(Icons.calendar_month),
               onTap: () async {
                 final picked = await showDatePicker(
                   context: context,
@@ -151,8 +155,8 @@ class _BookingCheckoutScreenState
               child: ElevatedButton(
                 onPressed: loading ? null : submitBooking,
                 child: loading
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("Proceed To Payment"),
+                    ? CircularProgressIndicator(color: Theme.of(context).colorScheme.surface)
+                    : Text("Proceed To Payment"),
               ),
             ),
           ],

@@ -23,7 +23,7 @@ class _PropertyCardState extends State<PropertyCard>
     final property = widget.property;
 
     final listingText =property.listingPurpose == 'rent' ? 'FOR RENT' : 'FOR SALE';
-    final listingColor = property.listingPurpose == 'rent' ? Colors.blue : Colors.green;
+    final listingColor = property.listingPurpose == 'rent' ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.secondary;
 
     return GestureDetector(
       onTapDown: (_) => setState(() => _pressed = true),
@@ -54,14 +54,14 @@ class _PropertyCardState extends State<PropertyCard>
         duration: const Duration(milliseconds: 120),
         scale: _pressed ? 0.98 : 1.0,
         child: Container(
-          margin: const EdgeInsets.symmetric(
+          margin: EdgeInsets.symmetric(
               horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.06),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.06),
                 blurRadius: 14,
                 offset: const Offset(0, 6),
               )
@@ -86,8 +86,8 @@ class _PropertyCardState extends State<PropertyCard>
                               fit: BoxFit.cover,
                             )
                           : Container(
-                              color: Colors.grey.shade200,
-                              child: const Icon(Icons.home, size: 40),
+                              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
+                              child: Icon(Icons.home, size: 40),
                             ),
                     ),
                   ),
@@ -117,7 +117,7 @@ class _PropertyCardState extends State<PropertyCard>
               ),
 
               Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
+                padding: EdgeInsets.all(AppSpacing.md),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -142,7 +142,7 @@ class _PropertyCardState extends State<PropertyCard>
                           text: listingText,
                           customColor: listingColor,
                           fontSize: 9,
-                          padding: const EdgeInsets.symmetric(
+                          padding: EdgeInsets.symmetric(
                             horizontal: 8,
                             vertical: 4,
                           ),
@@ -169,7 +169,7 @@ class _PropertyCardState extends State<PropertyCard>
                         Icon(
                           Icons.location_on,
                           size: 13,
-                          color: Colors.grey.shade600,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                         ),
                         const SizedBox(width: 3),
                         Expanded(
@@ -180,7 +180,7 @@ class _PropertyCardState extends State<PropertyCard>
                                 .textTheme
                                 .labelSmall
                                 ?.copyWith(
-                                  color: Colors.grey.shade600,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                                 ),
                           ),
                         ),

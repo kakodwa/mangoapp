@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/wallet_provider.dart';
-import '../../widgets/app_scaffold.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/design_system/app_spacing.dart';
+
+import '../../widgets/main_app_bar.dart';
+import '../../widgets/main_drawer.dart';
+import '../../widgets/app_scaffold.dart';
 
 class WalletTransactionsScreen extends ConsumerWidget {
   const WalletTransactionsScreen({super.key});
@@ -34,8 +38,8 @@ class WalletTransactionsScreen extends ConsumerWidget {
     }
   }
 
-  Color getColor(String type) {
-    return type == "credit" ? Colors.green : Colors.red;
+  Color getColor(BuildContext context, String type) {
+    return type == "credit" ? Theme.of(context).colorScheme.secondary : Theme.of(context).colorScheme.error;
   }
 
   @override
@@ -43,13 +47,9 @@ class WalletTransactionsScreen extends ConsumerWidget {
     final txAsync = ref.watch(walletTransactionsProvider);
 
     return AppScaffold(
-      backgroundColor: const Color(0xFFF6F7FB),
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
 
-      appBar: AppBar(
-        title: const Text("Wallet Activity"),
-        backgroundColor: AppColors.mangoOrange,
-        elevation: 0,
-      ),
+      appBar: const MainAppBar(title: 'Wallet Activity'),
 
       body: txAsync.when(
         data: (transactions) {
@@ -69,7 +69,7 @@ class WalletTransactionsScreen extends ConsumerWidget {
           }
 
           return ListView(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(AppSpacing.sm),
             children: grouped.entries.map((entry) {
               final date = entry.key;
               final items = entry.value;
@@ -80,13 +80,13 @@ class WalletTransactionsScreen extends ConsumerWidget {
 
                   // ================= DATE HEADER =================
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    padding: EdgeInsets.symmetric(vertical: 10),
                     child: Text(
                       sectionTitle(date),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: Colors.grey,
+                        color: Theme.of(context).colorScheme.outline,
                       ),
                     ),
                   ),
@@ -96,14 +96,14 @@ class WalletTransactionsScreen extends ConsumerWidget {
                     final isCredit = tx.transactionType == "credit";
 
                     return Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      padding: const EdgeInsets.all(14),
+                      margin: EdgeInsets.only(bottom: 10),
+                      padding: EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.grey.shade200,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
                             blurRadius: 8,
                             spreadRadius: 2,
                           )
@@ -118,17 +118,17 @@ class WalletTransactionsScreen extends ConsumerWidget {
                             height: 45,
                             width: 45,
                             decoration: BoxDecoration(
-                              color: getColor(tx.transactionType)
+                              color: getColor(context, tx.transactionType)
                                   .withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Icon(
                               getIcon(tx.source),
-                              color: getColor(tx.transactionType),
+                              color: getColor(context, tx.transactionType),
                             ),
                           ),
 
-                          const SizedBox(width: 12),
+                          const SizedBox(width: AppSpacing.sm),
 
                           // DETAILS
                           Expanded(
@@ -145,25 +145,25 @@ class WalletTransactionsScreen extends ConsumerWidget {
                                   ),
                                 ),
 
-                                const SizedBox(height: 4),
+                                const SizedBox(height: AppSpacing.xxs),
 
                                 Text(
                                   tx.description,
                                   style: TextStyle(
-                                    color: Colors.grey.shade600,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                                     fontSize: 12,
                                   ),
                                 ),
 
-                                const SizedBox(height: 4),
+                                const SizedBox(height: AppSpacing.xxs),
 
                                 // 🔥 PLATFORM FEE TRANSPARENCY
                                 if (tx.transactionRate > 0)
                                   Text(
                                     "${tx.transactionRate}% platform fee applied",
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 11,
-                                      color: Colors.grey,
+                                      color: Theme.of(context).colorScheme.outline,
                                     ),
                                   ),
                               ],
@@ -179,19 +179,19 @@ class WalletTransactionsScreen extends ConsumerWidget {
                               Text(
                                 "${isCredit ? '+' : '-'} MWK ${tx.amount}",
                                 style: TextStyle(
-                                  color: getColor(tx.transactionType),
+                                  color: getColor(context, tx.transactionType),
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
                                 ),
                               ),
 
-                              const SizedBox(height: 4),
+                              const SizedBox(height: AppSpacing.xxs),
 
                               Text(
                                 tx.createdAt.substring(11, 16),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 11,
-                                  color: Colors.grey,
+                                  color: Theme.of(context).colorScheme.outline,
                                 ),
                               ),
                             ],

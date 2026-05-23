@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class TicketDetailScreen extends StatelessWidget {
   final dynamic ticket;
@@ -12,23 +13,23 @@ class TicketDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
       appBar: AppBar(
-        title: const Text("My Ticket"),
+        title: Text("My Ticket"),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(AppSpacing.md),
         child: Column(
           children: [
             // ================= TICKET CARD =================
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
                     blurRadius: 12,
                     offset: const Offset(0, 6),
                   )
@@ -39,7 +40,7 @@ class TicketDetailScreen extends StatelessWidget {
                   // ================= HEADER =================
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(AppSpacing.md),
                     decoration: BoxDecoration(
                       color: AppColors.mangoOrange,
                       borderRadius: const BorderRadius.only(
@@ -52,8 +53,8 @@ class TicketDetailScreen extends StatelessWidget {
                       children: [
                         Text(
                           ticket.eventTitle,
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.surface,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
@@ -70,11 +71,11 @@ class TicketDetailScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.md),
 
                   // ================= QR CODE =================
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: EdgeInsets.all(AppSpacing.sm),
                     child: ticket.qrCodeUrl != null
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(12),
@@ -88,27 +89,27 @@ class TicketDetailScreen extends StatelessWidget {
                             height: 220,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade200,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.qr_code,
                               size: 120,
-                              color: Colors.grey,
+                              color: Theme.of(context).colorScheme.outline,
                             ),
                           ),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.md),
 
                   // ================= DETAILS =================
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _infoRow("Quantity", "${ticket.quantity}"),
-                        _infoRow("Total", "MWK ${ticket.totalAmount}"),
+                        _infoRow(context, "Quantity", "${ticket.quantity}"),
+                        _infoRow(context, "Total", "MWK ${ticket.totalAmount}"),
 
                         const SizedBox(height: 10),
 
@@ -117,23 +118,23 @@ class TicketDetailScreen extends StatelessWidget {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 "Ticket Types",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: AppSpacing.xs),
 
                               ...ticket.items.map<Widget>((item) {
                                 return Container(
-                                  margin: const EdgeInsets.only(bottom: 6),
-                                  padding: const EdgeInsets.symmetric(
+                                  margin: EdgeInsets.only(bottom: 6),
+                                  padding: EdgeInsets.symmetric(
                                     horizontal: 10,
                                     vertical: 8,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Colors.grey.shade100,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Row(
@@ -149,16 +150,16 @@ class TicketDetailScreen extends StatelessWidget {
                             ],
                           ),
 
-                        const SizedBox(height: 20),
+                        const SizedBox(height: AppSpacing.md),
 
                         // ================= STATUS =================
                         Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.all(12),
+                          padding: EdgeInsets.all(AppSpacing.sm),
                           decoration: BoxDecoration(
                             color: ticket.paymentStatus == "paid"
                                 ? AppColors.leafGreen.withOpacity(0.15)
-                                : Colors.red.withOpacity(0.1),
+                                : Theme.of(context).colorScheme.error.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -168,18 +169,18 @@ class TicketDetailScreen extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                               color: ticket.paymentStatus == "paid"
                                   ? AppColors.leafGreen
-                                  : Colors.red,
+                                  : Theme.of(context).colorScheme.error,
                             ),
                           ),
                         ),
 
-                        const SizedBox(height: 20),
+                        const SizedBox(height: AppSpacing.md),
 
-                        const Text(
+                        Text(
                           "Show this QR code at the entrance",
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            color: Colors.grey,
+                            color: Theme.of(context).colorScheme.outline,
                             fontSize: 12,
                           ),
                         ),
@@ -187,7 +188,7 @@ class TicketDetailScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: AppSpacing.md),
                 ],
               ),
             ),
@@ -197,15 +198,14 @@ class TicketDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _infoRow(String title, String value) {
+  Widget _infoRow(BuildContext context, String title, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: EdgeInsets.only(bottom: 6),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            title,
-            style: const TextStyle(color: Colors.grey),
+            title, style: TextStyle(color: Theme.of(context).colorScheme.outline),
           ),
           Text(
             value,

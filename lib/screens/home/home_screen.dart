@@ -115,7 +115,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
             // QUICK ACTIONS
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
               child: Row(
                 children: [
                   Expanded(
@@ -159,7 +159,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             const SizedBox(height: AppSpacing.sm),
 
             Padding(
-  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+  padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
   child: Row(
     children: [
 
@@ -227,13 +227,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 return ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
                   itemCount: featured.length,
                   itemBuilder: (context, index) =>
                       ShopCard(shop: featured[index]),
                 );
               },
-              loading: () => const CircularProgressIndicator(),
+              loading: () => CircularProgressIndicator(),
               error: (_, __) => const SizedBox(),
             ),
 
@@ -256,7 +256,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       .toList(),
                 );
               },
-              loading: () => const CircularProgressIndicator(),
+              loading: () => CircularProgressIndicator(),
               error: (_, __) => const SizedBox(),
             ),
 
@@ -270,13 +270,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 return ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
                   itemCount: featured.length,
                   itemBuilder: (context, index) =>
                       PropertyCard(property: featured[index]),
                 );
               },
-              loading: () => const CircularProgressIndicator(),
+              loading: () => CircularProgressIndicator(),
               error: (_, __) => const SizedBox(),
             ),
 
@@ -290,7 +290,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // SECTION HEADER
   Widget _sectionHeader(BuildContext context, String title) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -325,7 +325,7 @@ Widget _buildBanner(
   String? ctaText,
 }) {
   return Container(
-    margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+    margin: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 6),
     child: ClipRRect(
       borderRadius: BorderRadius.circular(14),
       child: Stack(
@@ -340,8 +340,8 @@ Widget _buildBanner(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Colors.black.withOpacity(0.6),
-                  Colors.black.withOpacity(0.2),
+                  Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                  Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
                 ],
                 begin: Alignment.bottomLeft,
                 end: Alignment.topRight,
@@ -351,7 +351,7 @@ Widget _buildBanner(
 
           /// CONTENT
           Padding(
-  padding: const EdgeInsets.all(20),
+  padding: EdgeInsets.all(20),
   child: Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     mainAxisAlignment: MainAxisAlignment.center,
@@ -359,12 +359,12 @@ Widget _buildBanner(
       Text(
         title,
         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               fontWeight: FontWeight.bold,
             ),
       ),
 
-      const SizedBox(height: 8),
+      const SizedBox(height: AppSpacing.xs),
 
       Text(
         subtitle,
@@ -373,7 +373,7 @@ Widget _buildBanner(
             ),
       ),
 
-      const SizedBox(height: 12),
+      const SizedBox(height: AppSpacing.sm),
 
       /// 🔥 CLICKABLE "LEARN MORE →"
       if (url != null && url.isNotEmpty)
@@ -392,18 +392,18 @@ Widget _buildBanner(
             children: [
             Text(
               ctaText ?? "Learn more",
-              style: const TextStyle(
-                color: Colors.orange,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.primary,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 decoration: TextDecoration.underline,
                 ),
               ),
               const SizedBox(width: 6),
-              const Icon(
+              Icon(
                 Icons.arrow_forward,
                 size: 16,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
               ),
             ],
           ),
@@ -449,10 +449,10 @@ class _QuickActionButtonState extends State<_QuickActionButton> {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.06),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.06),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               )
@@ -462,7 +462,7 @@ class _QuickActionButtonState extends State<_QuickActionButton> {
             borderRadius: BorderRadius.circular(16),
             onTap: widget.onTap,
             child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
+              padding: EdgeInsets.all(AppSpacing.md),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

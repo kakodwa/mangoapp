@@ -154,12 +154,12 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Create Lodge"),
+        title: Text("Create Lodge"),
         backgroundColor: AppColors.mangoOrange,
       ),
 
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(AppSpacing.md),
         children: [
 
           /// ================= BASIC =================
@@ -236,8 +236,8 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
 
           ElevatedButton.icon(
             onPressed: getLocation,
-            icon: const Icon(Icons.my_location),
-            label: const Text("Get GPS Location"),
+            icon: Icon(Icons.my_location),
+            label: Text("Get GPS Location"),
           ),
 
           if (latitude != null) Text("Lat: $latitude"),
@@ -245,7 +245,7 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
 
           const SizedBox(height: AppSpacing.lg),
 
-          const Text("Amenities", style: TextStyle(fontWeight: FontWeight.bold)),
+          Text("Amenities", style: TextStyle(fontWeight: FontWeight.bold)),
 
           amenitiesAsync.when(
             data: (amenities) => Wrap(
@@ -266,8 +266,8 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
                 );
               }).toList(),
             ),
-            loading: () => const CircularProgressIndicator(),
-            error: (_, __) => const Text("Failed to load amenities"),
+            loading: () => CircularProgressIndicator(),
+            error: (_, __) => Text("Failed to load amenities"),
           ),
 
           const SizedBox(height: AppSpacing.lg),
@@ -289,7 +289,7 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
                       right: 0,
                       child: GestureDetector(
                         onTap: () => setState(() => images.removeAt(i)),
-                        child: const Icon(Icons.close, color: Colors.red),
+                        child: Icon(Icons.close, color: Theme.of(context).colorScheme.error),
                       ),
                     )
                   ],
@@ -301,8 +301,8 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
                 child: Container(
                   width: 90,
                   height: 90,
-                  color: Colors.grey.shade200,
-                  child: const Icon(Icons.add),
+                  color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
+                  child: Icon(Icons.add),
                 ),
               ),
             ],
@@ -315,8 +315,8 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
             child: ElevatedButton(
               onPressed: isLoading ? null : submitLodge,
               child: isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text("Create Lodge"),
+                  ? CircularProgressIndicator(color: Theme.of(context).colorScheme.surface)
+                  : Text("Create Lodge"),
             ),
           ),
         ],

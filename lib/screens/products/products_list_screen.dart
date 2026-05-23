@@ -8,6 +8,7 @@ import '../../widgets/main_app_bar.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/search_filter_widgets.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class ProductsListScreen extends ConsumerStatefulWidget {
   const ProductsListScreen({Key? key}) : super(key: key);
@@ -74,14 +75,14 @@ class _ProductsListScreenState extends ConsumerState<ProductsListScreen> {
     return AppScaffold(
       appBar: const MainAppBar(title: 'Products'),
       drawer: const MainDrawer(),
-      backgroundColor: const Color(0xFFF6F7FB),
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
 
       body: Column(
         children: [
 
           // ================= SEARCH + FILTER TOGGLE =================
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            padding: EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: Row(
               children: [
                 Expanded(
@@ -117,7 +118,7 @@ class _ProductsListScreenState extends ConsumerState<ProductsListScreen> {
                   height: 50,
                 ),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
 
                 // DISTRICT FILTER
                 UnifiedFilterSectionTitle(title: "District (Malawi)"),
@@ -128,7 +129,7 @@ class _ProductsListScreenState extends ConsumerState<ProductsListScreen> {
                   height: 50,
                 ),
 
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.xs),
 
                 // CLEAR FILTER
                 UnifiedClearButton(
@@ -141,7 +142,7 @@ class _ProductsListScreenState extends ConsumerState<ProductsListScreen> {
             ),
           ),
 
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xxs),
 
           // ================= PRODUCTS =================
           Expanded(
@@ -200,7 +201,7 @@ class _ProductsListScreenState extends ConsumerState<ProductsListScreen> {
                       }
 
                       return GridView.builder(
-                        padding: const EdgeInsets.all(12),
+                        padding: EdgeInsets.all(AppSpacing.sm),
                         itemCount: filteredProducts.length,
                         gridDelegate:
                             SliverGridDelegateWithFixedCrossAxisCount(

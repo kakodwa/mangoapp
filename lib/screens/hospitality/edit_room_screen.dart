@@ -144,12 +144,12 @@ class _EditRoomScreenState
     required Function(bool) onChanged,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
+      margin: EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: Theme.of(context).colorScheme.outline.withOpacity(0.05),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: Colors.grey.shade200,
+          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
         ),
       ),
       child: SwitchListTile(
@@ -169,14 +169,14 @@ class _EditRoomScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Edit Room"),
+        title: Text("Edit Room"),
         backgroundColor: AppColors.mangoOrange,
       ),
 
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(AppSpacing.md),
           children: [
 
             /// ROOM NUMBER
@@ -268,7 +268,7 @@ class _EditRoomScreenState
             const SizedBox(height: AppSpacing.xl),
 
             /// FEATURES
-            const Text(
+            Text(
               "Room Features",
               style: TextStyle(
                 fontSize: 18,
@@ -276,7 +276,7 @@ class _EditRoomScreenState
               ),
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
 
             buildSwitchTile(
               title: "WiFi",
@@ -335,10 +335,10 @@ class _EditRoomScreenState
                   ),
                 ),
                 child: loading
-                    ? const CircularProgressIndicator(
-                        color: Colors.white,
+                    ? CircularProgressIndicator(
+                        color: Theme.of(context).colorScheme.surface,
                       )
-                    : const Text(
+                    : Text(
                         "Update Room",
                         style: TextStyle(
                           fontSize: 16,

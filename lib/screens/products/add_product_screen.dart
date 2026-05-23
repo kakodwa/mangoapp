@@ -10,6 +10,7 @@ import '../../models/product_model.dart';
 import '../../providers/products_provider.dart';
 import '../../theme/design_system/app_text_field.dart';
 import '../../utils/app_toast.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class AddProductScreen extends ConsumerStatefulWidget {
   const AddProductScreen({super.key});
@@ -151,9 +152,9 @@ class _AddProductScreenState
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
-                  color: Colors.grey.shade200,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
                 ),
-                child: const CircularProgressIndicator(),
+                child: CircularProgressIndicator(),
               );
             }
 
@@ -179,14 +180,14 @@ class _AddProductScreenState
               });
             },
             child: Container(
-              padding: const EdgeInsets.all(3),
-              decoration: const BoxDecoration(
-                color: Colors.red,
+              padding: EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.error,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.close,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 size: 16,
               ),
             ),
@@ -199,7 +200,7 @@ class _AddProductScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
 
       appBar: const MainAppBar(
         title: 'Add Product',
@@ -209,7 +210,7 @@ class _AddProductScreenState
         child: Form(
           key: _formKey,
           child: ListView(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(AppSpacing.md),
             children: [
               // ======================
               // PRODUCT INFO
@@ -229,7 +230,7 @@ class _AddProductScreenState
                 },
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
 
               AppTextField(
                 label: 'Description',
@@ -246,7 +247,7 @@ class _AddProductScreenState
                 },
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
 
               Row(
                 children: [
@@ -272,7 +273,7 @@ class _AddProductScreenState
                     ),
                   ),
 
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpacing.sm),
 
                   Expanded(
                     child: AppTextField(
@@ -298,7 +299,7 @@ class _AddProductScreenState
                 ],
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
 
               AppTextField(
                 label: 'Shop Name',
@@ -314,7 +315,7 @@ class _AddProductScreenState
                 },
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
 
               // ======================
               // CATEGORY
@@ -325,7 +326,7 @@ class _AddProductScreenState
                 decoration: InputDecoration(
                   labelText: 'Category',
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: Theme.of(context).colorScheme.surface,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -349,13 +350,13 @@ class _AddProductScreenState
                 },
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
 
               // ======================
               // IMAGES
               // ======================
 
-              const Text(
+              Text(
                 "Product Images (Max 4)",
                 style: TextStyle(
                   fontSize: 16,
@@ -378,16 +379,16 @@ class _AddProductScreenState
                         width: 90,
                         height: 90,
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.surface,
                           borderRadius:
                               BorderRadius.circular(14),
                           border: Border.all(
-                            color: Colors.grey.shade300,
+                            color: Theme.of(context).colorScheme.outline.withOpacity(0.38),
                           ),
                         ),
                         child: Icon(
                           Icons.add_photo_alternate_outlined,
-                          color: Colors.grey.shade600,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                           size: 30,
                         ),
                       ),
@@ -395,7 +396,7 @@ class _AddProductScreenState
                 ],
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.md),
 
               // ======================
               // ACTIVE SWITCH
@@ -408,10 +409,10 @@ class _AddProductScreenState
                 ),
                 child: SwitchListTile(
                   value: isActive,
-                  title: const Text(
+                  title: Text(
                     "Product Active",
                   ),
-                  subtitle: const Text(
+                  subtitle: Text(
                     "Visible to customers",
                   ),
                   onChanged: (value) {
@@ -439,15 +440,15 @@ class _AddProductScreenState
                     ),
                   ),
                   child: isLoading
-                      ? const SizedBox(
+                      ? SizedBox(
                           height: 24,
                           width: 24,
                           child: CircularProgressIndicator(
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.surface,
                             strokeWidth: 2.5,
                           ),
                         )
-                      : const Text(
+                      : Text(
                           "Create Product",
                           style: TextStyle(
                             fontSize: 16,

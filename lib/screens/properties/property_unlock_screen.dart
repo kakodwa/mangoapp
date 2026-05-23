@@ -10,6 +10,7 @@ import '../../utils/app_toast.dart';
 
 import '../payments/payment_checkout_screen.dart';
 import 'property_details_screen.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class PropertyUnlockScreen extends ConsumerStatefulWidget {
   final int propertyId;
@@ -106,12 +107,12 @@ class _PropertyUnlockScreenState
       appBar: const MainAppBar(title: 'Unlock Property'),
       body: Column(
         children: [
-          const SizedBox(height: 20),
+          const SizedBox(height: AppSpacing.md),
 
           /// PROPERTY CARD (UNCHANGED)
           Container(
-            margin: const EdgeInsets.all(16),
-            padding: const EdgeInsets.all(16),
+            margin: EdgeInsets.all(AppSpacing.md),
+            padding: EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
               color: AppColors.mangoOrange.withOpacity(0.08),
               borderRadius: BorderRadius.circular(12),
@@ -125,7 +126,7 @@ class _PropertyUnlockScreenState
                 Row(
                   children: [
                     Icon(Icons.lock, color: AppColors.mangoOrange),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.xs),
                     Expanded(
                       child: Text(
                         widget.propertyTitle,
@@ -138,9 +139,9 @@ class _PropertyUnlockScreenState
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                const Text('What you\'ll get after unlocking:'),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
+                Text('What you\'ll get after unlocking:'),
+                const SizedBox(height: AppSpacing.xs),
                 _buildFeature('Full property description and details'),
                 _buildFeature('Exact location on map'),
                 _buildFeature('Contact information of property owner'),
@@ -151,10 +152,10 @@ class _PropertyUnlockScreenState
 
           /// AMOUNT CARD (UNCHANGED)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
                 border: Border.all(
                   color: AppColors.darkText.withOpacity(0.2),
@@ -164,7 +165,7 @@ class _PropertyUnlockScreenState
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Unlock Fee:'),
+                  Text('Unlock Fee:'),
                   Text(
                     'MWK ${widget.unlockFee.toStringAsFixed(2)}',
                     style: TextStyle(
@@ -181,7 +182,7 @@ class _PropertyUnlockScreenState
 
           /// BUTTON
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(AppSpacing.md),
             child: SizedBox(
               width: double.infinity,
               height: 48,
@@ -191,8 +192,8 @@ class _PropertyUnlockScreenState
                 ),
                 onPressed: _isProcessing ? null : _processPayment,
                 icon: _isProcessing
-                    ? const CircularProgressIndicator(color: Colors.white)
-                    : const Icon(Icons.lock_open),
+                    ? CircularProgressIndicator(color: Theme.of(context).colorScheme.surface)
+                    : Icon(Icons.lock_open),
                 label: Text(
                   _isProcessing
                       ? 'Preparing payment...'
@@ -210,7 +211,7 @@ class _PropertyUnlockScreenState
     return Row(
       children: [
         Icon(Icons.check_circle, color: AppColors.mangoOrange),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.xs),
         Expanded(child: Text(feature)),
       ],
     );

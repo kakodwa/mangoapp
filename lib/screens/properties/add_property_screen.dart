@@ -241,7 +241,7 @@ class _AddPropertyScreenState
     bool required = true,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(
+      padding: EdgeInsets.only(
         bottom: AppSpacing.md,
       ),
       child: AppTextField(
@@ -277,12 +277,12 @@ class _AddPropertyScreenState
             height: 90,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: Colors.grey.shade200,
+              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
               borderRadius:
                   BorderRadius.circular(12),
             ),
             child:
-                const CircularProgressIndicator(),
+                CircularProgressIndicator(),
           );
         }
 
@@ -309,15 +309,15 @@ class _AddPropertyScreenState
                   });
                 },
                 child: Container(
-                  padding: const EdgeInsets.all(3),
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
+                  padding: EdgeInsets.all(3),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.error,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.close,
                     size: 16,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                   ),
                 ),
               ),
@@ -331,7 +331,7 @@ class _AddPropertyScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
 
       appBar: const MainAppBar(
         title: 'Post Property',
@@ -340,7 +340,7 @@ class _AddPropertyScreenState
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(
+          padding: EdgeInsets.all(
             AppSpacing.md,
           ),
           children: [
@@ -364,7 +364,7 @@ class _AddPropertyScreenState
                     CrossAxisAlignment.start,
                 children: [
 
-                  const Text(
+                  Text(
                     'Basic Information',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
@@ -394,7 +394,7 @@ class _AddPropertyScreenState
                       labelText:
                           'Property Type',
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Theme.of(context).colorScheme.surface,
                       border:
                           OutlineInputBorder(
                         borderRadius:
@@ -438,7 +438,7 @@ class _AddPropertyScreenState
                       labelText:
                           'Listing Purpose',
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Theme.of(context).colorScheme.surface,
                       border:
                           OutlineInputBorder(
                         borderRadius:
@@ -473,7 +473,7 @@ class _AddPropertyScreenState
                     decoration: InputDecoration(
                       labelText: 'Status',
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Theme.of(context).colorScheme.surface,
                       border:
                           OutlineInputBorder(
                         borderRadius:
@@ -519,7 +519,7 @@ class _AddPropertyScreenState
                     CrossAxisAlignment.start,
                 children: [
 
-                  const Text(
+                  Text(
                     'Location',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
@@ -529,10 +529,10 @@ class _AddPropertyScreenState
 
                   const SizedBox(height: 6),
 
-                  const Text(
+                  Text(
                     "📍 GPS used for navigation after unlock",
                     style:
-                        TextStyle(color: Colors.grey),
+                        TextStyle(color: Theme.of(context).colorScheme.outline),
                   ),
 
                   const SizedBox(
@@ -558,7 +558,7 @@ class _AddPropertyScreenState
                     decoration: InputDecoration(
                       labelText: 'District',
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Theme.of(context).colorScheme.surface,
                       border:
                           OutlineInputBorder(
                         borderRadius:
@@ -607,8 +607,8 @@ class _AddPropertyScreenState
                         ),
                       ),
                       icon:
-                          const Icon(Icons.my_location),
-                      label: const Text(
+                          Icon(Icons.my_location),
+                      label: Text(
                         "Get GPS Location",
                       ),
                     ),
@@ -658,7 +658,7 @@ class _AddPropertyScreenState
                     CrossAxisAlignment.start,
                 children: [
 
-                  const Text(
+                  Text(
                     'Property Details',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
@@ -730,7 +730,7 @@ class _AddPropertyScreenState
                             .spaceBetween,
                     children: [
 
-                      const Text(
+                      Text(
                         'Property Images',
                         style: TextStyle(
                           fontWeight:
@@ -741,11 +741,11 @@ class _AddPropertyScreenState
 
                       TextButton.icon(
                         onPressed: pickImages,
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.add_a_photo,
                         ),
                         label:
-                            const Text('Add Images'),
+                            Text('Add Images'),
                       ),
                     ],
                   ),

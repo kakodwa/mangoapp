@@ -5,6 +5,7 @@ import '../../providers/api_provider.dart';
 import '../../theme/design_system/app_text_field.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_button.dart';
+import '../../theme/app_colors.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -95,14 +96,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final authState = ref.watch(authProvider);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(AppSpacing.lg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 40),
+              const SizedBox(height: AppSpacing.xl),
 
               // ✅ LOGO (UNCHANGED)
               Image.asset(
@@ -116,11 +117,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       _showError('Logo failed to load');
                     });
                   }
-                  return const Icon(Icons.broken_image, size: 80);
+                  return Icon(Icons.broken_image, size: 80);
                 },
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.lg),
 
               Text(
                 'Welcome Back',
@@ -130,13 +131,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.xs),
 
               Text(
                 'Log in to your account to continue shopping',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[600],
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
               ),
 
@@ -150,7 +151,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       label: 'Username',
                       hint: 'Enter your username',
                       controller: _usernameController,
-                      prefix: const Icon(Icons.person),
+                      prefix: Icon(Icons.person),
                       isRequired: true,
                       validator: (value) {
                         if (value?.isEmpty ?? true) {
@@ -167,7 +168,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       hint: 'Enter your password',
                       controller: _passwordController,
                       type: TextFieldType.password,
-                      prefix: const Icon(Icons.lock),
+                      prefix: Icon(Icons.lock),
                       isRequired: true,
                       validator: (value) {
                         if (value?.isEmpty ?? true) {
@@ -192,7 +193,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
 
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -212,7 +213,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: Text(
                       'Register',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.blue,
+                            color: Theme.of(context).colorScheme.primary,
                             fontWeight: FontWeight.bold,
                           ),
                     ),

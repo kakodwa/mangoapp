@@ -11,6 +11,7 @@ import '../../providers/api_provider.dart';
 import '../../theme/design_system/app_text_field.dart';
 import '../../utils/app_toast.dart';
 import '../../widgets/main_app_bar.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class AddEventScreen extends ConsumerStatefulWidget {
   const AddEventScreen({super.key});
@@ -240,17 +241,17 @@ for (final ticket in ticketTypes) {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(AppSpacing.md),
           children: [
 
             AppTextField(label: "Title", controller: title, type: TextFieldType.text),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
 
             AppTextField(label: "Description", controller: description, type: TextFieldType.multiline),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
 
             AppTextField(label: "Venue", controller: venue, type: TextFieldType.text),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
 
             Row(
               children: [
@@ -269,18 +270,18 @@ for (final ticket in ticketTypes) {
               ],
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
 
             Row(
               children: [
                 Expanded(child: AppTextField(label: "Latitude", controller: latitude, type: TextFieldType.text)),
                 const SizedBox(width: 10),
                 Expanded(child: AppTextField(label: "Longitude", controller: longitude, type: TextFieldType.text)),
-                IconButton(onPressed: getGPS, icon: const Icon(Icons.my_location)),
+                IconButton(onPressed: getGPS, icon: Icon(Icons.my_location)),
               ],
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
 
             GestureDetector(
               onTap: pickDate,
@@ -289,7 +290,7 @@ for (final ticket in ticketTypes) {
               ),
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
 
             Row(
               children: [
@@ -313,15 +314,15 @@ for (final ticket in ticketTypes) {
               ],
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.md),
 
-           const SizedBox(height: 20),
+           const SizedBox(height: AppSpacing.md),
 
 // ===================== TICKET TYPES =====================
 Row(
   mainAxisAlignment: MainAxisAlignment.spaceBetween,
   children: [
-    const Text(
+    Text(
       "Ticket Types",
       style: TextStyle(
         fontWeight: FontWeight.bold,
@@ -331,8 +332,8 @@ Row(
 
     TextButton.icon(
       onPressed: addTicketType,
-      icon: const Icon(Icons.add),
-      label: const Text("Add"),
+      icon: Icon(Icons.add),
+      label: Text("Add"),
     ),
   ],
 ),
@@ -344,10 +345,10 @@ const SizedBox(height: 10),
   final item = entry.value;
 
   return Container(
-    margin: const EdgeInsets.only(bottom: 12),
-    padding: const EdgeInsets.all(12),
+    margin: EdgeInsets.only(bottom: 12),
+    padding: EdgeInsets.all(AppSpacing.sm),
     decoration: BoxDecoration(
-      border: Border.all(color: Colors.grey.shade300),
+      border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.38)),
       borderRadius: BorderRadius.circular(12),
     ),
     child: Column(
@@ -370,7 +371,7 @@ const SizedBox(height: 10),
           ),
         ),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.sm),
 
         // PRICE + SEATS
         Row(
@@ -404,7 +405,7 @@ const SizedBox(height: 10),
           Align(
             alignment: Alignment.centerRight,
             child: IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
+              icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
               onPressed: () => removeTicketType(i),
             ),
           ),
@@ -413,31 +414,31 @@ const SizedBox(height: 10),
   );
 }),
 
-const SizedBox(height: 20),
+const SizedBox(height: AppSpacing.md),
 
 ElevatedButton(
   onPressed: pickBanner,
-  child: const Text("Pick Banner Image"),
+  child: Text("Pick Banner Image"),
 ),
 
             const SizedBox(height: 10),
             Text(banner == null ? "No image selected" : "Image selected"),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.md),
 
             SwitchListTile(
               value: isFeatured,
               onChanged: (v) => setState(() => isFeatured = v),
-              title: const Text("Featured Event"),
+              title: Text("Featured Event"),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.md),
 
             ElevatedButton(
               onPressed: loading ? null : submit,
               child: loading
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text("Create Event"),
+                  ? CircularProgressIndicator(color: Theme.of(context).colorScheme.surface)
+                  : Text("Create Event"),
             ),
           ],
         ),

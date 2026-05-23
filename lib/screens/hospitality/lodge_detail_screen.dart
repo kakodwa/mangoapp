@@ -6,6 +6,9 @@ import '../../models/lodge_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/rooms_provider.dart';
 
+import '../../widgets/main_drawer.dart';
+import '../../widgets/main_app_bar.dart';
+
 import '../../theme/design_system/app_button.dart';
 import '../../theme/design_system/app_card.dart';
 import '../../theme/design_system/app_spacing.dart';
@@ -31,6 +34,12 @@ class LodgeDetailScreen extends ConsumerWidget {
     final user = authState.user;
 
     return Scaffold(
+      appBar: roomsAsync.when(
+        data: (_) => MainAppBar(title: lodge.name),
+        loading: () => const MainAppBar(title: "Loading..."),
+        error: (_, __) =>
+            const MainAppBar(title: "Details"),
+      ),
       backgroundColor: const Color(0xFFF5F7FA),
       body: Stack(
         children: [
@@ -40,12 +49,12 @@ class LodgeDetailScreen extends ConsumerWidget {
               SliverAppBar(
                 expandedHeight: 320,
                 pinned: true,
-                backgroundColor: Colors.white,
+                backgroundColor: Theme.of(context).colorScheme.surface,
                 elevation: 0,
-                iconTheme: const IconThemeData(color: Colors.white),
+                iconTheme: IconThemeData(color: Theme.of(context).colorScheme.surface),
                 flexibleSpace: FlexibleSpaceBar(
                   collapseMode: CollapseMode.parallax,
-                  titlePadding: const EdgeInsets.only(
+                  titlePadding: EdgeInsets.only(
                     left: 16,
                     bottom: 16,
                     right: 16,
@@ -54,8 +63,8 @@ class LodgeDetailScreen extends ConsumerWidget {
                     lodge.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.surface,
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                       shadows: [
@@ -82,12 +91,12 @@ class LodgeDetailScreen extends ConsumerWidget {
                             fit: BoxFit.cover,
                             width: double.infinity,
                             errorBuilder: (_, __, ___) => Container(
-                              color: Colors.grey.shade300,
-                              child: const Center(
+                              color: Theme.of(context).colorScheme.outline.withOpacity(0.38),
+                              child: Center(
                                 child: Icon(
                                   Icons.image_not_supported,
                                   size: 50,
-                                  color: Colors.white,
+                                  color: Theme.of(context).colorScheme.surface,
                                 ),
                               ),
                             ),
@@ -102,8 +111,8 @@ class LodgeDetailScreen extends ConsumerWidget {
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
-                              Colors.black.withOpacity(0.2),
-                              Colors.black.withOpacity(0.65),
+                              Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
+                              Theme.of(context).colorScheme.onSurface.withOpacity(0.65),
                             ],
                           ),
                         ),
@@ -114,30 +123,30 @@ class LodgeDetailScreen extends ConsumerWidget {
                         left: 16,
                         bottom: 60,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
+                          padding: EdgeInsets.symmetric(
                             horizontal: 12,
                             vertical: 7,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Theme.of(context).colorScheme.surface.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(30),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.3),
+                              color: Theme.of(context).colorScheme.surface.withOpacity(0.3),
                             ),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.location_on,
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.surface,
                                 size: 16,
                               ),
                               const SizedBox(width: 5),
                               Text(
                                 '${lodge.city}, ${lodge.district}',
-                                style: const TextStyle(
-                                  color: Colors.white,
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.surface,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -153,17 +162,17 @@ class LodgeDetailScreen extends ConsumerWidget {
               /// ================= MAIN CONTENT =================
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
+                  padding: EdgeInsets.all(AppSpacing.md),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       /// DESCRIPTION
                       AppCard(
-                        padding: const EdgeInsets.all(AppSpacing.lg),
+                        padding: EdgeInsets.all(AppSpacing.lg),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               "About Lodge",
                               style: AppTypography.titleMedium,
                             ),
@@ -180,7 +189,7 @@ class LodgeDetailScreen extends ConsumerWidget {
                       const SizedBox(height: AppSpacing.xl),
 
                       /// SECTION HEADER
-                      const Text(
+                      Text(
                         'Available Rooms',
                          style: AppTypography.headlineLarge,
                       ),
@@ -192,16 +201,16 @@ class LodgeDetailScreen extends ConsumerWidget {
                         data: (rooms) {
                           if (rooms.isEmpty) {
                             return AppCard(
-                              padding: const EdgeInsets.all(AppSpacing.xl),
+                              padding: EdgeInsets.all(AppSpacing.xl),
                               child: Column(
                                 children: [
                                   Icon(
                                     Icons.hotel_outlined,
                                     size: 60,
-                                    color: Colors.grey.shade400,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4),
                                   ),
                                   const SizedBox(height: AppSpacing.sm),
-                                  const Text(
+                                  Text(
                                     "No rooms available yet",
                                     style: TextStyle(
                                       fontWeight: FontWeight.w600,
@@ -248,10 +257,9 @@ class LodgeDetailScreen extends ConsumerWidget {
                           child: Center(child: CircularProgressIndicator()),
                         ),
                         error: (e, _) => Padding(
-                          padding: const EdgeInsets.all(20),
+                          padding: EdgeInsets.all(20),
                           child: Text(
-                            e.toString(),
-                            style: const TextStyle(color: Colors.red),
+                            e.toString(), style: TextStyle(color: Theme.of(context).colorScheme.error),
                           ),
                         ),
                       ),
@@ -271,7 +279,7 @@ class LodgeDetailScreen extends ConsumerWidget {
               right: 16,
               child: FloatingActionButton.extended(
                 heroTag: "mapBtn",
-                backgroundColor: Colors.orange,
+                backgroundColor: Theme.of(context).colorScheme.primary,
                 elevation: 4,
                 onPressed: () {
                   showModalBottomSheet(
@@ -284,10 +292,10 @@ class LodgeDetailScreen extends ConsumerWidget {
                     ),
                   );
                 },
-                icon: const Icon(Icons.map, color: Colors.white),
-                label: const Text(
+                icon: Icon(Icons.map, color: Theme.of(context).colorScheme.surface),
+                label: Text(
                   "View Map",
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: Theme.of(context).colorScheme.surface),
                 ),
               ),
             ),

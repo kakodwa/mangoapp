@@ -4,6 +4,10 @@ import '../../core/api/api_client.dart';
 import '../../models/event_model.dart';
 import '../../utils/app_toast.dart';
 import '../payments/payment_checkout_screen.dart';
+import '../../theme/design_system/app_spacing.dart';
+
+import '../../widgets/main_drawer.dart';
+import '../../widgets/main_app_bar.dart';
 
 class SelectedTicket {
   final int id;
@@ -222,13 +226,11 @@ class _BuyTicketScreenState
 
     return Scaffold(
 
-      appBar: AppBar(
-        title: const Text("Buy Ticket"),
-      ),
+      appBar: const MainAppBar(title: 'Buy Ticket'),
 
       body: Padding(
 
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(AppSpacing.md),
 
         child: Column(
 
@@ -245,7 +247,7 @@ class _BuyTicketScreenState
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.md),
 
             // ================= TICKETS =================
             Expanded(
@@ -256,14 +258,14 @@ class _BuyTicketScreenState
 
                   return Container(
 
-                    margin: const EdgeInsets.only(
+                    margin: EdgeInsets.only(
                       bottom: 12,
                     ),
 
-                    padding: const EdgeInsets.all(12),
+                    padding: EdgeInsets.all(AppSpacing.sm),
 
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(12),
                     ),
 
@@ -287,14 +289,14 @@ class _BuyTicketScreenState
                               ),
                             ),
 
-                            const SizedBox(height: 4),
+                            const SizedBox(height: AppSpacing.xxs),
 
                             Text(
 
                               "MWK ${t.price.toStringAsFixed(0)}",
 
                               style: TextStyle(
-                                color: Colors.grey.shade700,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
                               ),
                             ),
                           ],
@@ -316,7 +318,7 @@ class _BuyTicketScreenState
                             }
                           },
 
-                          icon: const Icon(Icons.remove),
+                          icon: Icon(Icons.remove),
                         ),
 
                         Text(
@@ -340,7 +342,7 @@ class _BuyTicketScreenState
 
                           },
 
-                          icon: const Icon(Icons.add),
+                          icon: Icon(Icons.add),
                         ),
                       ],
                     ),
@@ -379,11 +381,11 @@ class _BuyTicketScreenState
 
                 child: loading
 
-                    ? const CircularProgressIndicator(
-                        color: Colors.white,
+                    ? CircularProgressIndicator(
+                        color: Theme.of(context).colorScheme.surface,
                       )
 
-                    : const Text(
+                    : Text(
                         "Confirm Purchase",
                       ),
               ),

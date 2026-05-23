@@ -8,13 +8,13 @@ class BookingSuccessScreen extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(AppSpacing.lg),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: const [
               Icon(
                 Icons.check_circle,
-                color: Colors.green,
+                color: Theme.of(context).colorScheme.secondary,
                 size: 100,
               ),
               SizedBox(height: 24),

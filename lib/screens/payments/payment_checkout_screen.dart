@@ -16,6 +16,7 @@ import 'paychangu_visa_webview.dart';
 import '../../theme/design_system/app_text_field.dart';
 import '../../utils/app_toast.dart';
 import '../../widgets/main_app_bar.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class PaymentCheckoutScreen
     extends ConsumerStatefulWidget {
@@ -103,9 +104,9 @@ class _PaymentCheckoutScreenState
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const CircularProgressIndicator(),
+              CircularProgressIndicator(),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.md),
 
               Text(
                 isMobile
@@ -390,22 +391,22 @@ if (isVisa) {
       child: AnimatedContainer(
         duration:
             const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(14),
+        padding: EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius:
               BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
                 ? Theme.of(context)
                     .primaryColor
-                : Colors.grey.shade300,
+                : Theme.of(context).colorScheme.outline.withOpacity(0.38),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: [
             BoxShadow(
               color:
-                  Colors.black.withOpacity(
+                  Theme.of(context).colorScheme.onSurface.withOpacity(
                 0.03,
               ),
               blurRadius: 10,
@@ -419,9 +420,9 @@ if (isVisa) {
               width: 55,
               height: 55,
               padding:
-                  const EdgeInsets.all(8),
+                  EdgeInsets.all(AppSpacing.xs),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
                 borderRadius:
                     BorderRadius.circular(
                   14,
@@ -455,7 +456,7 @@ if (isVisa) {
               color: isSelected
                   ? Theme.of(context)
                       .primaryColor
-                  : Colors.grey,
+                  : Theme.of(context).colorScheme.outline,
             ),
           ],
         ),
@@ -486,7 +487,7 @@ if (isVisa) {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor:
-          Colors.grey.shade100,
+          Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
 
       appBar: const MainAppBar(
         title: 'Secure Payment',
@@ -497,7 +498,7 @@ if (isVisa) {
           key: _formKey,
           child: ListView(
             padding:
-                const EdgeInsets.all(16),
+                EdgeInsets.all(AppSpacing.md),
             children: [
               // ======================
               // HEADER
@@ -505,7 +506,7 @@ if (isVisa) {
 
               Container(
                 padding:
-                    const EdgeInsets.all(
+                    EdgeInsets.all(
                   18,
                 ),
                 decoration: BoxDecoration(
@@ -525,9 +526,9 @@ if (isVisa) {
                 ),
                 child: Column(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.lock_outline,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surface,
                       size: 38,
                     ),
 
@@ -538,9 +539,9 @@ if (isVisa) {
                     Text(
                       "Pay MWK ${widget.amount}",
                       style:
-                          const TextStyle(
+                          TextStyle(
                         color:
-                            Colors.white,
+                            Theme.of(context).colorScheme.surface,
                         fontSize: 22,
                         fontWeight:
                             FontWeight
@@ -568,13 +569,13 @@ if (isVisa) {
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
 
               // ======================
               // PAYMENT METHODS
               // ======================
 
-              const Text(
+              Text(
                 "Select Payment Method",
                 style: TextStyle(
                   fontSize: 16,
@@ -588,7 +589,7 @@ if (isVisa) {
               ...paymentMethods.map(
                 (method) => Padding(
                   padding:
-                      const EdgeInsets.only(
+                      EdgeInsets.only(
                     bottom: 12,
                   ),
                   child:
@@ -598,7 +599,7 @@ if (isVisa) {
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
 
               // ======================
               // MOBILE MONEY
@@ -702,7 +703,7 @@ if (isVisa) {
                                 2.5,
                           ),
                         )
-                      : const Text(
+                      : Text(
                           "Pay Now",
                           style:
                               TextStyle(
@@ -716,7 +717,7 @@ if (isVisa) {
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
 
               // ======================
               // POWERED BY
@@ -730,7 +731,7 @@ if (isVisa) {
                       style: TextStyle(
                         color: Colors
                             .grey
-                            .shade600,
+                            .withOpacity(0.7),
                         fontSize: 13,
                       ),
                     ),
@@ -741,14 +742,14 @@ if (isVisa) {
 
                     Container(
                       padding:
-                          const EdgeInsets.symmetric(
+                          EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 10,
                       ),
                       decoration:
                           BoxDecoration(
                         color:
-                            Colors.white,
+                            Theme.of(context).colorScheme.surface,
                         borderRadius:
                             BorderRadius.circular(
                           14,
@@ -756,7 +757,7 @@ if (isVisa) {
                         border: Border.all(
                           color: Colors
                               .grey
-                              .shade200,
+                              .withOpacity(0.25),
                         ),
                       ),
                       child: Row(

@@ -11,6 +11,7 @@ import '../../utils/app_toast.dart';
 import '../../widgets/main_app_bar.dart';
 import '../orders/orders_screen.dart';
 import '../payments/payment_checkout_screen.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   final List<CartItem> items;
@@ -110,7 +111,7 @@ class _CheckoutScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor:
-          Colors.grey.shade100,
+          Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
 
       appBar: const MainAppBar(
         title: 'Checkout',
@@ -121,7 +122,7 @@ class _CheckoutScreenState
           key: _formKey,
           child: ListView(
             padding:
-                const EdgeInsets.all(16),
+                EdgeInsets.all(AppSpacing.md),
             children: [
               // ======================
               // ORDER SUMMARY
@@ -129,7 +130,7 @@ class _CheckoutScreenState
 
               Container(
                 padding:
-                    const EdgeInsets.all(
+                    EdgeInsets.all(
                   18,
                 ),
                 decoration: BoxDecoration(
@@ -149,9 +150,9 @@ class _CheckoutScreenState
                 ),
                 child: Column(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.shopping_bag_outlined,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surface,
                       size: 38,
                     ),
 
@@ -159,11 +160,11 @@ class _CheckoutScreenState
                       height: 10,
                     ),
 
-                    const Text(
+                    Text(
                       "Order Checkout",
                       style: TextStyle(
                         color:
-                            Colors.white,
+                            Theme.of(context).colorScheme.surface,
                         fontSize: 20,
                         fontWeight:
                             FontWeight
@@ -191,13 +192,13 @@ class _CheckoutScreenState
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
 
               // ======================
               // ORDER ITEMS
               // ======================
 
-              const Text(
+              Text(
                 "Order Summary",
                 style: TextStyle(
                   fontSize: 16,
@@ -210,18 +211,18 @@ class _CheckoutScreenState
 
               Container(
                 padding:
-                    const EdgeInsets.all(
+                    EdgeInsets.all(
                   16,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius:
                       BorderRadius.circular(
                     16,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black
+                      color: Theme.of(context).colorScheme.onSurface
                           .withOpacity(
                         0.03,
                       ),
@@ -240,7 +241,7 @@ class _CheckoutScreenState
                     (item) {
                       return Padding(
                         padding:
-                            const EdgeInsets.only(
+                            EdgeInsets.only(
                           bottom: 12,
                         ),
                         child: Row(
@@ -281,13 +282,13 @@ class _CheckoutScreenState
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
 
               // ======================
               // DELIVERY DETAILS
               // ======================
 
-              const Text(
+              Text(
                 "Delivery Details",
                 style: TextStyle(
                   fontSize: 16,
@@ -321,7 +322,7 @@ class _CheckoutScreenState
                 },
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
 
               AppTextField(
                 label:
@@ -367,7 +368,7 @@ class _CheckoutScreenState
                       ),
                     ),
                   ),
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.gps_fixed,
                   ),
                   label: Text(
@@ -379,16 +380,16 @@ class _CheckoutScreenState
               ),
 
               if (_latitude != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
 
                 Container(
                   padding:
-                      const EdgeInsets.all(
+                      EdgeInsets.all(
                     14,
                   ),
                   decoration: BoxDecoration(
                     color:
-                        Colors.green.shade50,
+                        Theme.of(context).colorScheme.secondary.withOpacity(0.05),
                     borderRadius:
                         BorderRadius.circular(
                       14,
@@ -396,18 +397,18 @@ class _CheckoutScreenState
                     border: Border.all(
                       color: Colors
                           .green
-                          .shade100,
+                          .withOpacity(0.12),
                     ),
                   ),
                   child: Column(
                     children: [
-                      const Row(
+                      Row(
                         children: [
                           Icon(
                             Icons
                                 .check_circle,
                             color:
-                                Colors.green,
+                                Theme.of(context).colorScheme.secondary,
                             size: 18,
                           ),
 
@@ -436,10 +437,10 @@ class _CheckoutScreenState
                       Text(
                         "Lat: $_latitude\nLng: $_longitude",
                         style:
-                            const TextStyle(
+                            TextStyle(
                           fontSize: 12,
                           color:
-                              Colors.grey,
+                              Theme.of(context).colorScheme.outline,
                         ),
                       ),
                     ],
@@ -447,7 +448,7 @@ class _CheckoutScreenState
                 ),
               ],
 
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
 
               // ======================
               // TOTAL
@@ -455,18 +456,18 @@ class _CheckoutScreenState
 
               Container(
                 padding:
-                    const EdgeInsets.all(
+                    EdgeInsets.all(
                   16,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius:
                       BorderRadius.circular(
                     16,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black
+                      color: Theme.of(context).colorScheme.onSurface
                           .withOpacity(
                         0.03,
                       ),
@@ -486,7 +487,7 @@ class _CheckoutScreenState
                           MainAxisAlignment
                               .spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           "Subtotal",
                         ),
 
@@ -524,7 +525,7 @@ class _CheckoutScreenState
                           MainAxisAlignment
                               .spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           "Total",
                           style: TextStyle(
                             fontSize: 16,
@@ -537,13 +538,13 @@ class _CheckoutScreenState
                         Text(
                           "MWK ${widget.total.toStringAsFixed(2)}",
                           style:
-                              const TextStyle(
+                              TextStyle(
                             fontSize: 16,
                             fontWeight:
                                 FontWeight
                                     .bold,
                             color:
-                                Colors.green,
+                                Theme.of(context).colorScheme.secondary,
                           ),
                         ),
                       ],
@@ -589,7 +590,7 @@ class _CheckoutScreenState
                                 2.5,
                           ),
                         )
-                      : const Text(
+                      : Text(
                           'Place Order',
                           style:
                               TextStyle(

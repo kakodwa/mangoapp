@@ -1,16 +1,20 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import '../../models/room_model.dart';
 import '../../theme/design_system/app_button.dart';
 import '../../theme/design_system/app_card.dart';
+import '../../widgets/main_drawer.dart';
+import '../../widgets/main_app_bar.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_typography.dart';
 import '../../widgets/shop_map_modal.dart';
 import '../../widgets/hospitality/room_card.dart';
 import 'availability_calendar_screen.dart';
 import 'booking_checkout_screen.dart';
+import '../../providers/rooms_provider.dart';
 
-class RoomDetailScreen extends StatelessWidget {
+class RoomDetailScreen extends ConsumerWidget {
   final Room room;
   final List<String> lodgeImages;
 
@@ -21,8 +25,15 @@ class RoomDetailScreen extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final roomsAsync = ref.watch(roomsProvider(room.id));
     return Scaffold(
+      appBar: roomsAsync.when(
+        data: (_) => MainAppBar(title: 'Room #: ${room.roomNumber}',),
+        loading: () => const MainAppBar(title: "Loading..."),
+        error: (_, __) =>
+            const MainAppBar(title: "Details"),
+      ),
       backgroundColor: const Color(0xFFF5F7FA),
       body: Stack(
         children: [
@@ -34,10 +45,10 @@ class RoomDetailScreen extends StatelessWidget {
                 expandedHeight: 320,
                 pinned: true,
                 elevation: 0,
-                backgroundColor: Colors.white,
-                iconTheme: const IconThemeData(color: Colors.white),
+                backgroundColor: Theme.of(context).colorScheme.surface,
+                iconTheme: IconThemeData(color: Theme.of(context).colorScheme.surface),
                 flexibleSpace: FlexibleSpaceBar(
-                  titlePadding: const EdgeInsets.only(
+                  titlePadding: EdgeInsets.only(
                     left: 16,
                     right: 16,
                     bottom: 16,
@@ -46,8 +57,8 @@ class RoomDetailScreen extends StatelessWidget {
                     room.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.surface,
                       fontWeight: FontWeight.bold,
                       shadows: [
                         Shadow(
@@ -76,12 +87,12 @@ class RoomDetailScreen extends StatelessWidget {
                                   width: double.infinity,
                                   errorBuilder: (_, __, ___) {
                                     return Container(
-                                      color: Colors.grey.shade300,
-                                      child: const Center(
+                                      color: Theme.of(context).colorScheme.outline.withOpacity(0.38),
+                                      child: Center(
                                         child: Icon(
                                           Icons.hotel,
                                           size: 70,
-                                          color: Colors.white,
+                                          color: Theme.of(context).colorScheme.surface,
                                         ),
                                       ),
                                     );
@@ -90,12 +101,12 @@ class RoomDetailScreen extends StatelessWidget {
                               }).toList(),
                             )
                           : Container(
-                              color: Colors.grey.shade300,
-                              child: const Center(
+                              color: Theme.of(context).colorScheme.outline.withOpacity(0.38),
+                              child: Center(
                                 child: Icon(
                                   Icons.hotel,
                                   size: 80,
-                                  color: Colors.white,
+                                  color: Theme.of(context).colorScheme.surface,
                                 ),
                               ),
                             ),
@@ -107,8 +118,8 @@ class RoomDetailScreen extends StatelessWidget {
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
-                              Colors.black.withOpacity(0.2),
-                              Colors.black.withOpacity(0.7),
+                              Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
+                              Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
                             ],
                           ),
                         ),
@@ -121,7 +132,7 @@ class RoomDetailScreen extends StatelessWidget {
               /// ================= BODY =================
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
+                  padding: EdgeInsets.all(AppSpacing.md),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -131,14 +142,14 @@ class RoomDetailScreen extends StatelessWidget {
                             MainAxisAlignment.spaceBetween,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(
+                            padding: EdgeInsets.symmetric(
                               horizontal: 12,
                               vertical: 7,
                             ),
                             decoration: BoxDecoration(
                               color: room.isAvailable
-                                  ? Colors.green.withOpacity(.1)
-                                  : Colors.red.withOpacity(.1),
+                                  ? Theme.of(context).colorScheme.secondary.withOpacity(.1)
+                                  : Theme.of(context).colorScheme.error.withOpacity(.1),
                               borderRadius:
                                   BorderRadius.circular(30),
                             ),
@@ -148,27 +159,27 @@ class RoomDetailScreen extends StatelessWidget {
                                   : "Not Available",
                               style: TextStyle(
                                 color: room.isAvailable
-                                    ? Colors.green
-                                    : Colors.red,
+                                    ? Theme.of(context).colorScheme.secondary
+                                    : Theme.of(context).colorScheme.error,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
 
                           Container(
-                            padding: const EdgeInsets.symmetric(
+                            padding: EdgeInsets.symmetric(
                               horizontal: 12,
                               vertical: 7,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.orange.withOpacity(.1),
+                              color: Theme.of(context).colorScheme.primary.withOpacity(.1),
                               borderRadius:
                                   BorderRadius.circular(30),
                             ),
                             child: Text(
                               "Room ${room.roomNumber}",
-                              style: const TextStyle(
-                                color: Colors.orange,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -192,7 +203,7 @@ class RoomDetailScreen extends StatelessWidget {
                       Text(
                         room.roomType.toUpperCase(),
                         style: TextStyle(
-                          color: Colors.grey.shade600,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                           fontWeight: FontWeight.w600,
                           letterSpacing: 1,
                         ),
@@ -203,20 +214,20 @@ class RoomDetailScreen extends StatelessWidget {
                       /// ================= PRICE CARD =================
                       AppCard(
                         padding:
-                            const EdgeInsets.all(AppSpacing.md),
+                            EdgeInsets.all(AppSpacing.md),
                         child: Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(14),
+                              padding: EdgeInsets.all(14),
                               decoration: BoxDecoration(
                                 color:
-                                    Colors.orange.withOpacity(0.1),
+                                    Theme.of(context).colorScheme.primary.withOpacity(0.1),
                                 borderRadius:
                                     BorderRadius.circular(14),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.payments,
-                                color: Colors.orange,
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                             ),
 
@@ -238,13 +249,13 @@ class RoomDetailScreen extends StatelessWidget {
                                     ),
                                   ),
 
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: AppSpacing.xxs),
 
                                   Text(
                                     "Per Night",
                                     style: TextStyle(
                                       color:
-                                          Colors.grey.shade600,
+                                          Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                                     ),
                                   ),
                                 ],
@@ -258,6 +269,7 @@ class RoomDetailScreen extends StatelessWidget {
 
                       /// ================= CAPACITY =================
                       _infoCard(
+                        context: context,
                         icon: Icons.people,
                         title: "Capacity",
                         value: "${room.capacity} Guests",
@@ -266,7 +278,7 @@ class RoomDetailScreen extends StatelessWidget {
                       const SizedBox(height: AppSpacing.lg),
 
                       /// ================= AMENITIES =================
-                      const Text(
+                      Text(
                         "Amenities",
                         style: TextStyle(
                           fontSize: 20,
@@ -281,19 +293,21 @@ class RoomDetailScreen extends StatelessWidget {
                         runSpacing: AppSpacing.sm,
                         children: [
                           if (room.hasWifi)
-                            _amenity(Icons.wifi, "WiFi"),
+                            _amenity(context, Icons.wifi, "WiFi"),
 
                           if (room.hasTv)
-                            _amenity(Icons.tv, "TV"),
+                            _amenity(context, Icons.tv, "TV"),
 
                           if (room.hasAc)
                             _amenity(
+                              context,
                               Icons.ac_unit,
                               "Air Conditioning",
                             ),
 
                           if (room.hasBreakfast)
                             _amenity(
+                              context,
                               Icons.free_breakfast,
                               "Breakfast",
                             ),
@@ -303,7 +317,7 @@ class RoomDetailScreen extends StatelessWidget {
                       const SizedBox(height: AppSpacing.xl),
 
                       /// ================= DESCRIPTION =================
-                      const Text(
+                      Text(
                         "Description",
                         style: TextStyle(
                           fontSize: 20,
@@ -315,32 +329,32 @@ class RoomDetailScreen extends StatelessWidget {
 
                       AppCard(
                         padding:
-                            const EdgeInsets.all(AppSpacing.md),
+                            EdgeInsets.all(AppSpacing.md),
                         child: Text(
                           room.description.isEmpty
                               ? "No description provided."
                               : room.description,
                           style: TextStyle(
                             height: 1.7,
-                            color: Colors.grey.shade700,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
                           ),
                         ),
                       ),
 
                       const SizedBox(height: AppSpacing.xl),
                        AppCard(
-                        padding: const EdgeInsets.all(AppSpacing.lg),
+                        padding: EdgeInsets.all(AppSpacing.lg),
                         child: Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(14),
+                              padding: EdgeInsets.all(14),
                               decoration: BoxDecoration(
-                                color: Colors.orange.withOpacity(0.1),
+                                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(16),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.hotel_class,
-                                color: Colors.orange,
+                                color: Theme.of(context).colorScheme.primary,
                                 size: 30,
                               ),
                             ),
@@ -351,7 +365,7 @@ class RoomDetailScreen extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
+                                  Text(
                                     "Plan Your Stay",
                                     style: AppTypography.headlineLarge,
                                     ),
@@ -401,12 +415,12 @@ class RoomDetailScreen extends StatelessWidget {
             left: 0,
             right: 0,
             child: Container(
-              padding: const EdgeInsets.symmetric(
+              padding: EdgeInsets.symmetric(
                 horizontal: AppSpacing.md,
                 vertical: AppSpacing.sm,
               ),
-              decoration: const BoxDecoration(
-                color: Colors.white,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
                 boxShadow: [
                   BoxShadow(
                     blurRadius: 12,
@@ -422,9 +436,9 @@ class RoomDetailScreen extends StatelessWidget {
                   icon: Icons.calendar_month,
                   fullWidth: true,
                   backgroundColor: room.isAvailable
-                      ? Colors.orange
-                      : Colors.grey,
-                  textColor: Colors.white,
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.outline,
+                  textColor: Theme.of(context).colorScheme.surface,
                   onPressed: room.isAvailable
                       ? () {
                           Navigator.push(
@@ -449,23 +463,24 @@ class RoomDetailScreen extends StatelessWidget {
 
   /// ================= INFO CARD =================
   Widget _infoCard({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required String value,
   }) {
     return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: EdgeInsets.all(AppSpacing.md),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.orange.withOpacity(0.1),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               icon,
-              color: Colors.orange,
+              color: Theme.of(context).colorScheme.primary,
             ),
           ),
 
@@ -486,11 +501,12 @@ class RoomDetailScreen extends StatelessWidget {
 
   /// ================= AMENITY CHIP =================
   Widget _amenity(
+    BuildContext context,
     IconData icon,
     String label,
   ) {
     return AppCard(
-      padding: const EdgeInsets.symmetric(
+      padding: EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.sm,
       ),
@@ -500,7 +516,7 @@ class RoomDetailScreen extends StatelessWidget {
           Icon(
             icon,
             size: 18,
-            color: Colors.orange,
+            color: Theme.of(context).colorScheme.primary,
           ),
 
           const SizedBox(width: AppSpacing.xs),

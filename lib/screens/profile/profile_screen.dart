@@ -7,6 +7,8 @@ import '../../providers/shops_provider.dart';
 
 import '../../theme/app_colors.dart';
 import '../../widgets/main_app_bar.dart';
+import '../../widgets/main_drawer.dart';
+import '../../widgets/app_scaffold.dart';
 
 import '../properties/add_property_screen.dart';
 import '../properties/my_properties_screen.dart';
@@ -26,6 +28,7 @@ import '../events/my_tickets_screen.dart';
 import '../hospitality/lodge_owner_dashboard.dart';
 
 import '../../utils/user_role_utils.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -52,12 +55,15 @@ class ProfileScreen extends ConsumerWidget {
     final hasShop = ref.watch(hasShopProvider);
     //final hasShopAsync = ref.watch(hasShopProvider);
 
-    return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+    return AppScaffold(
+      backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
 
       appBar: MainAppBar(
         title: username ?? 'Profile',
       ),
+
+      drawer: const MainDrawer(),
+
 
       body: SingleChildScrollView(
         child: Column(
@@ -70,8 +76,8 @@ class ProfileScreen extends ConsumerWidget {
               clipBehavior: Clip.none,
               children: [
                 Container(
-                  margin: const EdgeInsets.all(16),
-                  padding: const EdgeInsets.fromLTRB(20, 70, 20, 20),
+                  margin: EdgeInsets.all(AppSpacing.md),
+                  padding: EdgeInsets.fromLTRB(20, 70, 20, 20),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [
@@ -87,8 +93,8 @@ class ProfileScreen extends ConsumerWidget {
                     children: [
                       Text(
                         user?.firstName ?? "User Name",
-                        style: const TextStyle(
-                          color: Colors.white,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.surface,
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
@@ -101,9 +107,9 @@ class ProfileScreen extends ConsumerWidget {
                           fontSize: 13,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.xs),
                       Container(
-                        padding: const EdgeInsets.symmetric(
+                        padding: EdgeInsets.symmetric(
                           horizontal: 10,
                           vertical: 4,
                           ),
@@ -113,56 +119,56 @@ class ProfileScreen extends ConsumerWidget {
                           ),
                         child: Text(
                           UserRoleUtils.getLabel(user?.userType ?? ''),
-                          style: const TextStyle(
-                            color: Colors.white,
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.surface,
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSpacing.md),
 
                       walletAsync.when(
                         data: (wallet) => Row(
                           mainAxisAlignment:
                               MainAxisAlignment.spaceBetween,
                           children: [
-                            _stat("Balance",
+                            _stat(context, "Balance",
                                 "${wallet.currency} ${wallet.balance}"),
-                            _stat("Earnings",
+                            _stat(context, "Earnings",
                                 "${wallet.currency} ${wallet.totalEarnings}"),
-                            _stat("Withdrawn",
+                            _stat(context, "Withdrawn",
                                 "${wallet.currency} ${wallet.totalWithdrawn}"),
                           ],
                         ),
                         loading: () =>
-                            const CircularProgressIndicator(
-                          color: Colors.white,
+                            CircularProgressIndicator(
+                          color: Theme.of(context).colorScheme.surface,
                         ),
                         error: (_, __) =>
-                            const Text("Wallet error"),
+                            Text("Wallet error"),
                       ),
                     ],
                   ),
                 ),
 
-                const Positioned(
+                Positioned(
                   top: -35,
                   child: CircleAvatar(
                     radius: 40,
                     backgroundColor: AppColors.mangoOrange,
                     child: Icon(Icons.person,
-                        size: 40, color: Colors.white),
+                        size: 40, color: Theme.of(context).colorScheme.surface),
                   ),
                 ),
               ],
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.md),
 
             // ================= MENU =================
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
               child: Column(
                 children: [
 
@@ -373,18 +379,18 @@ if (isLoggedIn && isShopOwner && hasShop) ...[
   }
 
   // ================= WALLET STAT =================
-  Widget _stat(String title, String value) {
+  Widget _stat(BuildContext context, String title, String value) {
     return Column(
       children: [
         Text(
           value,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.surface,
             fontWeight: FontWeight.bold,
             fontSize: 15,
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: AppSpacing.xxs),
         Text(
           title,
           style: const TextStyle(
@@ -405,14 +411,14 @@ if (isLoggedIn && isShopOwner && hasShop) ...[
   }) {
     return Card(
       elevation: 1,
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
       ),
       child: ListTile(
         leading: Icon(icon, color: AppColors.mangoOrange),
         title: Text(title),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        trailing: Icon(Icons.arrow_forward_ios, size: 16),
         onTap: onTap ?? () {},
       ),
     );

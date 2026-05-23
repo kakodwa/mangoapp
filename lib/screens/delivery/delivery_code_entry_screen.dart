@@ -12,6 +12,7 @@ import '../../theme/design_system/app_info_box.dart';
 import '../../theme/design_system/app_text_field.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_button.dart';
+import '../../widgets/main_app_bar.dart';
 import '../../widgets/app_scaffold.dart';
 
 class DeliveryCodeScreen extends ConsumerStatefulWidget {
@@ -67,20 +68,15 @@ class _DeliveryCodeScreenState extends ConsumerState<DeliveryCodeScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      backgroundColor: Colors.grey.shade100,
-
-      appBar: AppBar(
-        title: const Text("Enter Delivery Code"),
-        backgroundColor: AppColors.primary(context),
-      ),
-
+      backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
+      appBar: const MainAppBar(title: 'Enter Delivery Code'),
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.md),
 
             // =========================
             // 🔥 INFO HEADER (NEW)
@@ -107,7 +103,7 @@ class _DeliveryCodeScreenState extends ConsumerState<DeliveryCodeScreen> {
                 },
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.md),
 
             // =========================
             // BUTTON

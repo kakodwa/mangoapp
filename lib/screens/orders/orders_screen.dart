@@ -7,6 +7,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/main_app_bar.dart';
 import '../../widgets/shop_map_modal.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 final userOrdersProvider =
     FutureProvider.autoDispose<List<Order>>(
@@ -67,9 +68,9 @@ class _OrdersScreenState
       builder: (_) {
         return Container(
           padding:
-              const EdgeInsets.all(20),
-          decoration: const BoxDecoration(
-            color: Colors.white,
+              EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
             borderRadius:
                 BorderRadius.vertical(
               top: Radius.circular(28),
@@ -91,7 +92,7 @@ class _OrdersScreenState
                             BoxDecoration(
                           color: Colors
                               .grey
-                              .shade300,
+                              .withOpacity(0.38),
                           borderRadius:
                               BorderRadius
                                   .circular(
@@ -129,7 +130,7 @@ class _OrdersScreenState
                           BoxDecoration(
                         color: Colors
                             .grey
-                            .shade50,
+                            .withOpacity(0.05),
                         borderRadius:
                             BorderRadius
                                 .circular(
@@ -168,7 +169,7 @@ class _OrdersScreenState
                                 .deliveryPersonName ??
                             '')
                         .isNotEmpty) ...[
-                      const Text(
+                      Text(
                         "Rider Information",
                         style: TextStyle(
                           fontSize: 16,
@@ -190,7 +191,7 @@ class _OrdersScreenState
                             BoxDecoration(
                           color: Colors
                               .grey
-                              .shade50,
+                              .withOpacity(0.05),
                           borderRadius:
                               BorderRadius
                                   .circular(
@@ -251,10 +252,10 @@ class _OrdersScreenState
                               ),
                             ),
                           ),
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.navigation,
                           ),
-                          label: const Text(
+                          label: Text(
                             "Navigate to Rider",
                             style:
                                 TextStyle(
@@ -304,7 +305,7 @@ class _OrdersScreenState
                             Navigator.pop(
                           context,
                         ),
-                        child: const Text(
+                        child: Text(
                           "Close",
                         ),
                       ),
@@ -348,7 +349,7 @@ class _OrdersScreenState
           ),
         ),
 
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSpacing.sm),
 
         Expanded(
           child: Column(
@@ -360,7 +361,7 @@ class _OrdersScreenState
                 style: TextStyle(
                   fontSize: 12,
                   color:
-                      Colors.grey.shade600,
+                      Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                 ),
               ),
 
@@ -401,23 +402,23 @@ class _OrdersScreenState
             return Center(
               child: Container(
                 padding:
-                    const EdgeInsets.all(
+                    EdgeInsets.all(
                   24,
                 ),
                 margin:
-                    const EdgeInsets.all(
+                    EdgeInsets.all(
                   24,
                 ),
                 decoration:
                     BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius:
                       BorderRadius.circular(
                     20,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black
+                      color: Theme.of(context).colorScheme.onSurface
                           .withOpacity(
                         0.04,
                       ),
@@ -434,14 +435,14 @@ class _OrdersScreenState
                           .shopping_bag_outlined,
                       size: 80,
                       color:
-                          Colors.grey[400],
+                          Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
 
                     const SizedBox(
                       height: 16,
                     ),
 
-                    const Text(
+                    Text(
                       "No orders yet",
                       style: TextStyle(
                         fontSize: 18,
@@ -479,7 +480,7 @@ class _OrdersScreenState
 
             child: ListView.separated(
               padding:
-                  const EdgeInsets.all(
+                  EdgeInsets.all(
                 16,
               ),
 
@@ -511,7 +512,7 @@ class _OrdersScreenState
                   decoration:
                       BoxDecoration(
                     color:
-                        Colors.white,
+                        Theme.of(context).colorScheme.surface,
                     borderRadius:
                         BorderRadius.circular(
                       20,
@@ -622,7 +623,7 @@ class _OrdersScreenState
                                       style:
                                           TextStyle(
                                         color:
-                                            Colors.grey.shade600,
+                                            Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                                         fontSize:
                                             12,
                                       ),
@@ -659,7 +660,7 @@ class _OrdersScreenState
                             children: [
                               Container(
                                 padding:
-                                    const EdgeInsets.symmetric(
+                                    EdgeInsets.symmetric(
                                   horizontal:
                                       14,
                                   vertical:
@@ -715,14 +716,14 @@ class _OrdersScreenState
                             Divider(
                               color: Colors
                                   .grey
-                                  .shade200,
+                                  .withOpacity(0.25),
                             ),
 
                             const SizedBox(
                               height: 12,
                             ),
 
-                            const Text(
+                            Text(
                               "Order Items",
                               style:
                                   TextStyle(
@@ -742,13 +743,13 @@ class _OrdersScreenState
                               (item) {
                                 return Container(
                                   margin:
-                                      const EdgeInsets.only(
+                                      EdgeInsets.only(
                                     bottom:
                                         12,
                                   ),
 
                                   padding:
-                                      const EdgeInsets.all(
+                                      EdgeInsets.all(
                                     12,
                                   ),
 
@@ -756,7 +757,7 @@ class _OrdersScreenState
                                       BoxDecoration(
                                     color: Colors
                                         .grey
-                                        .shade50,
+                                        .withOpacity(0.05),
                                     borderRadius:
                                         BorderRadius.circular(
                                       16,
@@ -793,9 +794,9 @@ class _OrdersScreenState
                                             height:
                                                 55,
                                             color:
-                                                Colors.grey.shade200,
+                                                Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
                                             child:
-                                                const Icon(
+                                                Icon(
                                               Icons.image,
                                             ),
                                           ),
@@ -832,7 +833,7 @@ class _OrdersScreenState
                                               style:
                                                   TextStyle(
                                                 color:
-                                                    Colors.grey.shade600,
+                                                    Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                                                 fontSize:
                                                     12,
                                               ),
@@ -900,12 +901,12 @@ class _OrdersScreenState
                                     ),
                                   ),
                                   icon:
-                                      const Icon(
+                                      Icon(
                                     Icons
                                         .local_shipping,
                                   ),
                                   label:
-                                      const Text(
+                                      Text(
                                     "View Delivery Details",
                                     style:
                                         TextStyle(
@@ -940,11 +941,11 @@ class _OrdersScreenState
         error: (_, __) => Center(
           child: Container(
             padding:
-                const EdgeInsets.all(24),
+                EdgeInsets.all(AppSpacing.lg),
             margin:
-                const EdgeInsets.all(24),
+                EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius:
                   BorderRadius.circular(
                 20,
@@ -957,14 +958,14 @@ class _OrdersScreenState
                 Icon(
                   Icons.error_outline,
                   size: 70,
-                  color: Colors.red[300],
+                  color: Theme.of(context).colorScheme.error,
                 ),
 
                 const SizedBox(
                   height: 16,
                 ),
 
-                const Text(
+                Text(
                   "Failed to load orders",
                   style: TextStyle(
                     fontSize: 18,

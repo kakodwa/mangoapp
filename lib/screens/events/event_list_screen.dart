@@ -3,10 +3,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../widgets/main_drawer.dart';
+import '../../widgets/main_app_bar.dart';
+
 import '../../providers/events_provider.dart';
 import '../../widgets/events/event_card.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/search_filter_widgets.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 
 class EventListScreen extends ConsumerStatefulWidget {
@@ -33,10 +37,8 @@ class _EventListScreenState
     final eventsAsync = ref.watch(eventsProvider);
 
     return AppScaffold(
-      appBar: AppBar(
-        title: const Text("Events"),
-      ),
-
+      appBar: const MainAppBar(title: 'Events'),
+      drawer: const MainDrawer(),
       body: Column(
         children: [
 
@@ -83,7 +85,7 @@ class _EventListScreenState
                     ref.refresh(eventsProvider);
                   },
                   child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(AppSpacing.md),
                     itemCount: filteredEvents.length,
                     itemBuilder: (context, index) {
                       return EventCard(

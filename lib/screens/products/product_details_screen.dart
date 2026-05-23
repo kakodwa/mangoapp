@@ -15,6 +15,7 @@ import '../products/edit_product_screen.dart';
 import '../auth/login_screen.dart';
 
 import '../../utils/app_toast.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class ProductDetailsScreen extends ConsumerStatefulWidget {
   final int productId;
@@ -97,7 +98,7 @@ Future<void> _loadRelated(int productId) async {
     final auth = ref.watch(authProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F7FB),
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
 
       appBar: productAsync.when(
         data: (p) => MainAppBar(title: p.name),
@@ -150,7 +151,7 @@ Future<void> _loadRelated(int productId) async {
                   // ================= INFO
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.all(AppSpacing.md),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -177,14 +178,14 @@ Future<void> _loadRelated(int productId) async {
 
 // ================= STOCK
 Container(
-  padding: const EdgeInsets.symmetric(
+  padding: EdgeInsets.symmetric(
     horizontal: 12,
     vertical: 8,
   ),
   decoration: BoxDecoration(
     color: product.stock > 0
-        ? Colors.green.withOpacity(0.1)
-        : Colors.red.withOpacity(0.1),
+        ? Theme.of(context).colorScheme.secondary.withOpacity(0.1)
+        : Theme.of(context).colorScheme.error.withOpacity(0.1),
     borderRadius: BorderRadius.circular(12),
   ),
   child: Row(
@@ -196,8 +197,8 @@ Container(
             : Icons.cancel,
         size: 18,
         color: product.stock > 0
-            ? Colors.green
-            : Colors.red,
+            ? Theme.of(context).colorScheme.secondary
+            : Theme.of(context).colorScheme.error,
       ),
 
       const SizedBox(width: 6),
@@ -208,8 +209,8 @@ Container(
             : "Out of stock",
         style: TextStyle(
           color: product.stock > 0
-              ? Colors.green
-              : Colors.red,
+              ? Theme.of(context).colorScheme.secondary
+              : Theme.of(context).colorScheme.error,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -221,7 +222,7 @@ Container(
 
                           Row(
                             children: [
-                              const Icon(Icons.star,
+                              Icon(Icons.star,
                                   color: Colors.amber),
                               const SizedBox(width: 4),
                               Text(
@@ -230,13 +231,13 @@ Container(
                             ],
                           ),
 
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppSpacing.md),
 
                           // ================= SHOP INFO + DISTRICT
                           Container(
-                            padding: const EdgeInsets.all(14),
+                            padding: EdgeInsets.all(14),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: Theme.of(context).colorScheme.surface,
                               borderRadius: BorderRadius.circular(14),
                             ),
                             child: Column(
@@ -246,7 +247,7 @@ Container(
                                   children: [
                                     Icon(Icons.store,
                                         color: AppColors.mangoOrange),
-                                    const SizedBox(width: 8),
+                                    const SizedBox(width: AppSpacing.xs),
                                     Text(
                                       product.shopName,
                                       style: const TextStyle(
@@ -255,17 +256,17 @@ Container(
                                   ],
                                 ),
 
-                                const SizedBox(height: 8),
+                                const SizedBox(height: AppSpacing.xs),
 
                                 Row(
                                   children: [
-                                    const Icon(Icons.location_on,
+                                    Icon(Icons.location_on,
                                         size: 18),
                                     const SizedBox(width: 6),
                                     Text(
                                       product.shopDistrict ?? 'Unknown',
-                                      style: const TextStyle(
-                                          color: Colors.grey),
+                                      style: TextStyle(
+                                          color: Theme.of(context).colorScheme.outline),
                                     ),
                                   ],
                                 ),
@@ -273,7 +274,7 @@ Container(
                             ),
                           ),
 
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppSpacing.md),
 
                           Text(product.description),
                         ],
@@ -284,11 +285,11 @@ Container(
                   // ================= RELATED PRODUCTS
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: EdgeInsets.all(AppSpacing.md),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             "Related Products",
                             style: TextStyle(
                               fontSize: 18,
@@ -330,7 +331,7 @@ Container(
                     if (!isOwner)
                       FloatingActionButton(
                         heroTag: "fav",
-                        backgroundColor: Colors.white,
+                        backgroundColor: Theme.of(context).colorScheme.surface,
                         onPressed: () {
                           if (!isLoggedIn) {
                             Navigator.push(
@@ -346,11 +347,10 @@ Container(
 
                           _toast("Updated favorites");
                         },
-                        child: const Icon(Icons.favorite_border,
-                            color: Colors.red),
+                        child: Icon(Icons.favorite_border, color: Theme.of(context).colorScheme.error),
                       ),
 
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.sm),
 
                     if (product.isInStock && !isOwner)
                       FloatingActionButton(
@@ -371,14 +371,14 @@ Container(
 
                           _toast("Added to cart");
                         },
-                        child: const Icon(Icons.shopping_cart),
+                        child: Icon(Icons.shopping_cart),
                       ),
 
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.sm),
 
                     FloatingActionButton(
                       heroTag: "shop",
-                      backgroundColor: Colors.white,
+                      backgroundColor: Theme.of(context).colorScheme.surface,
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -395,10 +395,10 @@ Container(
 
                     // ================= OWNER EDIT BUTTON (NEW BELOW SHOP)
                     if (isOwner) ...[
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppSpacing.sm),
                       FloatingActionButton(
                         heroTag: "edit",
-                        backgroundColor: Colors.blue,
+                        backgroundColor: Theme.of(context).colorScheme.primary,
                         onPressed: () {
                           Navigator.push(
                             context,
@@ -408,7 +408,7 @@ Container(
                             ),
                           );
                         },
-                        child: const Icon(Icons.edit),
+                        child: Icon(Icons.edit),
                       ),
                     ]
                   ],
