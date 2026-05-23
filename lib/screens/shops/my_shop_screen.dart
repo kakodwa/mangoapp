@@ -52,7 +52,7 @@ class MyShopScreen extends ConsumerWidget {
                     ),
                   );
                 },
-                child: const Icon(Icons.edit),
+                child: Icon(Icons.edit),
               ),
 
               const SizedBox(height: AppSpacing.sm),
@@ -103,7 +103,7 @@ class MyShopScreen extends ConsumerWidget {
                     Container(
                       height: 180,
                       width: double.infinity,
-                      color: Theme.of(context).colorScheme.outline.shade300,
+                      color: Theme.of(context).colorScheme.outline.withOpacity(0.38),
                       child: (shop.banner != null && shop.banner!.isNotEmpty)
                           ? Image.network(
                               fixImageUrl(shop.banner),
@@ -160,7 +160,7 @@ class MyShopScreen extends ConsumerWidget {
 
                       const SizedBox(height: AppSpacing.md),
 
-                      const Text(
+                      Text(
                         "Contact Information",
                         style: TextStyle(
                           fontSize: 18,
@@ -245,10 +245,10 @@ class MyShopScreen extends ConsumerWidget {
         height: 50,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) {
-          return const Icon(Icons.image_not_supported);
+          return Icon(Icons.image_not_supported);
         },
       )
-    : const Icon(
+    : Icon(
         Icons.image_not_supported,
         size: 30,
         color: Theme.of(context).colorScheme.outline,
@@ -261,7 +261,7 @@ class MyShopScreen extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton(
-          icon: const Icon(Icons.edit, color: Theme.of(context).colorScheme.primary),
+          icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.primary),
           onPressed: () {
             Navigator.push(
               context,
@@ -273,7 +273,7 @@ class MyShopScreen extends ConsumerWidget {
           },
         ),
         IconButton(
-          icon: const Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
+          icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
           onPressed: () async {
             await ref
                 .read(apiClientProvider)
@@ -298,13 +298,12 @@ class MyShopScreen extends ConsumerWidget {
                     padding: const EdgeInsets.all(AppSpacing.md),
                     child: Column(
                       children: [
-                        const Icon(Icons.error,
+                        Icon(Icons.error,
                             color: Theme.of(context).colorScheme.error, size: 40),
                         const SizedBox(height: 10),
                         Text(
                           "Failed to load products:\n$e",
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(color: Theme.of(context).colorScheme.error),
+                          textAlign: TextAlign.center, style: TextStyle(color: Theme.of(context).colorScheme.error),
                         ),
                       ],
                     ),
@@ -323,7 +322,7 @@ class MyShopScreen extends ConsumerWidget {
         error: (error, _) => Center(
           child: Text(
             "Error: $error",
-            style: const TextStyle(color: Theme.of(context).colorScheme.error),
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
           ),
         ),
       ),

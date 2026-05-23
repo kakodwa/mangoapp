@@ -69,8 +69,8 @@ class ShopDetailsScreen extends ConsumerWidget {
                                   fit: BoxFit.cover,
                                 )
                               : Container(
-                                  color: Theme.of(context).colorScheme.outline.shade300,
-                                  child: const Icon(
+                                  color: Theme.of(context).colorScheme.outline.withOpacity(0.38),
+                                  child: Icon(
                                     Icons.store,
                                     size: 80,
                                   ),
@@ -92,7 +92,7 @@ class ShopDetailsScreen extends ConsumerWidget {
                               ),
                               child: Text(
                                 shop.category,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: Theme.of(context).colorScheme.surface,
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
@@ -119,7 +119,7 @@ class ShopDetailsScreen extends ConsumerWidget {
                                   shop.status == 'approved'
                                       ? "Verified"
                                       : "Pending",
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                       color: Theme.of(context).colorScheme.surface),
                                 ),
                               ],
@@ -169,7 +169,7 @@ class ShopDetailsScreen extends ConsumerWidget {
                                   children: [
                                     Text(
                                       shop.name,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -177,9 +177,8 @@ class ShopDetailsScreen extends ConsumerWidget {
                                     const SizedBox(height: AppSpacing.xxs),
                                     Row(
                                       children: [
-                                        const Icon(Icons.location_on,
-                                            size: 14,
-                                            color: Theme.of(context).colorScheme.outline),
+                                        Icon(Icons.location_on,
+                                            size: 14, color: Theme.of(context).colorScheme.outline),
                                         const SizedBox(width: 4),
                                         Text(shop.district),
                                         const SizedBox(width: AppSpacing.sm),

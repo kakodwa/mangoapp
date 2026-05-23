@@ -92,7 +92,7 @@ class MyPropertiesScreen extends ConsumerWidget {
                           children: [
                             // ✏️ EDIT
                             IconButton(
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.edit,
                                 color: Theme.of(context).colorScheme.primary,
                               ),
@@ -108,7 +108,7 @@ class MyPropertiesScreen extends ConsumerWidget {
 
                             // 🗑 DELETE
                             IconButton(
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.delete,
                                 color: Theme.of(context).colorScheme.error,
                               ),

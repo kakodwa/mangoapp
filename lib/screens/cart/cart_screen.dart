@@ -41,7 +41,7 @@ class CartScreen extends ConsumerWidget {
                     Icon(Icons.shopping_cart_outlined,
                         size: 80, color: Theme.of(context).colorScheme.onSurfaceVariant),
                     const SizedBox(height: AppSpacing.md),
-                    const Text(
+                    Text(
                       'Your cart is empty',
                       style: TextStyle(
                         fontSize: 18,
@@ -135,7 +135,7 @@ class CartScreen extends ConsumerWidget {
 
                                   Text(
                                     "MWK ${item.product.price.toStringAsFixed(2)}",
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: Theme.of(context).colorScheme.secondary,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -227,7 +227,7 @@ GestureDetector(
                                     .read(removeFromCartProvider)
                                     .call(item.product.id);
                               },
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.delete_outline,
                                 color: Theme.of(context).colorScheme.error,
                               ),
@@ -293,7 +293,7 @@ GestureDetector(
                         mainAxisAlignment:
                             MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
+                          Text(
                             "Total",
                             style: TextStyle(
                               fontSize: 16,
@@ -302,7 +302,7 @@ GestureDetector(
                           ),
                           Text(
                             "MWK ${total.toStringAsFixed(2)}",
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: Theme.of(context).colorScheme.secondary,

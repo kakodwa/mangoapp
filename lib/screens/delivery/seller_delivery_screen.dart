@@ -97,7 +97,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
       appBar: AppBar(
         elevation: 0,
         backgroundColor: AppColors.primary(context),
-        title: const Text(
+        title: Text(
           "Seller Deliveries",
           style: TextStyle(
             fontWeight: FontWeight.bold,
@@ -251,7 +251,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                           width: double.infinity,
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.outline.shade50,
+                            color: Theme.of(context).colorScheme.outline.withOpacity(0.05),
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
                               color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
@@ -315,7 +315,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
-                          icon: const Icon(Icons.person_add_alt_1),
+                          icon: Icon(Icons.person_add_alt_1),
                           label: const Text("Assign Rider"),
                           style: ElevatedButton.styleFrom(
                             elevation: 0,
@@ -468,7 +468,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
               children: [
                 TextSpan(
                   text: "$label: ",
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
                   ),
@@ -607,42 +607,49 @@ class SellerDeliveryScreen extends ConsumerWidget {
             child: Column(
               children: [
                 _buildField(
+                  context: context,
                   controller: idNumber,
                   label: "ID Number",
                   icon: Icons.badge_outlined,
                 ),
 
                 _buildField(
+                  context: context,
                   controller: fullName,
                   label: "Full Name",
                   icon: Icons.person_outline,
                 ),
 
                 _buildField(
+                  context: context,
                   controller: phone,
                   label: "Phone Number",
                   icon: Icons.phone_outlined,
                 ),
 
                 _buildField(
+                  context: context,
                   controller: altPhone,
                   label: "Alternative Phone",
                   icon: Icons.phone_callback_outlined,
                 ),
 
                 _buildField(
+                  context: context,
                   controller: vehicleNumber,
                   label: "Vehicle Number",
                   icon: Icons.directions_car_outlined,
                 ),
 
                 _buildField(
+                  context: context,
                   controller: vehicleType,
                   label: "Vehicle Type",
                   icon: Icons.local_shipping_outlined,
                 ),
 
                 _buildField(
+                  context: context,
                   controller: licenseNumber,
                   label: "License Number",
                   icon: Icons.credit_card_outlined,
@@ -747,6 +754,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
   // PROFESSIONAL TEXT FIELD
   // =========================
   Widget _buildField({
+    required BuildContext context,
     required TextEditingController controller,
     required String label,
     required IconData icon,
@@ -759,7 +767,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
           labelText: label,
           prefixIcon: Icon(icon),
           filled: true,
-          fillColor: Theme.of(context).colorScheme.outline.shade50,
+          fillColor: Theme.of(context).colorScheme.outline.withOpacity(0.05),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide.none,
@@ -767,7 +775,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide(
-              color: Theme.of(context).colorScheme.outline.shade300,
+              color: Theme.of(context).colorScheme.outline.withOpacity(0.38),
             ),
           ),
           focusedBorder: OutlineInputBorder(
@@ -815,7 +823,7 @@ class _DeliveryCodeCardState extends State<DeliveryCodeCard> {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.onSurface.withOpacity(0.04),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Theme.of(context).colorScheme.outline.shade300),
+        border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.38)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -824,7 +832,7 @@ class _DeliveryCodeCardState extends State<DeliveryCodeCard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 "DELIVERY CODE",
                 style: TextStyle(
                   fontSize: 12,
@@ -871,7 +879,7 @@ class _DeliveryCodeCardState extends State<DeliveryCodeCard> {
 
           const SizedBox(height: 6),
 
-          const Text(
+          Text(
             "Tap to reveal • Copy & share with rider",
             style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.outline),
           ),

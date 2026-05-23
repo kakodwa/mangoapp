@@ -44,7 +44,7 @@ class HelpSupportScreen extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 14,
                 ),
@@ -117,7 +117,7 @@ class HelpSupportScreen extends StatelessWidget {
 
             const SizedBox(height: AppSpacing.md),
 
-            const Text(
+            Text(
               "Contact Support",
               style: TextStyle(
                 fontSize: 18,
@@ -156,7 +156,7 @@ class HelpSupportScreen extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.access_time, color: Theme.of(context).colorScheme.primary),
+                  Icon(Icons.access_time, color: Theme.of(context).colorScheme.primary),
                   const SizedBox(width: 10),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

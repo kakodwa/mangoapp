@@ -222,7 +222,7 @@ Container(
 
                           Row(
                             children: [
-                              const Icon(Icons.star,
+                              Icon(Icons.star,
                                   color: Colors.amber),
                               const SizedBox(width: 4),
                               Text(
@@ -260,12 +260,12 @@ Container(
 
                                 Row(
                                   children: [
-                                    const Icon(Icons.location_on,
+                                    Icon(Icons.location_on,
                                         size: 18),
                                     const SizedBox(width: 6),
                                     Text(
                                       product.shopDistrict ?? 'Unknown',
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                           color: Theme.of(context).colorScheme.outline),
                                     ),
                                   ],
@@ -347,8 +347,7 @@ Container(
 
                           _toast("Updated favorites");
                         },
-                        child: const Icon(Icons.favorite_border,
-                            color: Theme.of(context).colorScheme.error),
+                        child: Icon(Icons.favorite_border, color: Theme.of(context).colorScheme.error),
                       ),
 
                     const SizedBox(height: AppSpacing.sm),

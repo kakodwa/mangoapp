@@ -71,7 +71,7 @@ class _RiderDeliveryScreenState
         backgroundColor: AppColors.primary(context),
         title: Text(
           "Order #${d.orderNumber}",
-          style: const TextStyle(
+          style: TextStyle(
             color: Theme.of(context).colorScheme.surface,
             fontWeight: FontWeight.bold,
           ),
@@ -115,7 +115,7 @@ class _RiderDeliveryScreenState
                       borderRadius:
                           BorderRadius.circular(14),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.local_shipping,
                       color: Theme.of(context).colorScheme.surface,
                       size: 28,
@@ -129,7 +129,7 @@ class _RiderDeliveryScreenState
                       crossAxisAlignment:
                           CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           "Delivery Status",
                           style: TextStyle(
                             color: Colors.white70,
@@ -141,7 +141,7 @@ class _RiderDeliveryScreenState
 
                         Text(
                           d.status.toString().toUpperCase(),
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Theme.of(context).colorScheme.surface,
                             fontWeight: FontWeight.bold,
                             fontSize: 20,
@@ -225,10 +225,10 @@ class _RiderDeliveryScreenState
               width: double.infinity,
               padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.shade50,
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.primary.shade200,
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.25),
                 ),
               ),
 
@@ -247,7 +247,7 @@ class _RiderDeliveryScreenState
                     child: Text(
                       "Please once you deliver the order, let the owner of this business update the delivery status.",
                       style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary.shade900,
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.95),
                         height: 1.5,
                         fontWeight: FontWeight.w500,
                       ),
@@ -316,7 +316,7 @@ class _RiderDeliveryScreenState
                         padding:
                             const EdgeInsets.all(AppSpacing.sm),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.outline.shade50,
+                          color: Theme.of(context).colorScheme.outline.withOpacity(0.05),
                           borderRadius:
                               BorderRadius.circular(
                                   12),
@@ -345,7 +345,7 @@ class _RiderDeliveryScreenState
                                   fontWeight:
                                       FontWeight.w500,
                                   color:
-                                      Theme.of(context).colorScheme.outline.shade800,
+                                      Theme.of(context).colorScheme.outline.withOpacity(0.9),
                                 ),
                               ),
                             ),
@@ -430,7 +430,7 @@ class _RiderDeliveryScreenState
               children: [
                 TextSpan(
                   text: "$label: ",
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
                   ),

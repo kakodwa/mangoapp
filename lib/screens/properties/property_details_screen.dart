@@ -106,7 +106,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                                 borderRadius:
                                                     BorderRadius.circular(20),
                                               ),
-                                              child: const Text(
+                                              child: Text(
                                                 'Primary',
                                                 style: TextStyle(
                                                   color: Theme.of(context).colorScheme.surface,
@@ -137,7 +137,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                               ),
                                               child: Text(
                                                 image.altText!,
-                                                style: const TextStyle(
+                                                style: TextStyle(
                                                   color: Theme.of(context).colorScheme.surface,
                                                   fontSize: 12,
                                                 ),
@@ -165,7 +165,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                       ),
                                       child: Text(
                                         '${property.images.length} Photos',
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           color: Theme.of(context).colorScheme.surface,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -530,7 +530,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                             ),
                                           ),
                                           const SizedBox(width: 6),
-                                          const Icon(
+                                          Icon(
                                             Icons.verified,
                                             color: Theme.of(context).colorScheme.primary,
                                             size: 18,

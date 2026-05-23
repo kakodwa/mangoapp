@@ -88,7 +88,7 @@ class ProfileScreen extends ConsumerWidget {
                     children: [
                       Text(
                         user?.firstName ?? "User Name",
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Theme.of(context).colorScheme.surface,
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -114,7 +114,7 @@ class ProfileScreen extends ConsumerWidget {
                           ),
                         child: Text(
                           UserRoleUtils.getLabel(user?.userType ?? ''),
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Theme.of(context).colorScheme.surface,
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
@@ -141,7 +141,7 @@ class ProfileScreen extends ConsumerWidget {
                           color: Theme.of(context).colorScheme.surface,
                         ),
                         error: (_, __) =>
-                            const Text("Wallet error"),
+                            Text("Wallet error"),
                       ),
                     ],
                   ),
@@ -379,7 +379,7 @@ if (isLoggedIn && isShopOwner && hasShop) ...[
       children: [
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             color: Theme.of(context).colorScheme.surface,
             fontWeight: FontWeight.bold,
             fontSize: 15,

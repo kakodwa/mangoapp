@@ -85,7 +85,7 @@ class _ShopCardState extends State<ShopCard> {
                                 errorBuilder: (_, __, ___) {
                                   return Container(
                                     color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
-                                    child: const Icon(Icons.store, size: 40),
+                                    child: Icon(Icons.store, size: 40),
                                   );
                                 },
                               )
@@ -195,7 +195,7 @@ class _ShopCardState extends State<ShopCard> {
                           ),
                         ),
                         const SizedBox(width: 6),
-                        const Icon(Icons.star,
+                        Icon(Icons.star,
                             size: 13, color: Colors.amber),
                         const SizedBox(width: 3),
                         Text(

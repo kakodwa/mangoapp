@@ -54,7 +54,7 @@ class LodgeDetailScreen extends ConsumerWidget {
                     lodge.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Theme.of(context).colorScheme.surface,
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -82,7 +82,7 @@ class LodgeDetailScreen extends ConsumerWidget {
                             fit: BoxFit.cover,
                             width: double.infinity,
                             errorBuilder: (_, __, ___) => Container(
-                              color: Theme.of(context).colorScheme.outline.shade300,
+                              color: Theme.of(context).colorScheme.outline.withOpacity(0.38),
                               child: const Center(
                                 child: Icon(
                                   Icons.image_not_supported,
@@ -128,7 +128,7 @@ class LodgeDetailScreen extends ConsumerWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.location_on,
                                 color: Theme.of(context).colorScheme.surface,
                                 size: 16,
@@ -136,7 +136,7 @@ class LodgeDetailScreen extends ConsumerWidget {
                               const SizedBox(width: 5),
                               Text(
                                 '${lodge.city}, ${lodge.district}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   color: Theme.of(context).colorScheme.surface,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -163,7 +163,7 @@ class LodgeDetailScreen extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               "About Lodge",
                               style: AppTypography.titleMedium,
                             ),
@@ -250,8 +250,7 @@ class LodgeDetailScreen extends ConsumerWidget {
                         error: (e, _) => Padding(
                           padding: const EdgeInsets.all(20),
                           child: Text(
-                            e.toString(),
-                            style: const TextStyle(color: Theme.of(context).colorScheme.error),
+                            e.toString(), style: TextStyle(color: Theme.of(context).colorScheme.error),
                           ),
                         ),
                       ),
@@ -284,8 +283,8 @@ class LodgeDetailScreen extends ConsumerWidget {
                     ),
                   );
                 },
-                icon: const Icon(Icons.map, color: Theme.of(context).colorScheme.surface),
-                label: const Text(
+                icon: Icon(Icons.map, color: Theme.of(context).colorScheme.surface),
+                label: Text(
                   "View Map",
                   style: TextStyle(color: Theme.of(context).colorScheme.surface),
                 ),

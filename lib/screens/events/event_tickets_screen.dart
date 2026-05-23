@@ -156,7 +156,7 @@ class _EventTicketsScreenState
 
                         Text(
                           widget.event.title,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Theme.of(context).colorScheme.surface,
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -295,7 +295,7 @@ class _EventTicketsScreenState
                                 const EdgeInsets.all(14),
 
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.outline.shade50,
+                              color: Theme.of(context).colorScheme.outline.withOpacity(0.05),
                               borderRadius:
                                   BorderRadius.circular(
                                       14),
@@ -471,7 +471,7 @@ class _EventTicketsScreenState
                                                 TextStyle(
                                               color: Colors
                                                   .grey
-                                                  .shade700,
+                                                  .withOpacity(0.8),
                                             ),
                                           ),
                                         ],
@@ -498,7 +498,7 @@ class _EventTicketsScreenState
                                                     30),
                                       ),
 
-                                      child: const Text(
+                                      child: Text(
                                         "PAID",
                                         style: TextStyle(
                                           color:
@@ -522,7 +522,7 @@ class _EventTicketsScreenState
 
                                   decoration: BoxDecoration(
                                     color:
-                                        Theme.of(context).colorScheme.outline.shade50,
+                                        Theme.of(context).colorScheme.outline.withOpacity(0.05),
                                     borderRadius:
                                         BorderRadius
                                             .circular(16),
@@ -658,7 +658,7 @@ class _EventTicketsScreenState
           Text(
             value,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               color: Theme.of(context).colorScheme.surface,
               fontWeight: FontWeight.bold,
               fontSize: 16,

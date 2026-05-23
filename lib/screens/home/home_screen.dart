@@ -392,7 +392,7 @@ Widget _buildBanner(
             children: [
             Text(
               ctaText ?? "Learn more",
-              style: const TextStyle(
+              style: TextStyle(
                 color: Theme.of(context).colorScheme.primary,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -400,7 +400,7 @@ Widget _buildBanner(
                 ),
               ),
               const SizedBox(width: 6),
-              const Icon(
+              Icon(
                 Icons.arrow_forward,
                 size: 16,
                 color: Theme.of(context).colorScheme.surface,

@@ -673,7 +673,7 @@ class _CreateShopScreenState
                       16,
                     ),
                     border: Border.all(
-                      color: Theme.of(context).colorScheme.outline.shade300,
+                      color: Theme.of(context).colorScheme.outline.withOpacity(0.38),
                     ),
                   ),
                   child: logoFile != null ||
@@ -727,7 +727,7 @@ class _CreateShopScreenState
                       16,
                     ),
                     border: Border.all(
-                      color: Theme.of(context).colorScheme.outline.shade300,
+                      color: Theme.of(context).colorScheme.outline.withOpacity(0.38),
                     ),
                   ),
                   child: bannerFile != null ||

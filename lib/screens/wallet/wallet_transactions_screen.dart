@@ -35,8 +35,7 @@ class WalletTransactionsScreen extends ConsumerWidget {
     }
   }
 
-  Color getColor(String type) {
-    return type == "credit" ? Theme.of(context).colorScheme.secondary : Theme.of(context).colorScheme.error;
+  Color getColor(BuildContext context, String type) { return type == "credit" ? Theme.of(context).colorScheme.secondary : Theme.of(context).colorScheme.error;
   }
 
   @override
@@ -84,7 +83,7 @@ class WalletTransactionsScreen extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     child: Text(
                       sectionTitle(date),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.outline,
@@ -162,7 +161,7 @@ class WalletTransactionsScreen extends ConsumerWidget {
                                 if (tx.transactionRate > 0)
                                   Text(
                                     "${tx.transactionRate}% platform fee applied",
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 11,
                                       color: Theme.of(context).colorScheme.outline,
                                     ),
@@ -190,7 +189,7 @@ class WalletTransactionsScreen extends ConsumerWidget {
 
                               Text(
                                 tx.createdAt.substring(11, 16),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 11,
                                   color: Theme.of(context).colorScheme.outline,
                                 ),

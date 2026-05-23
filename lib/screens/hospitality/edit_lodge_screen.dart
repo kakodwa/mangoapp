@@ -300,7 +300,7 @@ class _EditLodgeScreenState
                       color: Theme.of(context).colorScheme.surface,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.close,
                       color: Theme.of(context).colorScheme.error,
                     ),
@@ -352,7 +352,7 @@ class _EditLodgeScreenState
                       color: Theme.of(context).colorScheme.surface,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.close,
                       color: Theme.of(context).colorScheme.error,
                     ),

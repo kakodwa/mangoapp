@@ -15,7 +15,7 @@ class TicketDetailScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
       appBar: AppBar(
-        title: const Text("My Ticket"),
+        title: Text("My Ticket"),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -53,7 +53,7 @@ class TicketDetailScreen extends StatelessWidget {
                       children: [
                         Text(
                           ticket.eventTitle,
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Theme.of(context).colorScheme.surface,
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -92,7 +92,7 @@ class TicketDetailScreen extends StatelessWidget {
                               color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(
+                            child: Icon(
                               Icons.qr_code,
                               size: 120,
                               color: Theme.of(context).colorScheme.outline,
@@ -176,7 +176,7 @@ class TicketDetailScreen extends StatelessWidget {
 
                         const SizedBox(height: AppSpacing.md),
 
-                        const Text(
+                        Text(
                           "Show this QR code at the entrance",
                           textAlign: TextAlign.center,
                           style: TextStyle(
@@ -205,8 +205,7 @@ class TicketDetailScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            title,
-            style: const TextStyle(color: Theme.of(context).colorScheme.outline),
+            title, style: TextStyle(color: Theme.of(context).colorScheme.outline),
           ),
           Text(
             value,

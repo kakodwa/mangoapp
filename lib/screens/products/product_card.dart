@@ -200,7 +200,7 @@ class ProductCard extends ConsumerWidget {
                   // RATING
                   /*Row(
                     children: [
-                      const Icon(Icons.star,
+                      Icon(Icons.star,
                           size: 14, color: Color(0xFFFFC107)),
                       const SizedBox(width: 4),
                       Text(

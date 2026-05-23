@@ -92,7 +92,7 @@ class _OrdersScreenState
                             BoxDecoration(
                           color: Colors
                               .grey
-                              .shade300,
+                              .withOpacity(0.38),
                           borderRadius:
                               BorderRadius
                                   .circular(
@@ -130,7 +130,7 @@ class _OrdersScreenState
                           BoxDecoration(
                         color: Colors
                             .grey
-                            .shade50,
+                            .withOpacity(0.05),
                         borderRadius:
                             BorderRadius
                                 .circular(
@@ -191,7 +191,7 @@ class _OrdersScreenState
                             BoxDecoration(
                           color: Colors
                               .grey
-                              .shade50,
+                              .withOpacity(0.05),
                           borderRadius:
                               BorderRadius
                                   .circular(
@@ -305,7 +305,7 @@ class _OrdersScreenState
                             Navigator.pop(
                           context,
                         ),
-                        child: const Text(
+                        child: Text(
                           "Close",
                         ),
                       ),
@@ -716,7 +716,7 @@ class _OrdersScreenState
                             Divider(
                               color: Colors
                                   .grey
-                                  .shade200,
+                                  .withOpacity(0.25),
                             ),
 
                             const SizedBox(
@@ -757,7 +757,7 @@ class _OrdersScreenState
                                       BoxDecoration(
                                     color: Colors
                                         .grey
-                                        .shade50,
+                                        .withOpacity(0.05),
                                     borderRadius:
                                         BorderRadius.circular(
                                       16,

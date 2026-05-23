@@ -330,9 +330,9 @@ class _ExampleCompleteFormScreenState extends State<ExampleCompleteFormScreen> {
               Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.primary.shade50,
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Theme.of(context).colorScheme.primary.shade200),
+                  border: Border.all(color: Theme.of(context).colorScheme.primary.withOpacity(0.25)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

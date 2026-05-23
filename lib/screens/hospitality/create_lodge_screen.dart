@@ -236,7 +236,7 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
 
           ElevatedButton.icon(
             onPressed: getLocation,
-            icon: const Icon(Icons.my_location),
+            icon: Icon(Icons.my_location),
             label: const Text("Get GPS Location"),
           ),
 
@@ -289,7 +289,7 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
                       right: 0,
                       child: GestureDetector(
                         onTap: () => setState(() => images.removeAt(i)),
-                        child: const Icon(Icons.close, color: Theme.of(context).colorScheme.error),
+                        child: Icon(Icons.close, color: Theme.of(context).colorScheme.error),
                       ),
                     )
                   ],
@@ -302,7 +302,7 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
                   width: 90,
                   height: 90,
                   color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
-                  child: const Icon(Icons.add),
+                  child: Icon(Icons.add),
                 ),
               ),
             ],

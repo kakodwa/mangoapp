@@ -277,7 +277,7 @@ for (final ticket in ticketTypes) {
                 Expanded(child: AppTextField(label: "Latitude", controller: latitude, type: TextFieldType.text)),
                 const SizedBox(width: 10),
                 Expanded(child: AppTextField(label: "Longitude", controller: longitude, type: TextFieldType.text)),
-                IconButton(onPressed: getGPS, icon: const Icon(Icons.my_location)),
+                IconButton(onPressed: getGPS, icon: Icon(Icons.my_location)),
               ],
             ),
 
@@ -348,7 +348,7 @@ const SizedBox(height: 10),
     margin: const EdgeInsets.only(bottom: 12),
     padding: const EdgeInsets.all(AppSpacing.sm),
     decoration: BoxDecoration(
-      border: Border.all(color: Theme.of(context).colorScheme.outline.shade300),
+      border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.38)),
       borderRadius: BorderRadius.circular(12),
     ),
     child: Column(
@@ -405,7 +405,7 @@ const SizedBox(height: 10),
           Align(
             alignment: Alignment.centerRight,
             child: IconButton(
-              icon: const Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
+              icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
               onPressed: () => removeTicketType(i),
             ),
           ),
@@ -429,7 +429,7 @@ ElevatedButton(
             SwitchListTile(
               value: isFeatured,
               onChanged: (v) => setState(() => isFeatured = v),
-              title: const Text("Featured Event"),
+              title: Text("Featured Event"),
             ),
 
             const SizedBox(height: AppSpacing.md),

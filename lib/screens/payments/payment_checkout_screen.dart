@@ -400,7 +400,7 @@ if (isVisa) {
             color: isSelected
                 ? Theme.of(context)
                     .primaryColor
-                : Theme.of(context).colorScheme.outline.shade300,
+                : Theme.of(context).colorScheme.outline.withOpacity(0.38),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: [
@@ -526,7 +526,7 @@ if (isVisa) {
                 ),
                 child: Column(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.lock_outline,
                       color: Theme.of(context).colorScheme.surface,
                       size: 38,
@@ -539,7 +539,7 @@ if (isVisa) {
                     Text(
                       "Pay MWK ${widget.amount}",
                       style:
-                          const TextStyle(
+                          TextStyle(
                         color:
                             Theme.of(context).colorScheme.surface,
                         fontSize: 22,
@@ -731,7 +731,7 @@ if (isVisa) {
                       style: TextStyle(
                         color: Colors
                             .grey
-                            .shade600,
+                            .withOpacity(0.7),
                         fontSize: 13,
                       ),
                     ),
@@ -757,7 +757,7 @@ if (isVisa) {
                         border: Border.all(
                           color: Colors
                               .grey
-                              .shade200,
+                              .withOpacity(0.25),
                         ),
                       ),
                       child: Row(

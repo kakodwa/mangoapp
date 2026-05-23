@@ -46,7 +46,7 @@ class RoomDetailScreen extends StatelessWidget {
                     room.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: Theme.of(context).colorScheme.surface,
                       fontWeight: FontWeight.bold,
                       shadows: [
@@ -76,7 +76,7 @@ class RoomDetailScreen extends StatelessWidget {
                                   width: double.infinity,
                                   errorBuilder: (_, __, ___) {
                                     return Container(
-                                      color: Theme.of(context).colorScheme.outline.shade300,
+                                      color: Theme.of(context).colorScheme.outline.withOpacity(0.38),
                                       child: const Center(
                                         child: Icon(
                                           Icons.hotel,
@@ -90,7 +90,7 @@ class RoomDetailScreen extends StatelessWidget {
                               }).toList(),
                             )
                           : Container(
-                              color: Theme.of(context).colorScheme.outline.shade300,
+                              color: Theme.of(context).colorScheme.outline.withOpacity(0.38),
                               child: const Center(
                                 child: Icon(
                                   Icons.hotel,
@@ -167,7 +167,7 @@ class RoomDetailScreen extends StatelessWidget {
                             ),
                             child: Text(
                               "Room ${room.roomNumber}",
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: Theme.of(context).colorScheme.primary,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -214,7 +214,7 @@ class RoomDetailScreen extends StatelessWidget {
                                 borderRadius:
                                     BorderRadius.circular(14),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.payments,
                                 color: Theme.of(context).colorScheme.primary,
                               ),
@@ -338,7 +338,7 @@ class RoomDetailScreen extends StatelessWidget {
                                 color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(16),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.hotel_class,
                                 color: Theme.of(context).colorScheme.primary,
                                 size: 30,

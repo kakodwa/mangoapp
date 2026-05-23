@@ -152,7 +152,7 @@ class EventDetailScreen extends StatelessWidget {
                             ),
                           ),
 
-                          child: const Text(
+                          child: Text(
                             "FEATURED",
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.surface,
@@ -207,7 +207,7 @@ class EventDetailScreen extends StatelessWidget {
                               style: TextStyle(
                                 color: Colors
                                     .grey
-                                    .shade700,
+                                    .withOpacity(0.8),
                               ),
                             ),
                           ),
@@ -233,7 +233,7 @@ class EventDetailScreen extends StatelessWidget {
                             style: TextStyle(
                               color: Colors
                                   .grey
-                                  .shade700,
+                                  .withOpacity(0.8),
                             ),
                           ),
 
@@ -244,7 +244,7 @@ class EventDetailScreen extends StatelessWidget {
                             style: TextStyle(
                               color: Colors
                                   .grey
-                                  .shade700,
+                                  .withOpacity(0.8),
                             ),
                           ),
                         ],
@@ -404,7 +404,7 @@ Row(
                   event.description,
                   style: TextStyle(
                     height: 1.6,
-                    color: Theme.of(context).colorScheme.outline.shade800,
+                    color: Theme.of(context).colorScheme.outline.withOpacity(0.9),
                   ),
                 ),
               ],

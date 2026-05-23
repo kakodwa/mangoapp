@@ -314,7 +314,7 @@ class _AddPropertyScreenState
                     color: Theme.of(context).colorScheme.error,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.close,
                     size: 16,
                     color: Theme.of(context).colorScheme.surface,
@@ -519,7 +519,7 @@ class _AddPropertyScreenState
                     CrossAxisAlignment.start,
                 children: [
 
-                  const Text(
+                  Text(
                     'Location',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
@@ -529,7 +529,7 @@ class _AddPropertyScreenState
 
                   const SizedBox(height: 6),
 
-                  const Text(
+                  Text(
                     "📍 GPS used for navigation after unlock",
                     style:
                         TextStyle(color: Theme.of(context).colorScheme.outline),

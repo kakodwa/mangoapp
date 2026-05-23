@@ -172,7 +172,7 @@ class _ManageEventsScreenState
                   children: [
                     Text(
                       event.title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Theme.of(context).colorScheme.surface,
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -183,7 +183,7 @@ class _ManageEventsScreenState
 
                     Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.location_on,
                           color: Theme.of(context).colorScheme.surface,
                           size: 18,
@@ -194,7 +194,7 @@ class _ManageEventsScreenState
                         Expanded(
                           child: Text(
                             "${event.venue}, ${event.city}",
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Theme.of(context).colorScheme.surface,
                             ),
                           ),
@@ -220,7 +220,7 @@ class _ManageEventsScreenState
                       borderRadius:
                           BorderRadius.circular(30),
                     ),
-                    child: const Text(
+                    child: Text(
                       "FEATURED",
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.surface,

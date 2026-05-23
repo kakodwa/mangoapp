@@ -150,7 +150,7 @@ class _CheckoutScreenState
                 ),
                 child: Column(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.shopping_bag_outlined,
                       color: Theme.of(context).colorScheme.surface,
                       size: 38,
@@ -389,7 +389,7 @@ class _CheckoutScreenState
                   ),
                   decoration: BoxDecoration(
                     color:
-                        Theme.of(context).colorScheme.secondary.shade50,
+                        Theme.of(context).colorScheme.secondary.withOpacity(0.05),
                     borderRadius:
                         BorderRadius.circular(
                       14,
@@ -397,7 +397,7 @@ class _CheckoutScreenState
                     border: Border.all(
                       color: Colors
                           .green
-                          .shade100,
+                          .withOpacity(0.12),
                     ),
                   ),
                   child: Column(
@@ -437,7 +437,7 @@ class _CheckoutScreenState
                       Text(
                         "Lat: $_latitude\nLng: $_longitude",
                         style:
-                            const TextStyle(
+                            TextStyle(
                           fontSize: 12,
                           color:
                               Theme.of(context).colorScheme.outline,
@@ -538,7 +538,7 @@ class _CheckoutScreenState
                         Text(
                           "MWK ${widget.total.toStringAsFixed(2)}",
                           style:
-                              const TextStyle(
+                              TextStyle(
                             fontSize: 16,
                             fontWeight:
                                 FontWeight

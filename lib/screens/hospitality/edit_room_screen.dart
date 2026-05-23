@@ -146,7 +146,7 @@ class _EditRoomScreenState
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.outline.shade50,
+        color: Theme.of(context).colorScheme.outline.withOpacity(0.05),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),

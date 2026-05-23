@@ -203,7 +203,7 @@ class _EditProductScreenState
                 color: Theme.of(context).colorScheme.error,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.close,
                 color: Theme.of(context).colorScheme.surface,
                 size: 16,
@@ -402,7 +402,7 @@ class _EditProductScreenState
                               BorderRadius.circular(14),
                           border: Border.all(
                             color:
-                                Theme.of(context).colorScheme.outline.shade300,
+                                Theme.of(context).colorScheme.outline.withOpacity(0.38),
                           ),
                         ),
                         child: Icon(

@@ -206,7 +206,7 @@ class _PropertiesListScreenState
 
                       const SizedBox(height: 10),
 
-                      const Text(
+                      Text(
                         "Failed to load properties",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,

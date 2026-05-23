@@ -262,7 +262,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
                     color: Theme.of(context).colorScheme.error,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.close,
                     color: Theme.of(context).colorScheme.surface,
                     size: 16,
@@ -519,8 +519,8 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
                               BorderRadius.circular(12),
                         ),
                       ),
-                      icon: const Icon(Icons.my_location),
-                      label: const Text("Generate GPS"),
+                      icon: Icon(Icons.my_location),
+                      label: Text("Generate GPS"),
                     ),
                   ),
                 ],
