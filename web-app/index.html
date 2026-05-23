@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MangoMart - Marketplace</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/animations.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div id="app" class="app">
+        <!-- Navigation will be inserted here -->
+        <nav class="navbar">
+            <div class="navbar-container">
+                <div class="navbar-logo">
+                    <i class="fas fa-mango"></i>
+                    <span>MangoMart</span>
+                </div>
+                <div class="navbar-menu" id="navbarMenu">
+                    <a href="#home" class="nav-link">Home</a>
+                    <a href="#products" class="nav-link">Products</a>
+                    <a href="#shops" class="nav-link">Shops</a>
+                    <a href="#properties" class="nav-link">Properties</a>
+                    <a href="#events" class="nav-link">Events</a>
+                    <a href="#hospitality" class="nav-link">Hospitality</a>
+                </div>
+                <div class="navbar-actions">
+                    <button class="btn-icon" id="searchBtn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <button class="btn-icon" id="cartBtn">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count">0</span>
+                    </button>
+                    <button class="btn-icon" id="profileBtn">
+                        <i class="fas fa-user"></i>
+                    </button>
+                    <button class="hamburger" id="hamburger">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Home Page -->
+            <section id="home" class="page active">
+                <!-- Banner Carousel -->
+                <div class="carousel-container">
+                    <div class="carousel">
+                        <div class="carousel-item">
+                            <img src="https://via.placeholder.com/1200x400?text=Welcome+to+MangoMart" alt="Banner">
+                            <div class="carousel-content">
+                                <h2>Welcome to MangoMart</h2>
+                                <p>Your one-stop marketplace for everything</p>
+                                <button class="btn-primary">Shop Now</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carousel-indicators">
+                        <button class="indicator active" data-slide="0"></button>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <div class="quick-action-btn">
+                        <div class="action-icon">
+                            <i class="fas fa-store"></i>
+                        </div>
+                        <span>Shops</span>
+                    </div>
+                    <div class="quick-action-btn">
+                        <div class="action-icon">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <span>Properties</span>
+                    </div>
+                    <div class="quick-action-btn">
+                        <div class="action-icon">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <span>Delivery</span>
+                    </div>
+                    <div class="quick-action-btn">
+                        <div class="action-icon">
+                            <i class="fas fa-bed"></i>
+                        </div>
+                        <span>Hospitality</span>
+                    </div>
+                    <div class="quick-action-btn">
+                        <div class="action-icon">
+                            <i class="fas fa-calendar"></i>
+                        </div>
+                        <span>Events</span>
+                    </div>
+                    <div class="quick-action-btn">
+                        <div class="action-icon">
+                            <i class="fas fa-qrcode"></i>
+                        </div>
+                        <span>Scan Ticket</span>
+                    </div>
+                </div>
+
+                <!-- Featured Shops -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2>Popular Shops</h2>
+                        <a href="#shops" class="view-all">View All →</a>
+                    </div>
+                    <div class="shops-grid" id="shopsContainer">
+                        <!-- Shops will be inserted here -->
+                    </div>
+                </section>
+
+                <!-- Featured Products -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2>Featured Products</h2>
+                        <a href="#products" class="view-all">View All →</a>
+                    </div>
+                    <div class="products-grid" id="productsContainer">
+                        <!-- Products will be inserted here -->
+                    </div>
+                </section>
+
+                <!-- Featured Properties -->
+                <section class="section">
+                    <div class="section-header">
+                        <h2>Featured Properties</h2>
+                        <a href="#properties" class="view-all">View All →</a>
+                    </div>
+                    <div class="properties-grid" id="propertiesContainer">
+                        <!-- Properties will be inserted here -->
+                    </div>
+                </section>
+            </section>
+
+            <!-- Products Page -->
+            <section id="products" class="page">
+                <div class="page-header">
+                    <h1>Products</h1>
+                </div>
+
+                <div class="filters-section">
+                    <div class="search-bar">
+                        <input type="text" id="productSearch" placeholder="Search products..." class="search-input">
+                        <button class="btn-filter">
+                            <i class="fas fa-sliders-h"></i> Filters
+                        </button>
+                    </div>
+                    <div class="filter-chips">
+                        <button class="chip active">All</button>
+                        <button class="chip">Electronics</button>
+                        <button class="chip">Fashion</button>
+                        <button class="chip">Groceries</button>
+                        <button class="chip">Home</button>
+                        <button class="chip">Beauty</button>
+                    </div>
+                </div>
+
+                <div class="products-grid-page" id="productsPageContainer">
+                    <!-- Products will be inserted here -->
+                </div>
+            </section>
+
+            <!-- Shops Page -->
+            <section id="shops" class="page">
+                <div class="page-header">
+                    <h1>All Shops</h1>
+                </div>
+
+                <div class="filters-section">
+                    <div class="search-bar">
+                        <input type="text" id="shopSearch" placeholder="Search shops..." class="search-input">
+                    </div>
+                </div>
+
+                <div class="shops-grid-page" id="shopsPageContainer">
+                    <!-- Shops will be inserted here -->
+                </div>
+            </section>
+
+            <!-- Properties Page -->
+            <section id="properties" class="page">
+                <div class="page-header">
+                    <h1>Properties</h1>
+                </div>
+
+                <div class="filters-section">
+                    <div class="search-bar">
+                        <input type="text" id="propertySearch" placeholder="Search properties..." class="search-input">
+                    </div>
+                </div>
+
+                <div class="properties-grid-page" id="propertiesPageContainer">
+                    <!-- Properties will be inserted here -->
+                </div>
+            </section>
+
+            <!-- Events Page -->
+            <section id="events" class="page">
+                <div class="page-header">
+                    <h1>Events</h1>
+                </div>
+                <div class="events-container">
+                    <p>Explore upcoming events and buy tickets</p>
+                </div>
+            </section>
+
+            <!-- Hospitality Page -->
+            <section id="hospitality" class="page">
+                <div class="page-header">
+                    <h1>Hospitality & Lodges</h1>
+                </div>
+                <div class="hospitality-container">
+                    <p>Book your stay at our partner lodges</p>
+                </div>
+            </section>
+
+            <!-- Profile Page -->
+            <section id="profile" class="page">
+                <div class="profile-header">
+                    <div class="profile-card">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="profile-info">
+                            <h2>John Doe</h2>
+                            <p>john@example.com</p>
+                            <span class="role-badge">Buyer</span>
+                        </div>
+                    </div>
+
+                    <div class="wallet-stats">
+                        <div class="stat">
+                            <span class="stat-value">MK 5,000</span>
+                            <span class="stat-label">Balance</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-value">MK 15,000</span>
+                            <span class="stat-label">Earnings</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-value">MK 3,000</span>
+                            <span class="stat-label">Withdrawn</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-menu">
+                    <a href="#" class="menu-item">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span>My Orders</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    <a href="#" class="menu-item">
+                        <i class="fas fa-credit-card"></i>
+                        <span>Payments</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    <a href="#" class="menu-item">
+                        <i class="fas fa-ticket"></i>
+                        <span>My Tickets</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    <a href="#" class="menu-item">
+                        <i class="fas fa-home"></i>
+                        <span>My Properties</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    <a href="#" class="menu-item">
+                        <i class="fas fa-wallet"></i>
+                        <span>Wallet Transactions</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    <a href="#" class="menu-item">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    <a href="#" class="menu-item logout">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Logout</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </div>
+            </section>
+
+            <!-- Auth Page -->
+            <section id="auth" class="page">
+                <div class="auth-container">
+                    <div class="auth-form">
+                        <div class="auth-header">
+                            <i class="fas fa-mango" style="font-size: 3rem; color: #FF8C00;"></i>
+                            <h2>Welcome to MangoMart</h2>
+                        </div>
+
+                        <!-- Login Form -->
+                        <form id="loginForm" class="form">
+                            <div class="form-group">
+                                <label>Username</label>
+                                <input type="text" id="username" placeholder="Enter your username" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" id="password" placeholder="Enter your password" required>
+                            </div>
+                            <button type="submit" class="btn-primary btn-full">Login</button>
+                        </form>
+
+                        <div class="auth-divider">
+                            <span>Don't have an account?</span>
+                        </div>
+
+                        <button class="btn-secondary btn-full" id="toggleRegister">Create Account</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-container">
+                <div class="footer-section">
+                    <h4>About</h4>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Blog</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 MangoMart. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script src="js/components.js"></script>
+    <script src="js/data.js"></script>
+</body>
+</html>
