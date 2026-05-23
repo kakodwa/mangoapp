@@ -9,13 +9,13 @@ class ApiClient {
 
 
   static String get baseUrl {
-    if (kIsWeb) return 'http://127.0.0.1:8000/api/';
-    return 'http://127.0.0.1:8000/api/';
+    if (kIsWeb) return 'https://55f9-137-115-11-237.ngrok-free.app/api/';
+    return 'https://55f9-137-115-11-237.ngrok-free.app/api/';
   }
 
 
   static const String host =
-    'http://127.0.0.1:8000/api/';
+    'https://55f9-137-115-11-237.ngrok-free.app/api/';
   
   
   late Dio _dio;

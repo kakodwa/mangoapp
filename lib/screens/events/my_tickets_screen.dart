@@ -14,8 +14,8 @@ import 'ticket_detail_screen.dart';
 import '../../widgets/app_scaffold.dart';
 
 import 'package:flutter/foundation.dart';
-import 'dart:html' as html;
-import 'dart:io' as io;
+//import 'dart:html' as html;
+//import 'dart:io' as io;
 
 class MyTicketsScreen extends ConsumerStatefulWidget {
   const MyTicketsScreen({super.key});
@@ -39,20 +39,23 @@ Future<void> captureTicket(GlobalKey key) async {
 
     // ===================== WEB =====================
     if (kIsWeb) {
-      final blob = html.Blob([pngBytes]);
-      final url = html.Url.createObjectUrlFromBlob(blob);
-
-      final anchor = html.AnchorElement(href: url)
-        ..setAttribute("download", "ticket.png")
-        ..click();
-
-      html.Url.revokeObjectUrl(url);
-      return;
-    }
+  await Share.shareXFiles(
+    [
+      XFile.fromData(
+        pngBytes,
+        mimeType: 'image/png',
+        name: 'ticket.png',
+      ),
+    ],
+    text: "🎟 My Event Ticket",
+  );
+  return;
+}
 
     // ===================== MOBILE (Android / iOS) =====================
     final dir = await getTemporaryDirectory();
-    final file = io.File('${dir.path}/ticket.png');
+    final file = File('${dir.path}/ticket.png');
+    //final file = io.File('${dir.path}/ticket.png');
 
     await file.writeAsBytes(pngBytes);
 
