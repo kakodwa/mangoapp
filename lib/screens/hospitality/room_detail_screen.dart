@@ -35,7 +35,7 @@ class RoomDetailScreen extends StatelessWidget {
                 pinned: true,
                 elevation: 0,
                 backgroundColor: Theme.of(context).colorScheme.surface,
-                iconTheme: const IconThemeData(color: Theme.of(context).colorScheme.surface),
+                iconTheme: IconThemeData(color: Theme.of(context).colorScheme.surface),
                 flexibleSpace: FlexibleSpaceBar(
                   titlePadding: EdgeInsets.only(
                     left: 16,
@@ -258,6 +258,7 @@ class RoomDetailScreen extends StatelessWidget {
 
                       /// ================= CAPACITY =================
                       _infoCard(
+                        context: context,
                         icon: Icons.people,
                         title: "Capacity",
                         value: "${room.capacity} Guests",
@@ -449,6 +450,7 @@ class RoomDetailScreen extends StatelessWidget {
 
   /// ================= INFO CARD =================
   Widget _infoCard({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required String value,

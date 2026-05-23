@@ -108,8 +108,8 @@ class TicketDetailScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _infoRow("Quantity", "${ticket.quantity}"),
-                        _infoRow("Total", "MWK ${ticket.totalAmount}"),
+                        _infoRow(context, "Quantity", "${ticket.quantity}"),
+                        _infoRow(context, "Total", "MWK ${ticket.totalAmount}"),
 
                         const SizedBox(height: 10),
 
@@ -198,7 +198,7 @@ class TicketDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _infoRow(String title, String value) {
+  Widget _infoRow(BuildContext context, String title, String value) {
     return Padding(
       padding: EdgeInsets.only(bottom: 6),
       child: Row(

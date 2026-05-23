@@ -42,7 +42,7 @@ class LodgeDetailScreen extends ConsumerWidget {
                 pinned: true,
                 backgroundColor: Theme.of(context).colorScheme.surface,
                 elevation: 0,
-                iconTheme: const IconThemeData(color: Theme.of(context).colorScheme.surface),
+                iconTheme: IconThemeData(color: Theme.of(context).colorScheme.surface),
                 flexibleSpace: FlexibleSpaceBar(
                   collapseMode: CollapseMode.parallax,
                   titlePadding: EdgeInsets.only(

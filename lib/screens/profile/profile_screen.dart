@@ -109,7 +109,7 @@ class ProfileScreen extends ConsumerWidget {
                           vertical: 4,
                           ),
                         decoration: BoxDecoration(
-                          color: UserRoleUtils.getColor(context, user?.userType ?? ''),
+                          color: UserRoleUtils.getColor(user?.userType ?? ''),
                           borderRadius: BorderRadius.circular(20),
                           ),
                         child: Text(
@@ -128,11 +128,11 @@ class ProfileScreen extends ConsumerWidget {
                           mainAxisAlignment:
                               MainAxisAlignment.spaceBetween,
                           children: [
-                            _stat("Balance",
+                            _stat(context, "Balance",
                                 "${wallet.currency} ${wallet.balance}"),
-                            _stat("Earnings",
+                            _stat(context, "Earnings",
                                 "${wallet.currency} ${wallet.totalEarnings}"),
-                            _stat("Withdrawn",
+                            _stat(context, "Withdrawn",
                                 "${wallet.currency} ${wallet.totalWithdrawn}"),
                           ],
                         ),
@@ -374,7 +374,7 @@ if (isLoggedIn && isShopOwner && hasShop) ...[
   }
 
   // ================= WALLET STAT =================
-  Widget _stat(String title, String value) {
+  Widget _stat(BuildContext context, String title, String value) {
     return Column(
       children: [
         Text(
