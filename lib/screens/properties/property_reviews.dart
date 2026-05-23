@@ -45,7 +45,7 @@ class PropertyReviewsWidget extends StatelessWidget {
 
         // Rating Summary
         Container(
-          padding: const EdgeInsets.all(AppSpacing.sm),
+          padding: EdgeInsets.all(AppSpacing.sm),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
             borderRadius: BorderRadius.circular(8),
@@ -115,7 +115,7 @@ class PropertyReviewsWidget extends StatelessWidget {
         if (reviews.isEmpty)
           Center(
             child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.xl),
+              padding: EdgeInsets.all(AppSpacing.xl),
               child: Text(
                 'No reviews yet',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -139,9 +139,9 @@ class PropertyReviewsWidget extends StatelessWidget {
 
   Widget _buildReviewItem(BuildContext context, PropertyReview review) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: EdgeInsets.only(bottom: 8),
       child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.sm),
+        padding: EdgeInsets.all(AppSpacing.sm),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

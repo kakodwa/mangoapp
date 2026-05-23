@@ -37,7 +37,7 @@ class RoomDetailScreen extends StatelessWidget {
                 backgroundColor: Theme.of(context).colorScheme.surface,
                 iconTheme: const IconThemeData(color: Theme.of(context).colorScheme.surface),
                 flexibleSpace: FlexibleSpaceBar(
-                  titlePadding: const EdgeInsets.only(
+                  titlePadding: EdgeInsets.only(
                     left: 16,
                     right: 16,
                     bottom: 16,
@@ -121,7 +121,7 @@ class RoomDetailScreen extends StatelessWidget {
               /// ================= BODY =================
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
+                  padding: EdgeInsets.all(AppSpacing.md),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -131,7 +131,7 @@ class RoomDetailScreen extends StatelessWidget {
                             MainAxisAlignment.spaceBetween,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(
+                            padding: EdgeInsets.symmetric(
                               horizontal: 12,
                               vertical: 7,
                             ),
@@ -156,7 +156,7 @@ class RoomDetailScreen extends StatelessWidget {
                           ),
 
                           Container(
-                            padding: const EdgeInsets.symmetric(
+                            padding: EdgeInsets.symmetric(
                               horizontal: 12,
                               vertical: 7,
                             ),
@@ -203,11 +203,11 @@ class RoomDetailScreen extends StatelessWidget {
                       /// ================= PRICE CARD =================
                       AppCard(
                         padding:
-                            const EdgeInsets.all(AppSpacing.md),
+                            EdgeInsets.all(AppSpacing.md),
                         child: Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(14),
+                              padding: EdgeInsets.all(14),
                               decoration: BoxDecoration(
                                 color:
                                     Theme.of(context).colorScheme.primary.withOpacity(0.1),
@@ -266,7 +266,7 @@ class RoomDetailScreen extends StatelessWidget {
                       const SizedBox(height: AppSpacing.lg),
 
                       /// ================= AMENITIES =================
-                      const Text(
+                      Text(
                         "Amenities",
                         style: TextStyle(
                           fontSize: 20,
@@ -303,7 +303,7 @@ class RoomDetailScreen extends StatelessWidget {
                       const SizedBox(height: AppSpacing.xl),
 
                       /// ================= DESCRIPTION =================
-                      const Text(
+                      Text(
                         "Description",
                         style: TextStyle(
                           fontSize: 20,
@@ -315,7 +315,7 @@ class RoomDetailScreen extends StatelessWidget {
 
                       AppCard(
                         padding:
-                            const EdgeInsets.all(AppSpacing.md),
+                            EdgeInsets.all(AppSpacing.md),
                         child: Text(
                           room.description.isEmpty
                               ? "No description provided."
@@ -329,11 +329,11 @@ class RoomDetailScreen extends StatelessWidget {
 
                       const SizedBox(height: AppSpacing.xl),
                        AppCard(
-                        padding: const EdgeInsets.all(AppSpacing.lg),
+                        padding: EdgeInsets.all(AppSpacing.lg),
                         child: Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(14),
+                              padding: EdgeInsets.all(14),
                               decoration: BoxDecoration(
                                 color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(16),
@@ -351,7 +351,7 @@ class RoomDetailScreen extends StatelessWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
+                                  Text(
                                     "Plan Your Stay",
                                     style: AppTypography.headlineLarge,
                                     ),
@@ -401,7 +401,7 @@ class RoomDetailScreen extends StatelessWidget {
             left: 0,
             right: 0,
             child: Container(
-              padding: const EdgeInsets.symmetric(
+              padding: EdgeInsets.symmetric(
                 horizontal: AppSpacing.md,
                 vertical: AppSpacing.sm,
               ),
@@ -454,11 +454,11 @@ class RoomDetailScreen extends StatelessWidget {
     required String value,
   }) {
     return AppCard(
-      padding: const EdgeInsets.all(AppSpacing.md),
+      padding: EdgeInsets.all(AppSpacing.md),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
@@ -490,7 +490,7 @@ class RoomDetailScreen extends StatelessWidget {
     String label,
   ) {
     return AppCard(
-      padding: const EdgeInsets.symmetric(
+      padding: EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.sm,
       ),

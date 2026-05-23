@@ -68,7 +68,7 @@ class _OrdersScreenState
       builder: (_) {
         return Container(
           padding:
-              const EdgeInsets.all(20),
+              EdgeInsets.all(20),
           decoration: const BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
             borderRadius:
@@ -169,7 +169,7 @@ class _OrdersScreenState
                                 .deliveryPersonName ??
                             '')
                         .isNotEmpty) ...[
-                      const Text(
+                      Text(
                         "Rider Information",
                         style: TextStyle(
                           fontSize: 16,
@@ -252,10 +252,10 @@ class _OrdersScreenState
                               ),
                             ),
                           ),
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.navigation,
                           ),
-                          label: const Text(
+                          label: Text(
                             "Navigate to Rider",
                             style:
                                 TextStyle(
@@ -402,11 +402,11 @@ class _OrdersScreenState
             return Center(
               child: Container(
                 padding:
-                    const EdgeInsets.all(
+                    EdgeInsets.all(
                   24,
                 ),
                 margin:
-                    const EdgeInsets.all(
+                    EdgeInsets.all(
                   24,
                 ),
                 decoration:
@@ -442,7 +442,7 @@ class _OrdersScreenState
                       height: 16,
                     ),
 
-                    const Text(
+                    Text(
                       "No orders yet",
                       style: TextStyle(
                         fontSize: 18,
@@ -480,7 +480,7 @@ class _OrdersScreenState
 
             child: ListView.separated(
               padding:
-                  const EdgeInsets.all(
+                  EdgeInsets.all(
                 16,
               ),
 
@@ -660,7 +660,7 @@ class _OrdersScreenState
                             children: [
                               Container(
                                 padding:
-                                    const EdgeInsets.symmetric(
+                                    EdgeInsets.symmetric(
                                   horizontal:
                                       14,
                                   vertical:
@@ -723,7 +723,7 @@ class _OrdersScreenState
                               height: 12,
                             ),
 
-                            const Text(
+                            Text(
                               "Order Items",
                               style:
                                   TextStyle(
@@ -743,13 +743,13 @@ class _OrdersScreenState
                               (item) {
                                 return Container(
                                   margin:
-                                      const EdgeInsets.only(
+                                      EdgeInsets.only(
                                     bottom:
                                         12,
                                   ),
 
                                   padding:
-                                      const EdgeInsets.all(
+                                      EdgeInsets.all(
                                     12,
                                   ),
 
@@ -796,7 +796,7 @@ class _OrdersScreenState
                                             color:
                                                 Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
                                             child:
-                                                const Icon(
+                                                Icon(
                                               Icons.image,
                                             ),
                                           ),
@@ -901,12 +901,12 @@ class _OrdersScreenState
                                     ),
                                   ),
                                   icon:
-                                      const Icon(
+                                      Icon(
                                     Icons
                                         .local_shipping,
                                   ),
                                   label:
-                                      const Text(
+                                      Text(
                                     "View Delivery Details",
                                     style:
                                         TextStyle(
@@ -941,9 +941,9 @@ class _OrdersScreenState
         error: (_, __) => Center(
           child: Container(
             padding:
-                const EdgeInsets.all(AppSpacing.lg),
+                EdgeInsets.all(AppSpacing.lg),
             margin:
-                const EdgeInsets.all(AppSpacing.lg),
+                EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
               borderRadius:
@@ -965,7 +965,7 @@ class _OrdersScreenState
                   height: 16,
                 ),
 
-                const Text(
+                Text(
                   "Failed to load orders",
                   style: TextStyle(
                     fontSize: 18,

@@ -19,7 +19,7 @@ class TicketDetailScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: EdgeInsets.all(AppSpacing.md),
         child: Column(
           children: [
             // ================= TICKET CARD =================
@@ -40,7 +40,7 @@ class TicketDetailScreen extends StatelessWidget {
                   // ================= HEADER =================
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.all(AppSpacing.md),
+                    padding: EdgeInsets.all(AppSpacing.md),
                     decoration: BoxDecoration(
                       color: AppColors.mangoOrange,
                       borderRadius: const BorderRadius.only(
@@ -75,7 +75,7 @@ class TicketDetailScreen extends StatelessWidget {
 
                   // ================= QR CODE =================
                   Container(
-                    padding: const EdgeInsets.all(AppSpacing.sm),
+                    padding: EdgeInsets.all(AppSpacing.sm),
                     child: ticket.qrCodeUrl != null
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(12),
@@ -104,7 +104,7 @@ class TicketDetailScreen extends StatelessWidget {
 
                   // ================= DETAILS =================
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                    padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -118,7 +118,7 @@ class TicketDetailScreen extends StatelessWidget {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 "Ticket Types",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
@@ -128,8 +128,8 @@ class TicketDetailScreen extends StatelessWidget {
 
                               ...ticket.items.map<Widget>((item) {
                                 return Container(
-                                  margin: const EdgeInsets.only(bottom: 6),
-                                  padding: const EdgeInsets.symmetric(
+                                  margin: EdgeInsets.only(bottom: 6),
+                                  padding: EdgeInsets.symmetric(
                                     horizontal: 10,
                                     vertical: 8,
                                   ),
@@ -155,7 +155,7 @@ class TicketDetailScreen extends StatelessWidget {
                         // ================= STATUS =================
                         Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.all(AppSpacing.sm),
+                          padding: EdgeInsets.all(AppSpacing.sm),
                           decoration: BoxDecoration(
                             color: ticket.paymentStatus == "paid"
                                 ? AppColors.leafGreen.withOpacity(0.15)
@@ -200,7 +200,7 @@ class TicketDetailScreen extends StatelessWidget {
 
   Widget _infoRow(String title, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6),
+      padding: EdgeInsets.only(bottom: 6),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

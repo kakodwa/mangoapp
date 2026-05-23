@@ -72,7 +72,7 @@ Future<void> captureTicket(GlobalKey key) async {
 
     return AppScaffold(
       appBar: AppBar(
-        title: const Text("My Tickets"),
+        title: Text("My Tickets"),
       ),
       body: ticketsAsync.when(
         data: (tickets) {
@@ -81,7 +81,7 @@ Future<void> captureTicket(GlobalKey key) async {
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.all(AppSpacing.sm),
+            padding: EdgeInsets.all(AppSpacing.sm),
             itemCount: tickets.length,
             itemBuilder: (context, index) {
               final ticket = tickets[index];
@@ -99,8 +99,8 @@ Future<void> captureTicket(GlobalKey key) async {
                   RepaintBoundary(
                     key: key,
                     child: Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      padding: const EdgeInsets.all(14),
+                      margin: EdgeInsets.only(bottom: 10),
+                      padding: EdgeInsets.all(14),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(16),
@@ -176,7 +176,7 @@ Future<void> captureTicket(GlobalKey key) async {
                                         ticket.items.map((item) {
                                       return Container(
                                         padding:
-                                            const EdgeInsets.symmetric(
+                                            EdgeInsets.symmetric(
                                           horizontal: 8,
                                           vertical: 4,
                                         ),
@@ -215,7 +215,7 @@ Future<void> captureTicket(GlobalKey key) async {
 
                                   Container(
                                     padding:
-                                        const EdgeInsets.symmetric(
+                                        EdgeInsets.symmetric(
                                       horizontal: 10,
                                       vertical: 5,
                                     ),
@@ -259,14 +259,14 @@ Future<void> captureTicket(GlobalKey key) async {
 
                   // ================= DOWNLOAD BUTTON =================
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
+                    padding: EdgeInsets.only(bottom: 16),
                     child: Align(
                       alignment: Alignment.centerRight,
                       child: TextButton.icon(
                         onPressed: () =>
                             captureTicket(key),
-                        icon: const Icon(Icons.download),
-                        label: const Text("Download Ticket"),
+                        icon: Icon(Icons.download),
+                        label: Text("Download Ticket"),
                       ),
                     ),
                   ),

@@ -154,12 +154,12 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Create Lodge"),
+        title: Text("Create Lodge"),
         backgroundColor: AppColors.mangoOrange,
       ),
 
       body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: EdgeInsets.all(AppSpacing.md),
         children: [
 
           /// ================= BASIC =================
@@ -237,7 +237,7 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
           ElevatedButton.icon(
             onPressed: getLocation,
             icon: Icon(Icons.my_location),
-            label: const Text("Get GPS Location"),
+            label: Text("Get GPS Location"),
           ),
 
           if (latitude != null) Text("Lat: $latitude"),
@@ -245,7 +245,7 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
 
           const SizedBox(height: AppSpacing.lg),
 
-          const Text("Amenities", style: TextStyle(fontWeight: FontWeight.bold)),
+          Text("Amenities", style: TextStyle(fontWeight: FontWeight.bold)),
 
           amenitiesAsync.when(
             data: (amenities) => Wrap(
@@ -266,8 +266,8 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
                 );
               }).toList(),
             ),
-            loading: () => const CircularProgressIndicator(),
-            error: (_, __) => const Text("Failed to load amenities"),
+            loading: () => CircularProgressIndicator(),
+            error: (_, __) => Text("Failed to load amenities"),
           ),
 
           const SizedBox(height: AppSpacing.lg),
@@ -315,8 +315,8 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
             child: ElevatedButton(
               onPressed: isLoading ? null : submitLodge,
               child: isLoading
-                  ? const CircularProgressIndicator(color: Theme.of(context).colorScheme.surface)
-                  : const Text("Create Lodge"),
+                  ? CircularProgressIndicator(color: Theme.of(context).colorScheme.surface)
+                  : Text("Create Lodge"),
             ),
           ),
         ],

@@ -45,7 +45,7 @@ class LodgeDetailScreen extends ConsumerWidget {
                 iconTheme: const IconThemeData(color: Theme.of(context).colorScheme.surface),
                 flexibleSpace: FlexibleSpaceBar(
                   collapseMode: CollapseMode.parallax,
-                  titlePadding: const EdgeInsets.only(
+                  titlePadding: EdgeInsets.only(
                     left: 16,
                     bottom: 16,
                     right: 16,
@@ -114,7 +114,7 @@ class LodgeDetailScreen extends ConsumerWidget {
                         left: 16,
                         bottom: 60,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
+                          padding: EdgeInsets.symmetric(
                             horizontal: 12,
                             vertical: 7,
                           ),
@@ -153,13 +153,13 @@ class LodgeDetailScreen extends ConsumerWidget {
               /// ================= MAIN CONTENT =================
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
+                  padding: EdgeInsets.all(AppSpacing.md),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       /// DESCRIPTION
                       AppCard(
-                        padding: const EdgeInsets.all(AppSpacing.lg),
+                        padding: EdgeInsets.all(AppSpacing.lg),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -180,7 +180,7 @@ class LodgeDetailScreen extends ConsumerWidget {
                       const SizedBox(height: AppSpacing.xl),
 
                       /// SECTION HEADER
-                      const Text(
+                      Text(
                         'Available Rooms',
                          style: AppTypography.headlineLarge,
                       ),
@@ -192,7 +192,7 @@ class LodgeDetailScreen extends ConsumerWidget {
                         data: (rooms) {
                           if (rooms.isEmpty) {
                             return AppCard(
-                              padding: const EdgeInsets.all(AppSpacing.xl),
+                              padding: EdgeInsets.all(AppSpacing.xl),
                               child: Column(
                                 children: [
                                   Icon(
@@ -201,7 +201,7 @@ class LodgeDetailScreen extends ConsumerWidget {
                                     color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4),
                                   ),
                                   const SizedBox(height: AppSpacing.sm),
-                                  const Text(
+                                  Text(
                                     "No rooms available yet",
                                     style: TextStyle(
                                       fontWeight: FontWeight.w600,
@@ -248,7 +248,7 @@ class LodgeDetailScreen extends ConsumerWidget {
                           child: Center(child: CircularProgressIndicator()),
                         ),
                         error: (e, _) => Padding(
-                          padding: const EdgeInsets.all(20),
+                          padding: EdgeInsets.all(20),
                           child: Text(
                             e.toString(), style: TextStyle(color: Theme.of(context).colorScheme.error),
                           ),

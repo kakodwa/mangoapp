@@ -35,7 +35,8 @@ class WalletTransactionsScreen extends ConsumerWidget {
     }
   }
 
-  Color getColor(BuildContext context, String type) { return type == "credit" ? Theme.of(context).colorScheme.secondary : Theme.of(context).colorScheme.error;
+  Color getColor(BuildContext context, String type) {
+    return type == "credit" ? Theme.of(context).colorScheme.secondary : Theme.of(context).colorScheme.error;
   }
 
   @override
@@ -46,7 +47,7 @@ class WalletTransactionsScreen extends ConsumerWidget {
       backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
 
       appBar: AppBar(
-        title: const Text("Wallet Activity"),
+        title: Text("Wallet Activity"),
         backgroundColor: AppColors.mangoOrange,
         elevation: 0,
       ),
@@ -69,7 +70,7 @@ class WalletTransactionsScreen extends ConsumerWidget {
           }
 
           return ListView(
-            padding: const EdgeInsets.all(AppSpacing.sm),
+            padding: EdgeInsets.all(AppSpacing.sm),
             children: grouped.entries.map((entry) {
               final date = entry.key;
               final items = entry.value;
@@ -80,7 +81,7 @@ class WalletTransactionsScreen extends ConsumerWidget {
 
                   // ================= DATE HEADER =================
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    padding: EdgeInsets.symmetric(vertical: 10),
                     child: Text(
                       sectionTitle(date),
                       style: TextStyle(
@@ -96,8 +97,8 @@ class WalletTransactionsScreen extends ConsumerWidget {
                     final isCredit = tx.transactionType == "credit";
 
                     return Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      padding: const EdgeInsets.all(14),
+                      margin: EdgeInsets.only(bottom: 10),
+                      padding: EdgeInsets.all(14),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(16),
@@ -118,13 +119,13 @@ class WalletTransactionsScreen extends ConsumerWidget {
                             height: 45,
                             width: 45,
                             decoration: BoxDecoration(
-                              color: getColor(tx.transactionType)
+                              color: getColor(context, tx.transactionType)
                                   .withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Icon(
                               getIcon(tx.source),
-                              color: getColor(tx.transactionType),
+                              color: getColor(context, tx.transactionType),
                             ),
                           ),
 
@@ -179,7 +180,7 @@ class WalletTransactionsScreen extends ConsumerWidget {
                               Text(
                                 "${isCredit ? '+' : '-'} MWK ${tx.amount}",
                                 style: TextStyle(
-                                  color: getColor(tx.transactionType),
+                                  color: getColor(context, tx.transactionType),
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
                                 ),

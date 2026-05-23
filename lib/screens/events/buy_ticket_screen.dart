@@ -224,12 +224,12 @@ class _BuyTicketScreenState
     return Scaffold(
 
       appBar: AppBar(
-        title: const Text("Buy Ticket"),
+        title: Text("Buy Ticket"),
       ),
 
       body: Padding(
 
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: EdgeInsets.all(AppSpacing.md),
 
         child: Column(
 
@@ -257,11 +257,11 @@ class _BuyTicketScreenState
 
                   return Container(
 
-                    margin: const EdgeInsets.only(
+                    margin: EdgeInsets.only(
                       bottom: 12,
                     ),
 
-                    padding: const EdgeInsets.all(AppSpacing.sm),
+                    padding: EdgeInsets.all(AppSpacing.sm),
 
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
@@ -317,7 +317,7 @@ class _BuyTicketScreenState
                             }
                           },
 
-                          icon: const Icon(Icons.remove),
+                          icon: Icon(Icons.remove),
                         ),
 
                         Text(
@@ -341,7 +341,7 @@ class _BuyTicketScreenState
 
                           },
 
-                          icon: const Icon(Icons.add),
+                          icon: Icon(Icons.add),
                         ),
                       ],
                     ),
@@ -380,11 +380,11 @@ class _BuyTicketScreenState
 
                 child: loading
 
-                    ? const CircularProgressIndicator(
+                    ? CircularProgressIndicator(
                         color: Theme.of(context).colorScheme.surface,
                       )
 
-                    : const Text(
+                    : Text(
                         "Confirm Purchase",
                       ),
               ),

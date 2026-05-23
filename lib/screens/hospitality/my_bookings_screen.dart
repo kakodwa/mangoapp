@@ -14,12 +14,12 @@ class MyBookingsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Bookings'),
+        title: Text('My Bookings'),
       ),
       body: bookingsAsync.when(
         data: (bookings) {
           return ListView.builder(
-            padding: const EdgeInsets.all(AppSpacing.md),
+            padding: EdgeInsets.all(AppSpacing.md),
             itemCount: bookings.length,
             itemBuilder: (context, index) {
               return BookingCard(booking: bookings[index]);

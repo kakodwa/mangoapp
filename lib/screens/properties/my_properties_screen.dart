@@ -16,13 +16,13 @@ class MyPropertiesScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("My Properties"),
+        title: Text("My Properties"),
       ),
 
       // ✅ ADD PROPERTY BUTTON
       floatingActionButton: FloatingActionButton(
         backgroundColor: Theme.of(context).colorScheme.primary,
-        child: const Icon(Icons.add),
+        child: Icon(Icons.add),
         onPressed: () {
           Navigator.push(
             context,
@@ -60,7 +60,7 @@ class MyPropertiesScreen extends ConsumerWidget {
                 },
 
                 child: Card(
-                  margin: const EdgeInsets.all(10),
+                  margin: EdgeInsets.all(10),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -76,7 +76,7 @@ class MyPropertiesScreen extends ConsumerWidget {
                         Container(
                           height: 180,
                           color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
-                          child: const Icon(Icons.home, size: 50),
+                          child: Icon(Icons.home, size: 50),
                         ),
 
                       // ================= CONTENT =================
@@ -116,20 +116,20 @@ class MyPropertiesScreen extends ConsumerWidget {
                                 final confirm = await showDialog(
                                   context: context,
                                   builder: (_) => AlertDialog(
-                                    title: const Text("Delete Property?"),
-                                    content: const Text(
+                                    title: Text("Delete Property?"),
+                                    content: Text(
                                       "This action cannot be undone.",
                                     ),
                                     actions: [
                                       TextButton(
                                         onPressed: () =>
                                             Navigator.pop(context, false),
-                                        child: const Text("Cancel"),
+                                        child: Text("Cancel"),
                                       ),
                                       TextButton(
                                         onPressed: () =>
                                             Navigator.pop(context, true),
-                                        child: const Text("Delete"),
+                                        child: Text("Delete"),
                                       ),
                                     ],
                                   ),

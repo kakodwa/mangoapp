@@ -171,7 +171,7 @@ class _EditProductScreenState
                       BorderRadius.circular(14),
                   color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
                 ),
-                child: const CircularProgressIndicator(),
+                child: CircularProgressIndicator(),
               );
             }
 
@@ -198,7 +198,7 @@ class _EditProductScreenState
               });
             },
             child: Container(
-              padding: const EdgeInsets.all(3),
+              padding: EdgeInsets.all(3),
               decoration: const BoxDecoration(
                 color: Theme.of(context).colorScheme.error,
                 shape: BoxShape.circle,
@@ -228,7 +228,7 @@ class _EditProductScreenState
         child: Form(
           key: _formKey,
           child: ListView(
-            padding: const EdgeInsets.all(AppSpacing.md),
+            padding: EdgeInsets.all(AppSpacing.md),
             children: [
               // ======================
               // PRODUCT NAME
@@ -374,7 +374,7 @@ class _EditProductScreenState
               // IMAGES
               // ======================
 
-              const Text(
+              Text(
                 "New Product Images (Optional)",
                 style: TextStyle(
                   fontSize: 16,
@@ -430,10 +430,10 @@ class _EditProductScreenState
                 ),
                 child: SwitchListTile(
                   value: isActive,
-                  title: const Text(
+                  title: Text(
                     "Product Active",
                   ),
-                  subtitle: const Text(
+                  subtitle: Text(
                     "Visible to customers",
                   ),
                   onChanged: (value) {
@@ -471,7 +471,7 @@ class _EditProductScreenState
                             strokeWidth: 2.5,
                           ),
                         )
-                      : const Text(
+                      : Text(
                           "Update Product",
                           style: TextStyle(
                             fontSize: 16,

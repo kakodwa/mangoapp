@@ -8,14 +8,15 @@ class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
 
   Widget _featureCard({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required String desc,
     required Color color,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
+      margin: EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
@@ -74,7 +75,7 @@ class AboutScreen extends StatelessWidget {
       backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
 
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -84,7 +85,7 @@ class AboutScreen extends StatelessWidget {
             // =========================
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(18),
+              padding: EdgeInsets.all(18),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
@@ -121,7 +122,7 @@ class AboutScreen extends StatelessWidget {
 
             const SizedBox(height: AppSpacing.md),
 
-            const Text(
+            Text(
               "Why use this platform",
               style: TextStyle(
                 fontSize: 18,
@@ -132,6 +133,7 @@ class AboutScreen extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
 
             _featureCard(
+              context: context,
               icon: Icons.store,
               title: "All Shops in One Place",
               desc:
@@ -140,6 +142,7 @@ class AboutScreen extends StatelessWidget {
             ),
 
             _featureCard(
+              context: context,
               icon: Icons.local_shipping,
               title: "Fast & Reliable Delivery",
               desc:
@@ -148,6 +151,7 @@ class AboutScreen extends StatelessWidget {
             ),
 
             _featureCard(
+              context: context,
               icon: Icons.verified,
               title: "Verified Properties",
               desc: "Only verified land and houses are listed (no scams).",
@@ -155,6 +159,7 @@ class AboutScreen extends StatelessWidget {
             ),
 
             _featureCard(
+              context: context,
               icon: Icons.security,
               title: "Secure Payments",
               desc:
@@ -163,6 +168,7 @@ class AboutScreen extends StatelessWidget {
             ),
 
             _featureCard(
+              context: context,
               icon: Icons.trending_up,
               title: "Earn & Sell Easily",
               desc:
@@ -171,6 +177,7 @@ class AboutScreen extends StatelessWidget {
             ),
 
             _featureCard(
+              context: context,
               icon: Icons.phone_android,
               title: "Works on All Phones",
               desc:
@@ -185,7 +192,7 @@ class AboutScreen extends StatelessWidget {
             // =========================
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(14),
+              padding: EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(14),

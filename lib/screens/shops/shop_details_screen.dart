@@ -84,7 +84,7 @@ class ShopDetailsScreen extends ConsumerWidget {
                             top: 40,
                             left: 16,
                             child: Container(
-                              padding: const EdgeInsets.symmetric(
+                              padding: EdgeInsets.symmetric(
                                   horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
                                 color: AppColors.mangoOrange,
@@ -133,8 +133,8 @@ class ShopDetailsScreen extends ConsumerWidget {
                   // ================= SHOP INFO
                   SliverToBoxAdapter(
                     child: Container(
-                      margin: const EdgeInsets.all(AppSpacing.md),
-                      padding: const EdgeInsets.all(AppSpacing.md),
+                      margin: EdgeInsets.all(AppSpacing.md),
+                      padding: EdgeInsets.all(AppSpacing.md),
                       decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(16),
@@ -157,7 +157,7 @@ class ShopDetailsScreen extends ConsumerWidget {
                                     ? NetworkImage(shop.logo)
                                     : null,
                                 child: shop.logo.isEmpty
-                                    ? const Icon(Icons.store)
+                                    ? Icon(Icons.store)
                                     : null,
                               ),
                               const SizedBox(width: AppSpacing.sm),
@@ -182,7 +182,7 @@ class ShopDetailsScreen extends ConsumerWidget {
                                         const SizedBox(width: 4),
                                         Text(shop.district),
                                         const SizedBox(width: AppSpacing.sm),
-                                        const Icon(Icons.star,
+                                        Icon(Icons.star,
                                             size: 14,
                                             color:
                                                 AppColors.mangoOrange),
@@ -237,7 +237,7 @@ class ShopDetailsScreen extends ConsumerWidget {
                     ),
                     data: (products) {
                       return SliverPadding(
-                        padding: const EdgeInsets.all(AppSpacing.sm),
+                        padding: EdgeInsets.all(AppSpacing.sm),
                         sliver: SliverGrid(
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {
@@ -282,7 +282,7 @@ class ShopDetailsScreen extends ConsumerWidget {
                             child: CircularProgressIndicator()),
                       ),
                       error: (e, _) => Padding(
-                        padding: const EdgeInsets.all(AppSpacing.md),
+                        padding: EdgeInsets.all(AppSpacing.md),
                         child: Text("Error: $e"),
                       ),
                       data: (shops) {
@@ -297,7 +297,7 @@ class ShopDetailsScreen extends ConsumerWidget {
                         return SizedBox(
                           height:280,
                           child: ListView.separated(
-                            padding: const EdgeInsets.symmetric(
+                            padding: EdgeInsets.symmetric(
                                 horizontal: 16),
                             scrollDirection: Axis.horizontal,
                             itemCount: shops.length,
@@ -332,7 +332,7 @@ class ShopDetailsScreen extends ConsumerWidget {
                       heroTag: "fav",
                       backgroundColor: Theme.of(context).colorScheme.error,
                       onPressed: () {},
-                      child: const Icon(Icons.favorite),
+                      child: Icon(Icons.favorite),
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     FloatingActionButton(
@@ -348,7 +348,7 @@ class ShopDetailsScreen extends ConsumerWidget {
                           ),
                         );
                       },
-                      child: const Icon(Icons.map),
+                      child: Icon(Icons.map),
                     ),
                   ],
                 ),

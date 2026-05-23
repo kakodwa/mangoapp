@@ -115,7 +115,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
             // QUICK ACTIONS
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
               child: Row(
                 children: [
                   Expanded(
@@ -159,7 +159,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             const SizedBox(height: AppSpacing.sm),
 
             Padding(
-  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+  padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
   child: Row(
     children: [
 
@@ -227,13 +227,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 return ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
                   itemCount: featured.length,
                   itemBuilder: (context, index) =>
                       ShopCard(shop: featured[index]),
                 );
               },
-              loading: () => const CircularProgressIndicator(),
+              loading: () => CircularProgressIndicator(),
               error: (_, __) => const SizedBox(),
             ),
 
@@ -256,7 +256,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       .toList(),
                 );
               },
-              loading: () => const CircularProgressIndicator(),
+              loading: () => CircularProgressIndicator(),
               error: (_, __) => const SizedBox(),
             ),
 
@@ -270,13 +270,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 return ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
                   itemCount: featured.length,
                   itemBuilder: (context, index) =>
                       PropertyCard(property: featured[index]),
                 );
               },
-              loading: () => const CircularProgressIndicator(),
+              loading: () => CircularProgressIndicator(),
               error: (_, __) => const SizedBox(),
             ),
 
@@ -290,7 +290,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   // SECTION HEADER
   Widget _sectionHeader(BuildContext context, String title) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -325,7 +325,7 @@ Widget _buildBanner(
   String? ctaText,
 }) {
   return Container(
-    margin: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 6),
+    margin: EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 6),
     child: ClipRRect(
       borderRadius: BorderRadius.circular(14),
       child: Stack(
@@ -351,7 +351,7 @@ Widget _buildBanner(
 
           /// CONTENT
           Padding(
-  padding: const EdgeInsets.all(20),
+  padding: EdgeInsets.all(20),
   child: Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     mainAxisAlignment: MainAxisAlignment.center,
@@ -462,7 +462,7 @@ class _QuickActionButtonState extends State<_QuickActionButton> {
             borderRadius: BorderRadius.circular(16),
             onTap: widget.onTap,
             child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
+              padding: EdgeInsets.all(AppSpacing.md),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

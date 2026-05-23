@@ -106,7 +106,7 @@ class _PropertiesListScreenState
           // SEARCH + FILTER TOGGLE
           // =========================
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            padding: EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: Row(
               children: [
                 Expanded(
@@ -193,12 +193,12 @@ class _PropertiesListScreenState
 
               error: (e, _) => Center(
                 child: Padding(
-                  padding: const EdgeInsets.all(20),
+                  padding: EdgeInsets.all(20),
                   child: Column(
                     mainAxisAlignment:
                         MainAxisAlignment.center,
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.error_outline,
                         size: 60,
                         color: Colors.redAccent,
@@ -233,7 +233,7 @@ class _PropertiesListScreenState
                         ),
                         onPressed: () =>
                             ref.refresh(propertiesProvider),
-                        child: const Text("Retry"),
+                        child: Text("Retry"),
                       )
                     ],
                   ),
@@ -294,7 +294,7 @@ class _PropertiesListScreenState
                   },
 
                   child: ListView.separated(
-                    padding: const EdgeInsets.symmetric(
+                    padding: EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 12,
                     ),

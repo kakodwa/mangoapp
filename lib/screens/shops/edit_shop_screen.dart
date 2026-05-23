@@ -382,7 +382,7 @@ class _EditShopScreenState
         child: Form(
           key: _formKey,
           child: ListView(
-            padding: const EdgeInsets.all(AppSpacing.md),
+            padding: EdgeInsets.all(AppSpacing.md),
             children: [
               // ======================
               // SHOP NAME
@@ -605,12 +605,12 @@ class _EditShopScreenState
                 ),
                 child: Padding(
                   padding:
-                      const EdgeInsets.all(AppSpacing.md),
+                      EdgeInsets.all(AppSpacing.md),
                   child: Column(
                     crossAxisAlignment:
                         CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Shop Location',
                         style: TextStyle(
                           fontWeight:
@@ -625,10 +625,10 @@ class _EditShopScreenState
                         width: double.infinity,
                         child: ElevatedButton.icon(
                           onPressed: getLocation,
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.location_on,
                           ),
-                          label: const Text(
+                          label: Text(
                             'Update Location',
                           ),
                         ),
@@ -656,7 +656,7 @@ class _EditShopScreenState
               // LOGO
               // ======================
 
-              const Text(
+              Text(
                 "Shop Logo",
                 style: TextStyle(
                   fontSize: 16,
@@ -708,7 +708,7 @@ class _EditShopScreenState
               // BANNER
               // ======================
 
-              const Text(
+              Text(
                 "Shop Banner",
                 style: TextStyle(
                   fontSize: 16,
@@ -786,7 +786,7 @@ class _EditShopScreenState
                             strokeWidth: 2.5,
                           ),
                         )
-                      : const Text(
+                      : Text(
                           "Update Shop",
                           style: TextStyle(
                             fontSize: 16,

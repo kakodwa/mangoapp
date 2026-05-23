@@ -82,9 +82,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final auth = ref.watch(authProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Create Account")),
+      appBar: AppBar(title: Text("Create Account")),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: EdgeInsets.all(AppSpacing.md),
         child: Form(
           key: _formKey,
           child: Column(
@@ -96,7 +96,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 label: "Username",
                 controller: _usernameController,
                 isRequired: true,
-                prefix: const Icon(Icons.person),
+                prefix: Icon(Icons.person),
               ),
 
               const SizedBox(height: AppSpacing.sm),
@@ -106,7 +106,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 controller: _emailController,
                 type: TextFieldType.email,
                 isRequired: true,
-                prefix: const Icon(Icons.email),
+                prefix: Icon(Icons.email),
               ),
 
               const SizedBox(height: AppSpacing.sm),
@@ -115,7 +115,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 label: "First Name",
                 controller: _firstNameController,
                 isRequired: true,
-                prefix: const Icon(Icons.person_outline),
+                prefix: Icon(Icons.person_outline),
               ),
 
               const SizedBox(height: AppSpacing.sm),
@@ -124,7 +124,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 label: "Last Name",
                 controller: _lastNameController,
                 isRequired: true,
-                prefix: const Icon(Icons.person_outline),
+                prefix: Icon(Icons.person_outline),
               ),
 
               const SizedBox(height: AppSpacing.sm),
@@ -151,7 +151,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 controller: _passwordController,
                 type: TextFieldType.password,
                 isRequired: true,
-                prefix: const Icon(Icons.lock),
+                prefix: Icon(Icons.lock),
               ),
 
               const SizedBox(height: AppSpacing.sm),
@@ -161,7 +161,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 controller: _confirmPasswordController,
                 type: TextFieldType.password,
                 isRequired: true,
-                prefix: const Icon(Icons.lock),
+                prefix: Icon(Icons.lock),
               ),
 
               const SizedBox(height: AppSpacing.lg),
@@ -180,7 +180,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text("Already have an account? Login"),
+                child: Text("Already have an account? Login"),
               ),
             ],
           ),

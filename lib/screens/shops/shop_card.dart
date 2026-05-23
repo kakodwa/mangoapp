@@ -50,7 +50,7 @@ class _ShopCardState extends State<ShopCard> {
         duration: const Duration(milliseconds: 120),
         scale: _pressed ? 0.98 : 1.0,
         child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          margin: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
             color: Theme.of(context).colorScheme.surface,
@@ -91,7 +91,7 @@ class _ShopCardState extends State<ShopCard> {
                               )
                             : Container(
                                 color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
-                                child: const Icon(Icons.store, size: 40),
+                                child: Icon(Icons.store, size: 40),
                               ),
                       ),
                     ),
@@ -141,7 +141,7 @@ class _ShopCardState extends State<ShopCard> {
 
               // ================= INFO =================
               Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
+                padding: EdgeInsets.all(AppSpacing.md),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

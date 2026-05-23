@@ -79,7 +79,7 @@ class _RiderDeliveryScreenState
       ),
 
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: EdgeInsets.all(AppSpacing.md),
 
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,7 +88,7 @@ class _RiderDeliveryScreenState
             // ================= STATUS CARD =================
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(18),
+              padding: EdgeInsets.all(18),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
@@ -109,7 +109,7 @@ class _RiderDeliveryScreenState
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(AppSpacing.sm),
+                    padding: EdgeInsets.all(AppSpacing.sm),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.surface.withOpacity(0.2),
                       borderRadius:
@@ -159,7 +159,7 @@ class _RiderDeliveryScreenState
             // ================= CUSTOMER INFO =================
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(18),
+              padding: EdgeInsets.all(18),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(20),
@@ -223,7 +223,7 @@ class _RiderDeliveryScreenState
             // ================= INFO MESSAGE =================
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(AppSpacing.md),
+              padding: EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
                 borderRadius: BorderRadius.circular(18),
@@ -263,7 +263,7 @@ class _RiderDeliveryScreenState
             if (d.items != null && d.items!.isNotEmpty)
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(18),
+                padding: EdgeInsets.all(18),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(20),
@@ -310,11 +310,11 @@ class _RiderDeliveryScreenState
                     ...d.items!.map(
                       (item) => Container(
                         margin:
-                            const EdgeInsets.only(
+                            EdgeInsets.only(
                           bottom: 10,
                         ),
                         padding:
-                            const EdgeInsets.all(AppSpacing.sm),
+                            EdgeInsets.all(AppSpacing.sm),
                         decoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.outline.withOpacity(0.05),
                           borderRadius:
@@ -366,8 +366,8 @@ class _RiderDeliveryScreenState
                 width: double.infinity,
 
                 child: ElevatedButton.icon(
-                  icon: const Icon(Icons.navigation),
-                  label: const Text(
+                  icon: Icon(Icons.navigation),
+                  label: Text(
                     "Navigate to Customer",
                   ),
 
@@ -377,7 +377,7 @@ class _RiderDeliveryScreenState
                         AppColors.leafGreen,
                     foregroundColor: Theme.of(context).colorScheme.surface,
                     padding:
-                        const EdgeInsets.symmetric(
+                        EdgeInsets.symmetric(
                       vertical: 16,
                     ),
                     shape: RoundedRectangleBorder(

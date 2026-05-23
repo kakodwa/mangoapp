@@ -8,14 +8,15 @@ class HelpSupportScreen extends StatelessWidget {
   const HelpSupportScreen({super.key});
 
   Widget _contactCard({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required String value,
     required Color color,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
+      margin: EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
@@ -70,7 +71,7 @@ class HelpSupportScreen extends StatelessWidget {
       backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
 
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -80,7 +81,7 @@ class HelpSupportScreen extends StatelessWidget {
             // =========================
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(18),
+              padding: EdgeInsets.all(18),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
@@ -128,6 +129,7 @@ class HelpSupportScreen extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
 
             _contactCard(
+              context: context,
               icon: Icons.email,
               title: "Email Support",
               value: "ikpixels.py@gmail.com",
@@ -135,6 +137,7 @@ class HelpSupportScreen extends StatelessWidget {
             ),
 
             _contactCard(
+              context: context,
               icon: Icons.phone,
               title: "Phone Support",
               value: "0993 344 416",
@@ -148,7 +151,7 @@ class HelpSupportScreen extends StatelessWidget {
             // =========================
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(14),
+              padding: EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(14),
@@ -182,7 +185,7 @@ class HelpSupportScreen extends StatelessWidget {
             // QUICK HELP TIP
             // =========================
             Container(
-              padding: const EdgeInsets.all(14),
+              padding: EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(14),

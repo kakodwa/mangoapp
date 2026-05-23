@@ -111,8 +111,8 @@ class _PropertyUnlockScreenState
 
           /// PROPERTY CARD (UNCHANGED)
           Container(
-            margin: const EdgeInsets.all(AppSpacing.md),
-            padding: const EdgeInsets.all(AppSpacing.md),
+            margin: EdgeInsets.all(AppSpacing.md),
+            padding: EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
               color: AppColors.mangoOrange.withOpacity(0.08),
               borderRadius: BorderRadius.circular(12),
@@ -140,7 +140,7 @@ class _PropertyUnlockScreenState
                   ],
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                const Text('What you\'ll get after unlocking:'),
+                Text('What you\'ll get after unlocking:'),
                 const SizedBox(height: AppSpacing.xs),
                 _buildFeature('Full property description and details'),
                 _buildFeature('Exact location on map'),
@@ -152,10 +152,10 @@ class _PropertyUnlockScreenState
 
           /// AMOUNT CARD (UNCHANGED)
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
             child: Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(AppSpacing.md),
+              padding: EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
                 border: Border.all(
                   color: AppColors.darkText.withOpacity(0.2),
@@ -165,7 +165,7 @@ class _PropertyUnlockScreenState
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Unlock Fee:'),
+                  Text('Unlock Fee:'),
                   Text(
                     'MWK ${widget.unlockFee.toStringAsFixed(2)}',
                     style: TextStyle(
@@ -182,7 +182,7 @@ class _PropertyUnlockScreenState
 
           /// BUTTON
           Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
+            padding: EdgeInsets.all(AppSpacing.md),
             child: SizedBox(
               width: double.infinity,
               height: 48,
@@ -192,8 +192,8 @@ class _PropertyUnlockScreenState
                 ),
                 onPressed: _isProcessing ? null : _processPayment,
                 icon: _isProcessing
-                    ? const CircularProgressIndicator(color: Theme.of(context).colorScheme.surface)
-                    : const Icon(Icons.lock_open),
+                    ? CircularProgressIndicator(color: Theme.of(context).colorScheme.surface)
+                    : Icon(Icons.lock_open),
                 label: Text(
                   _isProcessing
                       ? 'Preparing payment...'

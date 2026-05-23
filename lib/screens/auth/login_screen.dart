@@ -99,7 +99,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       backgroundColor: Theme.of(context).colorScheme.surface,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.lg),
+          padding: EdgeInsets.all(AppSpacing.lg),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -117,7 +117,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       _showError('Logo failed to load');
                     });
                   }
-                  return const Icon(Icons.broken_image, size: 80);
+                  return Icon(Icons.broken_image, size: 80);
                 },
               ),
 
@@ -151,7 +151,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       label: 'Username',
                       hint: 'Enter your username',
                       controller: _usernameController,
-                      prefix: const Icon(Icons.person),
+                      prefix: Icon(Icons.person),
                       isRequired: true,
                       validator: (value) {
                         if (value?.isEmpty ?? true) {
@@ -168,7 +168,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       hint: 'Enter your password',
                       controller: _passwordController,
                       type: TextFieldType.password,
-                      prefix: const Icon(Icons.lock),
+                      prefix: Icon(Icons.lock),
                       isRequired: true,
                       validator: (value) {
                         if (value?.isEmpty ?? true) {

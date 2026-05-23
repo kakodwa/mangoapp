@@ -372,7 +372,7 @@ class _CreateShopScreenState
         child: Form(
           key: _formKey,
           child: ListView(
-            padding: const EdgeInsets.all(AppSpacing.md),
+            padding: EdgeInsets.all(AppSpacing.md),
             children: [
               // ======================
               // SHOP NAME
@@ -595,12 +595,12 @@ class _CreateShopScreenState
                 ),
                 child: Padding(
                   padding:
-                      const EdgeInsets.all(AppSpacing.md),
+                      EdgeInsets.all(AppSpacing.md),
                   child: Column(
                     crossAxisAlignment:
                         CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Shop GPS Location',
                         style: TextStyle(
                           fontWeight:
@@ -611,7 +611,7 @@ class _CreateShopScreenState
 
                       const SizedBox(height: AppSpacing.xs),
 
-                      const Text(
+                      Text(
                         'Please capture GPS at the entrance of your shop.',
                       ),
 
@@ -621,10 +621,10 @@ class _CreateShopScreenState
                         width: double.infinity,
                         child: ElevatedButton.icon(
                           onPressed: getLocation,
-                          icon: const Icon(
+                          icon: Icon(
                             Icons.my_location,
                           ),
-                          label: const Text(
+                          label: Text(
                             'Get Current Location',
                           ),
                         ),
@@ -652,7 +652,7 @@ class _CreateShopScreenState
               // LOGO
               // ======================
 
-              const Text(
+              Text(
                 "Shop Logo",
                 style: TextStyle(
                   fontSize: 16,
@@ -706,7 +706,7 @@ class _CreateShopScreenState
               // BANNER
               // ======================
 
-              const Text(
+              Text(
                 "Shop Banner",
                 style: TextStyle(
                   fontSize: 16,
@@ -784,7 +784,7 @@ class _CreateShopScreenState
                             strokeWidth: 2.5,
                           ),
                         )
-                      : const Text(
+                      : Text(
                           "Create Shop",
                           style: TextStyle(
                             fontSize: 16,

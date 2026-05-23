@@ -97,19 +97,19 @@ class _BookingCheckoutScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Booking Checkout')),
+      appBar: AppBar(title: Text('Booking Checkout')),
       body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: EdgeInsets.all(AppSpacing.md),
         child: Column(
           children: [
             ListTile(
-              title: const Text('Check In'),
+              title: Text('Check In'),
               subtitle: Text(
                 checkIn != null
                     ? formatDate(checkIn!)
                     : 'Select date',
               ),
-              trailing: const Icon(Icons.calendar_month),
+              trailing: Icon(Icons.calendar_month),
               onTap: () async {
                 final picked = await showDatePicker(
                   context: context,
@@ -124,13 +124,13 @@ class _BookingCheckoutScreenState
             ),
 
             ListTile(
-              title: const Text('Check Out'),
+              title: Text('Check Out'),
               subtitle: Text(
                 checkOut != null
                     ? formatDate(checkOut!)
                     : 'Select date',
               ),
-              trailing: const Icon(Icons.calendar_month),
+              trailing: Icon(Icons.calendar_month),
               onTap: () async {
                 final picked = await showDatePicker(
                   context: context,
@@ -152,8 +152,8 @@ class _BookingCheckoutScreenState
               child: ElevatedButton(
                 onPressed: loading ? null : submitBooking,
                 child: loading
-                    ? const CircularProgressIndicator(color: Theme.of(context).colorScheme.surface)
-                    : const Text("Proceed To Payment"),
+                    ? CircularProgressIndicator(color: Theme.of(context).colorScheme.surface)
+                    : Text("Proceed To Payment"),
               ),
             ),
           ],

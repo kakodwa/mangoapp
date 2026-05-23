@@ -373,7 +373,7 @@ class _EditLodgeScreenState
               color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.add_a_photo),
+            child: Icon(Icons.add_a_photo),
           ),
         ),
       ],
@@ -387,14 +387,14 @@ class _EditLodgeScreenState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Edit Lodge"),
+        title: Text("Edit Lodge"),
         backgroundColor: AppColors.mangoOrange,
       ),
 
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: EdgeInsets.all(AppSpacing.md),
           children: [
 
             /// BASIC INFO
@@ -505,7 +505,7 @@ class _EditLodgeScreenState
                     isGettingLocation
                         ? null
                         : getLocation,
-                icon: const Icon(Icons.my_location),
+                icon: Icon(Icons.my_location),
                 label: Text(
                   isGettingLocation
                       ? "Getting location..."
@@ -527,7 +527,7 @@ class _EditLodgeScreenState
             const SizedBox(height: AppSpacing.xl),
 
             /// AMENITIES
-            const Text(
+            Text(
               "Amenities",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
@@ -562,15 +562,15 @@ class _EditLodgeScreenState
                 );
               },
               loading: () =>
-                  const CircularProgressIndicator(),
+                  CircularProgressIndicator(),
               error: (_, __) =>
-                  const Text("Failed to load amenities"),
+                  Text("Failed to load amenities"),
             ),
 
             const SizedBox(height: AppSpacing.xl),
 
             /// IMAGES
-            const Text(
+            Text(
               "Lodge Images",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
@@ -599,10 +599,10 @@ class _EditLodgeScreenState
                   ),
                 ),
                 child: isLoading
-                    ? const CircularProgressIndicator(
+                    ? CircularProgressIndicator(
                         color: Theme.of(context).colorScheme.surface,
                       )
-                    : const Text(
+                    : Text(
                         "Update Lodge",
                         style: TextStyle(
                           fontSize: 16,

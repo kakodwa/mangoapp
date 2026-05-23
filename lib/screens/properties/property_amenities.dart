@@ -70,7 +70,7 @@ class PropertyAmenitiesWidget extends StatelessWidget {
         border: Border.all(color: Theme.of(context).colorScheme.onSurfaceVariant!),
         borderRadius: BorderRadius.circular(8),
       ),
-      padding: const EdgeInsets.all(AppSpacing.xs),
+      padding: EdgeInsets.all(AppSpacing.xs),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

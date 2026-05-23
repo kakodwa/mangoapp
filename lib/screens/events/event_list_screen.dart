@@ -35,7 +35,7 @@ class _EventListScreenState
 
     return AppScaffold(
       appBar: AppBar(
-        title: const Text("Events"),
+        title: Text("Events"),
       ),
 
       body: Column(
@@ -84,7 +84,7 @@ class _EventListScreenState
                     ref.refresh(eventsProvider);
                   },
                   child: ListView.builder(
-                    padding: const EdgeInsets.all(AppSpacing.md),
+                    padding: EdgeInsets.all(AppSpacing.md),
                     itemCount: filteredEvents.length,
                     itemBuilder: (context, index) {
                       return EventCard(

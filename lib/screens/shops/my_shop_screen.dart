@@ -69,7 +69,7 @@ class MyShopScreen extends ConsumerWidget {
                     ),
                   );
                 },
-                child: const Icon(Icons.add),
+                child: Icon(Icons.add),
               ),
             ],
           );
@@ -134,7 +134,7 @@ class MyShopScreen extends ConsumerWidget {
                                   fit: BoxFit.cover,
                                 ),
                               )
-                            : const Icon(Icons.store),
+                            : Icon(Icons.store),
                       ),
                     ),
                   ],
@@ -144,7 +144,7 @@ class MyShopScreen extends ConsumerWidget {
 
                 // ================= SHOP INFO =================
                 Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
+                  padding: EdgeInsets.all(AppSpacing.md),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -171,22 +171,22 @@ class MyShopScreen extends ConsumerWidget {
                       const SizedBox(height: 10),
 
                       ListTile(
-                        leading: const Icon(Icons.phone),
-                        title: const Text("Phone"),
+                        leading: Icon(Icons.phone),
+                        title: Text("Phone"),
                         subtitle: Text(shop.phoneNumber),
                         contentPadding: EdgeInsets.zero,
                       ),
 
                       ListTile(
-                        leading: const Icon(Icons.email),
-                        title: const Text("Email"),
+                        leading: Icon(Icons.email),
+                        title: Text("Email"),
                         subtitle: Text(shop.email),
                         contentPadding: EdgeInsets.zero,
                       ),
 
                       ListTile(
-                        leading: const Icon(Icons.location_on),
-                        title: const Text("Location"),
+                        leading: Icon(Icons.location_on),
+                        title: Text("Location"),
                         subtitle:
                             Text("${shop.address}, ${shop.city}"),
                         contentPadding: EdgeInsets.zero,
@@ -224,7 +224,7 @@ class MyShopScreen extends ConsumerWidget {
                       itemBuilder: (context, index) {
                         final product = products[index];
                         return Card(
-  margin: const EdgeInsets.symmetric(
+  margin: EdgeInsets.symmetric(
       horizontal: 16, vertical: 6),
   child: ListTile(
     onTap: () {
@@ -295,7 +295,7 @@ class MyShopScreen extends ConsumerWidget {
                       const Center(child: CircularProgressIndicator()),
 
                   error: (e, _) => Padding(
-                    padding: const EdgeInsets.all(AppSpacing.md),
+                    padding: EdgeInsets.all(AppSpacing.md),
                     child: Column(
                       children: [
                         Icon(Icons.error,

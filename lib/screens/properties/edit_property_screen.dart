@@ -200,7 +200,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
     int maxLines = 1,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.only(bottom: 16),
       child: AppTextField(
         label: label,
         controller: controller,
@@ -231,7 +231,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
               color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const CircularProgressIndicator(),
+            child: CircularProgressIndicator(),
           );
         }
 
@@ -257,7 +257,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
                   });
                 },
                 child: Container(
-                  padding: const EdgeInsets.all(2),
+                  padding: EdgeInsets.all(2),
                   decoration: const BoxDecoration(
                     color: Theme.of(context).colorScheme.error,
                     shape: BoxShape.circle,
@@ -292,12 +292,12 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: EdgeInsets.all(AppSpacing.md),
           children: [
 
             // ================= BASIC INFO =================
             Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
+              padding: EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(18),
@@ -306,7 +306,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
-                  const Text(
+                  Text(
                     "Basic Information",
                     style: TextStyle(
                       fontSize: 18,
@@ -432,7 +432,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
 
             // ================= LOCATION =================
             Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
+              padding: EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(18),
@@ -441,7 +441,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
-                  const Text(
+                  Text(
                     "Location",
                     style: TextStyle(
                       fontSize: 18,
@@ -531,7 +531,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
 
             // ================= DETAILS =================
             Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
+              padding: EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(18),
@@ -540,7 +540,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
-                  const Text(
+                  Text(
                     "Property Details",
                     style: TextStyle(
                       fontSize: 18,
@@ -586,7 +586,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
 
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text("Public Listing"),
+                    title: Text("Public Listing"),
                     value: isPublic,
                     onChanged: (v) {
                       setState(() {
@@ -602,7 +602,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
 
             // ================= IMAGES =================
             Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
+              padding: EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(18),
@@ -615,7 +615,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
                     mainAxisAlignment:
                         MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         "Property Images",
                         style: TextStyle(
                           fontSize: 18,
@@ -625,8 +625,8 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
 
                       TextButton.icon(
                         onPressed: pickImages,
-                        icon: const Icon(Icons.add_a_photo),
-                        label: const Text("Add Images"),
+                        icon: Icon(Icons.add_a_photo),
+                        label: Text("Add Images"),
                       ),
                     ],
                   ),
@@ -675,7 +675,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
                   ),
                 ),
                 child: loading
-                    ? const CircularProgressIndicator(
+                    ? CircularProgressIndicator(
                         color: Theme.of(context).colorScheme.surface,
                       )
                     : Text(

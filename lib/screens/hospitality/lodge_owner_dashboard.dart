@@ -11,12 +11,12 @@ class LodgeOwnerDashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Lodge Dashboard'),
+        title: Text('Lodge Dashboard'),
       ),
 
       body: GridView.count(
         crossAxisCount: 2,
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: EdgeInsets.all(AppSpacing.md),
         crossAxisSpacing: 16,
         mainAxisSpacing: 16,
 

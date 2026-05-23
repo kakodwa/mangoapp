@@ -54,7 +54,7 @@ class _PropertyCardState extends State<PropertyCard>
         duration: const Duration(milliseconds: 120),
         scale: _pressed ? 0.98 : 1.0,
         child: Container(
-          margin: const EdgeInsets.symmetric(
+          margin: EdgeInsets.symmetric(
               horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
@@ -87,7 +87,7 @@ class _PropertyCardState extends State<PropertyCard>
                             )
                           : Container(
                               color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
-                              child: const Icon(Icons.home, size: 40),
+                              child: Icon(Icons.home, size: 40),
                             ),
                     ),
                   ),
@@ -117,7 +117,7 @@ class _PropertyCardState extends State<PropertyCard>
               ),
 
               Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
+                padding: EdgeInsets.all(AppSpacing.md),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -142,7 +142,7 @@ class _PropertyCardState extends State<PropertyCard>
                           text: listingText,
                           customColor: listingColor,
                           fontSize: 9,
-                          padding: const EdgeInsets.symmetric(
+                          padding: EdgeInsets.symmetric(
                             horizontal: 8,
                             vertical: 4,
                           ),

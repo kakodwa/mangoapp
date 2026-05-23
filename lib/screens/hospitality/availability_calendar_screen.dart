@@ -15,10 +15,10 @@ class AvailabilityCalendarScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Availability Calendar'),
+        title: Text('Availability Calendar'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: EdgeInsets.all(AppSpacing.md),
         child: AvailabilityCalendar(
           roomId: roomId,
         ),

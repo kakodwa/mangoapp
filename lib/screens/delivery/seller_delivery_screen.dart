@@ -134,13 +134,13 @@ class SellerDeliveryScreen extends ConsumerWidget {
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.all(AppSpacing.md),
+            padding: EdgeInsets.all(AppSpacing.md),
             itemCount: deliveries.length,
             itemBuilder: (context, index) {
               final d = deliveries[index];
 
               return Container(
-                margin: const EdgeInsets.only(bottom: 18),
+                margin: EdgeInsets.only(bottom: 18),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(20),
@@ -153,7 +153,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                   ],
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(18),
+                  padding: EdgeInsets.all(18),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -164,7 +164,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                       Row(
                         children: [
                           Container(
-                            padding: const EdgeInsets.all(10),
+                            padding: EdgeInsets.all(10),
                             decoration: BoxDecoration(
                               color: AppColors.primary(context)
                                   .withOpacity(0.1),
@@ -195,7 +195,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                                 const SizedBox(height: AppSpacing.xxs),
 
                                 Container(
-                                  padding: const EdgeInsets.symmetric(
+                                  padding: EdgeInsets.symmetric(
                                     horizontal: 10,
                                     vertical: 4,
                                   ),
@@ -226,6 +226,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                       // DETAILS
                       // =========================
                       _infoTile(
+                        context: context,
                         icon: Icons.phone,
                         label: "Phone",
                         value: d.phone ?? "-",
@@ -234,6 +235,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                       const SizedBox(height: 10),
 
                       _infoTile(
+                        context: context,
                         icon: Icons.location_on_outlined,
                         label: "Address",
                         value: d.address ?? "-",
@@ -249,7 +251,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                       if (d.items != null && d.items!.isNotEmpty)
                         Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.all(14),
+                          padding: EdgeInsets.all(14),
                           decoration: BoxDecoration(
                             color: Theme.of(context).colorScheme.outline.withOpacity(0.05),
                             borderRadius: BorderRadius.circular(14),
@@ -288,7 +290,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                               ...d.items!.map(
                                 (item) => Padding(
                                   padding:
-                                      const EdgeInsets.only(
+                                      EdgeInsets.only(
                                     bottom: 6,
                                   ),
                                   child: Text(
@@ -316,14 +318,14 @@ class SellerDeliveryScreen extends ConsumerWidget {
                         width: double.infinity,
                         child: ElevatedButton.icon(
                           icon: Icon(Icons.person_add_alt_1),
-                          label: const Text("Assign Rider"),
+                          label: Text("Assign Rider"),
                           style: ElevatedButton.styleFrom(
                             elevation: 0,
                             backgroundColor:
                                 AppColors.primary(context),
                             foregroundColor: Theme.of(context).colorScheme.surface,
                             padding:
-                                const EdgeInsets.symmetric(
+                                EdgeInsets.symmetric(
                               vertical: 14,
                             ),
                             shape: RoundedRectangleBorder(
@@ -346,9 +348,9 @@ class SellerDeliveryScreen extends ConsumerWidget {
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButton.icon(
-                          icon: const Icon(Icons.update),
+                          icon: Icon(Icons.update),
                           label:
-                              const Text("Update Status"),
+                              Text("Update Status"),
                           style: OutlinedButton.styleFrom(
                             foregroundColor:
                                 AppColors.primary(context),
@@ -357,7 +359,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                                   AppColors.primary(context),
                             ),
                             padding:
-                                const EdgeInsets.symmetric(
+                                EdgeInsets.symmetric(
                               vertical: 14,
                             ),
                             shape: RoundedRectangleBorder(
@@ -383,8 +385,8 @@ class SellerDeliveryScreen extends ConsumerWidget {
                           width: double.infinity,
                           child: ElevatedButton.icon(
                             icon:
-                                const Icon(Icons.navigation),
-                            label: const Text(
+                                Icon(Icons.navigation),
+                            label: Text(
                                 "Locate Customer"),
                             style:
                                 ElevatedButton.styleFrom(
@@ -394,7 +396,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                               foregroundColor:
                                   Theme.of(context).colorScheme.surface,
                               padding:
-                                  const EdgeInsets.symmetric(
+                                  EdgeInsets.symmetric(
                                 vertical: 14,
                               ),
                               shape:
@@ -446,6 +448,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
   // PROFESSIONAL INFO TILE
   // =========================
   Widget _infoTile({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required String value,
@@ -512,7 +515,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
             borderRadius: BorderRadius.circular(20),
           ),
 
-          title: const Text(
+          title: Text(
             "Update Delivery Status",
           ),
 
@@ -542,7 +545,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
+              child: Text("Cancel"),
             ),
 
             ElevatedButton(
@@ -565,7 +568,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
 
                 Navigator.pop(context);
               },
-              child: const Text("Save"),
+              child: Text("Save"),
             ),
           ],
         ),
@@ -601,7 +604,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
             borderRadius: BorderRadius.circular(20),
           ),
 
-          title: const Text("Assign Rider"),
+          title: Text("Assign Rider"),
 
           content: SingleChildScrollView(
             child: Column(
@@ -660,8 +663,8 @@ class SellerDeliveryScreen extends ConsumerWidget {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
-                    icon: const Icon(Icons.gps_fixed),
-                    label: const Text(
+                    icon: Icon(Icons.gps_fixed),
+                    label: Text(
                         "Generate Pickup GPS"),
                     style: ElevatedButton.styleFrom(
                       elevation: 0,
@@ -669,7 +672,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                           AppColors.leafGreen,
                       foregroundColor: Theme.of(context).colorScheme.surface,
                       padding:
-                          const EdgeInsets.symmetric(
+                          EdgeInsets.symmetric(
                         vertical: 14,
                       ),
                       shape: RoundedRectangleBorder(
@@ -705,7 +708,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
+              child: Text("Cancel"),
             ),
 
             ElevatedButton(
@@ -742,7 +745,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
 
                 Navigator.pop(context);
               },
-              child: const Text("Assign"),
+              child: Text("Assign"),
             ),
           ],
         ),
@@ -760,7 +763,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
     required IconData icon,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
+      padding: EdgeInsets.only(bottom: 14),
       child: TextField(
         controller: controller,
         decoration: InputDecoration(
@@ -818,8 +821,8 @@ class _DeliveryCodeCardState extends State<DeliveryCodeCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(14),
+      margin: EdgeInsets.only(bottom: 14),
+      padding: EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.onSurface.withOpacity(0.04),
         borderRadius: BorderRadius.circular(14),
@@ -844,7 +847,7 @@ class _DeliveryCodeCardState extends State<DeliveryCodeCard> {
               Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.copy, size: 18),
+                    icon: Icon(Icons.copy, size: 18),
                     onPressed: isVisible ? _copy : null,
                   ),
                   IconButton(

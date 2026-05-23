@@ -71,8 +71,8 @@ class ProfileScreen extends ConsumerWidget {
               clipBehavior: Clip.none,
               children: [
                 Container(
-                  margin: const EdgeInsets.all(AppSpacing.md),
-                  padding: const EdgeInsets.fromLTRB(20, 70, 20, 20),
+                  margin: EdgeInsets.all(AppSpacing.md),
+                  padding: EdgeInsets.fromLTRB(20, 70, 20, 20),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
                       colors: [
@@ -104,12 +104,12 @@ class ProfileScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       Container(
-                        padding: const EdgeInsets.symmetric(
+                        padding: EdgeInsets.symmetric(
                           horizontal: 10,
                           vertical: 4,
                           ),
                         decoration: BoxDecoration(
-                          color: UserRoleUtils.getColor(user?.userType ?? ''),
+                          color: UserRoleUtils.getColor(context, user?.userType ?? ''),
                           borderRadius: BorderRadius.circular(20),
                           ),
                         child: Text(
@@ -137,7 +137,7 @@ class ProfileScreen extends ConsumerWidget {
                           ],
                         ),
                         loading: () =>
-                            const CircularProgressIndicator(
+                            CircularProgressIndicator(
                           color: Theme.of(context).colorScheme.surface,
                         ),
                         error: (_, __) =>
@@ -163,7 +163,7 @@ class ProfileScreen extends ConsumerWidget {
 
             // ================= MENU =================
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+              padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
               child: Column(
                 children: [
 
@@ -406,14 +406,14 @@ if (isLoggedIn && isShopOwner && hasShop) ...[
   }) {
     return Card(
       elevation: 1,
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
       ),
       child: ListTile(
         leading: Icon(icon, color: AppColors.mangoOrange),
         title: Text(title),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        trailing: Icon(Icons.arrow_forward_ios, size: 16),
         onTap: onTap ?? () {},
       ),
     );

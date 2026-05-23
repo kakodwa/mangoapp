@@ -70,12 +70,12 @@ class _DeliveryCodeScreenState extends ConsumerState<DeliveryCodeScreen> {
       backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
 
       appBar: AppBar(
-        title: const Text("Enter Delivery Code"),
+        title: Text("Enter Delivery Code"),
         backgroundColor: AppColors.primary(context),
       ),
 
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

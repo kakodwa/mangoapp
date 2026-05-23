@@ -122,7 +122,7 @@ class _CheckoutScreenState
           key: _formKey,
           child: ListView(
             padding:
-                const EdgeInsets.all(AppSpacing.md),
+                EdgeInsets.all(AppSpacing.md),
             children: [
               // ======================
               // ORDER SUMMARY
@@ -130,7 +130,7 @@ class _CheckoutScreenState
 
               Container(
                 padding:
-                    const EdgeInsets.all(
+                    EdgeInsets.all(
                   18,
                 ),
                 decoration: BoxDecoration(
@@ -160,7 +160,7 @@ class _CheckoutScreenState
                       height: 10,
                     ),
 
-                    const Text(
+                    Text(
                       "Order Checkout",
                       style: TextStyle(
                         color:
@@ -198,7 +198,7 @@ class _CheckoutScreenState
               // ORDER ITEMS
               // ======================
 
-              const Text(
+              Text(
                 "Order Summary",
                 style: TextStyle(
                   fontSize: 16,
@@ -211,7 +211,7 @@ class _CheckoutScreenState
 
               Container(
                 padding:
-                    const EdgeInsets.all(
+                    EdgeInsets.all(
                   16,
                 ),
                 decoration: BoxDecoration(
@@ -241,7 +241,7 @@ class _CheckoutScreenState
                     (item) {
                       return Padding(
                         padding:
-                            const EdgeInsets.only(
+                            EdgeInsets.only(
                           bottom: 12,
                         ),
                         child: Row(
@@ -288,7 +288,7 @@ class _CheckoutScreenState
               // DELIVERY DETAILS
               // ======================
 
-              const Text(
+              Text(
                 "Delivery Details",
                 style: TextStyle(
                   fontSize: 16,
@@ -368,7 +368,7 @@ class _CheckoutScreenState
                       ),
                     ),
                   ),
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.gps_fixed,
                   ),
                   label: Text(
@@ -384,7 +384,7 @@ class _CheckoutScreenState
 
                 Container(
                   padding:
-                      const EdgeInsets.all(
+                      EdgeInsets.all(
                     14,
                   ),
                   decoration: BoxDecoration(
@@ -456,7 +456,7 @@ class _CheckoutScreenState
 
               Container(
                 padding:
-                    const EdgeInsets.all(
+                    EdgeInsets.all(
                   16,
                 ),
                 decoration: BoxDecoration(
@@ -487,7 +487,7 @@ class _CheckoutScreenState
                           MainAxisAlignment
                               .spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           "Subtotal",
                         ),
 
@@ -525,7 +525,7 @@ class _CheckoutScreenState
                           MainAxisAlignment
                               .spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           "Total",
                           style: TextStyle(
                             fontSize: 16,
@@ -590,7 +590,7 @@ class _CheckoutScreenState
                                 2.5,
                           ),
                         )
-                      : const Text(
+                      : Text(
                           'Place Order',
                           style:
                               TextStyle(

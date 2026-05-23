@@ -14,7 +14,7 @@ class PaymentHistoryScreen extends ConsumerWidget {
 
     return AppScaffold(
       appBar: AppBar(
-        title: const Text("Payment History"),
+        title: Text("Payment History"),
       ),
 
       body: paymentsAsync.when(
@@ -35,7 +35,7 @@ class PaymentHistoryScreen extends ConsumerWidget {
               final payment = payments[index];
 
               return Card(
-                margin: const EdgeInsets.symmetric(
+                margin: EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 6,
                 ),

@@ -241,7 +241,7 @@ for (final ticket in ticketTypes) {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: EdgeInsets.all(AppSpacing.md),
           children: [
 
             AppTextField(label: "Title", controller: title, type: TextFieldType.text),
@@ -322,7 +322,7 @@ for (final ticket in ticketTypes) {
 Row(
   mainAxisAlignment: MainAxisAlignment.spaceBetween,
   children: [
-    const Text(
+    Text(
       "Ticket Types",
       style: TextStyle(
         fontWeight: FontWeight.bold,
@@ -332,8 +332,8 @@ Row(
 
     TextButton.icon(
       onPressed: addTicketType,
-      icon: const Icon(Icons.add),
-      label: const Text("Add"),
+      icon: Icon(Icons.add),
+      label: Text("Add"),
     ),
   ],
 ),
@@ -345,8 +345,8 @@ const SizedBox(height: 10),
   final item = entry.value;
 
   return Container(
-    margin: const EdgeInsets.only(bottom: 12),
-    padding: const EdgeInsets.all(AppSpacing.sm),
+    margin: EdgeInsets.only(bottom: 12),
+    padding: EdgeInsets.all(AppSpacing.sm),
     decoration: BoxDecoration(
       border: Border.all(color: Theme.of(context).colorScheme.outline.withOpacity(0.38)),
       borderRadius: BorderRadius.circular(12),
@@ -418,7 +418,7 @@ const SizedBox(height: AppSpacing.md),
 
 ElevatedButton(
   onPressed: pickBanner,
-  child: const Text("Pick Banner Image"),
+  child: Text("Pick Banner Image"),
 ),
 
             const SizedBox(height: 10),
@@ -437,8 +437,8 @@ ElevatedButton(
             ElevatedButton(
               onPressed: loading ? null : submit,
               child: loading
-                  ? const CircularProgressIndicator(color: Theme.of(context).colorScheme.surface)
-                  : const Text("Create Event"),
+                  ? CircularProgressIndicator(color: Theme.of(context).colorScheme.surface)
+                  : Text("Create Event"),
             ),
           ],
         ),

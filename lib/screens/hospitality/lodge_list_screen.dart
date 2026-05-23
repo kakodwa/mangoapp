@@ -71,7 +71,7 @@ class _LodgeListScreenState extends ConsumerState<LodgeListScreen> {
 
     return AppScaffold(
       appBar: AppBar(
-        title: const Text('Stays & Lodges'),
+        title: Text('Stays & Lodges'),
       ),
 
       body: Column(
@@ -79,7 +79,7 @@ class _LodgeListScreenState extends ConsumerState<LodgeListScreen> {
 
           // ================= SEARCH + FILTER TOGGLE =================
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            padding: EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: Row(
               children: [
                 Expanded(
@@ -176,7 +176,7 @@ class _LodgeListScreenState extends ConsumerState<LodgeListScreen> {
                     ref.refresh(lodgesProvider);
                   },
                   child: ListView.builder(
-                    padding: const EdgeInsets.all(AppSpacing.sm),
+                    padding: EdgeInsets.all(AppSpacing.sm),
                     itemCount: filtered.length,
                     itemBuilder: (context, index) {
                       return LodgeCard(lodge: filtered[index]);

@@ -97,7 +97,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                             right: 16,
                                             child: Container(
                                               padding:
-                                                  const EdgeInsets.symmetric(
+                                                  EdgeInsets.symmetric(
                                                 horizontal: 10,
                                                 vertical: 5,
                                               ),
@@ -126,7 +126,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                             right: 16,
                                             child: Container(
                                               padding:
-                                                  const EdgeInsets.symmetric(
+                                                  EdgeInsets.symmetric(
                                                 horizontal: 10,
                                                 vertical: 8,
                                               ),
@@ -155,7 +155,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                     right: 16,
                                     bottom: 16,
                                     child: Container(
-                                      padding: const EdgeInsets.symmetric(
+                                      padding: EdgeInsets.symmetric(
                                         horizontal: 10,
                                         vertical: 6,
                                       ),
@@ -190,7 +190,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                   // 📄 CONTENT
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.all(AppSpacing.md),
+                      padding: EdgeInsets.all(AppSpacing.md),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -367,8 +367,8 @@ class PropertyDetailsScreen extends ConsumerWidget {
                           if (!property.isUnlocked && !isOwner)
                             Container(
                               width: double.infinity,
-                              margin: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                              padding: const EdgeInsets.all(AppSpacing.md),
+                              margin: EdgeInsets.symmetric(vertical: AppSpacing.md),
+                              padding: EdgeInsets.all(AppSpacing.md),
                               decoration: BoxDecoration(
                                 color:
                                     AppColors.mangoOrange.withOpacity(0.1),
@@ -408,7 +408,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
 
                                   const SizedBox(height: 10),
 
-                                  const Text(
+                                  Text(
                                     'Unlock this property to view full description, exact location, and contact details.',
                                   ),
 
@@ -418,7 +418,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      const Text('Unlock Fee'),
+                                      Text('Unlock Fee'),
                                       Text(
                                         'MWK ${property.unlockFee.toStringAsFixed(0)}',
                                         style: Theme.of(context)
@@ -484,7 +484,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                           // 👤 OWNER
                           Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.all(AppSpacing.sm),
+                            padding: EdgeInsets.all(AppSpacing.sm),
                             decoration: BoxDecoration(
                               color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
                               borderRadius: BorderRadius.circular(10),
@@ -610,7 +610,7 @@ SizedBox(
                         ),
                       );
                     },
-                    child: const Icon(Icons.map),
+                    child: Icon(Icons.map),
                   ),
                 ),
             ],
@@ -627,14 +627,14 @@ SizedBox(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 48),
+              Icon(Icons.error_outline, size: 48),
               const SizedBox(height: AppSpacing.md),
               Text('Error: $error'),
               const SizedBox(height: AppSpacing.md),
               ElevatedButton(
                 onPressed: () =>
                     ref.refresh(propertyDetailsProvider(propertyId)),
-                child: const Text('Retry'),
+                child: Text('Retry'),
               ),
             ],
           ),
@@ -645,7 +645,7 @@ SizedBox(
 
   Widget _buildTag(String text, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(
+      padding: EdgeInsets.symmetric(
         horizontal: 12,
         vertical: 7,
       ),
@@ -676,7 +676,7 @@ SizedBox(
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25)),
       ),
-      padding: const EdgeInsets.all(AppSpacing.sm),
+      padding: EdgeInsets.all(AppSpacing.sm),
       child: Row(
         children: [
           Icon(

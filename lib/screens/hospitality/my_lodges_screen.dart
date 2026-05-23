@@ -83,7 +83,7 @@ class _MyLodgesScreenState extends ConsumerState<MyLodgesScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("My Lodges"),
+        title: Text("My Lodges"),
         backgroundColor: AppColors.mangoOrange,
       ),
 
@@ -96,7 +96,7 @@ class _MyLodgesScreenState extends ConsumerState<MyLodgesScreen> {
               : RefreshIndicator(
                   onRefresh: fetchMyLodges,
                   child: ListView.builder(
-                    padding: const EdgeInsets.all(AppSpacing.md),
+                    padding: EdgeInsets.all(AppSpacing.md),
                     itemCount: lodges.length,
 
                     itemBuilder: (context, index) {

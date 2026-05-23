@@ -104,7 +104,7 @@ class _PaymentCheckoutScreenState
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const CircularProgressIndicator(),
+              CircularProgressIndicator(),
 
               const SizedBox(height: AppSpacing.md),
 
@@ -391,7 +391,7 @@ if (isVisa) {
       child: AnimatedContainer(
         duration:
             const Duration(milliseconds: 200),
-        padding: const EdgeInsets.all(14),
+        padding: EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
           borderRadius:
@@ -420,7 +420,7 @@ if (isVisa) {
               width: 55,
               height: 55,
               padding:
-                  const EdgeInsets.all(AppSpacing.xs),
+                  EdgeInsets.all(AppSpacing.xs),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
                 borderRadius:
@@ -498,7 +498,7 @@ if (isVisa) {
           key: _formKey,
           child: ListView(
             padding:
-                const EdgeInsets.all(AppSpacing.md),
+                EdgeInsets.all(AppSpacing.md),
             children: [
               // ======================
               // HEADER
@@ -506,7 +506,7 @@ if (isVisa) {
 
               Container(
                 padding:
-                    const EdgeInsets.all(
+                    EdgeInsets.all(
                   18,
                 ),
                 decoration: BoxDecoration(
@@ -575,7 +575,7 @@ if (isVisa) {
               // PAYMENT METHODS
               // ======================
 
-              const Text(
+              Text(
                 "Select Payment Method",
                 style: TextStyle(
                   fontSize: 16,
@@ -589,7 +589,7 @@ if (isVisa) {
               ...paymentMethods.map(
                 (method) => Padding(
                   padding:
-                      const EdgeInsets.only(
+                      EdgeInsets.only(
                     bottom: 12,
                   ),
                   child:
@@ -703,7 +703,7 @@ if (isVisa) {
                                 2.5,
                           ),
                         )
-                      : const Text(
+                      : Text(
                           "Pay Now",
                           style:
                               TextStyle(
@@ -742,7 +742,7 @@ if (isVisa) {
 
                     Container(
                       padding:
-                          const EdgeInsets.symmetric(
+                          EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 10,
                       ),

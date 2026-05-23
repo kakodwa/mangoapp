@@ -144,7 +144,7 @@ class _EditRoomScreenState
     required Function(bool) onChanged,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
+      margin: EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.outline.withOpacity(0.05),
         borderRadius: BorderRadius.circular(14),
@@ -169,14 +169,14 @@ class _EditRoomScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Edit Room"),
+        title: Text("Edit Room"),
         backgroundColor: AppColors.mangoOrange,
       ),
 
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: EdgeInsets.all(AppSpacing.md),
           children: [
 
             /// ROOM NUMBER
@@ -268,7 +268,7 @@ class _EditRoomScreenState
             const SizedBox(height: AppSpacing.xl),
 
             /// FEATURES
-            const Text(
+            Text(
               "Room Features",
               style: TextStyle(
                 fontSize: 18,
@@ -335,10 +335,10 @@ class _EditRoomScreenState
                   ),
                 ),
                 child: loading
-                    ? const CircularProgressIndicator(
+                    ? CircularProgressIndicator(
                         color: Theme.of(context).colorScheme.surface,
                       )
-                    : const Text(
+                    : Text(
                         "Update Room",
                         style: TextStyle(
                           fontSize: 16,

@@ -96,7 +96,7 @@ class _ShopsListScreenState extends ConsumerState<ShopsListScreen> {
 
           // ================= SEARCH + FILTER TOGGLE =================
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            padding: EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: Row(
               children: [
                 Expanded(
@@ -193,7 +193,7 @@ class _ShopsListScreenState extends ConsumerState<ShopsListScreen> {
                 return RefreshIndicator(
                   onRefresh: () async => ref.refresh(shopsProvider),
                   child: ListView.separated(
-                    padding: const EdgeInsets.all(AppSpacing.sm),
+                    padding: EdgeInsets.all(AppSpacing.sm),
                     itemCount: filteredShops.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 10),
                     itemBuilder: (context, index) {

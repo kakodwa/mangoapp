@@ -105,11 +105,11 @@ class _ExampleCompleteFormScreenState extends State<ExampleCompleteFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Complete Form Example'),
+        title: Text('Complete Form Example'),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
+        padding: EdgeInsets.all(AppSpacing.lg),
         child: Form(
           key: _formKey,
           child: Column(
@@ -126,7 +126,7 @@ class _ExampleCompleteFormScreenState extends State<ExampleCompleteFormScreen> {
                       label: 'Full Name',
                       hint: 'Enter your full name',
                       controller: _nameController,
-                      prefix: const Icon(Icons.person),
+                      prefix: Icon(Icons.person),
                       isRequired: true,
                       validator: (value) {
                         if (value?.isEmpty ?? true) {
@@ -145,7 +145,7 @@ class _ExampleCompleteFormScreenState extends State<ExampleCompleteFormScreen> {
                       hint: 'example@email.com',
                       controller: _emailController,
                       type: TextFieldType.email,
-                      prefix: const Icon(Icons.email),
+                      prefix: Icon(Icons.email),
                       isRequired: true,
                       validator: (value) {
                         if (value?.isEmpty ?? true) {
@@ -164,7 +164,7 @@ class _ExampleCompleteFormScreenState extends State<ExampleCompleteFormScreen> {
                       hint: '+265 123 456 789',
                       controller: _phoneController,
                       type: TextFieldType.phone,
-                      prefix: const Icon(Icons.phone),
+                      prefix: Icon(Icons.phone),
                       isRequired: true,
                       validator: (value) {
                         if (value?.isEmpty ?? true) {
@@ -328,7 +328,7 @@ class _ExampleCompleteFormScreenState extends State<ExampleCompleteFormScreen> {
               // FORM SUMMARY (For reference)
               // ============================================
               Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
+                padding: EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(12),

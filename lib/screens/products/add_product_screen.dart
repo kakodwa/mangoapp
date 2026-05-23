@@ -154,7 +154,7 @@ class _AddProductScreenState
                   borderRadius: BorderRadius.circular(14),
                   color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
                 ),
-                child: const CircularProgressIndicator(),
+                child: CircularProgressIndicator(),
               );
             }
 
@@ -180,7 +180,7 @@ class _AddProductScreenState
               });
             },
             child: Container(
-              padding: const EdgeInsets.all(3),
+              padding: EdgeInsets.all(3),
               decoration: const BoxDecoration(
                 color: Theme.of(context).colorScheme.error,
                 shape: BoxShape.circle,
@@ -210,7 +210,7 @@ class _AddProductScreenState
         child: Form(
           key: _formKey,
           child: ListView(
-            padding: const EdgeInsets.all(AppSpacing.md),
+            padding: EdgeInsets.all(AppSpacing.md),
             children: [
               // ======================
               // PRODUCT INFO
@@ -356,7 +356,7 @@ class _AddProductScreenState
               // IMAGES
               // ======================
 
-              const Text(
+              Text(
                 "Product Images (Max 4)",
                 style: TextStyle(
                   fontSize: 16,
@@ -409,10 +409,10 @@ class _AddProductScreenState
                 ),
                 child: SwitchListTile(
                   value: isActive,
-                  title: const Text(
+                  title: Text(
                     "Product Active",
                   ),
-                  subtitle: const Text(
+                  subtitle: Text(
                     "Visible to customers",
                   ),
                   onChanged: (value) {
@@ -448,7 +448,7 @@ class _AddProductScreenState
                             strokeWidth: 2.5,
                           ),
                         )
-                      : const Text(
+                      : Text(
                           "Create Product",
                           style: TextStyle(
                             fontSize: 16,

@@ -155,7 +155,7 @@ class ProductCard extends ConsumerWidget {
                         );
                       },
                       child: Container(
-                        padding: const EdgeInsets.all(AppSpacing.xs),
+                        padding: EdgeInsets.all(AppSpacing.xs),
                         decoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.surface,
                           shape: BoxShape.circle,
@@ -182,7 +182,7 @@ class ProductCard extends ConsumerWidget {
 
             // ================= INFO =================
             Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
+              padding: EdgeInsets.all(AppSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

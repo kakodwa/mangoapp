@@ -23,8 +23,8 @@ class CartScreen extends ConsumerWidget {
       body: cart.isEmpty
           ? Center(
               child: Container(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                margin: const EdgeInsets.all(AppSpacing.lg),
+                padding: EdgeInsets.all(AppSpacing.lg),
+                margin: EdgeInsets.all(AppSpacing.lg),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(16),
@@ -58,7 +58,7 @@ class CartScreen extends ConsumerWidget {
                     const SizedBox(height: AppSpacing.md),
                     ElevatedButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Continue Shopping'),
+                      child: Text('Continue Shopping'),
                     ),
                   ],
                 ),
@@ -72,7 +72,7 @@ class CartScreen extends ConsumerWidget {
                 // =========================
                 Expanded(
                   child: ListView.separated(
-                    padding: const EdgeInsets.all(AppSpacing.md),
+                    padding: EdgeInsets.all(AppSpacing.md),
                     itemCount: cart.length,
                     separatorBuilder: (_, __) =>
                         const SizedBox(height: AppSpacing.sm),
@@ -80,7 +80,7 @@ class CartScreen extends ConsumerWidget {
                       final item = cart[index];
 
                       return Container(
-                        padding: const EdgeInsets.all(AppSpacing.sm),
+                        padding: EdgeInsets.all(AppSpacing.sm),
                         decoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.surface,
                           borderRadius: BorderRadius.circular(16),
@@ -107,9 +107,9 @@ class CartScreen extends ConsumerWidget {
                                         item.product.safeImage ?? '',
                                         fit: BoxFit.cover,
                                         errorBuilder: (_, __, ___) =>
-                                            const Icon(Icons.image),
+                                            Icon(Icons.image),
                                       )
-                                    : const Icon(Icons.image),
+                                    : Icon(Icons.image),
                               ),
                             ),
 
@@ -148,7 +148,7 @@ class CartScreen extends ConsumerWidget {
                                   // =========================
            
 Container(
-  padding: const EdgeInsets.symmetric(
+  padding: EdgeInsets.symmetric(
     horizontal: 10,
     vertical: 4,
   ),
@@ -174,14 +174,14 @@ Container(
           .state = updatedCart;
     }
   },
-  child: const Icon(
+  child: Icon(
     Icons.remove,
     size: 18,
   ),
 ),
 
 Padding(
-  padding: const EdgeInsets.symmetric(
+  padding: EdgeInsets.symmetric(
     horizontal: 10,
   ),
   child: Text(
@@ -208,7 +208,7 @@ GestureDetector(
           .state = updatedCart;
     }
   },
-  child: const Icon(
+  child: Icon(
     Icons.add,
     size: 18,
   ),
@@ -243,7 +243,7 @@ GestureDetector(
                 // CHECKOUT SUMMARY (STICKY)
                 // =========================
                 Container(
-                  padding: const EdgeInsets.all(AppSpacing.md),
+                  padding: EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.surface,
                     borderRadius:

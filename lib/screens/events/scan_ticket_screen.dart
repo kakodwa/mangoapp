@@ -144,10 +144,10 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
 
   Widget _infoTile(String title, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.only(bottom: 8),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.all(AppSpacing.sm),
+        padding: EdgeInsets.all(AppSpacing.sm),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
           borderRadius: BorderRadius.circular(10),
@@ -161,12 +161,12 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Scan Ticket"),
+        title: Text("Scan Ticket"),
         actions: [
           if (ticketData != null)
             IconButton(
               onPressed: _resetScanner,
-              icon: const Icon(Icons.refresh),
+              icon: Icon(Icons.refresh),
             )
         ],
       ),
@@ -186,7 +186,7 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
           // RESULT MODE
           // =========================
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(AppSpacing.md),
+              padding: EdgeInsets.all(AppSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -211,7 +211,7 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
 
                   const SizedBox(height: AppSpacing.md),
 
-                  const Text(
+                  Text(
                     "Ticket Items",
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
@@ -235,8 +235,8 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: _resetScanner,
-                      icon: const Icon(Icons.qr_code_scanner),
-                      label: const Text("Scan Next Ticket"),
+                      icon: Icon(Icons.qr_code_scanner),
+                      label: Text("Scan Next Ticket"),
                     ),
                   ),
                 ],

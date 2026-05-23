@@ -97,7 +97,7 @@ class _ManageEventsScreenState
             : soldTickets / totalTickets;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 18),
+      margin: EdgeInsets.only(bottom: 18),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(22),
@@ -211,7 +211,7 @@ class _ManageEventsScreenState
                   right: 14,
                   child: Container(
                     padding:
-                        const EdgeInsets.symmetric(
+                        EdgeInsets.symmetric(
                       horizontal: 14,
                       vertical: 7,
                     ),
@@ -234,7 +234,7 @@ class _ManageEventsScreenState
           ),
 
           Padding(
-            padding: const EdgeInsets.all(18),
+            padding: EdgeInsets.all(18),
             child: Column(
               crossAxisAlignment:
                   CrossAxisAlignment.start,
@@ -278,7 +278,7 @@ class _ManageEventsScreenState
                 // TICKET TYPES
                 // ======================
 
-                const Text(
+                Text(
                   "Ticket Types",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -376,10 +376,10 @@ class _ManageEventsScreenState
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () {},
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.qr_code_scanner,
                         ),
-                        label: const Text(
+                        label: Text(
                           "Check-ins",
                         ),
                         style:
@@ -415,11 +415,11 @@ class _ManageEventsScreenState
                               ),
                             );
                           },
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.settings,
                         ),
                         label:
-                            const Text("Manage"),
+                            Text("Manage"),
                         style:
                             ElevatedButton.styleFrom(
                           backgroundColor:
@@ -459,7 +459,7 @@ class _ManageEventsScreenState
         type.totalSeats - type.availableSeats;
 
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.sm),
+      padding: EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
         color: AppColors.mangoOrange.withOpacity(.08),
         borderRadius: BorderRadius.circular(14),
@@ -514,7 +514,7 @@ class _ManageEventsScreenState
     required IconData icon,
   }) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
         borderRadius:
@@ -571,8 +571,8 @@ class _ManageEventsScreenState
         backgroundColor:
             AppColors.mangoOrange,
         foregroundColor: Theme.of(context).colorScheme.surface,
-        icon: const Icon(Icons.add),
-        label: const Text("Add Event"),
+        icon: Icon(Icons.add),
+        label: Text("Add Event"),
         onPressed: () {
           Navigator.push(
             context,
@@ -600,7 +600,7 @@ class _ManageEventsScreenState
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.all(AppSpacing.md),
+            padding: EdgeInsets.all(AppSpacing.md),
             itemCount: events.length,
             itemBuilder: (context, index) {
               return buildEventCard(

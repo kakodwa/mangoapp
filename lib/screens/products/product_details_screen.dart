@@ -151,7 +151,7 @@ Future<void> _loadRelated(int productId) async {
                   // ================= INFO
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.all(AppSpacing.md),
+                      padding: EdgeInsets.all(AppSpacing.md),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -178,7 +178,7 @@ Future<void> _loadRelated(int productId) async {
 
 // ================= STOCK
 Container(
-  padding: const EdgeInsets.symmetric(
+  padding: EdgeInsets.symmetric(
     horizontal: 12,
     vertical: 8,
   ),
@@ -235,7 +235,7 @@ Container(
 
                           // ================= SHOP INFO + DISTRICT
                           Container(
-                            padding: const EdgeInsets.all(14),
+                            padding: EdgeInsets.all(14),
                             decoration: BoxDecoration(
                               color: Theme.of(context).colorScheme.surface,
                               borderRadius: BorderRadius.circular(14),
@@ -285,11 +285,11 @@ Container(
                   // ================= RELATED PRODUCTS
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.all(AppSpacing.md),
+                      padding: EdgeInsets.all(AppSpacing.md),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             "Related Products",
                             style: TextStyle(
                               fontSize: 18,
@@ -371,7 +371,7 @@ Container(
 
                           _toast("Added to cart");
                         },
-                        child: const Icon(Icons.shopping_cart),
+                        child: Icon(Icons.shopping_cart),
                       ),
 
                     const SizedBox(height: AppSpacing.sm),
@@ -408,7 +408,7 @@ Container(
                             ),
                           );
                         },
-                        child: const Icon(Icons.edit),
+                        child: Icon(Icons.edit),
                       ),
                     ]
                   ],

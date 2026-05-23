@@ -132,7 +132,7 @@ PaychanguCheckout({
     return Scaffold(
 
       appBar: AppBar(
-        title: const Text("Visa Payment"),
+        title: Text("Visa Payment"),
       ),
 
       body: WebViewWidget(

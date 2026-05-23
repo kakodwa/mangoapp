@@ -53,7 +53,7 @@ class EventDetailScreen extends StatelessWidget {
     event.latitude != null && event.longitude != null
         ? FloatingActionButton(
             backgroundColor: AppColors.primary(context),
-            child: const Icon(Icons.navigation),
+            child: Icon(Icons.navigation),
             onPressed: () {
               Navigator.push(
                 context,
@@ -69,7 +69,7 @@ class EventDetailScreen extends StatelessWidget {
         : null,
 
       body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: EdgeInsets.all(AppSpacing.md),
         children: [
 
           // ======================
@@ -124,7 +124,7 @@ class EventDetailScreen extends StatelessWidget {
                             height: 260,
                             color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
                             alignment: Alignment.center,
-                            child: const Icon(
+                            child: Icon(
                               Icons.image,
                               size: 50,
                             ),
@@ -139,7 +139,7 @@ class EventDetailScreen extends StatelessWidget {
                         left: 14,
                         child: Container(
                           padding:
-                              const EdgeInsets.symmetric(
+                              EdgeInsets.symmetric(
                             horizontal: 14,
                             vertical: 7,
                           ),
@@ -171,7 +171,7 @@ class EventDetailScreen extends StatelessWidget {
                 // ======================
 
                 Padding(
-                  padding: const EdgeInsets.all(18),
+                  padding: EdgeInsets.all(18),
                   child: Column(
                     crossAxisAlignment:
                         CrossAxisAlignment.start,
@@ -338,7 +338,7 @@ Row(
                       // TICKET TYPES
                       // ======================
 
-                      const Text(
+                      Text(
                         "Available Tickets",
                         style: TextStyle(
                           fontSize: 18,
@@ -367,7 +367,7 @@ Row(
           // ======================
 
           Container(
-            padding: const EdgeInsets.all(18),
+            padding: EdgeInsets.all(18),
 
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
@@ -389,7 +389,7 @@ Row(
                   CrossAxisAlignment.start,
               children: [
 
-                const Text(
+                Text(
                   "Description",
                   style: TextStyle(
                     fontSize: 18,
@@ -419,7 +419,7 @@ Row(
       // BUY TICKET BUTTON
       // =========================
       bottomNavigationBar: Container(
-  padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
+  padding: EdgeInsets.fromLTRB(16, 14, 16, 20),
   decoration: BoxDecoration(
     color: Theme.of(context).colorScheme.surface,
     boxShadow: [
@@ -435,8 +435,8 @@ Row(
     child: SizedBox(
       height: 56,
       child: ElevatedButton.icon(
-        icon: const Icon(Icons.confirmation_num),
-        label: const Text(
+        icon: Icon(Icons.confirmation_num),
+        label: Text(
           "Buy Ticket",
           style: TextStyle(
             fontSize: 16,
@@ -488,7 +488,7 @@ Row(
     required BuildContext context,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(
+      padding: EdgeInsets.symmetric(
         vertical: 14,
         horizontal: 10,
       ),
@@ -547,9 +547,9 @@ Row(
     EventTicketTypeModel ticket,
   ) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: 12),
 
-      padding: const EdgeInsets.all(14),
+      padding: EdgeInsets.all(14),
 
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
@@ -562,7 +562,7 @@ Row(
         children: [
 
           Container(
-            padding: const EdgeInsets.all(AppSpacing.sm),
+            padding: EdgeInsets.all(AppSpacing.sm),
 
             decoration: BoxDecoration(
               color: AppColors.primary(
