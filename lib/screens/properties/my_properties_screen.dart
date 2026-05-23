@@ -75,7 +75,7 @@ class MyPropertiesScreen extends ConsumerWidget {
                       else
                         Container(
                           height: 180,
-                          color: Theme.of(context).colorScheme.outline.shade200,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
                           child: const Icon(Icons.home, size: 50),
                         ),
 

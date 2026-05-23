@@ -86,7 +86,7 @@ class _PropertyCardState extends State<PropertyCard>
                               fit: BoxFit.cover,
                             )
                           : Container(
-                              color: Theme.of(context).colorScheme.outline.shade200,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
                               child: const Icon(Icons.home, size: 40),
                             ),
                     ),
@@ -169,7 +169,7 @@ class _PropertyCardState extends State<PropertyCard>
                         Icon(
                           Icons.location_on,
                           size: 13,
-                          color: Theme.of(context).colorScheme.outline.shade600,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                         ),
                         const SizedBox(width: 3),
                         Expanded(
@@ -180,7 +180,7 @@ class _PropertyCardState extends State<PropertyCard>
                                 .textTheme
                                 .labelSmall
                                 ?.copyWith(
-                                  color: Theme.of(context).colorScheme.outline.shade600,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                                 ),
                           ),
                         ),

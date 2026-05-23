@@ -67,7 +67,7 @@ class _DeliveryCodeScreenState extends ConsumerState<DeliveryCodeScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      backgroundColor: Theme.of(context).colorScheme.outline.shade100,
+      backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
 
       appBar: AppBar(
         title: const Text("Enter Delivery Code"),

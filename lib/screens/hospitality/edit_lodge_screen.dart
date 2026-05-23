@@ -370,7 +370,7 @@ class _EditLodgeScreenState
             width: 90,
             height: 90,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.outline.shade200,
+              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(Icons.add_a_photo),

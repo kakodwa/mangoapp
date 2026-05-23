@@ -169,7 +169,7 @@ class _EditProductScreenState
                 decoration: BoxDecoration(
                   borderRadius:
                       BorderRadius.circular(14),
-                  color: Theme.of(context).colorScheme.outline.shade200,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
                 ),
                 child: const CircularProgressIndicator(),
               );
@@ -218,7 +218,7 @@ class _EditProductScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.outline.shade100,
+      backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
 
       appBar: const MainAppBar(
         title: 'Edit Product',
@@ -408,7 +408,7 @@ class _EditProductScreenState
                         child: Icon(
                           Icons
                               .add_photo_alternate_outlined,
-                          color: Theme.of(context).colorScheme.outline.shade600,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                           size: 30,
                         ),
                       ),

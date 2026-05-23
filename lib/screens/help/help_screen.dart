@@ -67,7 +67,7 @@ class HelpSupportScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppScaffold(
       appBar: const MainAppBar(title: 'Help & Support'),
-      backgroundColor: const Theme.of(context).colorScheme.surfaceContainer,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
 
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.md),
@@ -152,7 +152,7 @@ class HelpSupportScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Theme.of(context).colorScheme.outline.shade200),
+                border: Border.all(color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25)),
               ),
               child: Row(
                 children: [

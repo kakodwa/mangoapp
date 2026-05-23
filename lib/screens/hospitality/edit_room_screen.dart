@@ -149,7 +149,7 @@ class _EditRoomScreenState
         color: Theme.of(context).colorScheme.outline.shade50,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.shade200,
+          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
         ),
       ),
       child: SwitchListTile(

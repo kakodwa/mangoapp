@@ -277,7 +277,7 @@ class _AddPropertyScreenState
             height: 90,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.outline.shade200,
+              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
               borderRadius:
                   BorderRadius.circular(12),
             ),
@@ -331,7 +331,7 @@ class _AddPropertyScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.outline.shade100,
+      backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
 
       appBar: const MainAppBar(
         title: 'Post Property',

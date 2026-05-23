@@ -98,7 +98,7 @@ Future<void> _loadRelated(int productId) async {
     final auth = ref.watch(authProvider);
 
     return Scaffold(
-      backgroundColor: const Theme.of(context).colorScheme.surfaceContainer,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
 
       appBar: productAsync.when(
         data: (p) => MainAppBar(title: p.name),

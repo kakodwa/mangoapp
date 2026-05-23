@@ -40,7 +40,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
               height: 120,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Theme.of(context).colorScheme.primary.shade100,
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.12),
               ),
               child: ClipOval(
   child: Image.asset(
@@ -69,7 +69,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
               height: 40,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary.shade700),
+                valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.primary.withOpacity(0.7)),
               ),
             ),
           ],

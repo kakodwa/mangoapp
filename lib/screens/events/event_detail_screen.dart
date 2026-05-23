@@ -40,7 +40,7 @@ class EventDetailScreen extends StatelessWidget {
 
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.outline.shade100,
+      backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
 
       appBar: const MainAppBar(
         title: "Event Details",
@@ -122,7 +122,7 @@ class EventDetailScreen extends StatelessWidget {
                             ) {
                           return Container(
                             height: 260,
-                            color: Theme.of(context).colorScheme.outline.shade200,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
                             alignment: Alignment.center,
                             child: const Icon(
                               Icons.image,
@@ -196,7 +196,7 @@ class EventDetailScreen extends StatelessWidget {
                             Icons.location_on_outlined,
                             size: 20,
                             color:
-                                Theme.of(context).colorScheme.outline.shade600,
+                                Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                           ),
 
                           const SizedBox(width: AppSpacing.xs),
@@ -223,7 +223,7 @@ class EventDetailScreen extends StatelessWidget {
                             Icons.calendar_month,
                             size: 20,
                             color:
-                                Theme.of(context).colorScheme.outline.shade600,
+                                Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                           ),
 
                           const SizedBox(width: AppSpacing.xs),
@@ -315,7 +315,7 @@ Row(
                         ),
 
                         backgroundColor:
-                            Theme.of(context).colorScheme.outline.shade200,
+                            Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
 
                         color: AppColors.primary(
                           context,
@@ -327,7 +327,7 @@ Row(
                       Text(
                         "${(soldPercentage * 100).toStringAsFixed(0)}% tickets sold",
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.outline.shade700,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
                           fontSize: 13,
                         ),
                       ),
@@ -494,7 +494,7 @@ Row(
       ),
 
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.outline.shade100,
+        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
 
         borderRadius:
             BorderRadius.circular(14),
@@ -530,7 +530,7 @@ Row(
 
             style: TextStyle(
               fontSize: 12,
-              color: Theme.of(context).colorScheme.outline.shade700,
+              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
             ),
           ),
         ],
@@ -552,7 +552,7 @@ Row(
       padding: const EdgeInsets.all(14),
 
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.outline.shade100,
+        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
 
         borderRadius:
             BorderRadius.circular(16),
@@ -605,7 +605,7 @@ Row(
                   "${ticket.availableSeats} seats available",
 
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.outline.shade700,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
                   ),
                 ),
               ],

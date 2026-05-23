@@ -92,7 +92,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
     final deliveriesAsync = ref.watch(sellerDeliveriesProvider);
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.outline.shade100,
+      backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
 
       appBar: AppBar(
         elevation: 0,
@@ -117,14 +117,14 @@ class SellerDeliveryScreen extends ConsumerWidget {
                   Icon(
                     Icons.local_shipping_outlined,
                     size: 70,
-                    color: Theme.of(context).colorScheme.outline.shade400,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4),
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   Text(
                     "No deliveries yet",
                     style: TextStyle(
                       fontSize: 16,
-                      color: Theme.of(context).colorScheme.outline.shade600,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -254,7 +254,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                             color: Theme.of(context).colorScheme.outline.shade50,
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
-                              color: Theme.of(context).colorScheme.outline.shade200,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
                             ),
                           ),
                           child: Column(
@@ -294,7 +294,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                                   child: Text(
                                     "• ${item['product_name']} x${item['quantity']}  •  MWK ${item['total_price']}",
                                     style: TextStyle(
-                                      color: Theme.of(context).colorScheme.outline.shade700,
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
                                     ),
                                   ),
                                 ),
@@ -456,7 +456,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
         Icon(
           icon,
           size: 20,
-          color: Theme.of(context).colorScheme.outline.shade600,
+          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
         ),
 
         const SizedBox(width: 10),
@@ -476,7 +476,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                 TextSpan(
                   text: value,
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.outline.shade700,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
                   ),
                 ),
               ],

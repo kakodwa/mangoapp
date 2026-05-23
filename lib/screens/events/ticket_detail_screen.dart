@@ -13,7 +13,7 @@ class TicketDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.outline.shade100,
+      backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
       appBar: AppBar(
         title: const Text("My Ticket"),
         centerTitle: true,
@@ -89,7 +89,7 @@ class TicketDetailScreen extends StatelessWidget {
                             height: 220,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.outline.shade200,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Icon(
@@ -134,7 +134,7 @@ class TicketDetailScreen extends StatelessWidget {
                                     vertical: 8,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.outline.shade100,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Row(

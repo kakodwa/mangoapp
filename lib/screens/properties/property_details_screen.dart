@@ -486,7 +486,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                             width: double.infinity,
                             padding: const EdgeInsets.all(AppSpacing.sm),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.outline.shade100,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Column(
@@ -674,7 +674,7 @@ SizedBox(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Theme.of(context).colorScheme.outline.shade200),
+        border: Border.all(color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25)),
       ),
       padding: const EdgeInsets.all(AppSpacing.sm),
       child: Row(

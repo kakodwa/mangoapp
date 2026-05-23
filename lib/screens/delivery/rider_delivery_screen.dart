@@ -63,7 +63,7 @@ class _RiderDeliveryScreenState
     final d = widget.delivery;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.outline.shade100,
+      backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
 
       appBar: AppBar(
         elevation: 0,
@@ -238,7 +238,7 @@ class _RiderDeliveryScreenState
                 children: [
                   Icon(
                     Icons.info_outline,
-                    color: Theme.of(context).colorScheme.primary.shade700,
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
                   ),
 
                   const SizedBox(width: AppSpacing.sm),
@@ -417,7 +417,7 @@ class _RiderDeliveryScreenState
         Icon(
           icon,
           size: 20,
-          color: Theme.of(context).colorScheme.outline.shade600,
+          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
         ),
 
         const SizedBox(width: AppSpacing.sm),
@@ -438,7 +438,7 @@ class _RiderDeliveryScreenState
                 TextSpan(
                   text: value,
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.outline.shade700,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
                     height: 1.5,
                   ),
                 ),

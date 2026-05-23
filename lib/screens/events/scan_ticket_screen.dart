@@ -149,7 +149,7 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
         width: double.infinity,
         padding: const EdgeInsets.all(AppSpacing.sm),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.outline.shade100,
+          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Text("$title: ${value ?? ''}"),

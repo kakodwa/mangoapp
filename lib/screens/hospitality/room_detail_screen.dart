@@ -192,7 +192,7 @@ class RoomDetailScreen extends StatelessWidget {
                       Text(
                         room.roomType.toUpperCase(),
                         style: TextStyle(
-                          color: Theme.of(context).colorScheme.outline.shade600,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                           fontWeight: FontWeight.w600,
                           letterSpacing: 1,
                         ),
@@ -244,7 +244,7 @@ class RoomDetailScreen extends StatelessWidget {
                                     "Per Night",
                                     style: TextStyle(
                                       color:
-                                          Theme.of(context).colorScheme.outline.shade600,
+                                          Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                                     ),
                                   ),
                                 ],
@@ -322,7 +322,7 @@ class RoomDetailScreen extends StatelessWidget {
                               : room.description,
                           style: TextStyle(
                             height: 1.7,
-                            color: Theme.of(context).colorScheme.outline.shade700,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
                           ),
                         ),
                       ),

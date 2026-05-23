@@ -84,13 +84,13 @@ class _ShopCardState extends State<ShopCard> {
                                 fit: BoxFit.cover,
                                 errorBuilder: (_, __, ___) {
                                   return Container(
-                                    color: Theme.of(context).colorScheme.outline.shade200,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
                                     child: const Icon(Icons.store, size: 40),
                                   );
                                 },
                               )
                             : Container(
-                                color: Theme.of(context).colorScheme.outline.shade200,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
                                 child: const Icon(Icons.store, size: 40),
                               ),
                       ),
@@ -167,7 +167,7 @@ class _ShopCardState extends State<ShopCard> {
                               .textTheme
                               .labelSmall
                               ?.copyWith(
-                                color: Theme.of(context).colorScheme.outline.shade600,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                               ),
                         ),
                       ],
@@ -180,7 +180,7 @@ class _ShopCardState extends State<ShopCard> {
                       children: [
                         Icon(Icons.location_on,
                             size: 13,
-                            color: Theme.of(context).colorScheme.outline.shade600),
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6)),
                         const SizedBox(width: 3),
                         Expanded(
                           child: Text(
@@ -190,7 +190,7 @@ class _ShopCardState extends State<ShopCard> {
                                 .textTheme
                                 .labelSmall
                                 ?.copyWith(
-                                  color: Theme.of(context).colorScheme.outline.shade600,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                                 ),
                           ),
                         ),
@@ -204,7 +204,7 @@ class _ShopCardState extends State<ShopCard> {
                               .textTheme
                               .labelSmall
                               ?.copyWith(
-                                color: Theme.of(context).colorScheme.outline.shade600,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                               ),
                         ),
                       ],

@@ -198,7 +198,7 @@ class LodgeDetailScreen extends ConsumerWidget {
                                   Icon(
                                     Icons.hotel_outlined,
                                     size: 60,
-                                    color: Theme.of(context).colorScheme.outline.shade400,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4),
                                   ),
                                   const SizedBox(height: AppSpacing.sm),
                                   const Text(

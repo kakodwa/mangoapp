@@ -89,7 +89,7 @@ class _ShopsListScreenState extends ConsumerState<ShopsListScreen> {
         title: 'Shops',
       ),
       drawer: const MainDrawer(),
-      backgroundColor: const Theme.of(context).colorScheme.surfaceContainer,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
 
       body: Column(
         children: [

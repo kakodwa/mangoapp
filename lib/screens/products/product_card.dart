@@ -90,10 +90,10 @@ class ProductCard extends ConsumerWidget {
                             fit: BoxFit.cover,
                           )
                         : Container(
-                            color: Theme.of(context).colorScheme.outline.shade200,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
                             child: Icon(
                               Icons.image,
-                              color: Theme.of(context).colorScheme.outline.shade400,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4),
                               size: 40,
                             ),
                           ),
@@ -172,7 +172,7 @@ class ProductCard extends ConsumerWidget {
                               ? Icons.favorite
                               : Icons.favorite_border,
                           size: 20,
-                          color: isFav ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.outline.shade600,
+                          color: isFav ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                         ),
                       ),
                     ),
@@ -191,7 +191,7 @@ class ProductCard extends ConsumerWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: theme.textTheme.titleMedium?.copyWith(
-                      color: const Theme.of(context).colorScheme.onSurface,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
 
@@ -213,7 +213,7 @@ class ProductCard extends ConsumerWidget {
                       Text(
                         "(${product.totalReviews})",
                         style: theme.textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.outline.shade600,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                         ),
                       ),
                     ],
@@ -233,7 +233,7 @@ class ProductCard extends ConsumerWidget {
                                 'MWK ${product.originalPrice?.toStringAsFixed(2)}',
                                 style: theme.textTheme.labelSmall?.copyWith(
                                   decoration: TextDecoration.lineThrough,
-                                  color: Theme.of(context).colorScheme.outline.shade500,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5),
                                 ),
                               ),
 
@@ -257,7 +257,7 @@ class ProductCard extends ConsumerWidget {
                         color: isOwner
                             ? const Color(0xFF1976D2)
                             : (product.isInStock
-                                ? const Theme.of(context).colorScheme.primary
+                                ? Theme.of(context).colorScheme.primary
                                 : Theme.of(context).colorScheme.outline),
                         style: IconButtonStyle.filled,
                         onTap: isOwner

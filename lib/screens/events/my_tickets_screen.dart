@@ -249,7 +249,7 @@ Future<void> captureTicket(GlobalKey key) async {
                             Icon(
                               Icons.arrow_forward_ios,
                               size: 14,
-                              color: Theme.of(context).colorScheme.outline.shade400,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4),
                             ),
                           ],
                         ),

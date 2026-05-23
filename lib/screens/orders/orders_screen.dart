@@ -361,7 +361,7 @@ class _OrdersScreenState
                 style: TextStyle(
                   fontSize: 12,
                   color:
-                      Theme.of(context).colorScheme.outline.shade600,
+                      Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                 ),
               ),
 
@@ -623,7 +623,7 @@ class _OrdersScreenState
                                       style:
                                           TextStyle(
                                         color:
-                                            Theme.of(context).colorScheme.outline.shade600,
+                                            Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                                         fontSize:
                                             12,
                                       ),
@@ -794,7 +794,7 @@ class _OrdersScreenState
                                             height:
                                                 55,
                                             color:
-                                                Theme.of(context).colorScheme.outline.shade200,
+                                                Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
                                             child:
                                                 const Icon(
                                               Icons.image,
@@ -833,7 +833,7 @@ class _OrdersScreenState
                                               style:
                                                   TextStyle(
                                                 color:
-                                                    Theme.of(context).colorScheme.outline.shade600,
+                                                    Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                                                 fontSize:
                                                     12,
                                               ),
@@ -958,7 +958,7 @@ class _OrdersScreenState
                 Icon(
                   Icons.error_outline,
                   size: 70,
-                  color: Theme.of(context).colorScheme.error[300],
+                  color: Theme.of(context).colorScheme.error,
                 ),
 
                 const SizedBox(

@@ -44,7 +44,7 @@ class WalletTransactionsScreen extends ConsumerWidget {
     final txAsync = ref.watch(walletTransactionsProvider);
 
     return AppScaffold(
-      backgroundColor: const Theme.of(context).colorScheme.surfaceContainer,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
 
       appBar: AppBar(
         title: const Text("Wallet Activity"),
@@ -104,7 +104,7 @@ class WalletTransactionsScreen extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Theme.of(context).colorScheme.outline.shade200,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
                             blurRadius: 8,
                             spreadRadius: 2,
                           )
@@ -151,7 +151,7 @@ class WalletTransactionsScreen extends ConsumerWidget {
                                 Text(
                                   tx.description,
                                   style: TextStyle(
-                                    color: Theme.of(context).colorScheme.outline.shade600,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                                     fontSize: 12,
                                   ),
                                 ),

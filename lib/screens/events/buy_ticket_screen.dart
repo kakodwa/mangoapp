@@ -264,7 +264,7 @@ class _BuyTicketScreenState
                     padding: const EdgeInsets.all(AppSpacing.sm),
 
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.outline.shade100,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(12),
                     ),
 
@@ -295,7 +295,7 @@ class _BuyTicketScreenState
                               "MWK ${t.price.toStringAsFixed(0)}",
 
                               style: TextStyle(
-                                color: Theme.of(context).colorScheme.outline.shade700,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
                               ),
                             ),
                           ],

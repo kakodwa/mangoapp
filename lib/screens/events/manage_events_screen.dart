@@ -133,11 +133,11 @@ class _ManageEventsScreenState
                       (context, error, stackTrace) {
                     return Container(
                       height: 210,
-                      color: Theme.of(context).colorScheme.outline.shade200,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
                       child: Icon(
                         Icons.image,
                         size: 60,
-                        color: Theme.of(context).colorScheme.outline.shade400,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4),
                       ),
                     );
                   },
@@ -256,7 +256,7 @@ class _ManageEventsScreenState
                     Text(
                       event.eventDate,
                       style: TextStyle(
-                        color: Theme.of(context).colorScheme.outline.shade700,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -266,7 +266,7 @@ class _ManageEventsScreenState
                     Text(
                       "${event.startTime} - ${event.endTime}",
                       style: TextStyle(
-                        color: Theme.of(context).colorScheme.outline.shade700,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
                       ),
                     ),
                   ],
@@ -351,7 +351,7 @@ class _ManageEventsScreenState
                     value: soldPercentage,
                     minHeight: 10,
                     backgroundColor:
-                        Theme.of(context).colorScheme.outline.shade200,
+                        Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
                     valueColor:
                         AlwaysStoppedAnimation(
                       AppColors.leafGreen,
@@ -364,7 +364,7 @@ class _ManageEventsScreenState
                 Text(
                   "${(soldPercentage * 100).toStringAsFixed(0)}% sold • $availableTickets remaining",
                   style: TextStyle(
-                    color: Theme.of(context).colorScheme.outline.shade700,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
                     fontSize: 13,
                   ),
                 ),
@@ -496,7 +496,7 @@ class _ManageEventsScreenState
             "$sold sold • ${type.availableSeats} left",
             style: TextStyle(
               fontSize: 12,
-              color: Theme.of(context).colorScheme.outline.shade700,
+              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
             ),
           ),
         ],
@@ -516,7 +516,7 @@ class _ManageEventsScreenState
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.outline.shade100,
+        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
         borderRadius:
             BorderRadius.circular(16),
       ),
@@ -545,7 +545,7 @@ class _ManageEventsScreenState
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 12,
-              color: Theme.of(context).colorScheme.outline.shade700,
+              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
             ),
           ),
         ],
@@ -560,7 +560,7 @@ class _ManageEventsScreenState
     );
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.outline.shade100,
+      backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
 
       appBar: const MainAppBar(
         title: "Manage Events",

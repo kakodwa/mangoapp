@@ -301,7 +301,7 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
                 child: Container(
                   width: 90,
                   height: 90,
-                  color: Theme.of(context).colorScheme.outline.shade200,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
                   child: const Icon(Icons.add),
                 ),
               ),

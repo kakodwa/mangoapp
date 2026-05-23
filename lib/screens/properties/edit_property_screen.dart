@@ -228,7 +228,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
             height: 90,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.outline.shade200,
+              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const CircularProgressIndicator(),
@@ -281,7 +281,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
     final isEdit = widget.property != null;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.outline.shade100,
+      backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
 
       appBar: MainAppBar(
         title: isEdit

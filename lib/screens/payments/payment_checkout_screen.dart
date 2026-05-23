@@ -422,7 +422,7 @@ if (isVisa) {
               padding:
                   const EdgeInsets.all(AppSpacing.xs),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.outline.shade100,
+                color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
                 borderRadius:
                     BorderRadius.circular(
                   14,
@@ -487,7 +487,7 @@ if (isVisa) {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor:
-          Theme.of(context).colorScheme.outline.shade100,
+          Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
 
       appBar: const MainAppBar(
         title: 'Secure Payment',

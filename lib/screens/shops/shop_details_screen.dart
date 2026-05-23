@@ -27,7 +27,7 @@ class ShopDetailsScreen extends ConsumerWidget {
         ref.watch(relatedShopsProvider(shopId));
 
     return Scaffold(
-      backgroundColor: const Theme.of(context).colorScheme.surfaceContainer,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
 
       appBar: shopAsync.when(
         data: (shop) => MainAppBar(title: shop.name),
@@ -152,7 +152,7 @@ class ShopDetailsScreen extends ConsumerWidget {
                             children: [
                               CircleAvatar(
                                 radius: 26,
-                                backgroundColor: Theme.of(context).colorScheme.outline.shade200,
+                                backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
                                 backgroundImage: shop.logo.isNotEmpty
                                     ? NetworkImage(shop.logo)
                                     : null,

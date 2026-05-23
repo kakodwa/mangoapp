@@ -98,7 +98,7 @@ class _PropertiesListScreenState
     return AppScaffold(
       appBar: const MainAppBar(title: 'Properties'),
       drawer: const MainDrawer(),
-      backgroundColor: const Theme.of(context).colorScheme.surfaceContainer,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
 
       body: Column(
         children: [

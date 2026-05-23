@@ -54,7 +54,7 @@ class ProfileScreen extends ConsumerWidget {
     //final hasShopAsync = ref.watch(hasShopProvider);
 
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.outline.shade100,
+      backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
 
       appBar: MainAppBar(
         title: username ?? 'Profile',

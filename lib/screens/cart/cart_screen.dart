@@ -18,7 +18,7 @@ class CartScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: const MainAppBar(title: 'Shopping Cart'),
-      backgroundColor: const Theme.of(context).colorScheme.surfaceContainer,
+      backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
 
       body: cart.isEmpty
           ? Center(

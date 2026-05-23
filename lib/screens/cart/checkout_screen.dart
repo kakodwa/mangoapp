@@ -111,7 +111,7 @@ class _CheckoutScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor:
-          Theme.of(context).colorScheme.outline.shade100,
+          Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
 
       appBar: const MainAppBar(
         title: 'Checkout',
