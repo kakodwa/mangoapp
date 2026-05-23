@@ -131,7 +131,7 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
             width: 3,
           ),
         ),
-        child: const Center(
+        child: Center(
           child: Icon(
             Icons.qr_code_scanner,
             color: Theme.of(context).colorScheme.surface,

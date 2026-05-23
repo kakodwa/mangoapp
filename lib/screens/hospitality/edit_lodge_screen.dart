@@ -296,7 +296,7 @@ class _EditLodgeScreenState
                     });
                   },
                   child: Container(
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.surface,
                       shape: BoxShape.circle,
                     ),
@@ -348,7 +348,7 @@ class _EditLodgeScreenState
                     });
                   },
                   child: Container(
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.surface,
                       shape: BoxShape.circle,
                     ),

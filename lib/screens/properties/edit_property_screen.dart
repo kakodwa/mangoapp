@@ -258,7 +258,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
                 },
                 child: Container(
                   padding: EdgeInsets.all(2),
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: Theme.of(context).colorScheme.error,
                     shape: BoxShape.circle,
                   ),

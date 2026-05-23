@@ -282,19 +282,21 @@ class RoomDetailScreen extends StatelessWidget {
                         runSpacing: AppSpacing.sm,
                         children: [
                           if (room.hasWifi)
-                            _amenity(Icons.wifi, "WiFi"),
+                            _amenity(context, Icons.wifi, "WiFi"),
 
                           if (room.hasTv)
-                            _amenity(Icons.tv, "TV"),
+                            _amenity(context, Icons.tv, "TV"),
 
                           if (room.hasAc)
                             _amenity(
+                              context,
                               Icons.ac_unit,
                               "Air Conditioning",
                             ),
 
                           if (room.hasBreakfast)
                             _amenity(
+                              context,
                               Icons.free_breakfast,
                               "Breakfast",
                             ),
@@ -406,7 +408,7 @@ class RoomDetailScreen extends StatelessWidget {
                 horizontal: AppSpacing.md,
                 vertical: AppSpacing.sm,
               ),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
                 boxShadow: [
                   BoxShadow(
@@ -488,6 +490,7 @@ class RoomDetailScreen extends StatelessWidget {
 
   /// ================= AMENITY CHIP =================
   Widget _amenity(
+    BuildContext context,
     IconData icon,
     String label,
   ) {

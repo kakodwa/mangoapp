@@ -69,7 +69,7 @@ class _OrdersScreenState
         return Container(
           padding:
               EdgeInsets.all(20),
-          decoration: const BoxDecoration(
+          decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface,
             borderRadius:
                 BorderRadius.vertical(

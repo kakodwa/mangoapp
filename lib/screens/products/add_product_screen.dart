@@ -181,7 +181,7 @@ class _AddProductScreenState
             },
             child: Container(
               padding: EdgeInsets.all(3),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.error,
                 shape: BoxShape.circle,
               ),
