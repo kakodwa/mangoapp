@@ -13,6 +13,7 @@ class MangoMartApp {
     this.banners = [];
     this.currentPage = 'home';
     this.isLoading = false;
+    this.mode = 'demo'; // 'demo' or 'live'
     this.loadFromStorage();
     this.setupEventListeners();
   }
@@ -27,15 +28,21 @@ class MangoMartApp {
       const serverAvailable = await apiClient.healthCheck();
       if (!serverAvailable) {
         console.warn('[v0] Server not available at http://127.0.0.1:8000/api/');
+        this.mode = 'demo';
+        this.updateModeIndicator();
         this.showConnectionError();
         // Still load demo data for offline use
         this.loadDemoData();
       } else {
         console.log('[v0] Server available, loading data from API');
+        this.mode = 'live';
+        this.updateModeIndicator();
         await this.loadDataFromAPI();
       }
     } catch (error) {
       console.error('[v0] Initialization error:', error);
+      this.mode = 'demo';
+      this.updateModeIndicator();
       this.loadDemoData();
     } finally {
       this.showLoadingSpinner(false);
@@ -191,6 +198,28 @@ class MangoMartApp {
     document.getElementById('cartBtn')?.addEventListener('click', () => this.navigate('cart'));
     document.getElementById('profileBtn')?.addEventListener('click', () => this.navigate('profile'));
     document.getElementById('hamburger')?.addEventListener('click', () => this.toggleMobileMenu());
+
+    // Mode indicator - show info
+    const modeStatus = document.getElementById('modeStatus');
+    if (modeStatus) {
+      modeStatus.addEventListener('click', () => this.showModeInfo());
+    }
+
+    // Modal close button
+    const modalCloseBtn = document.querySelector('.modal-close');
+    if (modalCloseBtn) {
+      modalCloseBtn.addEventListener('click', () => this.closeModeModal());
+    }
+
+    // Close modal when clicking outside
+    const modal = document.getElementById('modeModal');
+    if (modal) {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          this.closeModeModal();
+        }
+      });
+    }
 
     // Close mobile menu when link clicked
     document.querySelectorAll('.nav-link').forEach((link) => {
@@ -738,6 +767,109 @@ class MangoMartApp {
         // Data passed via onclick attribute
       });
     });
+  }
+
+  // ==================== MODE MANAGEMENT ====================
+  updateModeIndicator() {
+    const modeStatus = document.getElementById('modeStatus');
+    const modeText = document.getElementById('modeText');
+    
+    if (!modeStatus || !modeText) return;
+
+    if (this.mode === 'live') {
+      modeStatus.classList.remove('demo-mode');
+      modeStatus.classList.add('live-mode');
+      modeText.textContent = 'Live';
+      modeStatus.title = 'Click to learn more - Connected to live API server';
+    } else {
+      modeStatus.classList.remove('live-mode');
+      modeStatus.classList.add('demo-mode');
+      modeText.textContent = 'Demo';
+      modeStatus.title = 'Click to learn more - Using demo data (server unavailable)';
+    }
+  }
+
+  showModeInfo() {
+    const modal = document.getElementById('modeModal');
+    const content = document.getElementById('modeInfoContent');
+    
+    if (!modal || !content) return;
+
+    if (this.mode === 'live') {
+      content.innerHTML = `
+        <div class="mode-info-section">
+          <h3><i class="fas fa-server"></i> Live API Mode</h3>
+          <p>You are connected to the real API server and using live data.</p>
+          <ul>
+            <li>Data from API: http://127.0.0.1:8000/api/</li>
+            <li>Real products and shop information</li>
+            <li>User authentication enabled</li>
+            <li>Database persistence</li>
+            <li>Payment processing active</li>
+          </ul>
+        </div>
+        <div class="mode-info-section">
+          <h3><i class="fas fa-info-circle"></i> What You Can Do</h3>
+          <ul>
+            <li>Browse real products and shops</li>
+            <li>Create an account and login</li>
+            <li>Add items to cart and checkout</li>
+            <li>Manage your profile and wallet</li>
+            <li>Process real transactions</li>
+          </ul>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="document.getElementById('modeModal').style.display = 'none'">Close</button>
+        </div>
+      `;
+    } else {
+      content.innerHTML = `
+        <div class="mode-info-section">
+          <h3><i class="fas fa-database"></i> Demo Mode</h3>
+          <p>You are using demo data. The API server is not currently available.</p>
+          <ul>
+            <li>Sample products and shops (30+ items)</li>
+            <li>Offline browsing experience</li>
+            <li>Shopping cart works (saved locally)</li>
+            <li>No login required</li>
+            <li>No external API calls</li>
+          </ul>
+        </div>
+        <div class="mode-info-section">
+          <h3><i class="fas fa-question-circle"></i> How to Switch to Live Mode?</h3>
+          <p>Follow these steps to connect to the API:</p>
+          <ul>
+            <li>Start your backend server: <code style="background: #f0f0f0; padding: 2px 6px; border-radius: 3px;">python manage.py runserver</code></li>
+            <li>Ensure the server runs on http://127.0.0.1:8000</li>
+            <li>Refresh this page (Ctrl+R or Cmd+R)</li>
+            <li>The mode will automatically switch to "Live"</li>
+          </ul>
+        </div>
+        <div class="mode-info-section">
+          <h3><i class="fas fa-star"></i> Demo Mode Features</h3>
+          <ul>
+            <li>Explore all pages and features</li>
+            <li>Test search and filtering</li>
+            <li>Add/remove items from cart</li>
+            <li>Perfect for testing UI/UX</li>
+            <li>No data persistence to server</li>
+          </ul>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-secondary" onclick="document.getElementById('modeModal').style.display = 'none'">Close</button>
+          <button class="btn-primary" onclick="location.reload()">Refresh Page</button>
+        </div>
+      `;
+    }
+
+    modal.style.display = 'flex';
+  }
+
+  closeModeModal() {
+    const modal = document.getElementById('modeModal');
+    if (modal) {
+      modal.style.display = 'none';
+    }
   }
 
   // ==================== STORAGE ====================

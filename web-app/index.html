@@ -26,6 +26,13 @@
                     <a href="#hospitality" class="nav-link">Hospitality</a>
                 </div>
                 <div class="navbar-actions">
+                    <!-- Mode Indicator -->
+                    <div class="mode-indicator">
+                        <span id="modeStatus" class="mode-badge demo-mode">
+                            <i class="fas fa-database"></i>
+                            <span id="modeText">Demo</span>
+                        </span>
+                    </div>
                     <button class="btn-icon" id="searchBtn">
                         <i class="fas fa-search"></i>
                     </button>
@@ -354,6 +361,18 @@
                 <p>&copy; 2024 MangoMart. All rights reserved.</p>
             </div>
         </footer>
+    </div>
+
+    <!-- Mode Info Modal -->
+    <div id="modeModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <button class="modal-close">&times;</button>
+            <h2>Data Mode Information</h2>
+            
+            <div id="modeInfoContent">
+                <!-- Content will be updated based on current mode -->
+            </div>
+        </div>
     </div>
 
     <!-- Loading Spinner -->
