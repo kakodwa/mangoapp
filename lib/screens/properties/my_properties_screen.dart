@@ -21,7 +21,7 @@ class MyPropertiesScreen extends ConsumerWidget {
 
       // ✅ ADD PROPERTY BUTTON
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.orange,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         child: const Icon(Icons.add),
         onPressed: () {
           Navigator.push(
@@ -75,7 +75,7 @@ class MyPropertiesScreen extends ConsumerWidget {
                       else
                         Container(
                           height: 180,
-                          color: Colors.grey.shade200,
+                          color: Theme.of(context).colorScheme.outline.shade200,
                           child: const Icon(Icons.home, size: 50),
                         ),
 
@@ -94,7 +94,7 @@ class MyPropertiesScreen extends ConsumerWidget {
                             IconButton(
                               icon: const Icon(
                                 Icons.edit,
-                                color: Colors.blue,
+                                color: Theme.of(context).colorScheme.primary,
                               ),
                               onPressed: () {
                                Navigator.push(
@@ -110,7 +110,7 @@ class MyPropertiesScreen extends ConsumerWidget {
                             IconButton(
                               icon: const Icon(
                                 Icons.delete,
-                                color: Colors.red,
+                                color: Theme.of(context).colorScheme.error,
                               ),
                               onPressed: () async {
                                 final confirm = await showDialog(

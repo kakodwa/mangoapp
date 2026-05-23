@@ -11,6 +11,7 @@ import '../../utils/app_toast.dart';
 import '../../widgets/main_app_bar.dart';
 import '../orders/orders_screen.dart';
 import '../payments/payment_checkout_screen.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   final List<CartItem> items;
@@ -110,7 +111,7 @@ class _CheckoutScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor:
-          Colors.grey.shade100,
+          Theme.of(context).colorScheme.outline.shade100,
 
       appBar: const MainAppBar(
         title: 'Checkout',
@@ -121,7 +122,7 @@ class _CheckoutScreenState
           key: _formKey,
           child: ListView(
             padding:
-                const EdgeInsets.all(16),
+                const EdgeInsets.all(AppSpacing.md),
             children: [
               // ======================
               // ORDER SUMMARY
@@ -151,7 +152,7 @@ class _CheckoutScreenState
                   children: [
                     const Icon(
                       Icons.shopping_bag_outlined,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surface,
                       size: 38,
                     ),
 
@@ -163,7 +164,7 @@ class _CheckoutScreenState
                       "Order Checkout",
                       style: TextStyle(
                         color:
-                            Colors.white,
+                            Theme.of(context).colorScheme.surface,
                         fontSize: 20,
                         fontWeight:
                             FontWeight
@@ -191,7 +192,7 @@ class _CheckoutScreenState
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
 
               // ======================
               // ORDER ITEMS
@@ -214,14 +215,14 @@ class _CheckoutScreenState
                   16,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius:
                       BorderRadius.circular(
                     16,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black
+                      color: Theme.of(context).colorScheme.onSurface
                           .withOpacity(
                         0.03,
                       ),
@@ -281,7 +282,7 @@ class _CheckoutScreenState
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
 
               // ======================
               // DELIVERY DETAILS
@@ -321,7 +322,7 @@ class _CheckoutScreenState
                 },
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
 
               AppTextField(
                 label:
@@ -379,7 +380,7 @@ class _CheckoutScreenState
               ),
 
               if (_latitude != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
 
                 Container(
                   padding:
@@ -388,7 +389,7 @@ class _CheckoutScreenState
                   ),
                   decoration: BoxDecoration(
                     color:
-                        Colors.green.shade50,
+                        Theme.of(context).colorScheme.secondary.shade50,
                     borderRadius:
                         BorderRadius.circular(
                       14,
@@ -407,7 +408,7 @@ class _CheckoutScreenState
                             Icons
                                 .check_circle,
                             color:
-                                Colors.green,
+                                Theme.of(context).colorScheme.secondary,
                             size: 18,
                           ),
 
@@ -439,7 +440,7 @@ class _CheckoutScreenState
                             const TextStyle(
                           fontSize: 12,
                           color:
-                              Colors.grey,
+                              Theme.of(context).colorScheme.outline,
                         ),
                       ),
                     ],
@@ -447,7 +448,7 @@ class _CheckoutScreenState
                 ),
               ],
 
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
 
               // ======================
               // TOTAL
@@ -459,14 +460,14 @@ class _CheckoutScreenState
                   16,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius:
                       BorderRadius.circular(
                     16,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black
+                      color: Theme.of(context).colorScheme.onSurface
                           .withOpacity(
                         0.03,
                       ),
@@ -543,7 +544,7 @@ class _CheckoutScreenState
                                 FontWeight
                                     .bold,
                             color:
-                                Colors.green,
+                                Theme.of(context).colorScheme.secondary,
                           ),
                         ),
                       ],

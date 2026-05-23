@@ -26,6 +26,7 @@ import '../events/my_tickets_screen.dart';
 import '../hospitality/lodge_owner_dashboard.dart';
 
 import '../../utils/user_role_utils.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -53,7 +54,7 @@ class ProfileScreen extends ConsumerWidget {
     //final hasShopAsync = ref.watch(hasShopProvider);
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: Theme.of(context).colorScheme.outline.shade100,
 
       appBar: MainAppBar(
         title: username ?? 'Profile',
@@ -70,7 +71,7 @@ class ProfileScreen extends ConsumerWidget {
               clipBehavior: Clip.none,
               children: [
                 Container(
-                  margin: const EdgeInsets.all(16),
+                  margin: const EdgeInsets.all(AppSpacing.md),
                   padding: const EdgeInsets.fromLTRB(20, 70, 20, 20),
                   decoration: BoxDecoration(
                     gradient: const LinearGradient(
@@ -88,7 +89,7 @@ class ProfileScreen extends ConsumerWidget {
                       Text(
                         user?.firstName ?? "User Name",
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.surface,
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
@@ -101,7 +102,7 @@ class ProfileScreen extends ConsumerWidget {
                           fontSize: 13,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.xs),
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 10,
@@ -114,13 +115,13 @@ class ProfileScreen extends ConsumerWidget {
                         child: Text(
                           UserRoleUtils.getLabel(user?.userType ?? ''),
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.surface,
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSpacing.md),
 
                       walletAsync.when(
                         data: (wallet) => Row(
@@ -137,7 +138,7 @@ class ProfileScreen extends ConsumerWidget {
                         ),
                         loading: () =>
                             const CircularProgressIndicator(
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.surface,
                         ),
                         error: (_, __) =>
                             const Text("Wallet error"),
@@ -152,17 +153,17 @@ class ProfileScreen extends ConsumerWidget {
                     radius: 40,
                     backgroundColor: AppColors.mangoOrange,
                     child: Icon(Icons.person,
-                        size: 40, color: Colors.white),
+                        size: 40, color: Theme.of(context).colorScheme.surface),
                   ),
                 ),
               ],
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.md),
 
             // ================= MENU =================
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
               child: Column(
                 children: [
 
@@ -379,12 +380,12 @@ if (isLoggedIn && isShopOwner && hasShop) ...[
         Text(
           value,
           style: const TextStyle(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             fontWeight: FontWeight.bold,
             fontSize: 15,
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: AppSpacing.xxs),
         Text(
           title,
           style: const TextStyle(

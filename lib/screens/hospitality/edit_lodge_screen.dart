@@ -297,12 +297,12 @@ class _EditLodgeScreenState
                   },
                   child: Container(
                     decoration: const BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surface,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
                       Icons.close,
-                      color: Colors.red,
+                      color: Theme.of(context).colorScheme.error,
                     ),
                   ),
                 ),
@@ -349,12 +349,12 @@ class _EditLodgeScreenState
                   },
                   child: Container(
                     decoration: const BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surface,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
                       Icons.close,
-                      color: Colors.red,
+                      color: Theme.of(context).colorScheme.error,
                     ),
                   ),
                 ),
@@ -370,7 +370,7 @@ class _EditLodgeScreenState
             width: 90,
             height: 90,
             decoration: BoxDecoration(
-              color: Colors.grey.shade200,
+              color: Theme.of(context).colorScheme.outline.shade200,
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(Icons.add_a_photo),
@@ -394,7 +394,7 @@ class _EditLodgeScreenState
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.md),
           children: [
 
             /// BASIC INFO
@@ -515,12 +515,12 @@ class _EditLodgeScreenState
             ),
 
             if (latitude != null) ...[
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.xs),
               Text("Latitude: $latitude"),
             ],
 
             if (longitude != null) ...[
-              const SizedBox(height: 4),
+              const SizedBox(height: AppSpacing.xxs),
               Text("Longitude: $longitude"),
             ],
 
@@ -578,7 +578,7 @@ class _EditLodgeScreenState
               ),
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
 
             buildImagePreview(),
 
@@ -600,7 +600,7 @@ class _EditLodgeScreenState
                 ),
                 child: isLoading
                     ? const CircularProgressIndicator(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.surface,
                       )
                     : const Text(
                         "Update Lodge",

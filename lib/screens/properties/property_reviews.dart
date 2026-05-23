@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../providers/api_provider.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class PropertyReview {
   final int id;
@@ -40,13 +41,13 @@ class PropertyReviewsWidget extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.sm),
 
         // Rating Summary
         Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(AppSpacing.sm),
           decoration: BoxDecoration(
-            color: Colors.grey[100],
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
@@ -58,10 +59,10 @@ class PropertyReviewsWidget extends StatelessWidget {
                   Text(
                     'Average Rating',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AppSpacing.xxs),
                   Row(
                     children: [
                       Text(
@@ -93,10 +94,10 @@ class PropertyReviewsWidget extends StatelessWidget {
                   Text(
                     'Total Reviews',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: AppSpacing.xxs),
                   Text(
                     '$totalReviews',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -108,17 +109,17 @@ class PropertyReviewsWidget extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
 
         // Reviews List
         if (reviews.isEmpty)
           Center(
             child: Padding(
-              padding: const EdgeInsets.all(32),
+              padding: const EdgeInsets.all(AppSpacing.xl),
               child: Text(
                 'No reviews yet',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[600],
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
               ),
             ),
@@ -140,7 +141,7 @@ class PropertyReviewsWidget extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(AppSpacing.sm),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -156,12 +157,12 @@ class PropertyReviewsWidget extends StatelessWidget {
                 Text(
                   _formatDate(review.createdAt),
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: Colors.grey[600],
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                 ),
               ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.xxs),
             Row(
               children: List.generate(
                 5,
@@ -172,7 +173,7 @@ class PropertyReviewsWidget extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.xs),
             Text(
               review.comment,
               style: Theme.of(context).textTheme.bodySmall,

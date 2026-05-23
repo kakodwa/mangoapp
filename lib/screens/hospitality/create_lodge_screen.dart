@@ -159,7 +159,7 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
       ),
 
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.md),
         children: [
 
           /// ================= BASIC =================
@@ -289,7 +289,7 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
                       right: 0,
                       child: GestureDetector(
                         onTap: () => setState(() => images.removeAt(i)),
-                        child: const Icon(Icons.close, color: Colors.red),
+                        child: const Icon(Icons.close, color: Theme.of(context).colorScheme.error),
                       ),
                     )
                   ],
@@ -301,7 +301,7 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
                 child: Container(
                   width: 90,
                   height: 90,
-                  color: Colors.grey.shade200,
+                  color: Theme.of(context).colorScheme.outline.shade200,
                   child: const Icon(Icons.add),
                 ),
               ),
@@ -315,7 +315,7 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
             child: ElevatedButton(
               onPressed: isLoading ? null : submitLodge,
               child: isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
+                  ? const CircularProgressIndicator(color: Theme.of(context).colorScheme.surface)
                   : const Text("Create Lodge"),
             ),
           ),

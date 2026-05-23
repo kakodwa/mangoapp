@@ -15,6 +15,7 @@ import '../../theme/design_system/app_text_field.dart';
 import '../../providers/shops_provider.dart';
 
 import '../../utils/app_toast.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class CreateShopScreen extends ConsumerStatefulWidget {
   const CreateShopScreen({super.key});
@@ -361,7 +362,7 @@ class _CreateShopScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: Theme.of(context).colorScheme.outline.shade100,
 
       appBar: const MainAppBar(
         title: 'Create Shop',
@@ -371,7 +372,7 @@ class _CreateShopScreenState
         child: Form(
           key: _formKey,
           child: ListView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.md),
             children: [
               // ======================
               // SHOP NAME
@@ -392,7 +393,7 @@ class _CreateShopScreenState
                 },
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
 
               // ======================
               // DESCRIPTION
@@ -416,7 +417,7 @@ class _CreateShopScreenState
                 },
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
 
               // ======================
               // CATEGORY
@@ -427,7 +428,7 @@ class _CreateShopScreenState
                 decoration: InputDecoration(
                   labelText: 'Category',
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: Theme.of(context).colorScheme.surface,
                   border: OutlineInputBorder(
                     borderRadius:
                         BorderRadius.circular(
@@ -450,7 +451,7 @@ class _CreateShopScreenState
                 },
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
 
               // ======================
               // ADDRESS
@@ -472,7 +473,7 @@ class _CreateShopScreenState
                 },
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
 
               // ======================
               // CITY
@@ -493,7 +494,7 @@ class _CreateShopScreenState
                 },
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
 
               // ======================
               // DISTRICT
@@ -504,7 +505,7 @@ class _CreateShopScreenState
                 decoration: InputDecoration(
                   labelText: 'District',
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: Theme.of(context).colorScheme.surface,
                   border: OutlineInputBorder(
                     borderRadius:
                         BorderRadius.circular(
@@ -532,7 +533,7 @@ class _CreateShopScreenState
                 },
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
 
               // ======================
               // PHONE
@@ -555,7 +556,7 @@ class _CreateShopScreenState
                 },
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
 
               // ======================
               // EMAIL
@@ -578,7 +579,7 @@ class _CreateShopScreenState
                 },
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
 
               // ======================
               // LOCATION
@@ -594,7 +595,7 @@ class _CreateShopScreenState
                 ),
                 child: Padding(
                   padding:
-                      const EdgeInsets.all(16),
+                      const EdgeInsets.all(AppSpacing.md),
                   child: Column(
                     crossAxisAlignment:
                         CrossAxisAlignment.start,
@@ -608,7 +609,7 @@ class _CreateShopScreenState
                         ),
                       ),
 
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.xs),
 
                       const Text(
                         'Please capture GPS at the entrance of your shop.',
@@ -629,13 +630,13 @@ class _CreateShopScreenState
                         ),
                       ),
 
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppSpacing.sm),
 
                       Text(
                         'Latitude: ${latitude ?? 0}',
                       ),
 
-                      const SizedBox(height: 4),
+                      const SizedBox(height: AppSpacing.xxs),
 
                       Text(
                         'Longitude: ${longitude ?? 0}',
@@ -645,7 +646,7 @@ class _CreateShopScreenState
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
 
               // ======================
               // LOGO
@@ -659,20 +660,20 @@ class _CreateShopScreenState
                 ),
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.sm),
 
               GestureDetector(
                 onTap: pickLogo,
                 child: Container(
                   height: 180,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius:
                         BorderRadius.circular(
                       16,
                     ),
                     border: Border.all(
-                      color: Colors.grey.shade300,
+                      color: Theme.of(context).colorScheme.outline.shade300,
                     ),
                   ),
                   child: logoFile != null ||
@@ -699,7 +700,7 @@ class _CreateShopScreenState
                 ),
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
 
               // ======================
               // BANNER
@@ -713,20 +714,20 @@ class _CreateShopScreenState
                 ),
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.sm),
 
               GestureDetector(
                 onTap: pickBanner,
                 child: Container(
                   height: 180,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius:
                         BorderRadius.circular(
                       16,
                     ),
                     border: Border.all(
-                      color: Colors.grey.shade300,
+                      color: Theme.of(context).colorScheme.outline.shade300,
                     ),
                   ),
                   child: bannerFile != null ||
@@ -779,7 +780,7 @@ class _CreateShopScreenState
                           width: 24,
                           child:
                               CircularProgressIndicator(
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.surface,
                             strokeWidth: 2.5,
                           ),
                         )

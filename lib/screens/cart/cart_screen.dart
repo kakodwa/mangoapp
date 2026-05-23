@@ -6,6 +6,7 @@ import '../../theme/design_system/app_button.dart';
 import '../../providers/api_provider.dart';
 import 'checkout_screen.dart';
 import '../../widgets/main_app_bar.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class CartScreen extends ConsumerWidget {
   const CartScreen({Key? key}) : super(key: key);
@@ -17,19 +18,19 @@ class CartScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: const MainAppBar(title: 'Shopping Cart'),
-      backgroundColor: const Color(0xFFF6F7FB),
+      backgroundColor: const Theme.of(context).colorScheme.surfaceContainer,
 
       body: cart.isEmpty
           ? Center(
               child: Container(
-                padding: const EdgeInsets.all(24),
-                margin: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                margin: const EdgeInsets.all(AppSpacing.lg),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.05),
                       blurRadius: 10,
                     ),
                   ],
@@ -38,8 +39,8 @@ class CartScreen extends ConsumerWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.shopping_cart_outlined,
-                        size: 80, color: Colors.grey[400]),
-                    const SizedBox(height: 16),
+                        size: 80, color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    const SizedBox(height: AppSpacing.md),
                     const Text(
                       'Your cart is empty',
                       style: TextStyle(
@@ -51,10 +52,10 @@ class CartScreen extends ConsumerWidget {
                     Text(
                       'Add items to get started',
                       style: TextStyle(
-                        color: Colors.grey[600],
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppSpacing.md),
                     ElevatedButton(
                       onPressed: () => Navigator.pop(context),
                       child: const Text('Continue Shopping'),
@@ -71,21 +72,21 @@ class CartScreen extends ConsumerWidget {
                 // =========================
                 Expanded(
                   child: ListView.separated(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(AppSpacing.md),
                     itemCount: cart.length,
                     separatorBuilder: (_, __) =>
-                        const SizedBox(height: 12),
+                        const SizedBox(height: AppSpacing.sm),
                     itemBuilder: (context, index) {
                       final item = cart[index];
 
                       return Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(AppSpacing.sm),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.surface,
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.04),
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.04),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             )
@@ -100,7 +101,7 @@ class CartScreen extends ConsumerWidget {
                               child: Container(
                                 width: 70,
                                 height: 70,
-                                color: Colors.grey[200],
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                                 child: item.product.hasImage
                                     ? Image.network(
                                         item.product.safeImage ?? '',
@@ -112,7 +113,7 @@ class CartScreen extends ConsumerWidget {
                               ),
                             ),
 
-                            const SizedBox(width: 12),
+                            const SizedBox(width: AppSpacing.sm),
 
                             // DETAILS
                             Expanded(
@@ -130,12 +131,12 @@ class CartScreen extends ConsumerWidget {
                                     ),
                                   ),
 
-                                  const SizedBox(height: 4),
+                                  const SizedBox(height: AppSpacing.xxs),
 
                                   Text(
                                     "MWK ${item.product.price.toStringAsFixed(2)}",
                                     style: const TextStyle(
-                                      color: Colors.green,
+                                      color: Theme.of(context).colorScheme.secondary,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -152,7 +153,7 @@ Container(
     vertical: 4,
   ),
   decoration: BoxDecoration(
-    color: Colors.grey[100],
+    color: Theme.of(context).colorScheme.onSurfaceVariant,
     borderRadius: BorderRadius.circular(20),
   ),
   child: Row(
@@ -228,7 +229,7 @@ GestureDetector(
                               },
                               icon: const Icon(
                                 Icons.delete_outline,
-                                color: Colors.red,
+                                color: Theme.of(context).colorScheme.error,
                               ),
                             ),
                           ],
@@ -242,14 +243,14 @@ GestureDetector(
                 // CHECKOUT SUMMARY (STICKY)
                 // =========================
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                     borderRadius:
                         const BorderRadius.vertical(top: Radius.circular(20)),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
                         blurRadius: 10,
                         offset: const Offset(0, -3),
                       )
@@ -304,7 +305,7 @@ GestureDetector(
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: Colors.green,
+                              color: Theme.of(context).colorScheme.secondary,
                             ),
                           ),
                         ],

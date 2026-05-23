@@ -9,6 +9,7 @@ import '../../theme/app_colors.dart';
 import '../products/product_card.dart';
 import '../../models/shop_model.dart';
 import 'shop_card.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class ShopDetailsScreen extends ConsumerWidget {
   final int shopId;
@@ -26,7 +27,7 @@ class ShopDetailsScreen extends ConsumerWidget {
         ref.watch(relatedShopsProvider(shopId));
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F7FB),
+      backgroundColor: const Theme.of(context).colorScheme.surfaceContainer,
 
       appBar: shopAsync.when(
         data: (shop) => MainAppBar(title: shop.name),
@@ -68,7 +69,7 @@ class ShopDetailsScreen extends ConsumerWidget {
                                   fit: BoxFit.cover,
                                 )
                               : Container(
-                                  color: Colors.grey.shade300,
+                                  color: Theme.of(context).colorScheme.outline.shade300,
                                   child: const Icon(
                                     Icons.store,
                                     size: 80,
@@ -76,7 +77,7 @@ class ShopDetailsScreen extends ConsumerWidget {
                                 ),
 
                           Container(
-                            color: Colors.black.withOpacity(0.35),
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.35),
                           ),
 
                           Positioned(
@@ -92,7 +93,7 @@ class ShopDetailsScreen extends ConsumerWidget {
                               child: Text(
                                 shop.category,
                                 style: const TextStyle(
-                                  color: Colors.white,
+                                  color: Theme.of(context).colorScheme.surface,
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -110,8 +111,8 @@ class ShopDetailsScreen extends ConsumerWidget {
                                       ? Icons.verified
                                       : Icons.lock,
                                   color: shop.status == 'approved'
-                                      ? Colors.green
-                                      : Colors.red,
+                                      ? Theme.of(context).colorScheme.secondary
+                                      : Theme.of(context).colorScheme.error,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
@@ -119,7 +120,7 @@ class ShopDetailsScreen extends ConsumerWidget {
                                       ? "Verified"
                                       : "Pending",
                                   style: const TextStyle(
-                                      color: Colors.white),
+                                      color: Theme.of(context).colorScheme.surface),
                                 ),
                               ],
                             ),
@@ -132,14 +133,14 @@ class ShopDetailsScreen extends ConsumerWidget {
                   // ================= SHOP INFO
                   SliverToBoxAdapter(
                     child: Container(
-                      margin: const EdgeInsets.all(16),
-                      padding: const EdgeInsets.all(16),
+                      margin: const EdgeInsets.all(AppSpacing.md),
+                      padding: const EdgeInsets.all(AppSpacing.md),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.04),
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.04),
                             blurRadius: 10,
                           )
                         ],
@@ -151,7 +152,7 @@ class ShopDetailsScreen extends ConsumerWidget {
                             children: [
                               CircleAvatar(
                                 radius: 26,
-                                backgroundColor: Colors.grey.shade200,
+                                backgroundColor: Theme.of(context).colorScheme.outline.shade200,
                                 backgroundImage: shop.logo.isNotEmpty
                                     ? NetworkImage(shop.logo)
                                     : null,
@@ -159,7 +160,7 @@ class ShopDetailsScreen extends ConsumerWidget {
                                     ? const Icon(Icons.store)
                                     : null,
                               ),
-                              const SizedBox(width: 12),
+                              const SizedBox(width: AppSpacing.sm),
 
                               Expanded(
                                 child: Column(
@@ -173,15 +174,15 @@ class ShopDetailsScreen extends ConsumerWidget {
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    const SizedBox(height: 4),
+                                    const SizedBox(height: AppSpacing.xxs),
                                     Row(
                                       children: [
                                         const Icon(Icons.location_on,
                                             size: 14,
-                                            color: Colors.grey),
+                                            color: Theme.of(context).colorScheme.outline),
                                         const SizedBox(width: 4),
                                         Text(shop.district),
-                                        const SizedBox(width: 12),
+                                        const SizedBox(width: AppSpacing.sm),
                                         const Icon(Icons.star,
                                             size: 14,
                                             color:
@@ -201,7 +202,7 @@ class ShopDetailsScreen extends ConsumerWidget {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: AppSpacing.sm),
                           Text(shop.description),
                         ],
                       ),
@@ -237,7 +238,7 @@ class ShopDetailsScreen extends ConsumerWidget {
                     ),
                     data: (products) {
                       return SliverPadding(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(AppSpacing.sm),
                         sliver: SliverGrid(
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {
@@ -282,7 +283,7 @@ class ShopDetailsScreen extends ConsumerWidget {
                             child: CircularProgressIndicator()),
                       ),
                       error: (e, _) => Padding(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(AppSpacing.md),
                         child: Text("Error: $e"),
                       ),
                       data: (shops) {
@@ -330,11 +331,11 @@ class ShopDetailsScreen extends ConsumerWidget {
                   children: [
                     FloatingActionButton.small(
                       heroTag: "fav",
-                      backgroundColor: Colors.red,
+                      backgroundColor: Theme.of(context).colorScheme.error,
                       onPressed: () {},
                       child: const Icon(Icons.favorite),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppSpacing.sm),
                     FloatingActionButton(
                       heroTag: "map",
                       backgroundColor: AppColors.mangoOrange,

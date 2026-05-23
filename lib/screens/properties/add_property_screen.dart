@@ -277,7 +277,7 @@ class _AddPropertyScreenState
             height: 90,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: Colors.grey.shade200,
+              color: Theme.of(context).colorScheme.outline.shade200,
               borderRadius:
                   BorderRadius.circular(12),
             ),
@@ -311,13 +311,13 @@ class _AddPropertyScreenState
                 child: Container(
                   padding: const EdgeInsets.all(3),
                   decoration: const BoxDecoration(
-                    color: Colors.red,
+                    color: Theme.of(context).colorScheme.error,
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
                     Icons.close,
                     size: 16,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.surface,
                   ),
                 ),
               ),
@@ -331,7 +331,7 @@ class _AddPropertyScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: Theme.of(context).colorScheme.outline.shade100,
 
       appBar: const MainAppBar(
         title: 'Post Property',
@@ -394,7 +394,7 @@ class _AddPropertyScreenState
                       labelText:
                           'Property Type',
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Theme.of(context).colorScheme.surface,
                       border:
                           OutlineInputBorder(
                         borderRadius:
@@ -438,7 +438,7 @@ class _AddPropertyScreenState
                       labelText:
                           'Listing Purpose',
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Theme.of(context).colorScheme.surface,
                       border:
                           OutlineInputBorder(
                         borderRadius:
@@ -473,7 +473,7 @@ class _AddPropertyScreenState
                     decoration: InputDecoration(
                       labelText: 'Status',
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Theme.of(context).colorScheme.surface,
                       border:
                           OutlineInputBorder(
                         borderRadius:
@@ -532,7 +532,7 @@ class _AddPropertyScreenState
                   const Text(
                     "📍 GPS used for navigation after unlock",
                     style:
-                        TextStyle(color: Colors.grey),
+                        TextStyle(color: Theme.of(context).colorScheme.outline),
                   ),
 
                   const SizedBox(
@@ -558,7 +558,7 @@ class _AddPropertyScreenState
                     decoration: InputDecoration(
                       labelText: 'District',
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: Theme.of(context).colorScheme.surface,
                       border:
                           OutlineInputBorder(
                         borderRadius:

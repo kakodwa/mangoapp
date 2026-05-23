@@ -67,7 +67,7 @@ class _DeliveryCodeScreenState extends ConsumerState<DeliveryCodeScreen> {
   @override
   Widget build(BuildContext context) {
     return AppScaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: Theme.of(context).colorScheme.outline.shade100,
 
       appBar: AppBar(
         title: const Text("Enter Delivery Code"),
@@ -80,7 +80,7 @@ class _DeliveryCodeScreenState extends ConsumerState<DeliveryCodeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
 
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.md),
 
             // =========================
             // 🔥 INFO HEADER (NEW)
@@ -107,7 +107,7 @@ class _DeliveryCodeScreenState extends ConsumerState<DeliveryCodeScreen> {
                 },
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.md),
 
             // =========================
             // BUTTON

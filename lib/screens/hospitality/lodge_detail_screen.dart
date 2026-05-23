@@ -40,9 +40,9 @@ class LodgeDetailScreen extends ConsumerWidget {
               SliverAppBar(
                 expandedHeight: 320,
                 pinned: true,
-                backgroundColor: Colors.white,
+                backgroundColor: Theme.of(context).colorScheme.surface,
                 elevation: 0,
-                iconTheme: const IconThemeData(color: Colors.white),
+                iconTheme: const IconThemeData(color: Theme.of(context).colorScheme.surface),
                 flexibleSpace: FlexibleSpaceBar(
                   collapseMode: CollapseMode.parallax,
                   titlePadding: const EdgeInsets.only(
@@ -55,7 +55,7 @@ class LodgeDetailScreen extends ConsumerWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surface,
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                       shadows: [
@@ -82,12 +82,12 @@ class LodgeDetailScreen extends ConsumerWidget {
                             fit: BoxFit.cover,
                             width: double.infinity,
                             errorBuilder: (_, __, ___) => Container(
-                              color: Colors.grey.shade300,
+                              color: Theme.of(context).colorScheme.outline.shade300,
                               child: const Center(
                                 child: Icon(
                                   Icons.image_not_supported,
                                   size: 50,
-                                  color: Colors.white,
+                                  color: Theme.of(context).colorScheme.surface,
                                 ),
                               ),
                             ),
@@ -102,8 +102,8 @@ class LodgeDetailScreen extends ConsumerWidget {
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
-                              Colors.black.withOpacity(0.2),
-                              Colors.black.withOpacity(0.65),
+                              Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
+                              Theme.of(context).colorScheme.onSurface.withOpacity(0.65),
                             ],
                           ),
                         ),
@@ -119,10 +119,10 @@ class LodgeDetailScreen extends ConsumerWidget {
                             vertical: 7,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Theme.of(context).colorScheme.surface.withOpacity(0.2),
                             borderRadius: BorderRadius.circular(30),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.3),
+                              color: Theme.of(context).colorScheme.surface.withOpacity(0.3),
                             ),
                           ),
                           child: Row(
@@ -130,14 +130,14 @@ class LodgeDetailScreen extends ConsumerWidget {
                             children: [
                               const Icon(
                                 Icons.location_on,
-                                color: Colors.white,
+                                color: Theme.of(context).colorScheme.surface,
                                 size: 16,
                               ),
                               const SizedBox(width: 5),
                               Text(
                                 '${lodge.city}, ${lodge.district}',
                                 style: const TextStyle(
-                                  color: Colors.white,
+                                  color: Theme.of(context).colorScheme.surface,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -198,7 +198,7 @@ class LodgeDetailScreen extends ConsumerWidget {
                                   Icon(
                                     Icons.hotel_outlined,
                                     size: 60,
-                                    color: Colors.grey.shade400,
+                                    color: Theme.of(context).colorScheme.outline.shade400,
                                   ),
                                   const SizedBox(height: AppSpacing.sm),
                                   const Text(
@@ -251,7 +251,7 @@ class LodgeDetailScreen extends ConsumerWidget {
                           padding: const EdgeInsets.all(20),
                           child: Text(
                             e.toString(),
-                            style: const TextStyle(color: Colors.red),
+                            style: const TextStyle(color: Theme.of(context).colorScheme.error),
                           ),
                         ),
                       ),
@@ -271,7 +271,7 @@ class LodgeDetailScreen extends ConsumerWidget {
               right: 16,
               child: FloatingActionButton.extended(
                 heroTag: "mapBtn",
-                backgroundColor: Colors.orange,
+                backgroundColor: Theme.of(context).colorScheme.primary,
                 elevation: 4,
                 onPressed: () {
                   showModalBottomSheet(
@@ -284,10 +284,10 @@ class LodgeDetailScreen extends ConsumerWidget {
                     ),
                   );
                 },
-                icon: const Icon(Icons.map, color: Colors.white),
+                icon: const Icon(Icons.map, color: Theme.of(context).colorScheme.surface),
                 label: const Text(
                   "View Map",
-                  style: TextStyle(color: Colors.white),
+                  style: TextStyle(color: Theme.of(context).colorScheme.surface),
                 ),
               ),
             ),

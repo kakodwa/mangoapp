@@ -8,6 +8,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/app_scaffold.dart';
 import '../shops/shop_card.dart';
 import '../../widgets/search_filter_widgets.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class ShopsListScreen extends ConsumerStatefulWidget {
   const ShopsListScreen({Key? key}) : super(key: key);
@@ -88,7 +89,7 @@ class _ShopsListScreenState extends ConsumerState<ShopsListScreen> {
         title: 'Shops',
       ),
       drawer: const MainDrawer(),
-      backgroundColor: const Color(0xFFF6F7FB),
+      backgroundColor: const Theme.of(context).colorScheme.surfaceContainer,
 
       body: Column(
         children: [
@@ -132,7 +133,7 @@ class _ShopsListScreenState extends ConsumerState<ShopsListScreen> {
                   height: 50,
                 ),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
 
                 // ================= DISTRICT LIKE LODGE SCREEN =================
                 const UnifiedFilterSectionTitle(title: "District"),
@@ -143,7 +144,7 @@ class _ShopsListScreenState extends ConsumerState<ShopsListScreen> {
                   height: 50,
                 ),
 
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.xs),
 
                 // CLEAR FILTERS
                 UnifiedClearButton(
@@ -156,7 +157,7 @@ class _ShopsListScreenState extends ConsumerState<ShopsListScreen> {
             ),
           ),
 
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xxs),
 
           // ================= LIST =================
           Expanded(
@@ -192,7 +193,7 @@ class _ShopsListScreenState extends ConsumerState<ShopsListScreen> {
                 return RefreshIndicator(
                   onRefresh: () async => ref.refresh(shopsProvider),
                   child: ListView.separated(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(AppSpacing.sm),
                     itemCount: filteredShops.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 10),
                     itemBuilder: (context, index) {

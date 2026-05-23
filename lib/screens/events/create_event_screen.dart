@@ -11,6 +11,7 @@ import '../../providers/api_provider.dart';
 import '../../theme/design_system/app_text_field.dart';
 import '../../utils/app_toast.dart';
 import '../../widgets/main_app_bar.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class AddEventScreen extends ConsumerStatefulWidget {
   const AddEventScreen({super.key});
@@ -240,17 +241,17 @@ for (final ticket in ticketTypes) {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.md),
           children: [
 
             AppTextField(label: "Title", controller: title, type: TextFieldType.text),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
 
             AppTextField(label: "Description", controller: description, type: TextFieldType.multiline),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
 
             AppTextField(label: "Venue", controller: venue, type: TextFieldType.text),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
 
             Row(
               children: [
@@ -269,7 +270,7 @@ for (final ticket in ticketTypes) {
               ],
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
 
             Row(
               children: [
@@ -280,7 +281,7 @@ for (final ticket in ticketTypes) {
               ],
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
 
             GestureDetector(
               onTap: pickDate,
@@ -289,7 +290,7 @@ for (final ticket in ticketTypes) {
               ),
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
 
             Row(
               children: [
@@ -313,9 +314,9 @@ for (final ticket in ticketTypes) {
               ],
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.md),
 
-           const SizedBox(height: 20),
+           const SizedBox(height: AppSpacing.md),
 
 // ===================== TICKET TYPES =====================
 Row(
@@ -345,9 +346,9 @@ const SizedBox(height: 10),
 
   return Container(
     margin: const EdgeInsets.only(bottom: 12),
-    padding: const EdgeInsets.all(12),
+    padding: const EdgeInsets.all(AppSpacing.sm),
     decoration: BoxDecoration(
-      border: Border.all(color: Colors.grey.shade300),
+      border: Border.all(color: Theme.of(context).colorScheme.outline.shade300),
       borderRadius: BorderRadius.circular(12),
     ),
     child: Column(
@@ -370,7 +371,7 @@ const SizedBox(height: 10),
           ),
         ),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.sm),
 
         // PRICE + SEATS
         Row(
@@ -404,7 +405,7 @@ const SizedBox(height: 10),
           Align(
             alignment: Alignment.centerRight,
             child: IconButton(
-              icon: const Icon(Icons.delete, color: Colors.red),
+              icon: const Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
               onPressed: () => removeTicketType(i),
             ),
           ),
@@ -413,7 +414,7 @@ const SizedBox(height: 10),
   );
 }),
 
-const SizedBox(height: 20),
+const SizedBox(height: AppSpacing.md),
 
 ElevatedButton(
   onPressed: pickBanner,
@@ -423,7 +424,7 @@ ElevatedButton(
             const SizedBox(height: 10),
             Text(banner == null ? "No image selected" : "Image selected"),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.md),
 
             SwitchListTile(
               value: isFeatured,
@@ -431,12 +432,12 @@ ElevatedButton(
               title: const Text("Featured Event"),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.md),
 
             ElevatedButton(
               onPressed: loading ? null : submit,
               child: loading
-                  ? const CircularProgressIndicator(color: Colors.white)
+                  ? const CircularProgressIndicator(color: Theme.of(context).colorScheme.surface)
                   : const Text("Create Event"),
             ),
           ],

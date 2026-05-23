@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../widgets/hospitality/availability_calendar.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class AvailabilityCalendarScreen extends StatelessWidget {
   final int roomId;
@@ -17,7 +18,7 @@ class AvailabilityCalendarScreen extends StatelessWidget {
         title: const Text('Availability Calendar'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: AvailabilityCalendar(
           roomId: roomId,
         ),

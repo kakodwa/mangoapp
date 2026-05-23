@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/auth_provider.dart';
 import '../../theme/design_system/app_text_field.dart';
+import '../../theme/design_system/app_spacing.dart';
+import '../../theme/design_system/app_button.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -82,13 +84,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text("Create Account")),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
 
-              const SizedBox(height: 10),
+              const SizedBox(height: AppSpacing.sm),
 
               AppTextField(
                 label: "Username",
@@ -97,7 +99,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 prefix: const Icon(Icons.person),
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.sm),
 
               AppTextField(
                 label: "Email",
@@ -107,7 +109,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 prefix: const Icon(Icons.email),
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.sm),
 
               AppTextField(
                 label: "First Name",
@@ -116,7 +118,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 prefix: const Icon(Icons.person_outline),
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.sm),
 
               AppTextField(
                 label: "Last Name",
@@ -125,7 +127,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 prefix: const Icon(Icons.person_outline),
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.sm),
 
               DropdownButtonFormField<String>(
                 value: _selectedUserType,
@@ -142,7 +144,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 onChanged: (v) => setState(() => _selectedUserType = v!),
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.sm),
 
               AppTextField(
                 label: "Password",
@@ -152,7 +154,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 prefix: const Icon(Icons.lock),
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.sm),
 
               AppTextField(
                 label: "Confirm Password",
@@ -162,22 +164,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 prefix: const Icon(Icons.lock),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.lg),
 
               SizedBox(
                 width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: auth.isLoading || _loading
-                      ? null
-                      : _handleRegister,
-                  child: (auth.isLoading || _loading)
-                      ? const CircularProgressIndicator(color: Colors.white)
-                      : const Text("Register"),
+                child: AppButton(
+                  text: auth.isLoading || _loading ? "Registering..." : "Register",
+                  onPressed: auth.isLoading || _loading ? null : _handleRegister,
+                  loading: auth.isLoading || _loading,
+                  fullWidth: true,
                 ),
               ),
 
-              const SizedBox(height: 15),
+              const SizedBox(height: AppSpacing.md),
 
               TextButton(
                 onPressed: () => Navigator.pop(context),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../widgets/main_app_bar.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/app_scaffold.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -16,11 +17,11 @@ class AboutScreen extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -38,7 +39,7 @@ class AboutScreen extends StatelessWidget {
             ),
             child: Icon(icon, color: color),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -50,11 +51,11 @@ class AboutScreen extends StatelessWidget {
                     fontSize: 14,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xxs),
                 Text(
                   desc,
                   style: TextStyle(
-                    color: Colors.grey[600],
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                     height: 1.3,
                   ),
                 ),
@@ -70,10 +71,10 @@ class AboutScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppScaffold(
       appBar: const MainAppBar(title: 'About App'),
-      backgroundColor: const Color(0xFFF6F7FB),
+      backgroundColor: const Theme.of(context).colorScheme.surfaceContainer,
 
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -101,7 +102,7 @@ class AboutScreen extends StatelessWidget {
                   Text(
                     "MultiConnect Marketplace",
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surface,
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
@@ -118,7 +119,7 @@ class AboutScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.md),
 
             const Text(
               "Why use this platform",
@@ -128,7 +129,7 @@ class AboutScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
 
             _featureCard(
               icon: Icons.store,
@@ -143,14 +144,14 @@ class AboutScreen extends StatelessWidget {
               title: "Fast & Reliable Delivery",
               desc:
                   "We pick, verify, and deliver items safely to your location.",
-              color: Colors.blue,
+              color: Theme.of(context).colorScheme.primary,
             ),
 
             _featureCard(
               icon: Icons.verified,
               title: "Verified Properties",
               desc: "Only verified land and houses are listed (no scams).",
-              color: Colors.green,
+              color: Theme.of(context).colorScheme.secondary,
             ),
 
             _featureCard(
@@ -177,7 +178,7 @@ class AboutScreen extends StatelessWidget {
               color: Colors.redAccent,
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
 
             // =========================
             // VERSION CARD
@@ -186,9 +187,9 @@ class AboutScreen extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.grey.shade200),
+                border: Border.all(color: Theme.of(context).colorScheme.outline.shade200),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -199,7 +200,7 @@ class AboutScreen extends StatelessWidget {
                   ),
                   Text(
                     "1.0.0",
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(color: Theme.of(context).colorScheme.outline),
                   ),
                 ],
               ),

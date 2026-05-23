@@ -7,6 +7,7 @@ import '../../theme/app_colors.dart';
 
 import '../../models/lodge_model.dart';
 import '../../widgets/hospitality/lodge_card.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class MyLodgesScreen extends ConsumerStatefulWidget {
   const MyLodgesScreen({super.key});
@@ -95,7 +96,7 @@ class _MyLodgesScreenState extends ConsumerState<MyLodgesScreen> {
               : RefreshIndicator(
                   onRefresh: fetchMyLodges,
                   child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(AppSpacing.md),
                     itemCount: lodges.length,
 
                     itemBuilder: (context, index) {

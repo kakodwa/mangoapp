@@ -9,6 +9,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/main_app_bar.dart';
 import '../../widgets/shop_map_modal.dart';
 import 'buy_ticket_screen.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class EventDetailScreen extends StatelessWidget {
   final EventModel event;
@@ -39,7 +40,7 @@ class EventDetailScreen extends StatelessWidget {
 
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: Theme.of(context).colorScheme.outline.shade100,
 
       appBar: const MainAppBar(
         title: "Event Details",
@@ -68,7 +69,7 @@ class EventDetailScreen extends StatelessWidget {
         : null,
 
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.md),
         children: [
 
           // ======================
@@ -77,13 +78,13 @@ class EventDetailScreen extends StatelessWidget {
 
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius:
                   BorderRadius.circular(20),
 
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(.04),
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(.04),
                   blurRadius: 12,
                   offset: const Offset(0, 5),
                 ),
@@ -121,7 +122,7 @@ class EventDetailScreen extends StatelessWidget {
                             ) {
                           return Container(
                             height: 260,
-                            color: Colors.grey.shade200,
+                            color: Theme.of(context).colorScheme.outline.shade200,
                             alignment: Alignment.center,
                             child: const Icon(
                               Icons.image,
@@ -144,7 +145,7 @@ class EventDetailScreen extends StatelessWidget {
                           ),
 
                           decoration: BoxDecoration(
-                            color: Colors.orange,
+                            color: Theme.of(context).colorScheme.primary,
                             borderRadius:
                                 BorderRadius.circular(
                               30,
@@ -154,7 +155,7 @@ class EventDetailScreen extends StatelessWidget {
                           child: const Text(
                             "FEATURED",
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Theme.of(context).colorScheme.surface,
                               fontWeight:
                                   FontWeight.bold,
                               fontSize: 11,
@@ -195,10 +196,10 @@ class EventDetailScreen extends StatelessWidget {
                             Icons.location_on_outlined,
                             size: 20,
                             color:
-                                Colors.grey.shade600,
+                                Theme.of(context).colorScheme.outline.shade600,
                           ),
 
-                          const SizedBox(width: 8),
+                          const SizedBox(width: AppSpacing.xs),
 
                           Expanded(
                             child: Text(
@@ -222,10 +223,10 @@ class EventDetailScreen extends StatelessWidget {
                             Icons.calendar_month,
                             size: 20,
                             color:
-                                Colors.grey.shade600,
+                                Theme.of(context).colorScheme.outline.shade600,
                           ),
 
-                          const SizedBox(width: 8),
+                          const SizedBox(width: AppSpacing.xs),
 
                           Text(
                             event.eventDate,
@@ -272,7 +273,7 @@ Row(
       ),
     ),
 
-    const SizedBox(width: 12),
+    const SizedBox(width: AppSpacing.sm),
 
     // AVAILABLE
     Expanded(
@@ -284,7 +285,7 @@ Row(
       ),
     ),
 
-    const SizedBox(width: 12),
+    const SizedBox(width: AppSpacing.sm),
 
     // SOLD
     Expanded(
@@ -298,7 +299,7 @@ Row(
   ],
 ),
 
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSpacing.md),
 
                       // ======================
                       // PROGRESS
@@ -314,19 +315,19 @@ Row(
                         ),
 
                         backgroundColor:
-                            Colors.grey.shade200,
+                            Theme.of(context).colorScheme.outline.shade200,
 
                         color: AppColors.primary(
                           context,
                         ),
                       ),
 
-                      const SizedBox(height: 8),
+                      const SizedBox(height: AppSpacing.xs),
 
                       Text(
                         "${(soldPercentage * 100).toStringAsFixed(0)}% tickets sold",
                         style: TextStyle(
-                          color: Colors.grey.shade700,
+                          color: Theme.of(context).colorScheme.outline.shade700,
                           fontSize: 13,
                         ),
                       ),
@@ -369,14 +370,14 @@ Row(
             padding: const EdgeInsets.all(18),
 
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
 
               borderRadius:
                   BorderRadius.circular(20),
 
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(.04),
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(.04),
                   blurRadius: 12,
                   offset: const Offset(0, 5),
                 ),
@@ -403,7 +404,7 @@ Row(
                   event.description,
                   style: TextStyle(
                     height: 1.6,
-                    color: Colors.grey.shade800,
+                    color: Theme.of(context).colorScheme.outline.shade800,
                   ),
                 ),
               ],
@@ -420,10 +421,10 @@ Row(
       bottomNavigationBar: Container(
   padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
   decoration: BoxDecoration(
-    color: Colors.white,
+    color: Theme.of(context).colorScheme.surface,
     boxShadow: [
       BoxShadow(
-        color: Colors.black.withOpacity(.06),
+        color: Theme.of(context).colorScheme.onSurface.withOpacity(.06),
         blurRadius: 10,
         offset: const Offset(0, -2),
       ),
@@ -444,7 +445,7 @@ Row(
         ),
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary(context),
-          foregroundColor: Colors.white,
+          foregroundColor: Theme.of(context).colorScheme.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -493,7 +494,7 @@ Row(
       ),
 
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: Theme.of(context).colorScheme.outline.shade100,
 
         borderRadius:
             BorderRadius.circular(14),
@@ -510,7 +511,7 @@ Row(
             ),
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.xs),
 
           Text(
             value,
@@ -522,14 +523,14 @@ Row(
             ),
           ),
 
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xxs),
 
           Text(
             title,
 
             style: TextStyle(
               fontSize: 12,
-              color: Colors.grey.shade700,
+              color: Theme.of(context).colorScheme.outline.shade700,
             ),
           ),
         ],
@@ -551,7 +552,7 @@ Row(
       padding: const EdgeInsets.all(14),
 
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: Theme.of(context).colorScheme.outline.shade100,
 
         borderRadius:
             BorderRadius.circular(16),
@@ -561,7 +562,7 @@ Row(
         children: [
 
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(AppSpacing.sm),
 
             decoration: BoxDecoration(
               color: AppColors.primary(
@@ -598,13 +599,13 @@ Row(
                   ),
                 ),
 
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xxs),
 
                 Text(
                   "${ticket.availableSeats} seats available",
 
                   style: TextStyle(
-                    color: Colors.grey.shade700,
+                    color: Theme.of(context).colorScheme.outline.shade700,
                   ),
                 ),
               ],

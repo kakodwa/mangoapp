@@ -10,6 +10,7 @@ import 'property_unlock_screen.dart';
 import 'property_card.dart';
 import '../../providers/auth_provider.dart';
 import '../auth/login_screen.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class PropertyDetailsScreen extends ConsumerWidget {
   final int propertyId;
@@ -81,9 +82,9 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                               begin: Alignment.topCenter,
                                               end: Alignment.bottomCenter,
                                               colors: [
-                                                Colors.black.withOpacity(0.15),
+                                                Theme.of(context).colorScheme.onSurface.withOpacity(0.15),
                                                 Colors.transparent,
-                                                Colors.black.withOpacity(0.25),
+                                                Theme.of(context).colorScheme.onSurface.withOpacity(0.25),
                                               ],
                                             ),
                                           ),
@@ -108,7 +109,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                               child: const Text(
                                                 'Primary',
                                                 style: TextStyle(
-                                                  color: Colors.white,
+                                                  color: Theme.of(context).colorScheme.surface,
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 12,
                                                 ),
@@ -137,7 +138,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                               child: Text(
                                                 image.altText!,
                                                 style: const TextStyle(
-                                                  color: Colors.white,
+                                                  color: Theme.of(context).colorScheme.surface,
                                                   fontSize: 12,
                                                 ),
                                               ),
@@ -165,7 +166,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                       child: Text(
                                         '${property.images.length} Photos',
                                         style: const TextStyle(
-                                          color: Colors.white,
+                                          color: Theme.of(context).colorScheme.surface,
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
@@ -174,12 +175,12 @@ class PropertyDetailsScreen extends ConsumerWidget {
                               ],
                             )
                           : Container(
-                              color: Colors.grey[300],
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
                               child: Center(
                                 child: Icon(
                                   Icons.home,
                                   size: 80,
-                                  color: Colors.grey[600],
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                                 ),
                               ),
                             ),
@@ -189,7 +190,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                   // 📄 CONTENT
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(AppSpacing.md),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -217,16 +218,16 @@ class PropertyDetailsScreen extends ConsumerWidget {
                               ),
                               _buildTag(
                                 property.propertyType.toUpperCase(),
-                                Colors.blue,
+                                Theme.of(context).colorScheme.primary,
                               ),
                               _buildTag(
                                 property.status.toUpperCase(),
-                                Colors.green,
+                                Theme.of(context).colorScheme.secondary,
                               ),
                             ],
                           ),
 
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppSpacing.md),
 
                           // 💰 PRICE
                           Text(
@@ -240,7 +241,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                 ),
                           ),
 
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppSpacing.md),
 
                           // 📍 LOCATION
                           Row(
@@ -262,7 +263,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                             ],
                           ),
 
-                          const SizedBox(height: 20),
+                          const SizedBox(height: AppSpacing.md),
 
                           // 📊 DETAILS GRID
                           GridView.count(
@@ -342,7 +343,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                             ],
                           ),
 
-                          const SizedBox(height: 20),
+                          const SizedBox(height: AppSpacing.md),
 
                           // 📜 DESCRIPTION
                           Column(
@@ -357,7 +358,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                       fontWeight: FontWeight.bold,
                                     ),
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: AppSpacing.xs),
                               Text(property.description),
                             ],
                           ),
@@ -366,8 +367,8 @@ class PropertyDetailsScreen extends ConsumerWidget {
                           if (!property.isUnlocked && !isOwner)
                             Container(
                               width: double.infinity,
-                              margin: const EdgeInsets.symmetric(vertical: 16),
-                              padding: const EdgeInsets.all(16),
+                              margin: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                              padding: const EdgeInsets.all(AppSpacing.md),
                               decoration: BoxDecoration(
                                 color:
                                     AppColors.mangoOrange.withOpacity(0.1),
@@ -387,7 +388,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                         Icons.lock,
                                         color: AppColors.mangoOrange,
                                       ),
-                                      const SizedBox(width: 8),
+                                      const SizedBox(width: AppSpacing.xs),
                                       Expanded(
                                         child: Text(
                                           'Full Details Locked',
@@ -411,7 +412,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                     'Unlock this property to view full description, exact location, and contact details.',
                                   ),
 
-                                  const SizedBox(height: 12),
+                                  const SizedBox(height: AppSpacing.sm),
 
                                   Row(
                                     mainAxisAlignment:
@@ -433,7 +434,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                     ],
                                   ),
 
-                                  const SizedBox(height: 12),
+                                  const SizedBox(height: AppSpacing.sm),
 
                                   SizedBox(
                                     width: double.infinity,
@@ -478,14 +479,14 @@ class PropertyDetailsScreen extends ConsumerWidget {
                               ),
                             ),
 
-                          const SizedBox(height: 20),
+                          const SizedBox(height: AppSpacing.md),
 
                           // 👤 OWNER
                           Container(
                             width: double.infinity,
-                            padding: const EdgeInsets.all(12),
+                            padding: const EdgeInsets.all(AppSpacing.sm),
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade100,
+                              color: Theme.of(context).colorScheme.outline.shade100,
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Column(
@@ -498,7 +499,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                       .textTheme
                                       .labelMedium,
                                 ),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: AppSpacing.xs),
                                 Row(
                                   children: [
                                     CircleAvatar(
@@ -531,7 +532,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                           const SizedBox(width: 6),
                                           const Icon(
                                             Icons.verified,
-                                            color: Colors.blue,
+                                            color: Theme.of(context).colorScheme.primary,
                                             size: 18,
                                           ),
                                         ],
@@ -627,9 +628,9 @@ SizedBox(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(Icons.error_outline, size: 48),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               Text('Error: $error'),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
               ElevatedButton(
                 onPressed: () =>
                     ref.refresh(propertyDetailsProvider(propertyId)),
@@ -671,11 +672,11 @@ SizedBox(
   ) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Theme.of(context).colorScheme.outline.shade200),
       ),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(AppSpacing.sm),
       child: Row(
         children: [
           Icon(

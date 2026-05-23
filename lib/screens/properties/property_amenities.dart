@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../providers/api_provider.dart';
 import '../../widgets/main_app_bar.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class PropertyAmenitiesWidget extends StatelessWidget {
   final List<String> amenities;
@@ -40,7 +41,7 @@ class PropertyAmenitiesWidget extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: AppSpacing.sm),
         GridView.count(
           crossAxisCount: 3,
           shrinkWrap: true,
@@ -66,15 +67,15 @@ class PropertyAmenitiesWidget extends StatelessWidget {
   }) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: Theme.of(context).colorScheme.onSurfaceVariant!),
         borderRadius: BorderRadius.circular(8),
       ),
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(AppSpacing.xs),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: Colors.blue, size: 28),
-          const SizedBox(height: 4),
+          Icon(icon, color: Theme.of(context).colorScheme.primary, size: 28),
+          const SizedBox(height: AppSpacing.xxs),
           Text(
             label,
             style: Theme.of(context).textTheme.labelSmall,

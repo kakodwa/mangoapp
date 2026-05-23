@@ -93,7 +93,7 @@ class _AddRoomScreenState extends ConsumerState<AddRoomScreen> {
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.md),
           children: [
 
             AppTextField(
@@ -197,7 +197,7 @@ class _AddRoomScreenState extends ConsumerState<AddRoomScreen> {
                   backgroundColor: AppColors.mangoOrange,
                 ),
                 child: loading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? const CircularProgressIndicator(color: Theme.of(context).colorScheme.surface)
                     : const Text("Add Room"),
               ),
             ),

@@ -8,6 +8,7 @@ import '../../widgets/shop_map_modal.dart';
 import '../../core/api/api_client.dart';
 import '../../providers/api_provider.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 // ============================
 // DELIVERY MODEL (UPDATED)
@@ -91,7 +92,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
     final deliveriesAsync = ref.watch(sellerDeliveriesProvider);
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: Theme.of(context).colorScheme.outline.shade100,
 
       appBar: AppBar(
         elevation: 0,
@@ -100,7 +101,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
           "Seller Deliveries",
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
           ),
         ),
         centerTitle: true,
@@ -116,14 +117,14 @@ class SellerDeliveryScreen extends ConsumerWidget {
                   Icon(
                     Icons.local_shipping_outlined,
                     size: 70,
-                    color: Colors.grey.shade400,
+                    color: Theme.of(context).colorScheme.outline.shade400,
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     "No deliveries yet",
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.grey.shade600,
+                      color: Theme.of(context).colorScheme.outline.shade600,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -133,7 +134,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.md),
             itemCount: deliveries.length,
             itemBuilder: (context, index) {
               final d = deliveries[index];
@@ -141,11 +142,11 @@ class SellerDeliveryScreen extends ConsumerWidget {
               return Container(
                 margin: const EdgeInsets.only(bottom: 18),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -175,7 +176,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                             ),
                           ),
 
-                          const SizedBox(width: 12),
+                          const SizedBox(width: AppSpacing.sm),
 
                           Expanded(
                             child: Column(
@@ -191,7 +192,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                                   ),
                                 ),
 
-                                const SizedBox(height: 4),
+                                const SizedBox(height: AppSpacing.xxs),
 
                                 Container(
                                   padding: const EdgeInsets.symmetric(
@@ -238,7 +239,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                         value: d.address ?? "-",
                       ),
 
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.md),
 
 
 
@@ -250,10 +251,10 @@ class SellerDeliveryScreen extends ConsumerWidget {
                           width: double.infinity,
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade50,
+                            color: Theme.of(context).colorScheme.outline.shade50,
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(
-                              color: Colors.grey.shade200,
+                              color: Theme.of(context).colorScheme.outline.shade200,
                             ),
                           ),
                           child: Column(
@@ -268,7 +269,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                                         AppColors.primary(context),
                                     size: 20,
                                   ),
-                                  const SizedBox(width: 8),
+                                  const SizedBox(width: AppSpacing.xs),
                                   Text(
                                     "Items to Deliver",
                                     style: TextStyle(
@@ -293,7 +294,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                                   child: Text(
                                     "• ${item['product_name']} x${item['quantity']}  •  MWK ${item['total_price']}",
                                     style: TextStyle(
-                                      color: Colors.grey.shade700,
+                                      color: Theme.of(context).colorScheme.outline.shade700,
                                     ),
                                   ),
                                 ),
@@ -302,7 +303,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                           ),
                         ),
 
-                      const SizedBox(height: 20),
+                      const SizedBox(height: AppSpacing.md),
 
                         // ================= DELIVERY CODE =================
                     if (d.deliveryCode != null)
@@ -320,7 +321,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                             elevation: 0,
                             backgroundColor:
                                 AppColors.primary(context),
-                            foregroundColor: Colors.white,
+                            foregroundColor: Theme.of(context).colorScheme.surface,
                             padding:
                                 const EdgeInsets.symmetric(
                               vertical: 14,
@@ -340,7 +341,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                         ),
                       ),
 
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppSpacing.sm),
 
                       SizedBox(
                         width: double.infinity,
@@ -374,7 +375,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                         ),
                       ),
 
-                      const SizedBox(height: 12),
+                      const SizedBox(height: AppSpacing.sm),
 
                       if (d.customerLat != null &&
                           d.customerLng != null)
@@ -391,7 +392,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                               backgroundColor:
                                   AppColors.leafGreen,
                               foregroundColor:
-                                  Colors.white,
+                                  Theme.of(context).colorScheme.surface,
                               padding:
                                   const EdgeInsets.symmetric(
                                 vertical: 14,
@@ -455,7 +456,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
         Icon(
           icon,
           size: 20,
-          color: Colors.grey.shade600,
+          color: Theme.of(context).colorScheme.outline.shade600,
         ),
 
         const SizedBox(width: 10),
@@ -475,7 +476,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                 TextSpan(
                   text: value,
                   style: TextStyle(
-                    color: Colors.grey.shade700,
+                    color: Theme.of(context).colorScheme.outline.shade700,
                   ),
                 ),
               ],
@@ -548,7 +549,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor:
                     AppColors.primary(context),
-                foregroundColor: Colors.white,
+                foregroundColor: Theme.of(context).colorScheme.surface,
               ),
               onPressed: () async {
                 final api = ref.read(apiClientProvider);
@@ -647,7 +648,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                   icon: Icons.credit_card_outlined,
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.md),
 
                 SizedBox(
                   width: double.infinity,
@@ -659,7 +660,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                       elevation: 0,
                       backgroundColor:
                           AppColors.leafGreen,
-                      foregroundColor: Colors.white,
+                      foregroundColor: Theme.of(context).colorScheme.surface,
                       padding:
                           const EdgeInsets.symmetric(
                         vertical: 14,
@@ -704,7 +705,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor:
                     AppColors.primary(context),
-                foregroundColor: Colors.white,
+                foregroundColor: Theme.of(context).colorScheme.surface,
               ),
               onPressed: () async {
                 final api = ref.read(apiClientProvider);
@@ -758,7 +759,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
           labelText: label,
           prefixIcon: Icon(icon),
           filled: true,
-          fillColor: Colors.grey.shade50,
+          fillColor: Theme.of(context).colorScheme.outline.shade50,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide.none,
@@ -766,7 +767,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(14),
             borderSide: BorderSide(
-              color: Colors.grey.shade300,
+              color: Theme.of(context).colorScheme.outline.shade300,
             ),
           ),
           focusedBorder: OutlineInputBorder(
@@ -812,9 +813,9 @@ class _DeliveryCodeCardState extends State<DeliveryCodeCard> {
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.04),
+        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.04),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: Theme.of(context).colorScheme.outline.shade300),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -827,7 +828,7 @@ class _DeliveryCodeCardState extends State<DeliveryCodeCard> {
                 "DELIVERY CODE",
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.grey,
+                  color: Theme.of(context).colorScheme.outline,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -872,7 +873,7 @@ class _DeliveryCodeCardState extends State<DeliveryCodeCard> {
 
           const Text(
             "Tap to reveal • Copy & share with rider",
-            style: TextStyle(fontSize: 12, color: Colors.grey),
+            style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.outline),
           ),
         ],
       ),

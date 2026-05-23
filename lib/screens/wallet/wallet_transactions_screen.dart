@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/wallet_provider.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class WalletTransactionsScreen extends ConsumerWidget {
   const WalletTransactionsScreen({super.key});
@@ -35,7 +36,7 @@ class WalletTransactionsScreen extends ConsumerWidget {
   }
 
   Color getColor(String type) {
-    return type == "credit" ? Colors.green : Colors.red;
+    return type == "credit" ? Theme.of(context).colorScheme.secondary : Theme.of(context).colorScheme.error;
   }
 
   @override
@@ -43,7 +44,7 @@ class WalletTransactionsScreen extends ConsumerWidget {
     final txAsync = ref.watch(walletTransactionsProvider);
 
     return AppScaffold(
-      backgroundColor: const Color(0xFFF6F7FB),
+      backgroundColor: const Theme.of(context).colorScheme.surfaceContainer,
 
       appBar: AppBar(
         title: const Text("Wallet Activity"),
@@ -69,7 +70,7 @@ class WalletTransactionsScreen extends ConsumerWidget {
           }
 
           return ListView(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(AppSpacing.sm),
             children: grouped.entries.map((entry) {
               final date = entry.key;
               final items = entry.value;
@@ -86,7 +87,7 @@ class WalletTransactionsScreen extends ConsumerWidget {
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: Colors.grey,
+                        color: Theme.of(context).colorScheme.outline,
                       ),
                     ),
                   ),
@@ -99,11 +100,11 @@ class WalletTransactionsScreen extends ConsumerWidget {
                       margin: const EdgeInsets.only(bottom: 10),
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.grey.shade200,
+                            color: Theme.of(context).colorScheme.outline.shade200,
                             blurRadius: 8,
                             spreadRadius: 2,
                           )
@@ -128,7 +129,7 @@ class WalletTransactionsScreen extends ConsumerWidget {
                             ),
                           ),
 
-                          const SizedBox(width: 12),
+                          const SizedBox(width: AppSpacing.sm),
 
                           // DETAILS
                           Expanded(
@@ -145,17 +146,17 @@ class WalletTransactionsScreen extends ConsumerWidget {
                                   ),
                                 ),
 
-                                const SizedBox(height: 4),
+                                const SizedBox(height: AppSpacing.xxs),
 
                                 Text(
                                   tx.description,
                                   style: TextStyle(
-                                    color: Colors.grey.shade600,
+                                    color: Theme.of(context).colorScheme.outline.shade600,
                                     fontSize: 12,
                                   ),
                                 ),
 
-                                const SizedBox(height: 4),
+                                const SizedBox(height: AppSpacing.xxs),
 
                                 // 🔥 PLATFORM FEE TRANSPARENCY
                                 if (tx.transactionRate > 0)
@@ -163,7 +164,7 @@ class WalletTransactionsScreen extends ConsumerWidget {
                                     "${tx.transactionRate}% platform fee applied",
                                     style: const TextStyle(
                                       fontSize: 11,
-                                      color: Colors.grey,
+                                      color: Theme.of(context).colorScheme.outline,
                                     ),
                                   ),
                               ],
@@ -185,13 +186,13 @@ class WalletTransactionsScreen extends ConsumerWidget {
                                 ),
                               ),
 
-                              const SizedBox(height: 4),
+                              const SizedBox(height: AppSpacing.xxs),
 
                               Text(
                                 tx.createdAt.substring(11, 16),
                                 style: const TextStyle(
                                   fontSize: 11,
-                                  color: Colors.grey,
+                                  color: Theme.of(context).colorScheme.outline,
                                 ),
                               ),
                             ],

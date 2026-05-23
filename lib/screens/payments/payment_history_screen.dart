@@ -48,8 +48,8 @@ class PaymentHistoryScreen extends ConsumerWidget {
                         : Icons.pending,
 
                     color: payment.status == "completed"
-                        ? Colors.green
-                        : Colors.orange,
+                        ? Theme.of(context).colorScheme.secondary
+                        : Theme.of(context).colorScheme.primary,
                   ),
 
                   title: Text(
@@ -85,8 +85,8 @@ class PaymentHistoryScreen extends ConsumerWidget {
                     payment.statusDisplay,
                     style: TextStyle(
                       color: payment.status == "completed"
-                          ? Colors.green
-                          : Colors.orange,
+                          ? Theme.of(context).colorScheme.secondary
+                          : Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ),

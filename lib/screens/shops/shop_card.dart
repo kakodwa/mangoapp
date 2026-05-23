@@ -53,10 +53,10 @@ class _ShopCardState extends State<ShopCard> {
           margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.06),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.06),
                 blurRadius: 14,
                 offset: const Offset(0, 6),
               )
@@ -84,13 +84,13 @@ class _ShopCardState extends State<ShopCard> {
                                 fit: BoxFit.cover,
                                 errorBuilder: (_, __, ___) {
                                   return Container(
-                                    color: Colors.grey.shade200,
+                                    color: Theme.of(context).colorScheme.outline.shade200,
                                     child: const Icon(Icons.store, size: 40),
                                   );
                                 },
                               )
                             : Container(
-                                color: Colors.grey.shade200,
+                                color: Theme.of(context).colorScheme.outline.shade200,
                                 child: const Icon(Icons.store, size: 40),
                               ),
                       ),
@@ -103,8 +103,8 @@ class _ShopCardState extends State<ShopCard> {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Colors.black.withOpacity(0.05),
-                            Colors.black.withOpacity(0.35),
+                            Theme.of(context).colorScheme.onSurface.withOpacity(0.05),
+                            Theme.of(context).colorScheme.onSurface.withOpacity(0.35),
                           ],
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
@@ -167,7 +167,7 @@ class _ShopCardState extends State<ShopCard> {
                               .textTheme
                               .labelSmall
                               ?.copyWith(
-                                color: Colors.grey.shade600,
+                                color: Theme.of(context).colorScheme.outline.shade600,
                               ),
                         ),
                       ],
@@ -180,7 +180,7 @@ class _ShopCardState extends State<ShopCard> {
                       children: [
                         Icon(Icons.location_on,
                             size: 13,
-                            color: Colors.grey.shade600),
+                            color: Theme.of(context).colorScheme.outline.shade600),
                         const SizedBox(width: 3),
                         Expanded(
                           child: Text(
@@ -190,7 +190,7 @@ class _ShopCardState extends State<ShopCard> {
                                 .textTheme
                                 .labelSmall
                                 ?.copyWith(
-                                  color: Colors.grey.shade600,
+                                  color: Theme.of(context).colorScheme.outline.shade600,
                                 ),
                           ),
                         ),
@@ -204,7 +204,7 @@ class _ShopCardState extends State<ShopCard> {
                               .textTheme
                               .labelSmall
                               ?.copyWith(
-                                color: Colors.grey.shade600,
+                                color: Theme.of(context).colorScheme.outline.shade600,
                               ),
                         ),
                       ],

@@ -5,6 +5,7 @@ import '../../widgets/shop_map_modal.dart';
 import '../../core/api/api_client.dart';
 import '../../providers/api_provider.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class RiderDeliveryScreen extends ConsumerStatefulWidget {
   final dynamic delivery;
@@ -38,7 +39,7 @@ class _RiderDeliveryScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Status updated: $status"),
-          backgroundColor: Colors.green,
+          backgroundColor: Theme.of(context).colorScheme.secondary,
         ),
       );
 
@@ -49,7 +50,7 @@ class _RiderDeliveryScreenState
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Error: $e"),
-          backgroundColor: Colors.red,
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     }
@@ -62,7 +63,7 @@ class _RiderDeliveryScreenState
     final d = widget.delivery;
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: Theme.of(context).colorScheme.outline.shade100,
 
       appBar: AppBar(
         elevation: 0,
@@ -71,14 +72,14 @@ class _RiderDeliveryScreenState
         title: Text(
           "Order #${d.orderNumber}",
           style: const TextStyle(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             fontWeight: FontWeight.bold,
           ),
         ),
       ),
 
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.md),
 
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -98,7 +99,7 @@ class _RiderDeliveryScreenState
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -108,15 +109,15 @@ class _RiderDeliveryScreenState
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(AppSpacing.sm),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Theme.of(context).colorScheme.surface.withOpacity(0.2),
                       borderRadius:
                           BorderRadius.circular(14),
                     ),
                     child: const Icon(
                       Icons.local_shipping,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.surface,
                       size: 28,
                     ),
                   ),
@@ -136,12 +137,12 @@ class _RiderDeliveryScreenState
                           ),
                         ),
 
-                        const SizedBox(height: 4),
+                        const SizedBox(height: AppSpacing.xxs),
 
                         Text(
                           d.status.toString().toUpperCase(),
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.surface,
                             fontWeight: FontWeight.bold,
                             fontSize: 20,
                           ),
@@ -153,18 +154,18 @@ class _RiderDeliveryScreenState
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.md),
 
             // ================= CUSTOMER INFO =================
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -184,7 +185,7 @@ class _RiderDeliveryScreenState
                             AppColors.primary(context),
                       ),
 
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.xs),
 
                       Text(
                         "Customer Information",
@@ -217,17 +218,17 @@ class _RiderDeliveryScreenState
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.md),
 
             // ================= INFO MESSAGE =================
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: Colors.orange.shade50,
+                color: Theme.of(context).colorScheme.primary.shade50,
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(
-                  color: Colors.orange.shade200,
+                  color: Theme.of(context).colorScheme.primary.shade200,
                 ),
               ),
 
@@ -237,16 +238,16 @@ class _RiderDeliveryScreenState
                 children: [
                   Icon(
                     Icons.info_outline,
-                    color: Colors.orange.shade700,
+                    color: Theme.of(context).colorScheme.primary.shade700,
                   ),
 
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpacing.sm),
 
                   Expanded(
                     child: Text(
                       "Please once you deliver the order, let the owner of this business update the delivery status.",
                       style: TextStyle(
-                        color: Colors.orange.shade900,
+                        color: Theme.of(context).colorScheme.primary.shade900,
                         height: 1.5,
                         fontWeight: FontWeight.w500,
                       ),
@@ -256,7 +257,7 @@ class _RiderDeliveryScreenState
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.lg),
 
             // ================= ITEMS =================
             if (d.items != null && d.items!.isNotEmpty)
@@ -264,12 +265,12 @@ class _RiderDeliveryScreenState
                 width: double.infinity,
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
                       color:
-                          Colors.black.withOpacity(0.05),
+                          Theme.of(context).colorScheme.onSurface.withOpacity(0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -289,7 +290,7 @@ class _RiderDeliveryScreenState
                               AppColors.primary(context),
                         ),
 
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppSpacing.xs),
 
                         Text(
                           "Items to Deliver",
@@ -313,9 +314,9 @@ class _RiderDeliveryScreenState
                           bottom: 10,
                         ),
                         padding:
-                            const EdgeInsets.all(12),
+                            const EdgeInsets.all(AppSpacing.sm),
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
+                          color: Theme.of(context).colorScheme.outline.shade50,
                           borderRadius:
                               BorderRadius.circular(
                                   12),
@@ -335,7 +336,7 @@ class _RiderDeliveryScreenState
                               ),
                             ),
 
-                            const SizedBox(width: 12),
+                            const SizedBox(width: AppSpacing.sm),
 
                             Expanded(
                               child: Text(
@@ -344,7 +345,7 @@ class _RiderDeliveryScreenState
                                   fontWeight:
                                       FontWeight.w500,
                                   color:
-                                      Colors.grey.shade800,
+                                      Theme.of(context).colorScheme.outline.shade800,
                                 ),
                               ),
                             ),
@@ -356,7 +357,7 @@ class _RiderDeliveryScreenState
                 ),
               ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.lg),
 
             // ================= MAP BUTTON =================
             if (d.customerLat != null &&
@@ -374,7 +375,7 @@ class _RiderDeliveryScreenState
                     elevation: 0,
                     backgroundColor:
                         AppColors.leafGreen,
-                    foregroundColor: Colors.white,
+                    foregroundColor: Theme.of(context).colorScheme.surface,
                     padding:
                         const EdgeInsets.symmetric(
                       vertical: 16,
@@ -416,10 +417,10 @@ class _RiderDeliveryScreenState
         Icon(
           icon,
           size: 20,
-          color: Colors.grey.shade600,
+          color: Theme.of(context).colorScheme.outline.shade600,
         ),
 
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSpacing.sm),
 
         Expanded(
           child: RichText(
@@ -437,7 +438,7 @@ class _RiderDeliveryScreenState
                 TextSpan(
                   text: value,
                   style: TextStyle(
-                    color: Colors.grey.shade700,
+                    color: Theme.of(context).colorScheme.outline.shade700,
                     height: 1.5,
                   ),
                 ),

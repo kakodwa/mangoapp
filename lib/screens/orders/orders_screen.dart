@@ -7,6 +7,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/main_app_bar.dart';
 import '../../widgets/shop_map_modal.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 final userOrdersProvider =
     FutureProvider.autoDispose<List<Order>>(
@@ -69,7 +70,7 @@ class _OrdersScreenState
           padding:
               const EdgeInsets.all(20),
           decoration: const BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius:
                 BorderRadius.vertical(
               top: Radius.circular(28),
@@ -348,7 +349,7 @@ class _OrdersScreenState
           ),
         ),
 
-        const SizedBox(width: 12),
+        const SizedBox(width: AppSpacing.sm),
 
         Expanded(
           child: Column(
@@ -360,7 +361,7 @@ class _OrdersScreenState
                 style: TextStyle(
                   fontSize: 12,
                   color:
-                      Colors.grey.shade600,
+                      Theme.of(context).colorScheme.outline.shade600,
                 ),
               ),
 
@@ -410,14 +411,14 @@ class _OrdersScreenState
                 ),
                 decoration:
                     BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius:
                       BorderRadius.circular(
                     20,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black
+                      color: Theme.of(context).colorScheme.onSurface
                           .withOpacity(
                         0.04,
                       ),
@@ -434,7 +435,7 @@ class _OrdersScreenState
                           .shopping_bag_outlined,
                       size: 80,
                       color:
-                          Colors.grey[400],
+                          Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
 
                     const SizedBox(
@@ -511,7 +512,7 @@ class _OrdersScreenState
                   decoration:
                       BoxDecoration(
                     color:
-                        Colors.white,
+                        Theme.of(context).colorScheme.surface,
                     borderRadius:
                         BorderRadius.circular(
                       20,
@@ -622,7 +623,7 @@ class _OrdersScreenState
                                       style:
                                           TextStyle(
                                         color:
-                                            Colors.grey.shade600,
+                                            Theme.of(context).colorScheme.outline.shade600,
                                         fontSize:
                                             12,
                                       ),
@@ -793,7 +794,7 @@ class _OrdersScreenState
                                             height:
                                                 55,
                                             color:
-                                                Colors.grey.shade200,
+                                                Theme.of(context).colorScheme.outline.shade200,
                                             child:
                                                 const Icon(
                                               Icons.image,
@@ -832,7 +833,7 @@ class _OrdersScreenState
                                               style:
                                                   TextStyle(
                                                 color:
-                                                    Colors.grey.shade600,
+                                                    Theme.of(context).colorScheme.outline.shade600,
                                                 fontSize:
                                                     12,
                                               ),
@@ -940,11 +941,11 @@ class _OrdersScreenState
         error: (_, __) => Center(
           child: Container(
             padding:
-                const EdgeInsets.all(24),
+                const EdgeInsets.all(AppSpacing.lg),
             margin:
-                const EdgeInsets.all(24),
+                const EdgeInsets.all(AppSpacing.lg),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               borderRadius:
                   BorderRadius.circular(
                 20,
@@ -957,7 +958,7 @@ class _OrdersScreenState
                 Icon(
                   Icons.error_outline,
                   size: 70,
-                  color: Colors.red[300],
+                  color: Theme.of(context).colorScheme.error[300],
                 ),
 
                 const SizedBox(

@@ -10,6 +10,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/main_app_bar.dart';
 import 'event_tickets_screen.dart';
 import 'create_event_screen.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class ManageEventsScreen extends ConsumerStatefulWidget {
   const ManageEventsScreen({super.key});
@@ -98,11 +99,11 @@ class _ManageEventsScreenState
     return Container(
       margin: const EdgeInsets.only(bottom: 18),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(.05),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(.05),
             blurRadius: 14,
             offset: const Offset(0, 6),
           ),
@@ -132,11 +133,11 @@ class _ManageEventsScreenState
                       (context, error, stackTrace) {
                     return Container(
                       height: 210,
-                      color: Colors.grey.shade200,
+                      color: Theme.of(context).colorScheme.outline.shade200,
                       child: Icon(
                         Icons.image,
                         size: 60,
-                        color: Colors.grey.shade400,
+                        color: Theme.of(context).colorScheme.outline.shade400,
                       ),
                     );
                   },
@@ -154,7 +155,7 @@ class _ManageEventsScreenState
                     begin: Alignment.bottomCenter,
                     end: Alignment.topCenter,
                     colors: [
-                      Colors.black.withOpacity(.6),
+                      Theme.of(context).colorScheme.onSurface.withOpacity(.6),
                       Colors.transparent,
                     ],
                   ),
@@ -172,19 +173,19 @@ class _ManageEventsScreenState
                     Text(
                       event.title,
                       style: const TextStyle(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.surface,
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
 
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.xs),
 
                     Row(
                       children: [
                         const Icon(
                           Icons.location_on,
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.surface,
                           size: 18,
                         ),
 
@@ -194,7 +195,7 @@ class _ManageEventsScreenState
                           child: Text(
                             "${event.venue}, ${event.city}",
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: Theme.of(context).colorScheme.surface,
                             ),
                           ),
                         ),
@@ -222,7 +223,7 @@ class _ManageEventsScreenState
                     child: const Text(
                       "FEATURED",
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.surface,
                         fontWeight: FontWeight.bold,
                         fontSize: 11,
                       ),
@@ -250,12 +251,12 @@ class _ManageEventsScreenState
                       color: AppColors.mangoOrange,
                     ),
 
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.xs),
 
                     Text(
                       event.eventDate,
                       style: TextStyle(
-                        color: Colors.grey.shade700,
+                        color: Theme.of(context).colorScheme.outline.shade700,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -265,13 +266,13 @@ class _ManageEventsScreenState
                     Text(
                       "${event.startTime} - ${event.endTime}",
                       style: TextStyle(
-                        color: Colors.grey.shade700,
+                        color: Theme.of(context).colorScheme.outline.shade700,
                       ),
                     ),
                   ],
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: AppSpacing.md),
 
                 // ======================
                 // TICKET TYPES
@@ -285,7 +286,7 @@ class _ManageEventsScreenState
                   ),
                 ),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
 
                 Wrap(
                   spacing: 10,
@@ -316,7 +317,7 @@ class _ManageEventsScreenState
                       ),
                     ),
 
-                    const SizedBox(width: 12),
+                    const SizedBox(width: AppSpacing.sm),
 
                     Expanded(
                       child: statCard(
@@ -327,7 +328,7 @@ class _ManageEventsScreenState
                       ),
                     ),
 
-                    const SizedBox(width: 12),
+                    const SizedBox(width: AppSpacing.sm),
 
                     Expanded(
                       child: statCard(
@@ -341,7 +342,7 @@ class _ManageEventsScreenState
                   ],
                 ),
 
-                const SizedBox(height: 20),
+                const SizedBox(height: AppSpacing.md),
 
                 ClipRRect(
                   borderRadius:
@@ -350,7 +351,7 @@ class _ManageEventsScreenState
                     value: soldPercentage,
                     minHeight: 10,
                     backgroundColor:
-                        Colors.grey.shade200,
+                        Theme.of(context).colorScheme.outline.shade200,
                     valueColor:
                         AlwaysStoppedAnimation(
                       AppColors.leafGreen,
@@ -358,17 +359,17 @@ class _ManageEventsScreenState
                   ),
                 ),
 
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.xs),
 
                 Text(
                   "${(soldPercentage * 100).toStringAsFixed(0)}% sold • $availableTickets remaining",
                   style: TextStyle(
-                    color: Colors.grey.shade700,
+                    color: Theme.of(context).colorScheme.outline.shade700,
                     fontSize: 13,
                   ),
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: AppSpacing.lg),
 
                 Row(
                   children: [
@@ -424,7 +425,7 @@ class _ManageEventsScreenState
                           backgroundColor:
                               AppColors.mangoOrange,
                           foregroundColor:
-                              Colors.white,
+                              Theme.of(context).colorScheme.surface,
                           minimumSize:
                               const Size(0, 52),
                           shape:
@@ -458,7 +459,7 @@ class _ManageEventsScreenState
         type.totalSeats - type.availableSeats;
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
         color: AppColors.mangoOrange.withOpacity(.08),
         borderRadius: BorderRadius.circular(14),
@@ -489,13 +490,13 @@ class _ManageEventsScreenState
             ),
           ),
 
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xxs),
 
           Text(
             "$sold sold • ${type.availableSeats} left",
             style: TextStyle(
               fontSize: 12,
-              color: Colors.grey.shade700,
+              color: Theme.of(context).colorScheme.outline.shade700,
             ),
           ),
         ],
@@ -515,7 +516,7 @@ class _ManageEventsScreenState
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: Theme.of(context).colorScheme.outline.shade100,
         borderRadius:
             BorderRadius.circular(16),
       ),
@@ -544,7 +545,7 @@ class _ManageEventsScreenState
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 12,
-              color: Colors.grey.shade700,
+              color: Theme.of(context).colorScheme.outline.shade700,
             ),
           ),
         ],
@@ -559,7 +560,7 @@ class _ManageEventsScreenState
     );
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+      backgroundColor: Theme.of(context).colorScheme.outline.shade100,
 
       appBar: const MainAppBar(
         title: "Manage Events",
@@ -569,7 +570,7 @@ class _ManageEventsScreenState
           FloatingActionButton.extended(
         backgroundColor:
             AppColors.mangoOrange,
-        foregroundColor: Colors.white,
+        foregroundColor: Theme.of(context).colorScheme.surface,
         icon: const Icon(Icons.add),
         label: const Text("Add Event"),
         onPressed: () {
@@ -599,7 +600,7 @@ class _ManageEventsScreenState
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.md),
             itemCount: events.length,
             itemBuilder: (context, index) {
               return buildEventCard(

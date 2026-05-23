@@ -146,10 +146,10 @@ class _EditRoomScreenState
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: Theme.of(context).colorScheme.outline.shade50,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: Colors.grey.shade200,
+          color: Theme.of(context).colorScheme.outline.shade200,
         ),
       ),
       child: SwitchListTile(
@@ -176,7 +176,7 @@ class _EditRoomScreenState
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.md),
           children: [
 
             /// ROOM NUMBER
@@ -276,7 +276,7 @@ class _EditRoomScreenState
               ),
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.sm),
 
             buildSwitchTile(
               title: "WiFi",
@@ -336,7 +336,7 @@ class _EditRoomScreenState
                 ),
                 child: loading
                     ? const CircularProgressIndicator(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.surface,
                       )
                     : const Text(
                         "Update Room",

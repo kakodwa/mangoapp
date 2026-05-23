@@ -7,6 +7,7 @@ import '../../providers/events_provider.dart';
 import '../../widgets/events/event_card.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/search_filter_widgets.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 
 class EventListScreen extends ConsumerStatefulWidget {
@@ -83,7 +84,7 @@ class _EventListScreenState
                     ref.refresh(eventsProvider);
                   },
                   child: ListView.builder(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(AppSpacing.md),
                     itemCount: filteredEvents.length,
                     itemBuilder: (context, index) {
                       return EventCard(

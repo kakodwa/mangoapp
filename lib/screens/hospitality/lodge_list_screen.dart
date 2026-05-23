@@ -5,6 +5,7 @@ import '../../providers/lodges_provider.dart';
 import '../../widgets/hospitality/lodge_card.dart';
 import '../../widgets/app_scaffold.dart';
 import '../../widgets/search_filter_widgets.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class LodgeListScreen extends ConsumerStatefulWidget {
   const LodgeListScreen({super.key});
@@ -89,7 +90,7 @@ class _LodgeListScreenState extends ConsumerState<LodgeListScreen> {
                     onClear: () => setState(() {}),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.xs),
                 UnifiedFilterToggle(
                   isExpanded: _showFilters,
                   onPressed: () {
@@ -116,7 +117,7 @@ class _LodgeListScreenState extends ConsumerState<LodgeListScreen> {
                   height: 50,
                 ),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
 
                 // DISTRICT FILTER
                 const UnifiedFilterSectionTitle(title: "District"),
@@ -127,7 +128,7 @@ class _LodgeListScreenState extends ConsumerState<LodgeListScreen> {
                   height: 50,
                 ),
 
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.xs),
 
                 // CLEAR BUTTON
                 UnifiedClearButton(
@@ -140,7 +141,7 @@ class _LodgeListScreenState extends ConsumerState<LodgeListScreen> {
             ),
           ),
 
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xxs),
 
           // ================= LIST =================
           Expanded(
@@ -175,7 +176,7 @@ class _LodgeListScreenState extends ConsumerState<LodgeListScreen> {
                     ref.refresh(lodgesProvider);
                   },
                   child: ListView.builder(
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(AppSpacing.sm),
                     itemCount: filtered.length,
                     itemBuilder: (context, index) {
                       return LodgeCard(lodge: filtered[index]);

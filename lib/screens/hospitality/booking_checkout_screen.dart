@@ -7,6 +7,7 @@ import '../../models/requests/booking_create_request.dart';
 import '../../providers/api_provider.dart';
 
 import '../payments/payment_checkout_screen.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class BookingCheckoutScreen extends ConsumerStatefulWidget {
   final Room room;
@@ -98,7 +99,7 @@ class _BookingCheckoutScreenState
     return Scaffold(
       appBar: AppBar(title: const Text('Booking Checkout')),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
           children: [
             ListTile(
@@ -151,7 +152,7 @@ class _BookingCheckoutScreenState
               child: ElevatedButton(
                 onPressed: loading ? null : submitBooking,
                 child: loading
-                    ? const CircularProgressIndicator(color: Colors.white)
+                    ? const CircularProgressIndicator(color: Theme.of(context).colorScheme.surface)
                     : const Text("Proceed To Payment"),
               ),
             ),

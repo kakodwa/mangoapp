@@ -227,7 +227,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 return ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                   itemCount: featured.length,
                   itemBuilder: (context, index) =>
                       ShopCard(shop: featured[index]),
@@ -270,7 +270,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 return ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                   itemCount: featured.length,
                   itemBuilder: (context, index) =>
                       PropertyCard(property: featured[index]),
@@ -325,7 +325,7 @@ Widget _buildBanner(
   String? ctaText,
 }) {
   return Container(
-    margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+    margin: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 6),
     child: ClipRRect(
       borderRadius: BorderRadius.circular(14),
       child: Stack(
@@ -340,8 +340,8 @@ Widget _buildBanner(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Colors.black.withOpacity(0.6),
-                  Colors.black.withOpacity(0.2),
+                  Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                  Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
                 ],
                 begin: Alignment.bottomLeft,
                 end: Alignment.topRight,
@@ -359,12 +359,12 @@ Widget _buildBanner(
       Text(
         title,
         style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.surface,
               fontWeight: FontWeight.bold,
             ),
       ),
 
-      const SizedBox(height: 8),
+      const SizedBox(height: AppSpacing.xs),
 
       Text(
         subtitle,
@@ -373,7 +373,7 @@ Widget _buildBanner(
             ),
       ),
 
-      const SizedBox(height: 12),
+      const SizedBox(height: AppSpacing.sm),
 
       /// 🔥 CLICKABLE "LEARN MORE →"
       if (url != null && url.isNotEmpty)
@@ -393,7 +393,7 @@ Widget _buildBanner(
             Text(
               ctaText ?? "Learn more",
               style: const TextStyle(
-                color: Colors.orange,
+                color: Theme.of(context).colorScheme.primary,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 decoration: TextDecoration.underline,
@@ -403,7 +403,7 @@ Widget _buildBanner(
               const Icon(
                 Icons.arrow_forward,
                 size: 16,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.surface,
               ),
             ],
           ),
@@ -449,10 +449,10 @@ class _QuickActionButtonState extends State<_QuickActionButton> {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.06),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.06),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               )

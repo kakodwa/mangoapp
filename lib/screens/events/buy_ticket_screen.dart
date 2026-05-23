@@ -4,6 +4,7 @@ import '../../core/api/api_client.dart';
 import '../../models/event_model.dart';
 import '../../utils/app_toast.dart';
 import '../payments/payment_checkout_screen.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class SelectedTicket {
   final int id;
@@ -228,7 +229,7 @@ class _BuyTicketScreenState
 
       body: Padding(
 
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.md),
 
         child: Column(
 
@@ -245,7 +246,7 @@ class _BuyTicketScreenState
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.md),
 
             // ================= TICKETS =================
             Expanded(
@@ -260,10 +261,10 @@ class _BuyTicketScreenState
                       bottom: 12,
                     ),
 
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(AppSpacing.sm),
 
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
+                      color: Theme.of(context).colorScheme.outline.shade100,
                       borderRadius: BorderRadius.circular(12),
                     ),
 
@@ -287,14 +288,14 @@ class _BuyTicketScreenState
                               ),
                             ),
 
-                            const SizedBox(height: 4),
+                            const SizedBox(height: AppSpacing.xxs),
 
                             Text(
 
                               "MWK ${t.price.toStringAsFixed(0)}",
 
                               style: TextStyle(
-                                color: Colors.grey.shade700,
+                                color: Theme.of(context).colorScheme.outline.shade700,
                               ),
                             ),
                           ],
@@ -380,7 +381,7 @@ class _BuyTicketScreenState
                 child: loading
 
                     ? const CircularProgressIndicator(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.surface,
                       )
 
                     : const Text(

@@ -16,6 +16,7 @@ import '../../widgets/app_scaffold.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:html' as html;
 import 'dart:io' as io;
+import '../../theme/design_system/app_spacing.dart';
 
 class MyTicketsScreen extends ConsumerStatefulWidget {
   const MyTicketsScreen({super.key});
@@ -80,7 +81,7 @@ Future<void> captureTicket(GlobalKey key) async {
           }
 
           return ListView.builder(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(AppSpacing.sm),
             itemCount: tickets.length,
             itemBuilder: (context, index) {
               final ticket = tickets[index];
@@ -101,11 +102,11 @@ Future<void> captureTicket(GlobalKey key) async {
                       margin: const EdgeInsets.only(bottom: 10),
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.surface,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.06),
+                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.06),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -149,7 +150,7 @@ Future<void> captureTicket(GlobalKey key) async {
                                     ),
                             ),
 
-                            const SizedBox(width: 12),
+                            const SizedBox(width: AppSpacing.sm),
 
                             // CENTER CONTENT
                             Expanded(
@@ -200,7 +201,7 @@ Future<void> captureTicket(GlobalKey key) async {
                                     }).toList(),
                                   ),
 
-                                  const SizedBox(height: 8),
+                                  const SizedBox(height: AppSpacing.xs),
 
                                   Text(
                                     "MWK ${ticket.totalAmount.toStringAsFixed(2)}",
@@ -210,7 +211,7 @@ Future<void> captureTicket(GlobalKey key) async {
                                     ),
                                   ),
 
-                                  const SizedBox(height: 8),
+                                  const SizedBox(height: AppSpacing.xs),
 
                                   Container(
                                     padding:
@@ -223,7 +224,7 @@ Future<void> captureTicket(GlobalKey key) async {
                                               "paid"
                                           ? AppColors.leafGreen
                                               .withOpacity(0.15)
-                                          : Colors.red.withOpacity(0.1),
+                                          : Theme.of(context).colorScheme.error.withOpacity(0.1),
                                       borderRadius:
                                           BorderRadius.circular(20),
                                     ),
@@ -237,7 +238,7 @@ Future<void> captureTicket(GlobalKey key) async {
                                             ticket.paymentStatus ==
                                                     "paid"
                                                 ? AppColors.leafGreen
-                                                : Colors.red,
+                                                : Theme.of(context).colorScheme.error,
                                       ),
                                     ),
                                   ),
@@ -248,7 +249,7 @@ Future<void> captureTicket(GlobalKey key) async {
                             Icon(
                               Icons.arrow_forward_ios,
                               size: 14,
-                              color: Colors.grey.shade400,
+                              color: Theme.of(context).colorScheme.outline.shade400,
                             ),
                           ],
                         ),

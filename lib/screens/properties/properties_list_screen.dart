@@ -9,6 +9,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/app_scaffold.dart';
 import 'property_card.dart';
 import '../../widgets/search_filter_widgets.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class PropertiesListScreen extends ConsumerStatefulWidget {
   const PropertiesListScreen({Key? key}) : super(key: key);
@@ -97,7 +98,7 @@ class _PropertiesListScreenState
     return AppScaffold(
       appBar: const MainAppBar(title: 'Properties'),
       drawer: const MainDrawer(),
-      backgroundColor: const Color(0xFFF6F7FB),
+      backgroundColor: const Theme.of(context).colorScheme.surfaceContainer,
 
       body: Column(
         children: [
@@ -143,7 +144,7 @@ class _PropertiesListScreenState
                   height: 50,
                 ),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
 
                 // LISTING PURPOSE FILTER
                 UnifiedFilterSectionTitle(title: "Listing Purpose"),
@@ -154,7 +155,7 @@ class _PropertiesListScreenState
                   height: 50,
                 ),
 
-                const SizedBox(height: 12),
+                const SizedBox(height: AppSpacing.sm),
 
                 // DISTRICT FILTER
                 UnifiedDistrictDropdown(
@@ -163,7 +164,7 @@ class _PropertiesListScreenState
                   onChanged: (value) => setState(() => _selectedDistrict = value),
                 ),
 
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.xs),
 
                 // CLEAR FILTERS
                 UnifiedClearButton(
@@ -177,7 +178,7 @@ class _PropertiesListScreenState
             ),
           ),
 
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xxs),
 
           // =========================
           // PROPERTY LIST
@@ -218,12 +219,12 @@ class _PropertiesListScreenState
                         e.toString(),
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Colors.grey[600],
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                           fontSize: 12,
                         ),
                       ),
 
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.md),
 
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
@@ -299,19 +300,19 @@ class _PropertiesListScreenState
                     ),
                     itemCount: filtered.length,
                     separatorBuilder: (_, __) =>
-                        const SizedBox(height: 12),
+                        const SizedBox(height: AppSpacing.sm),
                     itemBuilder: (context, index) {
                       final property = filtered[index];
 
                       return Container(
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.surface,
                           borderRadius:
                               BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
                               color:
-                                  Colors.black.withOpacity(0.04),
+                                  Theme.of(context).colorScheme.onSurface.withOpacity(0.04),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             ),
