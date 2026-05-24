@@ -4,9 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/room_model.dart';
 import '../../providers/api_provider.dart';
 
-import '../../theme/app_colors.dart';
+
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_text_field.dart';
+import '../../theme/app_colors.dart';
+import '../../widgets/main_app_bar.dart';
+import '../../widgets/main_drawer.dart';
+import '../../widgets/app_scaffold.dart';
 
 class EditRoomScreen extends ConsumerStatefulWidget {
   final Room room;
@@ -169,9 +173,8 @@ class _EditRoomScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(
-        title: Text("Edit Room"),
-        backgroundColor: AppColors.mangoOrange,
+      appBar: MainAppBar(
+        title:"Edit Room"
       ),
 
       body: Form(

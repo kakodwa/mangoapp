@@ -12,8 +12,12 @@ import '../../providers/amenities_provider.dart';
 import '../../models/amenity_model.dart';
 
 import '../../theme/app_colors.dart';
+import '../../utils/app_toast.dart';
 import '../../theme/design_system/app_text_field.dart';
 import '../../theme/design_system/app_spacing.dart';
+import '../../widgets/main_app_bar.dart';
+import '../../widgets/main_drawer.dart';
+import '../../widgets/app_scaffold.dart';
 
 class CreateLodgeScreen extends ConsumerStatefulWidget {
   const CreateLodgeScreen({super.key});
@@ -71,30 +75,87 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
     }
   }
 
-  Future<void> getLocation() async {
-    setState(() => isGettingLocation = true);
+Future<void> getLocation() async {
 
-    try {
-      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) return;
+  setState(() {
+    isGettingLocation = true;
+  });
 
-      LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-      }
+  try {
 
-      final pos = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+    bool serviceEnabled =
+        await Geolocator.isLocationServiceEnabled();
+
+    if (!serviceEnabled) {
+
+      AppToast.error(
+        context,
+        'Enable location services',
       );
 
+      return;
+    }
+
+    LocationPermission permission =
+        await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied) {
+
+      permission =
+          await Geolocator.requestPermission();
+
+      if (permission == LocationPermission.denied) {
+
+        AppToast.error(
+          context,
+          'Location permission denied',
+        );
+
+        return;
+      }
+    }
+
+    Position pos =
+        await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+
+    setState(() {
+
+      latitude =
+          double.parse(
+              pos.latitude.toStringAsFixed(6));
+
+      longitude =
+          double.parse(
+              pos.longitude.toStringAsFixed(6));
+    });
+
+    if (mounted) {
+
+      AppToast.success(
+        context,
+        'Location captured successfully',
+      );
+    }
+
+  } catch (e) {
+
+    AppToast.error(
+      context,
+      'Failed to get location',
+    );
+
+  } finally {
+
+    if (mounted) {
+
       setState(() {
-        latitude = double.parse(pos.latitude.toStringAsFixed(6));
-        longitude = double.parse(pos.longitude.toStringAsFixed(6));
+        isGettingLocation = false;
       });
-    } finally {
-      setState(() => isGettingLocation = false);
     }
   }
+}
 
   Future<void> submitLodge() async {
     if (!_formKey.currentState!.validate()) return;
@@ -154,9 +215,8 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(
-        title: Text("Create Lodge"),
-        backgroundColor: AppColors.mangoOrange,
+      appBar: MainAppBar(
+        title:"Create Lodge"
       ),
 
       body: ListView(
@@ -235,11 +295,33 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
 
           const SizedBox(height: AppSpacing.lg),
 
-          ElevatedButton.icon(
-            onPressed: getLocation,
-            icon: Icon(Icons.my_location),
-            label: Text("Get GPS Location"),
-          ),
+          SizedBox(
+  width: double.infinity,
+  child: ElevatedButton.icon(
+    onPressed: isGettingLocation
+        ? null
+        : getLocation,
+
+    icon: isGettingLocation
+        ? SizedBox(
+            height: 18,
+            width: 18,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Theme.of(context)
+                  .colorScheme
+                  .surface,
+            ),
+          )
+        : const Icon(Icons.my_location),
+
+    label: Text(
+      isGettingLocation
+          ? 'Getting GPS Location...'
+          : 'Get GPS Location',
+    ),
+  ),
+),
 
           if (latitude != null) Text("Lat: $latitude"),
           if (longitude != null) Text("Lng: $longitude"),

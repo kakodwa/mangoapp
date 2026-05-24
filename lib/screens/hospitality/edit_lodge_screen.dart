@@ -13,10 +13,13 @@ import '../../models/amenity_model.dart';
 
 import '../../providers/api_provider.dart';
 import '../../providers/amenities_provider.dart';
-
+import '../../utils/app_toast.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_text_field.dart';
+import '../../widgets/main_app_bar.dart';
+import '../../widgets/main_drawer.dart';
+import '../../widgets/app_scaffold.dart';
 
 class EditLodgeScreen extends ConsumerStatefulWidget {
   final Lodge lodge;
@@ -160,41 +163,87 @@ class _EditLodgeScreenState
     }
   }
 
-  Future<void> getLocation() async {
-    setState(() => isGettingLocation = true);
+Future<void> getLocation() async {
 
-    try {
-      bool serviceEnabled =
-          await Geolocator.isLocationServiceEnabled();
+  setState(() {
+    isGettingLocation = true;
+  });
 
-      if (!serviceEnabled) return;
+  try {
 
-      LocationPermission permission =
-          await Geolocator.checkPermission();
+    bool serviceEnabled =
+        await Geolocator.isLocationServiceEnabled();
 
-      if (permission == LocationPermission.denied) {
-        permission =
-            await Geolocator.requestPermission();
-      }
+    if (!serviceEnabled) {
 
-      final pos =
-          await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
+      AppToast.error(
+        context,
+        'Enable location services',
       );
 
-      setState(() {
-        latitude = double.parse(
-          pos.latitude.toStringAsFixed(6),
+      return;
+    }
+
+    LocationPermission permission =
+        await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied) {
+
+      permission =
+          await Geolocator.requestPermission();
+
+      if (permission == LocationPermission.denied) {
+
+        AppToast.error(
+          context,
+          'Location permission denied',
         );
 
-        longitude = double.parse(
-          pos.longitude.toStringAsFixed(6),
-        );
+        return;
+      }
+    }
+
+    Position pos =
+        await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+
+    setState(() {
+
+      latitude =
+          double.parse(
+              pos.latitude.toStringAsFixed(6));
+
+      longitude =
+          double.parse(
+              pos.longitude.toStringAsFixed(6));
+    });
+
+    if (mounted) {
+
+      AppToast.success(
+        context,
+        'Location captured successfully',
+      );
+    }
+
+  } catch (e) {
+
+    AppToast.error(
+      context,
+      'Failed to get location',
+    );
+
+  } finally {
+
+    if (mounted) {
+
+      setState(() {
+        isGettingLocation = false;
       });
-    } finally {
-      setState(() => isGettingLocation = false);
     }
   }
+}
 
   Future<void> updateLodge() async {
     if (!_formKey.currentState!.validate()) return;
@@ -387,9 +436,8 @@ class _EditLodgeScreenState
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(
-        title: Text("Edit Lodge"),
-        backgroundColor: AppColors.mangoOrange,
+      appBar: MainAppBar(
+        title: "Edit Lodge"
       ),
 
       body: Form(
@@ -500,20 +548,36 @@ class _EditLodgeScreenState
 
             /// LOCATION
             SizedBox(
-              height: 50,
-              child: ElevatedButton.icon(
-                onPressed:
-                    isGettingLocation
-                        ? null
-                        : getLocation,
-                icon: Icon(Icons.my_location),
-                label: Text(
-                  isGettingLocation
-                      ? "Getting location..."
-                      : "Update GPS Location",
-                ),
-              ),
+  height: 50,
+  child: ElevatedButton.icon(
+
+    onPressed:
+        isGettingLocation
+            ? null
+            : getLocation,
+
+    icon: isGettingLocation
+        ? SizedBox(
+            height: 18,
+            width: 18,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Theme.of(context)
+                  .colorScheme
+                  .surface,
             ),
+          )
+        : const Icon(
+            Icons.my_location,
+          ),
+
+    label: Text(
+      isGettingLocation
+          ? "Getting GPS Location..."
+          : "Update GPS Location",
+    ),
+  ),
+),
 
             if (latitude != null) ...[
               const SizedBox(height: AppSpacing.xs),

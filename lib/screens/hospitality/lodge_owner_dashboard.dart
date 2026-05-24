@@ -4,6 +4,13 @@ import 'create_lodge_screen.dart';
 import 'my_lodges_screen.dart';
 import '../../theme/design_system/app_spacing.dart';
 
+import '../../theme/app_colors.dart';
+import '../../widgets/main_app_bar.dart';
+import '../../widgets/main_drawer.dart';
+import '../../widgets/app_scaffold.dart';
+import 'owner_bookings_screen.dart';
+import 'bookings_scanner_screen.dart';
+
 class LodgeOwnerDashboard extends StatelessWidget {
   const LodgeOwnerDashboard({super.key});
 
@@ -11,8 +18,10 @@ class LodgeOwnerDashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(
-        title: Text('Lodge Dashboard'),
+
+
+      appBar: MainAppBar(
+        title:'Lodge Dashboard',
       ),
 
       body: GridView.count(
@@ -27,16 +36,26 @@ class LodgeOwnerDashboard extends StatelessWidget {
             title: 'Bookings',
             icon: Icons.book_online,
             onTap: () {
-              // TODO: navigate bookings screen
-            },
-          ),
-
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => OwnerBookingsScreen(),
+                  ),
+                );
+              },
+              ),
           _DashboardCard(
-            title: 'Rooms',
-            icon: Icons.hotel,
-            onTap: () {
-              // TODO: rooms screen
-            },
+            title: 'Scan QR',
+  icon: Icons.qr_code_scanner,
+  color: Colors.deepPurple,
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => BookingQrScannerScreen(),
+      ),
+    );
+  },
           ),
 
           _DashboardCard(

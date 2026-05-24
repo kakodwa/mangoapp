@@ -3,11 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/auth_provider.dart' as auth;
 import '../../providers/api_provider.dart';
-import '../../theme/app_colors.dart';
+
 
 import '../../models/lodge_model.dart';
 import '../../widgets/hospitality/lodge_card.dart';
 import '../../theme/design_system/app_spacing.dart';
+
+import '../../theme/app_colors.dart';
+import '../../widgets/main_app_bar.dart';
+import '../../widgets/main_drawer.dart';
+import '../../widgets/app_scaffold.dart';
 
 class MyLodgesScreen extends ConsumerStatefulWidget {
   const MyLodgesScreen({super.key});
@@ -74,20 +79,18 @@ class _MyLodgesScreenState extends ConsumerState<MyLodgesScreen> {
   @override
   Widget build(BuildContext context) {
 
-    debugPrint("🧱 BUILD RUNNING - lodges: ${lodges.length}");
+    debugPrint("BUILD RUNNING - lodges: ${lodges.length}");
 
     final authState = ref.watch(auth.authProvider);
     final user = authState.user;
 
-    debugPrint("👤 CURRENT USER: ${user?.id}");
+    debugPrint("CURRENT USER: ${user?.id}");
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(
-        title: Text("My Lodges"),
-        backgroundColor: AppColors.mangoOrange,
+      appBar: MainAppBar(
+        title:'My Lodges',
       ),
-
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
 

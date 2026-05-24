@@ -5,6 +5,11 @@ import '../../providers/bookings_provider.dart';
 import '../../widgets/hospitality/booking_card.dart';
 import '../../theme/design_system/app_spacing.dart';
 
+import '../../theme/app_colors.dart';
+import '../../widgets/main_app_bar.dart';
+import '../../widgets/main_drawer.dart';
+import '../../widgets/app_scaffold.dart';
+
 class MyBookingsScreen extends ConsumerWidget {
   const MyBookingsScreen({super.key});
 
@@ -12,10 +17,10 @@ class MyBookingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final bookingsAsync = ref.watch(bookingsProvider);
 
-    return Scaffold(
+    return AppScaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(
-        title: Text('My Bookings'),
+      appBar: MainAppBar(
+        title:'My Bookings',
       ),
       body: bookingsAsync.when(
         data: (bookings) {

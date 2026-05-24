@@ -6,6 +6,12 @@ import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_text_field.dart';
 import '../../theme/design_system/app_spacing.dart';
 
+
+import '../../theme/app_colors.dart';
+import '../../widgets/main_app_bar.dart';
+import '../../widgets/main_drawer.dart';
+import '../../widgets/app_scaffold.dart';
+
 class AddRoomScreen extends ConsumerStatefulWidget {
   final int lodgeId;
 
@@ -87,9 +93,8 @@ class _AddRoomScreenState extends ConsumerState<AddRoomScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(
-        title: Text("Add Room"),
-        backgroundColor: AppColors.mangoOrange,
+      appBar: MainAppBar(
+        title:'Add room',
       ),
       body: Form(
         key: _formKey,

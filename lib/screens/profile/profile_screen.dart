@@ -26,7 +26,7 @@ import '../shops/create_shop_screen.dart';
 import '../shops/my_shop_screen.dart';
 import '../events/my_tickets_screen.dart';
 import '../hospitality/lodge_owner_dashboard.dart';
-
+import '../hospitality/my_bookings_screen.dart';
 import '../../utils/user_role_utils.dart';
 import '../../theme/design_system/app_spacing.dart';
 
@@ -199,6 +199,20 @@ class ProfileScreen extends ConsumerWidget {
                       );
                     },
                   ),
+
+                  _menuTile(
+                    context,
+  Icons.hotel,
+  "My Bookings",
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const MyBookingsScreen(),
+      ),
+    );
+  },
+),
 
                   _menuTile(
                     context,
