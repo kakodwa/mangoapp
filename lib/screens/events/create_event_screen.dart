@@ -49,6 +49,7 @@ class _AddEventScreenState extends ConsumerState<AddEventScreen> {
 
   bool isFeatured = false;
   bool loading = false;
+  bool gettingGps = false;
 
   final ImagePicker picker = ImagePicker();
   XFile? banner;
@@ -80,25 +81,59 @@ class _AddEventScreenState extends ConsumerState<AddEventScreen> {
   ];
 
   // ===================== GPS =====================
-  Future<void> getGPS() async {
-    bool enabled = await Geolocator.isLocationServiceEnabled();
+Future<void> getGPS() async {
+  setState(() => gettingGps = true);
+
+  try {
+    bool enabled =
+        await Geolocator.isLocationServiceEnabled();
+
     if (!enabled) {
       AppToast.error(context, "Enable GPS first");
       return;
     }
 
-    Position pos = await Geolocator.getCurrentPosition(
+    LocationPermission permission =
+        await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied) {
+      permission =
+          await Geolocator.requestPermission();
+
+      if (permission == LocationPermission.denied) {
+        AppToast.error(
+          context,
+          "Location permission denied",
+        );
+        return;
+      }
+    }
+
+    Position pos =
+        await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.high,
     );
 
     setState(() {
-      latitude.text = pos.latitude.toStringAsFixed(6);
-      longitude.text = pos.longitude.toStringAsFixed(6);
+      latitude.text =
+          pos.latitude.toStringAsFixed(6);
+
+      longitude.text =
+          pos.longitude.toStringAsFixed(6);
     });
 
     AppToast.success(context, "GPS captured");
+  } catch (e) {
+    AppToast.error(
+      context,
+      "Failed to get GPS",
+    );
+  } finally {
+    if (mounted) {
+      setState(() => gettingGps = false);
+    }
   }
-
+}
   // ===================== IMAGE =====================
   Future<void> pickBanner() async {
     final picked = await picker.pickImage(source: ImageSource.gallery);
@@ -274,13 +309,53 @@ for (final ticket in ticketTypes) {
             const SizedBox(height: AppSpacing.sm),
 
             Row(
-              children: [
-                Expanded(child: AppTextField(label: "Latitude", controller: latitude, type: TextFieldType.text)),
-                const SizedBox(width: 10),
-                Expanded(child: AppTextField(label: "Longitude", controller: longitude, type: TextFieldType.text)),
-                IconButton(onPressed: getGPS, icon: Icon(Icons.my_location)),
-              ],
-            ),
+  crossAxisAlignment: CrossAxisAlignment.end,
+  children: [
+    Expanded(
+      child: AppTextField(
+        label: "Latitude",
+        controller: latitude,
+        type: TextFieldType.text,
+      ),
+    ),
+    const SizedBox(width: 10),
+
+    Expanded(
+      child: AppTextField(
+        label: "Longitude",
+        controller: longitude,
+        type: TextFieldType.text,
+      ),
+    ),
+    const SizedBox(width: 10),
+
+    SizedBox(
+      height: 56,
+      width: 56,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.primary,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: gettingGps
+            ? Padding(
+                padding: const EdgeInsets.all(14),
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: Theme.of(context).colorScheme.surface,
+                ),
+              )
+            : IconButton(
+                onPressed: getGPS,
+                icon: Icon(
+                  Icons.my_location,
+                  color: Theme.of(context).colorScheme.surface,
+                ),
+              ),
+      ),
+    ),
+  ],
+),
 
             const SizedBox(height: AppSpacing.sm),
 

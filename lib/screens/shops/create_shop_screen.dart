@@ -45,6 +45,7 @@ class _CreateShopScreenState
   String? selectedDistrict;
 
   bool loading = false;
+  bool gettingLocation = false;
 
   // ======================
   // LOCATION
@@ -112,15 +113,24 @@ class _CreateShopScreenState
   // GET LOCATION
   // ======================
 
-  Future<void> getLocation() async {
+ Future<void> getLocation() async {
+
+  setState(() {
+    gettingLocation = true;
+  });
+
+  try {
+
     bool serviceEnabled =
         await Geolocator.isLocationServiceEnabled();
 
     if (!serviceEnabled) {
+
       AppToast.error(
         context,
         'Enable location services',
       );
+
       return;
     }
 
@@ -128,6 +138,7 @@ class _CreateShopScreenState
         await Geolocator.checkPermission();
 
     if (permission == LocationPermission.denied) {
+
       permission =
           await Geolocator.requestPermission();
 
@@ -142,20 +153,41 @@ class _CreateShopScreenState
     );
 
     setState(() {
+
       latitude =
-          double.parse(pos.latitude.toStringAsFixed(6));
+          double.parse(
+              pos.latitude.toStringAsFixed(6));
 
       longitude =
-          double.parse(pos.longitude.toStringAsFixed(6));
+          double.parse(
+              pos.longitude.toStringAsFixed(6));
     });
 
     if (mounted) {
+
       AppToast.success(
         context,
         'Location captured successfully',
       );
     }
+
+  } catch (e) {
+
+    AppToast.error(
+      context,
+      'Failed to get location',
+    );
+
+  } finally {
+
+    if (mounted) {
+
+      setState(() {
+        gettingLocation = false;
+      });
+    }
   }
+}
 
   // ======================
   // PICK LOGO
@@ -619,14 +651,33 @@ class _CreateShopScreenState
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
-                          onPressed: getLocation,
-                          icon: Icon(
-                            Icons.my_location,
-                          ),
-                          label: Text(
-                            'Get Current Location',
-                          ),
-                        ),
+
+  onPressed:
+      gettingLocation
+          ? null
+          : getLocation,
+
+  icon: gettingLocation
+      ? SizedBox(
+          height: 18,
+          width: 18,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: Theme.of(context)
+                .colorScheme
+                .surface,
+          ),
+        )
+      : const Icon(
+          Icons.my_location,
+        ),
+
+  label: Text(
+    gettingLocation
+        ? 'Getting GPS Location...'
+        : 'Get Shop Location',
+  ),
+),
                       ),
 
                       const SizedBox(height: AppSpacing.sm),

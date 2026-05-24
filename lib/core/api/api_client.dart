@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logger/logger.dart';
 import '../../models/payment_model.dart';
+import '../errors/api_exception.dart';
 
 class ApiClient {
 
@@ -57,7 +58,7 @@ class ApiClient {
   }
 
 
-  Future<List<Map<String, dynamic>>> fetchBanners() async {
+Future<List<Map<String, dynamic>>> fetchBanners() async {
   try {
     final response = await _dio.get('banners/');
 
@@ -70,28 +71,84 @@ class ApiClient {
         : data;
 
     if (results is! List) {
-      logger.e("Expected List but got: ${results.runtimeType}");
-      return [];
+      throw ApiException("Invalid banners format");
     }
 
     return List<Map<String, dynamic>>.from(results);
+  } on DioException catch (e) {
+    logger.e('❌ GET banners failed');
+
+    // 🌐 NETWORK ERROR
+    if (e.type == DioExceptionType.connectionError ||
+        e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout) {
+      throw ApiException("No internet connection");
+    }
+
+    // 🔥 BACKEND ERROR
+    final response = e.response;
+
+    if (response != null && response.data is Map<String, dynamic>) {
+      final data = response.data;
+
+      throw ApiException(
+        data['message'] ??
+        data['error'] ??
+        data['detail'] ??
+        "Failed to load banners",
+        statusCode: response.statusCode,
+      );
+    }
+
+    throw ApiException("Server not reachable");
   } catch (e) {
     logger.e('GET banners failed: $e');
-    rethrow;
+    throw ApiException("Something went wrong");
   }
 }
 
 
 Future<Map<String, dynamic>> getAppVersion() async {
-  final response = await _dio.get('products/app_version/');
+  try {
+    final response = await _dio.get('products/app_version/');
 
-  final data = response.data;
+    final data = response.data;
 
-  if (data is Map<String, dynamic>) {
-    return data;
+    if (data is Map<String, dynamic>) {
+      return data;
+    }
+
+    throw ApiException("Invalid app version response");
+  } on DioException catch (e) {
+    logger.e('❌ GET app version failed');
+
+    // 🌐 NETWORK ERROR
+    if (e.type == DioExceptionType.connectionError ||
+        e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout) {
+      throw ApiException("No internet connection");
+    }
+
+    // 🔥 BACKEND ERROR
+    final response = e.response;
+
+    if (response != null && response.data is Map<String, dynamic>) {
+      final data = response.data;
+
+      throw ApiException(
+        data['message'] ??
+        data['error'] ??
+        data['detail'] ??
+        "Failed to fetch app version",
+        statusCode: response.statusCode,
+      );
+    }
+
+    throw ApiException("Server not reachable");
+  } catch (e) {
+    logger.e('GET app version failed: $e');
+    throw ApiException("Something went wrong");
   }
-
-  throw Exception("Invalid app_version response: $data");
 }
 
 
@@ -162,25 +219,45 @@ Future<T> get<T>(
       return fromJson(data);
     }
 
-    throw Exception("Expected Map but got ${data.runtimeType}: $data");
+    throw ApiException(
+      "Invalid response format",
+    );
   } on DioException catch (e) {
-
     logger.e('❌ GET $path failed');
 
-    // 🌐 Internet issues
-    if (
-      e.type == DioExceptionType.connectionError ||
-      e.type == DioExceptionType.connectionTimeout ||
-      e.type == DioExceptionType.receiveTimeout
-    ) {
-      throw Exception("No internet connection");
+    // 🌐 Network issues
+    if (e.type == DioExceptionType.connectionError ||
+        e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout) {
+      throw ApiException("No internet connection");
     }
 
-    logger.e('DIO ERROR: $e');
-    rethrow;
+    // 🔥 Backend response errors
+    if (e.response != null) {
+      final data = e.response?.data;
+
+      String message = "Request failed";
+
+      if (data is Map<String, dynamic>) {
+        message = data['message'] ??
+            data['error'] ??
+            data['detail'] ??
+            message;
+      }
+
+      throw ApiException(
+        message,
+        statusCode: e.response?.statusCode,
+      );
+    }
+
+    // fallback
+    throw ApiException("Server not reachable");
   } catch (e) {
     logger.e('GET $path failed: $e');
-    rethrow;
+
+    // fallback for unexpected errors
+    throw ApiException("Something went wrong");
   }
 }
 
@@ -204,22 +281,46 @@ Future<List<T>> getList<T>(
         : data;
 
     if (results is! List) {
-      logger.e("Expected List but got: ${results.runtimeType}");
-      return [];
+      throw ApiException("Invalid list response format");
     }
 
     return results.map<T>((e) {
       final item = Map<String, dynamic>.from(e);
       return fromJson(item);
     }).toList();
+  } on DioException catch (e) {
+    logger.e('❌ GET LIST $path failed');
 
+    // 🌐 NETWORK ERROR
+    if (e.type == DioExceptionType.connectionError ||
+        e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout) {
+      throw ApiException("No internet connection");
+    }
+
+    // 🔥 BACKEND ERROR
+    final response = e.response;
+
+    if (response != null && response.data is Map<String, dynamic>) {
+      final data = response.data;
+
+      throw ApiException(
+        data['message'] ??
+        data['error'] ??
+        data['detail'] ??
+        "Failed to load data",
+        statusCode: response.statusCode,
+      );
+    }
+
+    throw ApiException("Server not reachable");
   } catch (e, stack) {
     logger.e('GET LIST $path failed: $e');
     logger.e(stack.toString());
-    rethrow;
+
+    throw ApiException("Something went wrong");
   }
 }
-
 
 
 Future<dynamic> uploadMultipart({
@@ -229,38 +330,80 @@ Future<dynamic> uploadMultipart({
   required String fileFieldName,
   String method = 'POST',
 }) async {
-  final formData = FormData();
+  try {
+    final formData = FormData();
 
-  // fields
-  fields.forEach((key, value) {
-    formData.fields.add(MapEntry(key, value));
-  });
+    // 📦 add fields
+    fields.forEach((key, value) {
+      formData.fields.add(MapEntry(key, value));
+    });
 
-  // files (FIXED for web + mobile)
-  for (final file in files) {
-    Uint8List bytes = await file.readAsBytes();
+    // 📎 add files
+    for (final file in files) {
+      Uint8List bytes = await file.readAsBytes();
 
-    formData.files.add(
-      MapEntry(
-        fileFieldName,
-        MultipartFile.fromBytes(
-          bytes,
-          filename: file.name,
+      formData.files.add(
+        MapEntry(
+          fileFieldName,
+          MultipartFile.fromBytes(
+            bytes,
+            filename: file.name,
+          ),
         ),
+      );
+    }
+
+    final response = await _dio.request(
+      endpoint,
+      data: formData,
+      options: Options(
+        method: method,
+        contentType: 'multipart/form-data',
       ),
     );
+
+    logger.i("✅ MULTIPART $endpoint SUCCESS");
+    logger.i(response.data);
+
+    return response.data;
+  } on DioException catch (e) {
+    logger.e("❌ MULTIPART $endpoint FAILED");
+
+    // 🌐 NETWORK ERROR
+    if (e.type == DioExceptionType.connectionError ||
+        e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout) {
+      throw ApiException("No internet connection");
+    }
+
+    final response = e.response;
+
+    // 🔥 SERVER ERROR
+    if (response != null) {
+      final data = response.data;
+
+      String message = "Upload failed";
+
+      if (data is Map<String, dynamic>) {
+        message = data['message'] ??
+            data['error'] ??
+            data['detail'] ??
+            message;
+      } else if (data is String) {
+        message = data;
+      }
+
+      throw ApiException(
+        message,
+        statusCode: response.statusCode,
+      );
+    }
+
+    throw ApiException("Server not reachable");
+  } catch (e) {
+    logger.e("UPLOAD ERROR: $e");
+    throw ApiException("Something went wrong");
   }
-
-  final response = await _dio.request(
-    endpoint,
-    data: formData,
-    options: Options(
-      method: method,
-      contentType: 'multipart/form-data',
-    ),
-  );
-
-  return response.data;
 }
 
 Future<T> post<T>(
@@ -274,71 +417,169 @@ Future<T> post<T>(
     logger.i("✅ POST $path RESPONSE:");
     logger.i(response.data);
 
-    return fromJson(response.data);
+    if (response.data is Map<String, dynamic>) {
+      return fromJson(response.data);
+    }
+
+    throw ApiException("Invalid response format");
   } on DioException catch (e) {
     logger.e('❌ POST $path failed');
 
     final response = e.response;
 
-    logger.e('STATUS: ${response?.statusCode}');
-    logger.e('DATA: ${response?.data}');
+    // 🌐 NETWORK ERROR
+    if (e.type == DioExceptionType.connectionError ||
+        e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout) {
+      throw ApiException("No internet connection");
+    }
 
-    // 🔥 EXTRACT REAL BACKEND MESSAGE
-    String message = "Request failed";
+    // 🔥 SERVER RESPONDED WITH ERROR
+    if (response != null) {
+      final data = response.data;
 
-    if (response?.data != null) {
-      final data = response!.data;
+      String message = "Request failed";
 
       if (data is Map<String, dynamic>) {
-        message =
-            data['message'] ??
+        message = data['message'] ??
             data['error'] ??
             data['detail'] ??
             message;
       } else if (data is String) {
         message = data;
       }
+
+      throw ApiException(
+        message,
+        statusCode: response.statusCode,
+      );
     }
 
-    throw Exception(message);
+    // fallback
+    throw ApiException("Server not reachable");
   } catch (e) {
     logger.e('UNKNOWN ERROR: $e');
-    throw Exception('Something went wrong');
+    throw ApiException("Something went wrong");
   }
 }
 
 
-  Future<T> put<T>(
-    String path, {
-    required Map<String, dynamic> data,
-    required T Function(Map<String, dynamic>) fromJson,
-  }) async {
-    try {
-      final response = await _dio.put(path, data: data);
+Future<T> put<T>(
+  String path, {
+  required Map<String, dynamic> data,
+  required T Function(Map<String, dynamic>) fromJson,
+}) async {
+  try {
+    final response = await _dio.put(path, data: data);
+
+    logger.i("✅ PUT $path RESPONSE:");
+    logger.i(response.data);
+
+    if (response.data is Map<String, dynamic>) {
       return fromJson(response.data);
-    } catch (e) {
-      logger.e('PUT $path failed: $e');
-      rethrow;
     }
-  }
 
-  Future<void> delete(String path) async {
-    try {
-      await _dio.delete(path);
-    } catch (e) {
-      logger.e('DELETE $path failed: $e');
-      rethrow;
+    throw ApiException("Invalid response format");
+  } on DioException catch (e) {
+    logger.e('❌ PUT $path failed');
+
+    // 🌐 NETWORK ISSUES
+    if (e.type == DioExceptionType.connectionError ||
+        e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout) {
+      throw ApiException("No internet connection");
     }
+
+    final response = e.response;
+
+    // 🔥 BACKEND ERROR
+    if (response != null) {
+      final data = response.data;
+
+      String message = "Request failed";
+
+      if (data is Map<String, dynamic>) {
+        message = data['message'] ??
+            data['error'] ??
+            data['detail'] ??
+            message;
+      } else if (data is String) {
+        message = data;
+      }
+
+      throw ApiException(
+        message,
+        statusCode: response.statusCode,
+      );
+    }
+
+    throw ApiException("Server not reachable");
+  } catch (e) {
+    logger.e('PUT $path failed: $e');
+    throw ApiException("Something went wrong");
   }
-
-
-  Future<List<PaymentModel>> getMyPayments() async {
-  return getList(
-    'payments/my_payments/',
-    fromJson: (json) => PaymentModel.fromJson(json),
-  );
 }
 
+
+Future<void> delete(String path) async {
+  try {
+    final response = await _dio.delete(path);
+
+    logger.i("✅ DELETE $path RESPONSE:");
+    logger.i(response.data);
+  } on DioException catch (e) {
+    logger.e('❌ DELETE $path failed');
+
+    // 🌐 NETWORK ERROR
+    if (e.type == DioExceptionType.connectionError ||
+        e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout) {
+      throw ApiException("No internet connection");
+    }
+
+    final response = e.response;
+
+    // 🔥 BACKEND ERROR
+    if (response != null) {
+      final data = response.data;
+
+      String message = "Request failed";
+
+      if (data is Map<String, dynamic>) {
+        message = data['message'] ??
+            data['error'] ??
+            data['detail'] ??
+            message;
+      } else if (data is String) {
+        message = data;
+      }
+
+      throw ApiException(
+        message,
+        statusCode: response.statusCode,
+      );
+    }
+
+    throw ApiException("Server not reachable");
+  } catch (e) {
+    logger.e('DELETE $path failed: $e');
+    throw ApiException("Something went wrong");
+  }
+}
+
+
+Future<List<PaymentModel>> getMyPayments() async {
+  try {
+    return await getList(
+      'payments/my_payments/',
+      fromJson: (json) => PaymentModel.fromJson(json),
+    );
+  } on ApiException {
+    rethrow; // keep clean error flow
+  } catch (e) {
+    throw ApiException("Something went wrong");
+  }
+}
 
   Future<Response> patchMultipart(
   String endpoint,
@@ -367,13 +608,54 @@ Future<T> patch<T>(
 }) async {
   try {
     final response = await _dio.patch(path, data: data);
-    return fromJson(response.data);
+
+    logger.i("✅ PATCH $path RESPONSE:");
+    logger.i(response.data);
+
+    if (response.data is Map<String, dynamic>) {
+      return fromJson(response.data);
+    }
+
+    throw ApiException("Invalid response format");
+  } on DioException catch (e) {
+    logger.e('❌ PATCH $path failed');
+
+    // 🌐 NETWORK ERROR
+    if (e.type == DioExceptionType.connectionError ||
+        e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout) {
+      throw ApiException("No internet connection");
+    }
+
+    final response = e.response;
+
+    // 🔥 BACKEND ERROR
+    if (response != null) {
+      final data = response.data;
+
+      String message = "Request failed";
+
+      if (data is Map<String, dynamic>) {
+        message = data['message'] ??
+            data['error'] ??
+            data['detail'] ??
+            message;
+      } else if (data is String) {
+        message = data;
+      }
+
+      throw ApiException(
+        message,
+        statusCode: response.statusCode,
+      );
+    }
+
+    throw ApiException("Server not reachable");
   } catch (e) {
     logger.e('PATCH $path failed: $e');
-    rethrow;
+    throw ApiException("Something went wrong");
   }
 }
-
   // Authentication methods
   Future<Map<String, dynamic>> register({
     required String username,
@@ -476,14 +758,38 @@ Future<Map<String, dynamic>> initiatePropertyPayment({
       },
     );
 
-    logger.i("PAYMENT INIT RESPONSE: ${response.data}");
+    logger.i("💳 PAYMENT INIT RESPONSE: ${response.data}");
 
     return response.data;
   } on DioException catch (e) {
-    logger.e("PAYMENT INIT FAILED");
-    logger.e("STATUS: ${e.response?.statusCode}");
-    logger.e("DATA: ${e.response?.data}");
-    rethrow;
+    logger.e("❌ PAYMENT INIT FAILED");
+
+    // 🌐 NETWORK ERROR
+    if (e.type == DioExceptionType.connectionError ||
+        e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout) {
+      throw ApiException("No internet connection");
+    }
+
+    final response = e.response;
+
+    // 🔥 BACKEND ERROR
+    if (response != null && response.data is Map<String, dynamic>) {
+      final data = response.data;
+
+      throw ApiException(
+        data['message'] ??
+        data['error'] ??
+        data['detail'] ??
+        "Payment failed",
+        statusCode: response.statusCode,
+      );
+    }
+
+    throw ApiException("Server not reachable");
+  } catch (e) {
+    logger.e("PAYMENT INIT UNKNOWN ERROR: $e");
+    throw ApiException("Something went wrong");
   }
 }
 

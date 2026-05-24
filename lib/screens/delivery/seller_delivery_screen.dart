@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import '../../utils/app_toast.dart';
 import '../../utils/api_response_handler.dart';
 import '../../widgets/shop_map_modal.dart';
+import '../../widgets/main_app_bar.dart';
 import '../../core/api/api_client.dart';
 import '../../providers/api_provider.dart';
 import '../../theme/app_colors.dart';
@@ -93,17 +94,8 @@ class SellerDeliveryScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: AppColors.primary(context),
-        title: Text(
-          "Seller Deliveries",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.surface,
-          ),
-        ),
-        centerTitle: true,
+      appBar: const MainAppBar(
+        title: 'Seller Deliveries',
       ),
 
       body: deliveriesAsync.when(
@@ -594,6 +586,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
 
     double? pickupLat;
     double? pickupLng;
+    bool generatingGps = false;
 
     showDialog(
       context: context,
@@ -660,46 +653,86 @@ class SellerDeliveryScreen extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.md),
 
                 SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    icon: Icon(Icons.gps_fixed),
-                    label: Text(
-                        "Generate Pickup GPS"),
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      backgroundColor:
-                          AppColors.leafGreen,
-                      foregroundColor: Theme.of(context).colorScheme.surface,
-                      padding:
-                          EdgeInsets.symmetric(
-                        vertical: 14,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(14),
-                      ),
-                    ),
-                    onPressed: () async {
-                      try {
-                        final pos =
-                            await Geolocator
-                                .getCurrentPosition(
-                          desiredAccuracy:
-                              LocationAccuracy.high,
-                        );
+  width: double.infinity,
+  child: ElevatedButton.icon(
 
-                        setState(() {
-                          pickupLat = pos.latitude;
-                          pickupLng = pos.longitude;
-                        });
+    icon: generatingGps
+        ? SizedBox(
+            height: 18,
+            width: 18,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Theme.of(context)
+                  .colorScheme
+                  .surface,
+            ),
+          )
+        : const Icon(Icons.gps_fixed),
 
-                        AppToast.success(context,"Pickup GPS generated successfully");
-                      } catch (e) {
-                         AppToast.error(context,"GPS Error: ${e.toString()}");
-                      }
-                    },
-                  ),
-                ),
+    label: Text(
+      generatingGps
+          ? "Generating GPS..."
+          : "Generate Pickup GPS",
+    ),
+
+    style: ElevatedButton.styleFrom(
+      elevation: 0,
+      backgroundColor:
+          AppColors.leafGreen,
+      foregroundColor:
+          Theme.of(context).colorScheme.surface,
+      padding: EdgeInsets.symmetric(
+        vertical: 14,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.circular(14),
+      ),
+    ),
+
+    onPressed: generatingGps
+        ? null
+        : () async {
+
+            setState(() {
+              generatingGps = true;
+            });
+
+            try {
+
+              final pos =
+                  await Geolocator
+                      .getCurrentPosition(
+                desiredAccuracy:
+                    LocationAccuracy.high,
+              );
+
+              setState(() {
+                pickupLat = pos.latitude;
+                pickupLng = pos.longitude;
+              });
+
+              AppToast.success(
+                context,
+                "Pickup GPS generated successfully",
+              );
+
+            } catch (e) {
+
+              AppToast.error(
+                context,
+                "GPS Error: ${e.toString()}",
+              );
+
+            } finally {
+
+              setState(() {
+                generatingGps = false;
+              });
+            }
+          },
+  ),
+),
               ],
             ),
           ),

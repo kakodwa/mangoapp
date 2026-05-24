@@ -48,6 +48,7 @@ class _AddPropertyScreenState
   final priceController = TextEditingController();
 
   bool isLoading = false;
+  bool gettingGps = false;
 
   String propertyType = 'house';
   String listingPurpose = 'sale';
@@ -104,57 +105,63 @@ class _AddPropertyScreenState
   // =========================
   // GPS
   // =========================
-  Future<void> getGPS() async {
-    try {
-      bool serviceEnabled =
-          await Geolocator.isLocationServiceEnabled();
+Future<void> getGPS() async {
+  setState(() => gettingGps = true);
 
-      if (!serviceEnabled) {
-        AppToast.error(
-          context,
-          "Location services disabled",
-        );
-        return;
-      }
+  try {
+    bool serviceEnabled =
+        await Geolocator.isLocationServiceEnabled();
 
-      LocationPermission permission =
-          await Geolocator.checkPermission();
-
-      if (permission == LocationPermission.denied) {
-        permission =
-            await Geolocator.requestPermission();
-      }
-
-      if (permission ==
-          LocationPermission.deniedForever) {
-        AppToast.error(
-          context,
-          "Permission denied permanently",
-        );
-        return;
-      }
-
-      Position position =
-          await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-
-      setState(() {
-        latitudeController.text =
-            position.latitude.toString();
-
-        longitudeController.text =
-            position.longitude.toString();
-      });
-
-      AppToast.success(
+    if (!serviceEnabled) {
+      AppToast.error(
         context,
-        "GPS captured successfully",
+        "Location services disabled",
       );
-    } catch (e) {
-      AppToast.error(context, e.toString());
+      return;
+    }
+
+    LocationPermission permission =
+        await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied) {
+      permission =
+          await Geolocator.requestPermission();
+    }
+
+    if (permission ==
+        LocationPermission.deniedForever) {
+      AppToast.error(
+        context,
+        "Permission denied permanently",
+      );
+      return;
+    }
+
+    Position position =
+        await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+
+    setState(() {
+      latitudeController.text =
+          position.latitude.toStringAsFixed(6);
+
+      longitudeController.text =
+          position.longitude.toStringAsFixed(6);
+    });
+
+    AppToast.success(
+      context,
+      "GPS captured successfully",
+    );
+  } catch (e) {
+    AppToast.error(context, e.toString());
+  } finally {
+    if (mounted) {
+      setState(() => gettingGps = false);
     }
   }
+}
 
   // =========================
   // SUBMIT
@@ -588,30 +595,81 @@ class _AddPropertyScreenState
                   ),
 
                   SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton.icon(
-                      onPressed: getGPS,
-                      style:
-                          ElevatedButton.styleFrom(
-                        backgroundColor:
-                            AppColors
-                                .mangoOrange,
-                        shape:
-                            RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(
-                            12,
-                          ),
-                        ),
-                      ),
-                      icon:
-                          Icon(Icons.my_location),
-                      label: Text(
-                        "Get GPS Location",
-                      ),
-                    ),
-                  ),
+  width: double.infinity,
+  height: 50,
+  child: ElevatedButton(
+    onPressed:
+        gettingGps ? null : getGPS,
+    style:
+        ElevatedButton.styleFrom(
+      backgroundColor:
+          AppColors.mangoOrange,
+      shape:
+          RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.circular(
+          12,
+        ),
+      ),
+    ),
+    child: gettingGps
+        ? Row(
+            mainAxisAlignment:
+                MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: 20,
+                width: 20,
+                child:
+                    CircularProgressIndicator(
+                  strokeWidth: 2.4,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .surface,
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              Text(
+                "Getting GPS...",
+                style: TextStyle(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .surface,
+                  fontWeight:
+                      FontWeight.w600,
+                ),
+              ),
+            ],
+          )
+        : Row(
+            mainAxisAlignment:
+                MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.my_location,
+                color: Theme.of(context)
+                    .colorScheme
+                    .surface,
+              ),
+
+              const SizedBox(width: 8),
+
+              Text(
+                "Get GPS Location",
+                style: TextStyle(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .surface,
+                  fontWeight:
+                      FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+  ),
+),
 
                   const SizedBox(
                     height: AppSpacing.md,

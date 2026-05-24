@@ -5,8 +5,13 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+
+import 'package:permission_handler/permission_handler.dart';
+import 'package:path/path.dart' as path;
+
+import '../../utils/download_permissions.dart';
+
 
 import '../../providers/tickets_provider.dart';
 import '../../theme/app_colors.dart';
@@ -15,8 +20,7 @@ import '../../widgets/main_app_bar.dart';
 import '../../widgets/app_scaffold.dart';
 
 import 'package:flutter/foundation.dart';
-//import 'dart:html' as html;
-//import 'dart:io' as io;
+
 
 class MyTicketsScreen extends ConsumerStatefulWidget {
   const MyTicketsScreen({super.key});
@@ -31,41 +35,102 @@ class _MyTicketsScreenState extends ConsumerState<MyTicketsScreen> {
 
 Future<void> captureTicket(GlobalKey key) async {
   try {
+
     final boundary =
-        key.currentContext!.findRenderObject() as RenderRepaintBoundary;
+        key.currentContext!.findRenderObject()
+            as RenderRepaintBoundary;
 
     final image = await boundary.toImage(pixelRatio: 3.0);
-    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+
+    final byteData = await image.toByteData(
+      format: ui.ImageByteFormat.png,
+    );
+
     final pngBytes = byteData!.buffer.asUint8List();
 
-    // ===================== WEB =====================
+    // ================= WEB =================
     if (kIsWeb) {
-  await Share.shareXFiles(
-    [
-      XFile.fromData(
-        pngBytes,
-        mimeType: 'image/png',
-        name: 'ticket.png',
-      ),
-    ],
-    text: "🎟 My Event Ticket",
-  );
-  return;
-}
 
-    // ===================== MOBILE (Android / iOS) =====================
-    final dir = await getTemporaryDirectory();
-    final file = File('${dir.path}/ticket.png');
-    //final file = io.File('${dir.path}/ticket.png');
+      await Share.shareXFiles(
+        [
+          XFile.fromData(
+            pngBytes,
+            mimeType: 'image/png',
+            name: 'ticket.png',
+          ),
+        ],
+        text: "🎟 My Event Ticket",
+      );
+
+      return;
+    }
+
+    // ================= MOBILE =================
+
+    final allowed = await requestStoragePermission();
+
+    if (!allowed) {
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              "Storage permission denied",
+            ),
+          ),
+        );
+      }
+
+      return;
+    }
+
+    // Save directly to Downloads folder
+    final downloadsDir =
+        Directory('/storage/emulated/0/Download');
+
+    if (!await downloadsDir.exists()) {
+      await downloadsDir.create(recursive: true);
+    }
+
+    final fileName =
+        'ticket_${DateTime.now().millisecondsSinceEpoch}.png';
+
+    final filePath =
+        path.join(downloadsDir.path, fileName);
+
+    final file = File(filePath);
 
     await file.writeAsBytes(pngBytes);
 
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Ticket saved to Downloads",
+          ),
+        ),
+      );
+    }
+
+    // Optional share after save
     await Share.shareXFiles(
       [XFile(file.path)],
       text: "🎟 My Event Ticket",
     );
+
   } catch (e) {
+
     debugPrint("Capture error: $e");
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Failed to save ticket",
+          ),
+        ),
+      );
+    }
   }
 }
 

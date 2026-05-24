@@ -46,6 +46,7 @@ class _EditShopScreenState
   String category = "Electronics";
 
   bool loading = false;
+  bool gettingLocation = false;
 
   double? latitude;
   double? longitude;
@@ -132,15 +133,24 @@ class _EditShopScreenState
   // LOCATION
   // ======================
 
-  Future<void> getLocation() async {
+Future<void> getLocation() async {
+
+  setState(() {
+    gettingLocation = true;
+  });
+
+  try {
+
     bool serviceEnabled =
         await Geolocator.isLocationServiceEnabled();
 
     if (!serviceEnabled) {
+
       AppToast.error(
         context,
         'Enable location services',
       );
+
       return;
     }
 
@@ -148,6 +158,7 @@ class _EditShopScreenState
         await Geolocator.checkPermission();
 
     if (permission == LocationPermission.denied) {
+
       permission =
           await Geolocator.requestPermission();
 
@@ -162,20 +173,41 @@ class _EditShopScreenState
     );
 
     setState(() {
+
       latitude =
-          double.parse(pos.latitude.toStringAsFixed(6));
+          double.parse(
+              pos.latitude.toStringAsFixed(6));
 
       longitude =
-          double.parse(pos.longitude.toStringAsFixed(6));
+          double.parse(
+              pos.longitude.toStringAsFixed(6));
     });
 
     if (mounted) {
+
       AppToast.success(
         context,
         'Location updated',
       );
     }
+
+  } catch (e) {
+
+    AppToast.error(
+      context,
+      'Failed to get location',
+    );
+
+  } finally {
+
+    if (mounted) {
+
+      setState(() {
+        gettingLocation = false;
+      });
+    }
   }
+}
 
   // ======================
   // PICK LOGO
@@ -623,14 +655,28 @@ class _EditShopScreenState
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
-                          onPressed: getLocation,
-                          icon: Icon(
-                            Icons.location_on,
-                          ),
-                          label: Text(
-                            'Update Location',
-                          ),
-                        ),
+  onPressed:
+      gettingLocation ? null : getLocation,
+
+  icon: gettingLocation
+      ? SizedBox(
+          height: 18,
+          width: 18,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            color: Theme.of(context)
+                .colorScheme
+                .surface,
+          ),
+        )
+      : const Icon(Icons.location_on),
+
+  label: Text(
+    gettingLocation
+        ? 'Getting GPS Location...'
+        : 'Update Location',
+  ),
+),
                       ),
 
                       const SizedBox(height: AppSpacing.sm),

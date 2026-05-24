@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:geolocator/geolocator.dart';
 
 import '../../models/property_model.dart';
 import '../../providers/properties_provider.dart';
@@ -50,6 +51,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
 
   bool isPublic = true;
   bool loading = false;
+  bool gettingGps = false;
 
   final List<String> malawiDistricts = [
     'Blantyre',
@@ -114,17 +116,80 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
       });
     }
   }
+// ================= GPS =================
+Future<void> getGPS() async {
+  setState(() => gettingGps = true);
 
-  // ================= GPS =================
-  void generateGPS() {
+  try {
+    bool serviceEnabled =
+        await Geolocator.isLocationServiceEnabled();
+
+    if (!serviceEnabled) {
+      AppToast.error(
+        context,
+        "Location services are disabled",
+      );
+
+      return;
+    }
+
+    LocationPermission permission =
+        await Geolocator.checkPermission();
+
+    if (permission == LocationPermission.denied) {
+      permission =
+          await Geolocator.requestPermission();
+
+      if (permission == LocationPermission.denied) {
+        AppToast.error(
+          context,
+          "Location permission denied",
+        );
+
+        return;
+      }
+    }
+
+    if (permission ==
+        LocationPermission.deniedForever) {
+      AppToast.error(
+        context,
+        "Location permission permanently denied",
+      );
+
+      return;
+    }
+
+    final position =
+        await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+
+    if (!mounted) return;
+
     setState(() {
-      latitude.text = "-15.7861";
-      longitude.text = "35.0058";
+      latitude.text =
+          position.latitude.toStringAsFixed(6);
+
+      longitude.text =
+          position.longitude.toStringAsFixed(6);
     });
 
-    AppToast.success(context, "GPS coordinates generated");
+    AppToast.success(
+      context,
+      "GPS coordinates captured successfully",
+    );
+  } catch (e) {
+    AppToast.error(
+      context,
+      "GPS Error: ${e.toString()}",
+    );
+  } finally {
+    if (mounted) {
+      setState(() => gettingGps = false);
+    }
   }
-
+}
   // ================= SUBMIT =================
   Future<void> submit() async {
     if (!_formKey.currentState!.validate()) return;
@@ -507,21 +572,81 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
                   ),
 
                   SizedBox(
-                    height: 50,
-                    child: ElevatedButton.icon(
-                      onPressed: generateGPS,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            AppColors.mangoOrange,
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(12),
-                        ),
-                      ),
-                      icon: Icon(Icons.my_location),
-                      label: Text("Generate GPS"),
-                    ),
-                  ),
+  width: double.infinity,
+  height: 50,
+  child: ElevatedButton(
+    onPressed:
+        gettingGps ? null : getGPS,
+    style:
+        ElevatedButton.styleFrom(
+      backgroundColor:
+          AppColors.mangoOrange,
+      shape:
+          RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.circular(
+          12,
+        ),
+      ),
+    ),
+    child: gettingGps
+        ? Row(
+            mainAxisAlignment:
+                MainAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: 20,
+                width: 20,
+                child:
+                    CircularProgressIndicator(
+                  strokeWidth: 2.4,
+                  color: Theme.of(context)
+                      .colorScheme
+                      .surface,
+                ),
+              ),
+
+              const SizedBox(width: 12),
+
+              Text(
+                "Getting GPS...",
+                style: TextStyle(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .surface,
+                  fontWeight:
+                      FontWeight.w600,
+                ),
+              ),
+            ],
+          )
+        : Row(
+            mainAxisAlignment:
+                MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.my_location,
+                color: Theme.of(context)
+                    .colorScheme
+                    .surface,
+              ),
+
+              const SizedBox(width: 8),
+
+              Text(
+                "Get GPS Location",
+                style: TextStyle(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .surface,
+                  fontWeight:
+                      FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+  ),
+),
                 ],
               ),
             ),
