@@ -10,3 +10,6 @@ C:\flutter\bin\flutter.bat config --android-sdk "C:\Users\YOUR_USERNAME\AppData\
 ngrok http 8000
 
 git push origin main
+
+Everything Local. One Hub.
+MangoHub
