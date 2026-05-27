@@ -116,7 +116,7 @@ class MainDrawer extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'MangoMart',
+                      'MangoHub',
                       style: Theme.of(context)
                           .textTheme
                           .headlineSmall
@@ -127,7 +127,7 @@ class MainDrawer extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Marketplace App',
+                      'Everything Local.One Hub.',
                       style: Theme.of(context)
                           .textTheme
                           .labelSmall

@@ -50,7 +50,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     return AppScaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: const MainAppBar(title: 'MangoMart'),
+      appBar: const MainAppBar(title: 'MangoHub'),
       drawer: const MainDrawer(),
       body: SingleChildScrollView(
         child: Column(

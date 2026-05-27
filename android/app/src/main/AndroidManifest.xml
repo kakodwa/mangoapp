@@ -20,7 +20,7 @@
     android:maxSdkVersion="28"/>
     
     <application
-      android:label="mangochi_marketplace"
+      android:label="MangoHub"
       android:name="${applicationName}"
       android:requestLegacyExternalStorage="true"
       android:icon="@mipmap/ic_launcher"

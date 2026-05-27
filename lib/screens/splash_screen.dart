@@ -65,14 +65,14 @@ Future<void> _initFlow() async {
             ),
             const SizedBox(height: 24),
             Text(
-              'MangoMart',
+              'MangoHub',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             ),
             const SizedBox(height: 8),
             Text(
-              'Your One-Stop Shop',
+              'Everything Local.One Hub.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Colors.grey[600],
                   ),

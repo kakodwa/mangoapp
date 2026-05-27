@@ -10,13 +10,13 @@ class ApiClient {
 
 
   static String get baseUrl {
-    if (kIsWeb) return 'https://mangobackend-yayy.onrender.com/api/';
-    return 'https://mangobackend-yayy.onrender.com/api/';
+    if (kIsWeb) return 'http://127.0.0.1:8000/api/';
+    return 'http://127.0.0.1:8000/api/';
   }
 
 
   static const String host =
-    'https://mangobackend-yayy.onrender.com/api/';
+    'http://127.0.0.1:8000/api/';
   
   
   late Dio _dio;

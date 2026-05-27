@@ -132,7 +132,7 @@ class HelpSupportScreen extends StatelessWidget {
               context: context,
               icon: Icons.email,
               title: "Email Support",
-              value: "ikpixels.py@gmail.com",
+              value: "mangohub26@gmail.com",
               color: Theme.of(context).colorScheme.primary,
             ),
 
