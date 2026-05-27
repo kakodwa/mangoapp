@@ -68,7 +68,7 @@ dependencies:
   intl: ^0.19.0
 
   # Image Handling
-  image_picker: ^1.0.4
+  image_picker: ^1.1.2
   file_picker: ^8.0.0
   image_cropper: ^9.0.0
  

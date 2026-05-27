@@ -4,7 +4,8 @@ git remote set-url origin https://YOUR_USERNAME:YOUR_TOKEN@github.com/kakodwa/ma
 
 C:\flutter\bin\flutter.bat config --android-sdk "C:\Users\YOUR_USERNAME\AppData\Local\Android\Sdk"
 
-
+flutter pub run flutter_launcher_icons
+	
 "C:\flutter\bin"
 
 ngrok http 8000
@@ -13,6 +14,14 @@ git push origin main
 
 Everything Local. One Hub.
 MangoHub
+
+.\adb devices
+
+.\adb logcat
+.\adb logcat *:E  - only error
+.\adb logcat -c   - Clear old logs
+
+.\adb logcat | findstr com.example.mangochi_marketplace
 
 mangohub26@gmail.com
 <<<<<<< HEAD

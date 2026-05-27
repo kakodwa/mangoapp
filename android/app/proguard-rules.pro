@@ -1,2 +1,4 @@
--keep class com.stripe.** { *; }
--dontwarn com.stripe.**
+-keep class com.yalantis.ucrop** { *; }
+-keep class com.yalantis.ucrop.UCropActivity { *; }
+-keep interface com.yalantis.ucrop** { *; }
+-dontwarn com.yalantis.ucrop**
