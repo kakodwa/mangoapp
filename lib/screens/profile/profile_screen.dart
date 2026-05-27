@@ -228,7 +228,7 @@ class ProfileScreen extends ConsumerWidget {
                       },
                   ),
 
-                  if (isLoggedIn && isHospitalityOwner)
+                  ///if (isLoggedIn && isHospitalityOwner)
                   _menuTile(
                     context,
                     Icons.dashboard,

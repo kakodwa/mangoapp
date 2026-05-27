@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -18,8 +17,8 @@ import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_text_field.dart';
 import '../../widgets/main_app_bar.dart';
-import '../../widgets/main_drawer.dart';
-import '../../widgets/app_scaffold.dart';
+
+import '../../widgets/image_crop_picker.dart'; // ✅ NEW
 
 class EditLodgeScreen extends ConsumerStatefulWidget {
   final Lodge lodge;
@@ -34,8 +33,7 @@ class EditLodgeScreen extends ConsumerStatefulWidget {
       _EditLodgeScreenState();
 }
 
-class _EditLodgeScreenState
-    extends ConsumerState<EditLodgeScreen> {
+class _EditLodgeScreenState extends ConsumerState<EditLodgeScreen> {
   final _formKey = GlobalKey<FormState>();
 
   late final TextEditingController nameController;
@@ -45,10 +43,7 @@ class _EditLodgeScreenState
   late final TextEditingController phoneController;
   late final TextEditingController emailController;
 
-  final picker = ImagePicker();
-
   List<XFile> newImages = [];
-  List<Uint8List> webImages = [];
 
   List<String> existingImages = [];
 
@@ -73,34 +68,11 @@ class _EditLodgeScreenState
   ];
 
   final malawiDistricts = [
-    "Balaka",
-    "Blantyre",
-    "Chikwawa",
-    "Chiradzulu",
-    "Chitipa",
-    "Dedza",
-    "Dowa",
-    "Karonga",
-    "Kasungu",
-    "Likoma",
-    "Lilongwe",
-    "Machinga",
-    "Mangochi",
-    "Mchinji",
-    "Mulanje",
-    "Mwanza",
-    "Mzimba",
-    "Neno",
-    "Nkhata Bay",
-    "Nkhotakota",
-    "Nsanje",
-    "Ntcheu",
-    "Ntchisi",
-    "Phalombe",
-    "Rumphi",
-    "Salima",
-    "Thyolo",
-    "Zomba",
+    "Balaka","Blantyre","Chikwawa","Chiradzulu","Chitipa","Dedza",
+    "Dowa","Karonga","Kasungu","Likoma","Lilongwe","Machinga",
+    "Mangochi","Mchinji","Mulanje","Mwanza","Mzimba","Neno",
+    "Nkhata Bay","Nkhotakota","Nsanje","Ntcheu","Ntchisi",
+    "Phalombe","Rumphi","Salima","Thyolo","Zomba",
   ];
 
   @override
@@ -109,23 +81,12 @@ class _EditLodgeScreenState
 
     final lodge = widget.lodge;
 
-    nameController =
-        TextEditingController(text: lodge.name);
-
-    descriptionController =
-        TextEditingController(text: lodge.description);
-
-    cityController =
-        TextEditingController(text: lodge.city);
-
-    addressController =
-        TextEditingController(text: lodge.address);
-
-    phoneController =
-        TextEditingController(text: lodge.phoneNumber);
-
-    emailController =
-        TextEditingController(text: lodge.email);
+    nameController = TextEditingController(text: lodge.name);
+    descriptionController = TextEditingController(text: lodge.description);
+    cityController = TextEditingController(text: lodge.city);
+    addressController = TextEditingController(text: lodge.address);
+    phoneController = TextEditingController(text: lodge.phoneNumber);
+    emailController = TextEditingController(text: lodge.email);
 
     selectedType = lodge.lodgeType;
     selectedDistrict = lodge.district;
@@ -136,115 +97,70 @@ class _EditLodgeScreenState
     existingImages = List<String>.from(lodge.images);
   }
 
-  @override
-  void dispose() {
-    nameController.dispose();
-    descriptionController.dispose();
-    cityController.dispose();
-    addressController.dispose();
-    phoneController.dispose();
-    emailController.dispose();
-    super.dispose();
+  // ================= GPS =================
+  Future<void> getLocation() async {
+    setState(() => isGettingLocation = true);
+
+    try {
+      bool enabled = await Geolocator.isLocationServiceEnabled();
+      if (!enabled) {
+        AppToast.error(context, "Enable GPS");
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          AppToast.error(context, "Permission denied");
+          return;
+        }
+      }
+
+      final pos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      setState(() {
+        latitude = double.parse(pos.latitude.toStringAsFixed(6));
+        longitude = double.parse(pos.longitude.toStringAsFixed(6));
+      });
+
+      AppToast.success(context, "Location updated");
+    } catch (e) {
+      AppToast.error(context, "Failed to get location");
+    } finally {
+      setState(() => isGettingLocation = false);
+    }
   }
 
+  // ================= IMAGE PICKER (CROPPER) =================
   Future<void> pickImages() async {
+    final picker = ImagePicker();
+
     final picked = await picker.pickMultiImage();
 
     if (picked.isNotEmpty) {
-      if (kIsWeb) {
-        webImages = await Future.wait(
-          picked.map((e) => e.readAsBytes()),
-        );
-      }
-
       setState(() {
         newImages.addAll(picked);
       });
     }
   }
 
-Future<void> getLocation() async {
-
-  setState(() {
-    isGettingLocation = true;
-  });
-
-  try {
-
-    bool serviceEnabled =
-        await Geolocator.isLocationServiceEnabled();
-
-    if (!serviceEnabled) {
-
-      AppToast.error(
-        context,
-        'Enable location services',
-      );
-
-      return;
-    }
-
-    LocationPermission permission =
-        await Geolocator.checkPermission();
-
-    if (permission == LocationPermission.denied) {
-
-      permission =
-          await Geolocator.requestPermission();
-
-      if (permission == LocationPermission.denied) {
-
-        AppToast.error(
-          context,
-          'Location permission denied',
-        );
-
-        return;
-      }
-    }
-
-    Position pos =
-        await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
-
+  void removeExisting(int index) {
     setState(() {
-
-      latitude =
-          double.parse(
-              pos.latitude.toStringAsFixed(6));
-
-      longitude =
-          double.parse(
-              pos.longitude.toStringAsFixed(6));
+      existingImages.removeAt(index);
     });
-
-    if (mounted) {
-
-      AppToast.success(
-        context,
-        'Location captured successfully',
-      );
-    }
-
-  } catch (e) {
-
-    AppToast.error(
-      context,
-      'Failed to get location',
-    );
-
-  } finally {
-
-    if (mounted) {
-
-      setState(() {
-        isGettingLocation = false;
-      });
-    }
   }
-}
 
+  void removeNew(int index) {
+    setState(() {
+      newImages.removeAt(index);
+    });
+  }
+
+  // ================= UPDATE =================
   Future<void> updateLodge() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -262,29 +178,18 @@ Future<void> getLocation() async {
         "address": addressController.text,
         "phone_number": phoneController.text,
         "email": emailController.text,
-        "latitude":
-            latitude?.toStringAsFixed(6) ?? "",
-        "longitude":
-            longitude?.toStringAsFixed(6) ?? "",
+        "latitude": latitude?.toStringAsFixed(6) ?? "",
+        "longitude": longitude?.toStringAsFixed(6) ?? "",
       });
 
-      /// NEW IMAGES
-      if (newImages.isNotEmpty) {
-        for (int i = 0; i < newImages.length; i++) {
-          formData.files.add(
-            MapEntry(
-              "images",
-              kIsWeb
-                  ? MultipartFile.fromBytes(
-                      webImages[i],
-                      filename: newImages[i].name,
-                    )
-                  : await MultipartFile.fromFile(
-                      newImages[i].path,
-                    ),
-            ),
-          );
-        }
+      // NEW IMAGES ONLY
+      for (final img in newImages) {
+        formData.files.add(
+          MapEntry(
+            "images",
+            await MultipartFile.fromFile(img.path),
+          ),
+        );
       }
 
       await api.patchMultipart(
@@ -293,393 +198,216 @@ Future<void> getLocation() async {
       );
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content:
-                Text("Lodge updated successfully"),
-          ),
-        );
-
+        AppToast.success(context, "Lodge updated");
         Navigator.pop(context, true);
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error: $e"),
-        ),
-      );
+      AppToast.error(context, e.toString());
     }
 
     setState(() => isLoading = false);
   }
 
-  Widget buildImagePreview() {
-    return Wrap(
-      spacing: 10,
-      runSpacing: 10,
-      children: [
-        /// EXISTING IMAGES
-        ...existingImages.asMap().entries.map((e) {
-          final index = e.key;
-          final image = e.value;
+  // ================= UI =================
+  @override
+  Widget build(BuildContext context) {
+    final amenitiesAsync = ref.watch(amenitiesProvider);
 
-          return Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  image,
-                  width: 90,
-                  height: 90,
-                  fit: BoxFit.cover,
-                ),
-              ),
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F7FA),
+      appBar: const MainAppBar(title: "Edit Lodge"),
 
-              Positioned(
-                right: 0,
-                top: 0,
-                child: GestureDetector(
-                  onTap: () {
+      body: ListView(
+        padding: EdgeInsets.all(AppSpacing.md),
+        children: [
+
+          AppTextField(label: "Name", controller: nameController),
+          const SizedBox(height: 12),
+
+          AppTextField(
+            label: "Description",
+            controller: descriptionController,
+            type: TextFieldType.multiline,
+            maxLines: 4,
+          ),
+
+          const SizedBox(height: 12),
+
+          AppTextField(label: "City", controller: cityController),
+          const SizedBox(height: 12),
+
+          AppTextField(label: "Address", controller: addressController),
+          const SizedBox(height: 12),
+
+          AppTextField(label: "Phone", controller: phoneController),
+          const SizedBox(height: 12),
+
+          AppTextField(label: "Email", controller: emailController),
+          const SizedBox(height: 20),
+
+          DropdownButtonFormField(
+            value: selectedType,
+            items: types
+                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                .toList(),
+            onChanged: (v) => setState(() => selectedType = v.toString()),
+            decoration: const InputDecoration(labelText: "Type"),
+          ),
+
+          const SizedBox(height: 12),
+
+          DropdownButtonFormField(
+            value: selectedDistrict,
+            items: malawiDistricts
+                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                .toList(),
+            onChanged: (v) =>
+                setState(() => selectedDistrict = v.toString()),
+            decoration: const InputDecoration(labelText: "District"),
+          ),
+
+          const SizedBox(height: 20),
+
+          ElevatedButton.icon(
+            onPressed: isGettingLocation ? null : getLocation,
+            icon: isGettingLocation
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.my_location),
+            label: Text(
+              isGettingLocation ? "Getting GPS..." : "Update Location",
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // ================= AMENITIES =================
+          amenitiesAsync.when(
+            data: (amenities) => Wrap(
+              spacing: 8,
+              children: amenities.map((Amenity a) {
+                final selected =
+                    selectedAmenities.contains(a.id);
+
+                return FilterChip(
+                  label: Text(a.name),
+                  selected: selected,
+                  onSelected: (v) {
                     setState(() {
-                      existingImages.removeAt(index);
+                      v
+                          ? selectedAmenities.add(a.id)
+                          : selectedAmenities.remove(a.id);
                     });
                   },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Icon(
-                      Icons.close,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          );
-        }),
+                );
+              }).toList(),
+            ),
+            loading: () => const CircularProgressIndicator(),
+            error: (_, __) => const Text("Failed to load"),
+          ),
 
-        /// NEW IMAGES
-        ...newImages.asMap().entries.map((e) {
-          final i = e.key;
+          const SizedBox(height: 20),
 
-          return Stack(
+          // ================= IMAGES =================
+          Text(
+            "Images",
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+
+          const SizedBox(height: 10),
+
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: kIsWeb
-                    ? Image.memory(
-                        webImages[i],
+
+              // EXISTING
+              ...existingImages.asMap().entries.map((e) {
+                final i = e.key;
+                final img = e.value;
+
+                return Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        img,
                         width: 90,
                         height: 90,
                         fit: BoxFit.cover,
-                      )
-                    : Image.file(
+                      ),
+                    ),
+                    Positioned(
+                      right: 0,
+                      child: IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => removeExisting(i),
+                      ),
+                    )
+                  ],
+                );
+              }),
+
+              // NEW
+              ...newImages.asMap().entries.map((e) {
+                final i = e.key;
+
+                return Stack(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.file(
                         File(newImages[i].path),
                         width: 90,
                         height: 90,
                         fit: BoxFit.cover,
                       ),
-              ),
-
-              Positioned(
-                right: 0,
-                top: 0,
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      newImages.removeAt(i);
-
-                      if (kIsWeb) {
-                        webImages.removeAt(i);
-                      }
-                    });
-                  },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      shape: BoxShape.circle,
                     ),
-                    child: Icon(
-                      Icons.close,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          );
-        }),
-
-        /// ADD BUTTON
-        GestureDetector(
-          onTap: pickImages,
-          child: Container(
-            width: 90,
-            height: 90,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(Icons.add_a_photo),
-          ),
-        ),
-      ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final amenitiesAsync =
-        ref.watch(amenitiesProvider);
-
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-      appBar: MainAppBar(
-        title: "Edit Lodge"
-      ),
-
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: EdgeInsets.all(AppSpacing.md),
-          children: [
-
-            /// BASIC INFO
-            AppTextField(
-              label: "Lodge Name",
-              controller: nameController,
-              isRequired: true,
-            ),
-
-            const SizedBox(height: AppSpacing.md),
-
-            AppTextField(
-              label: "Description",
-              controller: descriptionController,
-              type: TextFieldType.multiline,
-              maxLines: 4,
-            ),
-
-            const SizedBox(height: AppSpacing.md),
-
-            AppTextField(
-              label: "City",
-              controller: cityController,
-            ),
-
-            const SizedBox(height: AppSpacing.md),
-
-            AppTextField(
-              label: "Address",
-              controller: addressController,
-              isRequired: true,
-            ),
-
-            const SizedBox(height: AppSpacing.md),
-
-            AppTextField(
-              label: "Phone Number",
-              controller: phoneController,
-              type: TextFieldType.phone,
-              isRequired: true,
-            ),
-
-            const SizedBox(height: AppSpacing.md),
-
-            AppTextField(
-              label: "Email",
-              controller: emailController,
-              type: TextFieldType.email,
-            ),
-
-            const SizedBox(height: AppSpacing.lg),
-
-            /// TYPE
-            DropdownButtonFormField(
-              value: selectedType,
-              decoration: InputDecoration(
-                labelText: "Lodge Type",
-                border: OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(12),
-                ),
-              ),
-              items: types.map((e) {
-                return DropdownMenuItem(
-                  value: e,
-                  child: Text(e),
-                );
-              }).toList(),
-              onChanged: (v) {
-                setState(() {
-                  selectedType = v.toString();
-                });
-              },
-            ),
-
-            const SizedBox(height: AppSpacing.md),
-
-            /// DISTRICT
-            DropdownButtonFormField(
-              value: selectedDistrict,
-              decoration: InputDecoration(
-                labelText: "District",
-                border: OutlineInputBorder(
-                  borderRadius:
-                      BorderRadius.circular(12),
-                ),
-              ),
-              items: malawiDistricts.map((e) {
-                return DropdownMenuItem(
-                  value: e,
-                  child: Text(e),
-                );
-              }).toList(),
-              onChanged: (v) {
-                setState(() {
-                  selectedDistrict = v.toString();
-                });
-              },
-            ),
-
-            const SizedBox(height: AppSpacing.lg),
-
-            /// LOCATION
-            SizedBox(
-  height: 50,
-  child: ElevatedButton.icon(
-
-    onPressed:
-        isGettingLocation
-            ? null
-            : getLocation,
-
-    icon: isGettingLocation
-        ? SizedBox(
-            height: 18,
-            width: 18,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: Theme.of(context)
-                  .colorScheme
-                  .surface,
-            ),
-          )
-        : const Icon(
-            Icons.my_location,
-          ),
-
-    label: Text(
-      isGettingLocation
-          ? "Getting GPS Location..."
-          : "Update GPS Location",
-    ),
-  ),
-),
-
-            if (latitude != null) ...[
-              const SizedBox(height: AppSpacing.xs),
-              Text("Latitude: $latitude"),
-            ],
-
-            if (longitude != null) ...[
-              const SizedBox(height: AppSpacing.xxs),
-              Text("Longitude: $longitude"),
-            ],
-
-            const SizedBox(height: AppSpacing.xl),
-
-            /// AMENITIES
-            Text(
-              "Amenities",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-
-            const SizedBox(height: 10),
-
-            amenitiesAsync.when(
-              data: (amenities) {
-                return Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: amenities.map((Amenity a) {
-                    final selected =
-                        selectedAmenities.contains(a.id);
-
-                    return FilterChip(
-                      label: Text(a.name),
-                      selected: selected,
-                      onSelected: (v) {
-                        setState(() {
-                          v
-                              ? selectedAmenities.add(a.id)
-                              : selectedAmenities
-                                  .remove(a.id);
-                        });
-                      },
-                    );
-                  }).toList(),
-                );
-              },
-              loading: () =>
-                  CircularProgressIndicator(),
-              error: (_, __) =>
-                  Text("Failed to load amenities"),
-            ),
-
-            const SizedBox(height: AppSpacing.xl),
-
-            /// IMAGES
-            Text(
-              "Lodge Images",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-
-            const SizedBox(height: AppSpacing.sm),
-
-            buildImagePreview(),
-
-            const SizedBox(height: AppSpacing.xl),
-
-            /// UPDATE BUTTON
-            SizedBox(
-              height: 55,
-              child: ElevatedButton(
-                onPressed:
-                    isLoading ? null : updateLodge,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      AppColors.mangoOrange,
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(14),
-                  ),
-                ),
-                child: isLoading
-                    ? CircularProgressIndicator(
-                        color: Theme.of(context).colorScheme.surface,
-                      )
-                    : Text(
-                        "Update Lodge",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    Positioned(
+                      right: 0,
+                      child: IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => removeNew(i),
                       ),
-              ),
-            ),
+                    )
+                  ],
+                );
+              }),
 
-            const SizedBox(height: 30),
-          ],
-        ),
+              // ADD BUTTON
+              GestureDetector(
+                onTap: pickImages,
+                child: Container(
+                  width: 90,
+                  height: 90,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurfaceVariant
+                        .withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.add),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 30),
+
+          SizedBox(
+            height: 55,
+            child: ElevatedButton(
+              onPressed: isLoading ? null : updateLodge,
+              child: isLoading
+                  ? const CircularProgressIndicator()
+                  : const Text("Update Lodge"),
+            ),
+          ),
+        ],
       ),
     );
   }

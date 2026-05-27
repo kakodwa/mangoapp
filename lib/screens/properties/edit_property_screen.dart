@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,10 +6,9 @@ import 'package:geolocator/geolocator.dart';
 import '../../models/property_model.dart';
 import '../../providers/properties_provider.dart';
 import '../../theme/app_colors.dart';
-
 import '../../theme/design_system/app_text_field.dart';
 import '../../widgets/main_app_bar.dart';
-
+import '../../widgets/image_crop_picker.dart';
 import '../../utils/app_toast.dart';
 import '../../theme/design_system/app_spacing.dart';
 
@@ -25,11 +22,13 @@ class PropertyFormScreen extends ConsumerStatefulWidget {
       _PropertyFormScreenState();
 }
 
-class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
+class _PropertyFormScreenState
+    extends ConsumerState<PropertyFormScreen> {
   final _formKey = GlobalKey<FormState>();
+
   final ImagePicker picker = ImagePicker();
 
-  // ================= CONTROLLERS =================
+  // CONTROLLERS
   late TextEditingController title;
   late TextEditingController description;
   late TextEditingController address;
@@ -42,7 +41,7 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
   late TextEditingController sizeSqm;
   late TextEditingController price;
 
-  // ================= DROPDOWNS =================
+  // DROPDOWNS
   String listingPurpose = 'sale';
   String propertyType = 'house';
   String status = 'available';
@@ -54,29 +53,10 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
   bool gettingGps = false;
 
   final List<String> malawiDistricts = [
-    'Blantyre',
-    'Lilongwe',
-    'Mzuzu',
-    'Zomba',
-    'Mangochi',
-    'Salima',
-    'Kasungu',
-    'Mchinji',
-    'Dedza',
-    'Nkhotakota',
-    'Nkhatabay',
-    'Karonga',
-    'Chikwawa',
-    'Nsanje',
-    'Balaka',
-    'Neno',
-    'Phalombe',
-    'Mulanje',
-    'Thyolo',
-    'Chiradzulu',
-    'Ntcheu',
-    'Rumphi',
-    'Likoma'
+    'Blantyre','Lilongwe','Mzuzu','Zomba','Mangochi','Salima','Kasungu',
+    'Mchinji','Dedza','Nkhotakota','Nkhatabay','Karonga','Chikwawa',
+    'Nsanje','Balaka','Neno','Phalombe','Mulanje','Thyolo','Chiradzulu',
+    'Ntcheu','Rumphi','Likoma'
   ];
 
   @override
@@ -100,99 +80,62 @@ class _PropertyFormScreenState extends ConsumerState<PropertyFormScreen> {
     propertyType = p?.propertyType ?? 'house';
     status = p?.status ?? 'available';
     isPublic = p?.isPubliclyVisible ?? true;
-
     listingPurpose = p?.listingPurpose ?? 'sale';
   }
 
-  // ================= IMAGE PICKER =================
-  Future<void> pickImages() async {
-    final picked = await picker.pickMultiImage();
+  // ================= GPS =================
+  Future<void> getGPS() async {
+    setState(() => gettingGps = true);
 
-    if (picked.isNotEmpty) {
-      setState(() {
-        images = picked.length > 6
-            ? picked.sublist(0, 6)
-            : picked;
-      });
-    }
-  }
-// ================= GPS =================
-Future<void> getGPS() async {
-  setState(() => gettingGps = true);
+    try {
+      bool serviceEnabled =
+          await Geolocator.isLocationServiceEnabled();
 
-  try {
-    bool serviceEnabled =
-        await Geolocator.isLocationServiceEnabled();
-
-    if (!serviceEnabled) {
-      AppToast.error(
-        context,
-        "Location services are disabled",
-      );
-
-      return;
-    }
-
-    LocationPermission permission =
-        await Geolocator.checkPermission();
-
-    if (permission == LocationPermission.denied) {
-      permission =
-          await Geolocator.requestPermission();
-
-      if (permission == LocationPermission.denied) {
-        AppToast.error(
-          context,
-          "Location permission denied",
-        );
-
+      if (!serviceEnabled) {
+        AppToast.error(context, "Location services are disabled");
         return;
       }
-    }
 
-    if (permission ==
-        LocationPermission.deniedForever) {
-      AppToast.error(
-        context,
-        "Location permission permanently denied",
+      LocationPermission permission =
+          await Geolocator.checkPermission();
+
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        AppToast.error(context, "Location permission permanently denied");
+        return;
+      }
+
+      final position =
+          await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
       );
 
-      return;
-    }
+      if (!mounted) return;
 
-    final position =
-        await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
+      setState(() {
+        latitude.text = position.latitude.toStringAsFixed(6);
+        longitude.text = position.longitude.toStringAsFixed(6);
+      });
 
-    if (!mounted) return;
-
-    setState(() {
-      latitude.text =
-          position.latitude.toStringAsFixed(6);
-
-      longitude.text =
-          position.longitude.toStringAsFixed(6);
-    });
-
-    AppToast.success(
-      context,
-      "GPS coordinates captured successfully",
-    );
-  } catch (e) {
-    AppToast.error(
-      context,
-      "GPS Error: ${e.toString()}",
-    );
-  } finally {
-    if (mounted) {
-      setState(() => gettingGps = false);
+      AppToast.success(context, "GPS captured successfully");
+    } catch (e) {
+      AppToast.error(context, e.toString());
+    } finally {
+      if (mounted) setState(() => gettingGps = false);
     }
   }
-}
+
   // ================= SUBMIT =================
   Future<void> submit() async {
     if (!_formKey.currentState!.validate()) return;
+
+    if (images.isEmpty && widget.property == null) {
+      AppToast.error(context, "Please select at least one image");
+      return;
+    }
 
     setState(() => loading = true);
 
@@ -222,8 +165,7 @@ Future<void> getGPS() async {
         ownerId: widget.property?.ownerId ?? 0,
         ownerName: widget.property?.ownerName ?? '',
         isUnlocked: widget.property?.isUnlocked ?? false,
-        createdAt:
-            widget.property?.createdAt ?? DateTime.now(),
+        createdAt: widget.property?.createdAt ?? DateTime.now(),
       );
 
       final actions = ref.read(propertyActionsProvider);
@@ -251,13 +193,11 @@ Future<void> getGPS() async {
     } catch (e) {
       AppToast.error(context, e.toString());
     } finally {
-      if (mounted) {
-        setState(() => loading = false);
-      }
+      if (mounted) setState(() => loading = false);
     }
   }
 
-  // ================= APP FIELD =================
+  // ================= FIELD =================
   Widget buildField(
     TextEditingController controller,
     String label, {
@@ -265,7 +205,7 @@ Future<void> getGPS() async {
     int maxLines = 1,
   }) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 16),
       child: AppTextField(
         label: label,
         controller: controller,
@@ -282,65 +222,6 @@ Future<void> getGPS() async {
     );
   }
 
-  // ================= IMAGE PREVIEW =================
-  Widget buildImagePreview(XFile image) {
-    return FutureBuilder<Uint8List>(
-      future: image.readAsBytes(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return Container(
-            width: 90,
-            height: 90,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: CircularProgressIndicator(),
-          );
-        }
-
-        return Stack(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Image.memory(
-                snapshot.data!,
-                width: 90,
-                height: 90,
-                fit: BoxFit.cover,
-              ),
-            ),
-
-            Positioned(
-              top: 4,
-              right: 4,
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    images.remove(image);
-                  });
-                },
-                child: Container(
-                  padding: EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.error,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.close,
-                    color: Theme.of(context).colorScheme.surface,
-                    size: 16,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final isEdit = widget.property != null;
@@ -348,20 +229,17 @@ Future<void> getGPS() async {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: MainAppBar(
-        title: isEdit
-            ? "Edit Property"
-            : "Add Property",
+        title: isEdit ? "Edit Property" : "Add Property",
       ),
-
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: EdgeInsets.all(AppSpacing.md),
+          padding: const EdgeInsets.all(AppSpacing.md),
           children: [
 
-            // ================= BASIC INFO =================
+            // ================= IMAGES (UPDATED) =================
             Container(
-              padding: EdgeInsets.all(AppSpacing.md),
+              padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(18),
@@ -371,415 +249,33 @@ Future<void> getGPS() async {
                 children: [
 
                   Text(
-                    "Basic Information",
-                    style: TextStyle(
+                    "Property Images",
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
 
-                  const SizedBox(height: AppSpacing.md),
-
-                  buildField(title, "Property Title"),
-
-                  buildField(
-                    description,
-                    "Description",
-                    type: TextFieldType.multiline,
-                    maxLines: 4,
-                  ),
-
-                  DropdownButtonFormField<String>(
-                    value: propertyType,
-                    decoration: InputDecoration(
-                      labelText: "Property Type",
-                      filled: true,
-                      fillColor: Theme.of(context).colorScheme.surface,
-                      border: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(12),
-                      ),
-                    ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: "house",
-                        child: Text("House"),
-                      ),
-                      DropdownMenuItem(
-                        value: "apartment",
-                        child: Text("Apartment"),
-                      ),
-                      DropdownMenuItem(
-                        value: "land",
-                        child: Text("Land"),
-                      ),
-                      DropdownMenuItem(
-                        value: "commercial",
-                        child: Text("Commercial"),
-                      ),
-                    ],
-                    onChanged: (v) {
-                      setState(() {
-                        propertyType = v!;
-                      });
-                    },
-                  ),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  DropdownButtonFormField<String>(
-                    value: listingPurpose,
-                    decoration: InputDecoration(
-                      labelText: "Listing Purpose",
-                      filled: true,
-                      fillColor: Theme.of(context).colorScheme.surface,
-                      border: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(12),
-                      ),
-                    ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: "sale",
-                        child: Text("For Sale"),
-                      ),
-                      DropdownMenuItem(
-                        value: "rent",
-                        child: Text("For Rent"),
-                      ),
-                    ],
-                    onChanged: (v) {
-                      setState(() {
-                        listingPurpose = v!;
-                      });
-                    },
-                  ),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  DropdownButtonFormField<String>(
-                    value: status,
-                    decoration: InputDecoration(
-                      labelText: "Status",
-                      filled: true,
-                      fillColor: Theme.of(context).colorScheme.surface,
-                      border: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(12),
-                      ),
-                    ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: "available",
-                        child: Text("Available"),
-                      ),
-                      DropdownMenuItem(
-                        value: "sold",
-                        child: Text("Sold"),
-                      ),
-                      DropdownMenuItem(
-                        value: "rented",
-                        child: Text("Rented"),
-                      ),
-                    ],
-                    onChanged: (v) {
-                      setState(() {
-                        status = v!;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: AppSpacing.md),
-
-            // ================= LOCATION =================
-            Container(
-              padding: EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+                  const SizedBox(height: 6),
 
                   Text(
-                    "Location",
+                    "Upload clear landscape property photos",
                     style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.outline,
                     ),
                   ),
 
                   const SizedBox(height: AppSpacing.md),
 
-                  buildField(address, "Address"),
-
-                  buildField(city, "City"),
-
-                  DropdownButtonFormField<String>(
-                    value: district.text.isEmpty
-                        ? null
-                        : district.text,
-                    decoration: InputDecoration(
-                      labelText: "District",
-                      filled: true,
-                      fillColor: Theme.of(context).colorScheme.surface,
-                      border: OutlineInputBorder(
-                        borderRadius:
-                            BorderRadius.circular(12),
-                      ),
-                    ),
-                    items: malawiDistricts
-                        .map(
-                          (d) => DropdownMenuItem(
-                            value: d,
-                            child: Text(d),
-                          ),
-                        )
-                        .toList(),
-                    onChanged: (v) {
+                  ImageCropPicker(
+                    maxImages: 6,
+                    cropType: CropShapeType.rectangle, // ✅ IMPORTANT
+                    initialImages: images,
+                    onChanged: (value) {
                       setState(() {
-                        district.text = v!;
+                        images = value;
                       });
                     },
-                  ),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  Row(
-                    children: [
-                      Expanded(
-                        child: buildField(
-                          latitude,
-                          "Latitude",
-                          type: TextFieldType.number,
-                        ),
-                      ),
-
-                      const SizedBox(width: AppSpacing.sm),
-
-                      Expanded(
-                        child: buildField(
-                          longitude,
-                          "Longitude",
-                          type: TextFieldType.number,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(
-  width: double.infinity,
-  height: 50,
-  child: ElevatedButton(
-    onPressed:
-        gettingGps ? null : getGPS,
-    style:
-        ElevatedButton.styleFrom(
-      backgroundColor:
-          AppColors.mangoOrange,
-      shape:
-          RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.circular(
-          12,
-        ),
-      ),
-    ),
-    child: gettingGps
-        ? Row(
-            mainAxisAlignment:
-                MainAxisAlignment.center,
-            children: [
-              SizedBox(
-                height: 20,
-                width: 20,
-                child:
-                    CircularProgressIndicator(
-                  strokeWidth: 2.4,
-                  color: Theme.of(context)
-                      .colorScheme
-                      .surface,
-                ),
-              ),
-
-              const SizedBox(width: 12),
-
-              Text(
-                "Getting GPS...",
-                style: TextStyle(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .surface,
-                  fontWeight:
-                      FontWeight.w600,
-                ),
-              ),
-            ],
-          )
-        : Row(
-            mainAxisAlignment:
-                MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.my_location,
-                color: Theme.of(context)
-                    .colorScheme
-                    .surface,
-              ),
-
-              const SizedBox(width: 8),
-
-              Text(
-                "Get GPS Location",
-                style: TextStyle(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .surface,
-                  fontWeight:
-                      FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-  ),
-),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: AppSpacing.md),
-
-            // ================= DETAILS =================
-            Container(
-              padding: EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-
-                  Text(
-                    "Property Details",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  Row(
-                    children: [
-                      Expanded(
-                        child: buildField(
-                          bedrooms,
-                          "Bedrooms",
-                          type: TextFieldType.number,
-                        ),
-                      ),
-
-                      const SizedBox(width: AppSpacing.sm),
-
-                      Expanded(
-                        child: buildField(
-                          bathrooms,
-                          "Bathrooms",
-                          type: TextFieldType.number,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  buildField(
-                    sizeSqm,
-                    "Size (sqm)",
-                    type: TextFieldType.number,
-                  ),
-
-                  buildField(
-                    price,
-                    "Price",
-                    type: TextFieldType.number,
-                  ),
-
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text("Public Listing"),
-                    value: isPublic,
-                    onChanged: (v) {
-                      setState(() {
-                        isPublic = v;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: AppSpacing.md),
-
-            // ================= IMAGES =================
-            Container(
-              padding: EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface,
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-
-                  Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Property Images",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-
-                      TextButton.icon(
-                        onPressed: pickImages,
-                        icon: Icon(Icons.add_a_photo),
-                        label: Text("Add Images"),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    children: [
-
-                      // Existing Images
-                      if (widget.property?.images != null)
-                        ...widget.property!.images.map(
-                          (img) => ClipRRect(
-                            borderRadius:
-                                BorderRadius.circular(12),
-                            child: Image.network(
-                              img.image,
-                              width: 90,
-                              height: 90,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-
-                      // New Images
-                      ...images.map(buildImagePreview),
-                    ],
                   ),
                 ],
               ),
@@ -791,26 +287,11 @@ Future<void> getGPS() async {
               height: 55,
               child: ElevatedButton(
                 onPressed: loading ? null : submit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.mangoOrange,
-                  shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(14),
-                  ),
-                ),
                 child: loading
-                    ? CircularProgressIndicator(
-                        color: Theme.of(context).colorScheme.surface,
-                      )
-                    : Text(
-                        isEdit
-                            ? "Update Property"
-                            : "Create Property",
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                    ? const CircularProgressIndicator()
+                    : Text(isEdit
+                        ? "Update Property"
+                        : "Create Property"),
               ),
             ),
 

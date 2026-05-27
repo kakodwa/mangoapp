@@ -1,5 +1,5 @@
-import 'dart:typed_data';
 import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,8 +16,8 @@ import '../../utils/app_toast.dart';
 import '../../theme/design_system/app_text_field.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../widgets/main_app_bar.dart';
-import '../../widgets/main_drawer.dart';
-import '../../widgets/app_scaffold.dart';
+
+import '../../widgets/image_crop_picker.dart'; // ✅ NEW IMPORT
 
 class CreateLodgeScreen extends ConsumerStatefulWidget {
   const CreateLodgeScreen({super.key});
@@ -50,113 +50,52 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
     "Phalombe","Rumphi","Salima","Thyolo","Zomba",
   ];
 
-  final picker = ImagePicker();
-
-  List<XFile> images = [];
-  List<Uint8List> webImages = [];
-
   bool isLoading = false;
   bool isGettingLocation = false;
 
   double? latitude;
   double? longitude;
 
-  List<int> selectedAmenities = [];
+  List<XFile> images = [];
 
-  Future<void> pickImages() async {
-    final picked = await picker.pickMultiImage();
+  // ================= GPS =================
+  Future<void> getLocation() async {
+    setState(() => isGettingLocation = true);
 
-    if (picked.isNotEmpty) {
-      if (kIsWeb) {
-        webImages = await Future.wait(picked.map((e) => e.readAsBytes()));
-      }
-
-      setState(() => images = picked);
-    }
-  }
-
-Future<void> getLocation() async {
-
-  setState(() {
-    isGettingLocation = true;
-  });
-
-  try {
-
-    bool serviceEnabled =
-        await Geolocator.isLocationServiceEnabled();
-
-    if (!serviceEnabled) {
-
-      AppToast.error(
-        context,
-        'Enable location services',
-      );
-
-      return;
-    }
-
-    LocationPermission permission =
-        await Geolocator.checkPermission();
-
-    if (permission == LocationPermission.denied) {
-
-      permission =
-          await Geolocator.requestPermission();
-
-      if (permission == LocationPermission.denied) {
-
-        AppToast.error(
-          context,
-          'Location permission denied',
-        );
-
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        AppToast.error(context, 'Enable location services');
         return;
       }
-    }
 
-    Position pos =
-        await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          AppToast.error(context, 'Location permission denied');
+          return;
+        }
+      }
 
-    setState(() {
-
-      latitude =
-          double.parse(
-              pos.latitude.toStringAsFixed(6));
-
-      longitude =
-          double.parse(
-              pos.longitude.toStringAsFixed(6));
-    });
-
-    if (mounted) {
-
-      AppToast.success(
-        context,
-        'Location captured successfully',
+      Position pos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
       );
-    }
-
-  } catch (e) {
-
-    AppToast.error(
-      context,
-      'Failed to get location',
-    );
-
-  } finally {
-
-    if (mounted) {
 
       setState(() {
-        isGettingLocation = false;
+        latitude = double.parse(pos.latitude.toStringAsFixed(6));
+        longitude = double.parse(pos.longitude.toStringAsFixed(6));
       });
+
+      AppToast.success(context, 'Location captured successfully');
+    } catch (e) {
+      AppToast.error(context, 'Failed to get location');
+    } finally {
+      setState(() => isGettingLocation = false);
     }
   }
-}
 
+  // ================= SUBMIT =================
   Future<void> submitLodge() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -176,54 +115,46 @@ Future<void> getLocation() async {
         "email": emailController.text,
         "latitude": latitude?.toStringAsFixed(6) ?? "",
         "longitude": longitude?.toStringAsFixed(6) ?? "",
-        for (final id in selectedAmenities) "amenities": id.toString(),
       });
 
-      if (images.isNotEmpty) {
-        for (int i = 0; i < images.length; i++) {
-          formData.files.add(
-            MapEntry(
-              "images",
-              kIsWeb
-                  ? MultipartFile.fromBytes(webImages[i], filename: images[i].name)
-                  : await MultipartFile.fromFile(images[i].path),
-            ),
-          );
-        }
+      // images (cropped already)
+      for (final img in images) {
+        formData.files.add(
+          MapEntry(
+            "images",
+            kIsWeb
+                ? await MultipartFile.fromFile(img.path)
+                : await MultipartFile.fromFile(img.path),
+          ),
+        );
       }
 
       await api.postMultipart("lodges/", formData);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Lodge created successfully")),
-        );
+        AppToast.success(context, "Lodge created successfully");
         Navigator.pop(context);
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
-      );
+      AppToast.error(context, e.toString());
     }
 
     setState(() => isLoading = false);
   }
 
+  // ================= UI =================
   @override
   Widget build(BuildContext context) {
     final amenitiesAsync = ref.watch(amenitiesProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: MainAppBar(
-        title:"Create Lodge"
-      ),
+      appBar: const MainAppBar(title: "Create Lodge"),
 
       body: ListView(
         padding: EdgeInsets.all(AppSpacing.md),
         children: [
 
-          /// ================= BASIC =================
           AppTextField(
             label: "Lodge Name",
             controller: nameController,
@@ -296,99 +227,61 @@ Future<void> getLocation() async {
           const SizedBox(height: AppSpacing.lg),
 
           SizedBox(
-  width: double.infinity,
-  child: ElevatedButton.icon(
-    onPressed: isGettingLocation
-        ? null
-        : getLocation,
-
-    icon: isGettingLocation
-        ? SizedBox(
-            height: 18,
-            width: 18,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: Theme.of(context)
-                  .colorScheme
-                  .surface,
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: isGettingLocation ? null : getLocation,
+              icon: isGettingLocation
+                  ? const SizedBox(
+                      height: 18,
+                      width: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(Icons.my_location),
+              label: Text(
+                isGettingLocation
+                    ? 'Getting GPS...'
+                    : 'Get GPS Location',
+              ),
             ),
-          )
-        : const Icon(Icons.my_location),
-
-    label: Text(
-      isGettingLocation
-          ? 'Getting GPS Location...'
-          : 'Get GPS Location',
-    ),
-  ),
-),
+          ),
 
           if (latitude != null) Text("Lat: $latitude"),
           if (longitude != null) Text("Lng: $longitude"),
 
           const SizedBox(height: AppSpacing.lg),
 
-          Text("Amenities", style: TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            "Amenities",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
 
           amenitiesAsync.when(
             data: (amenities) => Wrap(
               spacing: 8,
               children: amenities.map((Amenity a) {
-                final selected = selectedAmenities.contains(a.id);
+                final selected = images.any((e) => e.name == a.id.toString());
 
                 return FilterChip(
                   label: Text(a.name),
                   selected: selected,
-                  onSelected: (v) {
-                    setState(() {
-                      v
-                          ? selectedAmenities.add(a.id)
-                          : selectedAmenities.remove(a.id);
-                    });
-                  },
+                  onSelected: (_) {},
                 );
               }).toList(),
             ),
-            loading: () => CircularProgressIndicator(),
-            error: (_, __) => Text("Failed to load amenities"),
+            loading: () => const CircularProgressIndicator(),
+            error: (_, __) => const Text("Failed to load amenities"),
           ),
 
           const SizedBox(height: AppSpacing.lg),
 
-          Wrap(
-            spacing: 10,
-            children: [
-              ...images.asMap().entries.map((e) {
-                final i = e.key;
-
-                return Stack(
-                  children: [
-                    kIsWeb
-                        ? Image.memory(webImages[i], width: 90, height: 90)
-                        : Image.file(File(images[i].path),
-                            width: 90, height: 90),
-
-                    Positioned(
-                      right: 0,
-                      child: GestureDetector(
-                        onTap: () => setState(() => images.removeAt(i)),
-                        child: Icon(Icons.close, color: Theme.of(context).colorScheme.error),
-                      ),
-                    )
-                  ],
-                );
-              }),
-
-              GestureDetector(
-                onTap: pickImages,
-                child: Container(
-                  width: 90,
-                  height: 90,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
-                  child: Icon(Icons.add),
-                ),
-              ),
-            ],
+          // ================= CROPPED IMAGE PICKER =================
+          ImageCropPicker(
+            maxImages: 6,
+            cropType: CropShapeType.rectangle, // ✅ IMPORTANT FOR LODGES
+            initialImages: images,
+            onChanged: (imgs) {
+              setState(() => images = imgs);
+            },
           ),
 
           const SizedBox(height: AppSpacing.xl),
@@ -398,8 +291,8 @@ Future<void> getLocation() async {
             child: ElevatedButton(
               onPressed: isLoading ? null : submitLodge,
               child: isLoading
-                  ? CircularProgressIndicator(color: Theme.of(context).colorScheme.surface)
-                  : Text("Create Lodge"),
+                  ? const CircularProgressIndicator()
+                  : const Text("Create Lodge"),
             ),
           ),
         ],

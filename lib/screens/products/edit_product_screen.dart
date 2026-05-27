@@ -1,17 +1,14 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../../widgets/main_app_bar.dart';
-import '../../theme/design_system/app_text_field.dart';
-
 import '../../models/product_model.dart';
 import '../../providers/products_provider.dart';
-
-import '../../utils/app_toast.dart';
 import '../../theme/design_system/app_spacing.dart';
+import '../../theme/design_system/app_text_field.dart';
+import '../../utils/app_toast.dart';
+import '../../widgets/image_crop_picker.dart';
+import '../../widgets/main_app_bar.dart';
 
 class EditProductScreen extends ConsumerStatefulWidget {
   final Product product;
@@ -48,18 +45,18 @@ class _EditProductScreenState
     "Beauty",
   ];
 
-  final ImagePicker picker = ImagePicker();
-
   List<XFile> images = [];
 
   @override
   void initState() {
     super.initState();
 
-    nameController =
-        TextEditingController(text: widget.product.name);
+    nameController = TextEditingController(
+      text: widget.product.name,
+    );
 
-    descriptionController = TextEditingController(
+    descriptionController =
+        TextEditingController(
       text: widget.product.description,
     );
 
@@ -71,24 +68,10 @@ class _EditProductScreenState
       text: widget.product.stock.toString(),
     );
 
-    selectedCategory = widget.product.category;
+    selectedCategory =
+        widget.product.category;
+
     isActive = widget.product.isActive;
-  }
-
-  // ======================
-  // PICK IMAGES
-  // ======================
-
-  Future<void> pickImages() async {
-    final picked = await picker.pickMultiImage();
-
-    if (picked.isNotEmpty) {
-      setState(() {
-        images = picked.length > 4
-            ? picked.sublist(0, 4)
-            : picked;
-      });
-    }
   }
 
   // ======================
@@ -96,17 +79,33 @@ class _EditProductScreenState
   // ======================
 
   Future<void> submit() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!
+        .validate()) {
+      return;
+    }
+
+    if (selectedCategory == null) {
+      AppToast.error(
+        context,
+        'Please select category',
+      );
+      return;
+    }
 
     setState(() => isLoading = true);
 
     try {
       final updatedData = {
         "name": nameController.text,
-        "description": descriptionController.text,
+        "description":
+            descriptionController.text,
         "category": selectedCategory,
-        "price": double.parse(priceController.text),
-        "stock": int.parse(stockController.text),
+        "price": double.parse(
+          priceController.text,
+        ),
+        "stock": int.parse(
+          stockController.text,
+        ),
         "is_active": isActive,
       };
 
@@ -119,7 +118,8 @@ class _EditProductScreenState
           );
 
       // UPLOAD NEW IMAGES
-      if (updatedProduct.id > 0 && images.isNotEmpty) {
+      if (updatedProduct.id > 0 &&
+          images.isNotEmpty) {
         await ref
             .read(productActionsProvider)
             .uploadProductImages(
@@ -151,74 +151,22 @@ class _EditProductScreenState
     }
   }
 
-  // ======================
-  // IMAGE CARD
-  // ======================
+  @override
+  void dispose() {
+    nameController.dispose();
+    descriptionController.dispose();
+    priceController.dispose();
+    stockController.dispose();
 
-  Widget imageCard(XFile img) {
-    return Stack(
-      children: [
-        FutureBuilder<Uint8List>(
-          future: img.readAsBytes(),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return Container(
-                width: 90,
-                height: 90,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  borderRadius:
-                      BorderRadius.circular(14),
-                  color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
-                ),
-                child: CircularProgressIndicator(),
-              );
-            }
-
-            return ClipRRect(
-              borderRadius:
-                  BorderRadius.circular(14),
-              child: Image.memory(
-                snapshot.data!,
-                width: 90,
-                height: 90,
-                fit: BoxFit.cover,
-              ),
-            );
-          },
-        ),
-
-        Positioned(
-          right: 4,
-          top: 4,
-          child: GestureDetector(
-            onTap: () {
-              setState(() {
-                images.remove(img);
-              });
-            },
-            child: Container(
-              padding: EdgeInsets.all(3),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.error,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.close,
-                color: Theme.of(context).colorScheme.surface,
-                size: 16,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor:
+          const Color(0xFFF5F7FA),
+
       appBar: const MainAppBar(
         title: 'Edit Product',
       ),
@@ -227,7 +175,9 @@ class _EditProductScreenState
         child: Form(
           key: _formKey,
           child: ListView(
-            padding: EdgeInsets.all(AppSpacing.md),
+            padding: const EdgeInsets.all(
+              AppSpacing.md,
+            ),
             children: [
               // ======================
               // PRODUCT NAME
@@ -241,7 +191,9 @@ class _EditProductScreenState
                 isRequired: true,
                 validator: (value) {
                   if (value == null ||
-                      value.trim().isEmpty) {
+                      value
+                          .trim()
+                          .isEmpty) {
                     return 'Product name is required';
                   }
 
@@ -249,7 +201,9 @@ class _EditProductScreenState
                 },
               ),
 
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(
+                height: AppSpacing.md,
+              ),
 
               // ======================
               // DESCRIPTION
@@ -257,14 +211,19 @@ class _EditProductScreenState
 
               AppTextField(
                 label: 'Description',
-                hint: 'Enter product description',
-                controller: descriptionController,
-                type: TextFieldType.multiline,
+                hint:
+                    'Enter product description',
+                controller:
+                    descriptionController,
+                type:
+                    TextFieldType.multiline,
                 maxLines: 4,
                 isRequired: true,
                 validator: (value) {
                   if (value == null ||
-                      value.trim().isEmpty) {
+                      value
+                          .trim()
+                          .isEmpty) {
                     return 'Description is required';
                   }
 
@@ -272,7 +231,9 @@ class _EditProductScreenState
                 },
               ),
 
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(
+                height: AppSpacing.md,
+              ),
 
               // ======================
               // PRICE + STOCK
@@ -284,16 +245,22 @@ class _EditProductScreenState
                     child: AppTextField(
                       label: 'Price',
                       hint: '0.00',
-                      controller: priceController,
-                      type: TextFieldType.number,
+                      controller:
+                          priceController,
+                      type:
+                          TextFieldType
+                              .number,
                       isRequired: true,
                       validator: (value) {
                         if (value == null ||
-                            value.trim().isEmpty) {
+                            value
+                                .trim()
+                                .isEmpty) {
                           return 'Price required';
                         }
 
-                        if (double.tryParse(value) ==
+                        if (double.tryParse(
+                                value) ==
                             null) {
                           return 'Invalid price';
                         }
@@ -303,22 +270,30 @@ class _EditProductScreenState
                     ),
                   ),
 
-                  const SizedBox(width: AppSpacing.sm),
+                  const SizedBox(
+                    width: AppSpacing.sm,
+                  ),
 
                   Expanded(
                     child: AppTextField(
                       label: 'Stock',
                       hint: '0',
-                      controller: stockController,
-                      type: TextFieldType.number,
+                      controller:
+                          stockController,
+                      type:
+                          TextFieldType
+                              .number,
                       isRequired: true,
                       validator: (value) {
                         if (value == null ||
-                            value.trim().isEmpty) {
+                            value
+                                .trim()
+                                .isEmpty) {
                           return 'Stock required';
                         }
 
-                        if (int.tryParse(value) ==
+                        if (int.tryParse(
+                                value) ==
                             null) {
                           return 'Invalid stock';
                         }
@@ -330,34 +305,49 @@ class _EditProductScreenState
                 ],
               ),
 
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(
+                height: AppSpacing.md,
+              ),
 
               // ======================
               // CATEGORY
               // ======================
 
-              DropdownButtonFormField<String>(
+              DropdownButtonFormField<
+                  String>(
                 value: selectedCategory,
+
                 decoration: InputDecoration(
                   labelText: 'Category',
                   filled: true,
-                  fillColor: Theme.of(context).colorScheme.surface,
+                  fillColor:
+                      Theme.of(context)
+                          .colorScheme
+                          .surface,
+
                   border: OutlineInputBorder(
                     borderRadius:
-                        BorderRadius.circular(12),
+                        BorderRadius.circular(
+                      12,
+                    ),
                   ),
                 ),
-                items: categories.map((cat) {
+
+                items:
+                    categories.map((cat) {
                   return DropdownMenuItem(
                     value: cat,
                     child: Text(cat),
                   );
                 }).toList(),
+
                 onChanged: (value) {
                   setState(() {
-                    selectedCategory = value;
+                    selectedCategory =
+                        value;
                   });
                 },
+
                 validator: (value) {
                   if (value == null) {
                     return 'Please select category';
@@ -367,7 +357,9 @@ class _EditProductScreenState
                 },
               ),
 
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(
+                height: AppSpacing.lg,
+              ),
 
               // ======================
               // IMAGES
@@ -377,45 +369,31 @@ class _EditProductScreenState
                 "New Product Images (Optional)",
                 style: TextStyle(
                   fontSize: 16,
-                  fontWeight: FontWeight.w600,
+                  fontWeight:
+                      FontWeight.w600,
                 ),
               ),
 
               const SizedBox(height: 14),
 
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: [
-                  ...images.map(imageCard),
+              ImageCropPicker(
+                maxImages: 4,
 
-                  if (images.length < 4)
-                    GestureDetector(
-                      onTap: pickImages,
-                      child: Container(
-                        width: 90,
-                        height: 90,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface,
-                          borderRadius:
-                              BorderRadius.circular(14),
-                          border: Border.all(
-                            color:
-                                Theme.of(context).colorScheme.outline.withOpacity(0.38),
-                          ),
-                        ),
-                        child: Icon(
-                          Icons
-                              .add_photo_alternate_outlined,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
-                          size: 30,
-                        ),
-                      ),
-                    ),
-                ],
+                cropType:
+                    CropShapeType.square,
+
+                initialImages: images,
+
+                onChanged: (value) {
+                  setState(() {
+                    images = value;
+                  });
+                },
               ),
 
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(
+                height: AppSpacing.lg,
+              ),
 
               // ======================
               // ACTIVE SWITCH
@@ -423,18 +401,26 @@ class _EditProductScreenState
 
               Card(
                 elevation: 0,
-                shape: RoundedRectangleBorder(
+
+                shape:
+                    RoundedRectangleBorder(
                   borderRadius:
-                      BorderRadius.circular(14),
+                      BorderRadius.circular(
+                    14,
+                  ),
                 ),
+
                 child: SwitchListTile(
                   value: isActive,
-                  title: Text(
+
+                  title: const Text(
                     "Product Active",
                   ),
-                  subtitle: Text(
+
+                  subtitle: const Text(
                     "Visible to customers",
                   ),
+
                   onChanged: (value) {
                     setState(() {
                       isActive = value;
@@ -451,31 +437,46 @@ class _EditProductScreenState
 
               SizedBox(
                 height: 55,
+
                 child: ElevatedButton(
                   onPressed:
-                      isLoading ? null : submit,
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
+                      isLoading
+                          ? null
+                          : submit,
+
+                  style:
+                      ElevatedButton.styleFrom(
+                    shape:
+                        RoundedRectangleBorder(
                       borderRadius:
-                          BorderRadius.circular(14),
+                          BorderRadius.circular(
+                        14,
+                      ),
                     ),
                   ),
+
                   child: isLoading
                       ? SizedBox(
                           height: 24,
                           width: 24,
                           child:
                               CircularProgressIndicator(
-                            color: Theme.of(context).colorScheme.surface,
+                            color:
+                                Theme.of(
+                                      context,
+                                    )
+                                    .colorScheme
+                                    .surface,
                             strokeWidth: 2.5,
                           ),
                         )
-                      : Text(
+                      : const Text(
                           "Update Product",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight:
-                                FontWeight.w600,
+                                FontWeight
+                                    .w600,
                           ),
                         ),
                 ),
