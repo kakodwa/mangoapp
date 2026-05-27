@@ -5,6 +5,8 @@ git remote set-url origin https://YOUR_USERNAME:YOUR_TOKEN@github.com/kakodwa/ma
 C:\flutter\bin\flutter.bat config --android-sdk "C:\Users\YOUR_USERNAME\AppData\Local\Android\Sdk"
 
 flutter pub run flutter_launcher_icons
+
+https://mangobackend-yayy.onrender.com
 	
 "C:\flutter\bin"
 
