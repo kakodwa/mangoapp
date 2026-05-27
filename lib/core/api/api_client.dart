@@ -10,13 +10,13 @@ class ApiClient {
 
 
   static String get baseUrl {
-    if (kIsWeb) return 'https://e96b-137-115-11-29.ngrok-free.app/api/';
-    return 'https://e96b-137-115-11-29.ngrok-free.app/api/';
+    if (kIsWeb) return 'https://mangobackend-yayy.onrender.com/api/';
+    return 'https://mangobackend-yayy.onrender.com/api/';
   }
 
 
   static const String host =
-    'https://e96b-137-115-11-29.ngrok-free.app/api/';
+    'https://mangobackend-yayy.onrender.com/api/';
   
   
   late Dio _dio;
