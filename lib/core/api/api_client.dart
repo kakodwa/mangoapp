@@ -712,18 +712,42 @@ Future<void> createEvent(Map<String, dynamic> data) async {
   );
 }
 
-
-  Future<Response> postMultipart(
+Future<Map<String, dynamic>> postMultipart(
   String endpoint,
   FormData formData,
 ) async {
-  return await _dio.post(
-    endpoint,
-    data: formData,
-    options: Options(
-      contentType: 'multipart/form-data',
-    ),
-  );
+  try {
+    final response = await _dio.post(
+      endpoint,
+      data: formData,
+      options: Options(
+        contentType: 'multipart/form-data',
+      ),
+    );
+
+    logger.i("✅ POST MULTIPART SUCCESS: $endpoint");
+    logger.i(response.data);
+
+    if (response.data is Map<String, dynamic>) {
+      return response.data;
+    }
+
+    throw ApiException("Invalid response format: ${response.data}");
+  } on DioException catch (e) {
+    logger.e("❌ POST MULTIPART FAILED: $endpoint");
+    logger.e(e.response?.data ?? e.message);
+
+    final data = e.response?.data;
+
+    if (data is Map<String, dynamic>) {
+      throw ApiException(
+        data['message'] ?? data['error'] ?? "Upload failed",
+        statusCode: e.response?.statusCode,
+      );
+    }
+
+    throw ApiException("Server error");
+  }
 }
 
 

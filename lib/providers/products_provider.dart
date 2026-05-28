@@ -114,9 +114,9 @@ class ProductActions {
       'products/',
       formData,
     );
-  
-    print("FULL CREATE RESPONSE: ${response.data}");
-    return Product.fromJson(response.data);
+
+    print("FULL CREATE RESPONSE: $response");
+    return Product.fromJson(response);
   }
 
 
@@ -159,7 +159,8 @@ class ProductActions {
     formData,
   );
 
-  print("🔥 Upload response: ${response.data}");
+
+  print("🔥 Upload response: $response");
 }
 }
 

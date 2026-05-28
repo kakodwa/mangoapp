@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
@@ -13,12 +12,9 @@ import '../../models/amenity_model.dart';
 import '../../providers/api_provider.dart';
 import '../../providers/amenities_provider.dart';
 import '../../utils/app_toast.dart';
-import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_text_field.dart';
 import '../../widgets/main_app_bar.dart';
-
-import '../../widgets/image_crop_picker.dart'; // ✅ NEW
 
 class EditLodgeScreen extends ConsumerStatefulWidget {
   final Lodge lodge;
@@ -29,8 +25,7 @@ class EditLodgeScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<EditLodgeScreen> createState() =>
-      _EditLodgeScreenState();
+  ConsumerState<EditLodgeScreen> createState() => _EditLodgeScreenState();
 }
 
 class _EditLodgeScreenState extends ConsumerState<EditLodgeScreen> {
@@ -44,7 +39,6 @@ class _EditLodgeScreenState extends ConsumerState<EditLodgeScreen> {
   late final TextEditingController emailController;
 
   List<XFile> newImages = [];
-
   List<String> existingImages = [];
 
   bool isLoading = false;
@@ -81,20 +75,24 @@ class _EditLodgeScreenState extends ConsumerState<EditLodgeScreen> {
 
     final lodge = widget.lodge;
 
-    nameController = TextEditingController(text: lodge.name);
-    descriptionController = TextEditingController(text: lodge.description);
-    cityController = TextEditingController(text: lodge.city);
-    addressController = TextEditingController(text: lodge.address);
-    phoneController = TextEditingController(text: lodge.phoneNumber);
-    emailController = TextEditingController(text: lodge.email);
+    nameController = TextEditingController(text: lodge.name ?? "");
+    descriptionController = TextEditingController(text: lodge.description ?? "");
+    cityController = TextEditingController(text: lodge.city ?? "");
+    addressController = TextEditingController(text: lodge.address ?? "");
+    phoneController = TextEditingController(text: lodge.phoneNumber ?? "");
+    emailController = TextEditingController(text: lodge.email ?? "");
 
-    selectedType = lodge.lodgeType;
-    selectedDistrict = lodge.district;
+    selectedType = lodge.lodgeType ?? "hotel";
+    selectedDistrict = lodge.district ?? "Lilongwe";
 
     latitude = lodge.latitude;
     longitude = lodge.longitude;
 
-    existingImages = List<String>.from(lodge.images);
+    existingImages = List<String>.from(lodge.images ?? []);
+
+    // ⚠️ IMPORTANT: DO NOT depend on lodge.amenities object
+    // We initialize empty like Create screen
+    selectedAmenities = [];
   }
 
   // ================= GPS =================
@@ -123,8 +121,8 @@ class _EditLodgeScreenState extends ConsumerState<EditLodgeScreen> {
       );
 
       setState(() {
-        latitude = double.parse(pos.latitude.toStringAsFixed(6));
-        longitude = double.parse(pos.longitude.toStringAsFixed(6));
+        latitude = pos.latitude;
+        longitude = pos.longitude;
       });
 
       AppToast.success(context, "Location updated");
@@ -135,10 +133,9 @@ class _EditLodgeScreenState extends ConsumerState<EditLodgeScreen> {
     }
   }
 
-  // ================= IMAGE PICKER (CROPPER) =================
+  // ================= IMAGES =================
   Future<void> pickImages() async {
     final picker = ImagePicker();
-
     final picked = await picker.pickMultiImage();
 
     if (picked.isNotEmpty) {
@@ -149,15 +146,37 @@ class _EditLodgeScreenState extends ConsumerState<EditLodgeScreen> {
   }
 
   void removeExisting(int index) {
-    setState(() {
-      existingImages.removeAt(index);
-    });
+    setState(() => existingImages.removeAt(index));
   }
 
   void removeNew(int index) {
-    setState(() {
-      newImages.removeAt(index);
-    });
+    setState(() => newImages.removeAt(index));
+  }
+
+  // ================= LOAD AMENITIES FROM API =================
+  Future<void> loadAmenities() async {
+    try {
+      final api = ref.read(apiClientProvider);
+
+      final res = await api.get(
+        "lodges/${widget.lodge.id}/",
+        fromJson: (json) => json,
+      );
+
+      final data = res["amenities"] ?? [];
+
+      setState(() {
+        selectedAmenities = List<int>.from(data);
+      });
+    } catch (_) {
+      // keep empty if fails
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    loadAmenities();
   }
 
   // ================= UPDATE =================
@@ -169,36 +188,49 @@ class _EditLodgeScreenState extends ConsumerState<EditLodgeScreen> {
     try {
       final api = ref.read(apiClientProvider);
 
-      final formData = FormData.fromMap({
-        "name": nameController.text,
-        "description": descriptionController.text,
-        "lodge_type": selectedType,
-        "city": cityController.text,
-        "district": selectedDistrict,
-        "address": addressController.text,
-        "phone_number": phoneController.text,
-        "email": emailController.text,
-        "latitude": latitude?.toStringAsFixed(6) ?? "",
-        "longitude": longitude?.toStringAsFixed(6) ?? "",
-      });
+      final formData = FormData();
+
+      // TEXT FIELDS
+      formData.fields.addAll([
+        MapEntry("name", nameController.text),
+        MapEntry("description", descriptionController.text),
+        MapEntry("lodge_type", selectedType),
+        MapEntry("city", cityController.text),
+        MapEntry("district", selectedDistrict),
+        MapEntry("address", addressController.text),
+        MapEntry("phone_number", phoneController.text),
+        MapEntry("email", emailController.text),
+        MapEntry("latitude", latitude?.toStringAsFixed(6) ?? ""),
+        MapEntry("longitude", longitude?.toStringAsFixed(6) ?? ""),
+      ]);
+
+      // AMENITIES (SAME AS CREATE SCREEN)
+      for (final id in selectedAmenities) {
+        formData.fields.add(MapEntry("amenities", id.toString()));
+      }
 
       // NEW IMAGES ONLY
       for (final img in newImages) {
         formData.files.add(
           MapEntry(
             "images",
-            await MultipartFile.fromFile(img.path),
+            await MultipartFile.fromFile(
+              img.path,
+              filename: img.name,
+            ),
           ),
         );
       }
 
-      await api.patchMultipart(
+      final response = await api.patchMultipart(
         "lodges/${widget.lodge.id}/",
         formData,
       );
 
+      debugPrint("FULL UPDATE RESPONSE: $response");
+
       if (mounted) {
-        AppToast.success(context, "Lodge updated");
+        AppToast.success(context, "Lodge updated successfully");
         Navigator.pop(context, true);
       }
     } catch (e) {
@@ -208,206 +240,178 @@ class _EditLodgeScreenState extends ConsumerState<EditLodgeScreen> {
     setState(() => isLoading = false);
   }
 
-  // ================= UI =================
   @override
   Widget build(BuildContext context) {
     final amenitiesAsync = ref.watch(amenitiesProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
       appBar: const MainAppBar(title: "Edit Lodge"),
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          children: [
 
-      body: ListView(
-        padding: EdgeInsets.all(AppSpacing.md),
-        children: [
+            AppTextField(label: "Name", controller: nameController),
+            const SizedBox(height: 12),
 
-          AppTextField(label: "Name", controller: nameController),
-          const SizedBox(height: 12),
-
-          AppTextField(
-            label: "Description",
-            controller: descriptionController,
-            type: TextFieldType.multiline,
-            maxLines: 4,
-          ),
-
-          const SizedBox(height: 12),
-
-          AppTextField(label: "City", controller: cityController),
-          const SizedBox(height: 12),
-
-          AppTextField(label: "Address", controller: addressController),
-          const SizedBox(height: 12),
-
-          AppTextField(label: "Phone", controller: phoneController),
-          const SizedBox(height: 12),
-
-          AppTextField(label: "Email", controller: emailController),
-          const SizedBox(height: 20),
-
-          DropdownButtonFormField(
-            value: selectedType,
-            items: types
-                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                .toList(),
-            onChanged: (v) => setState(() => selectedType = v.toString()),
-            decoration: const InputDecoration(labelText: "Type"),
-          ),
-
-          const SizedBox(height: 12),
-
-          DropdownButtonFormField(
-            value: selectedDistrict,
-            items: malawiDistricts
-                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                .toList(),
-            onChanged: (v) =>
-                setState(() => selectedDistrict = v.toString()),
-            decoration: const InputDecoration(labelText: "District"),
-          ),
-
-          const SizedBox(height: 20),
-
-          ElevatedButton.icon(
-            onPressed: isGettingLocation ? null : getLocation,
-            icon: isGettingLocation
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.my_location),
-            label: Text(
-              isGettingLocation ? "Getting GPS..." : "Update Location",
+            AppTextField(
+              label: "Description",
+              controller: descriptionController,
+              type: TextFieldType.multiline,
+              maxLines: 4,
             ),
-          ),
 
-          const SizedBox(height: 20),
+            const SizedBox(height: 12),
 
-          // ================= AMENITIES =================
-          amenitiesAsync.when(
-            data: (amenities) => Wrap(
-              spacing: 8,
-              children: amenities.map((Amenity a) {
-                final selected =
-                    selectedAmenities.contains(a.id);
+            AppTextField(label: "City", controller: cityController),
+            const SizedBox(height: 12),
 
-                return FilterChip(
-                  label: Text(a.name),
-                  selected: selected,
-                  onSelected: (v) {
-                    setState(() {
-                      v
-                          ? selectedAmenities.add(a.id)
-                          : selectedAmenities.remove(a.id);
-                    });
-                  },
-                );
-              }).toList(),
+            AppTextField(label: "Address", controller: addressController),
+            const SizedBox(height: 12),
+
+            AppTextField(label: "Phone", controller: phoneController),
+            const SizedBox(height: 12),
+
+            AppTextField(label: "Email", controller: emailController),
+
+            const SizedBox(height: 20),
+
+            DropdownButtonFormField(
+              value: selectedType,
+              items: types
+                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  .toList(),
+              onChanged: (v) => setState(() => selectedType = v.toString()),
+              decoration: const InputDecoration(labelText: "Type"),
             ),
-            loading: () => const CircularProgressIndicator(),
-            error: (_, __) => const Text("Failed to load"),
-          ),
 
-          const SizedBox(height: 20),
+            const SizedBox(height: 12),
 
-          // ================= IMAGES =================
-          Text(
-            "Images",
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
+            DropdownButtonFormField(
+              value: selectedDistrict,
+              items: malawiDistricts
+                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                  .toList(),
+              onChanged: (v) => setState(() => selectedDistrict = v.toString()),
+              decoration: const InputDecoration(labelText: "District"),
+            ),
 
-          const SizedBox(height: 10),
+            const SizedBox(height: 20),
 
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
+            ElevatedButton.icon(
+              onPressed: getLocation,
+              icon: const Icon(Icons.my_location),
+              label: const Text("Update Location"),
+            ),
 
-              // EXISTING
-              ...existingImages.asMap().entries.map((e) {
-                final i = e.key;
-                final img = e.value;
+            const SizedBox(height: 20),
 
-                return Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        img,
-                        width: 90,
-                        height: 90,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    Positioned(
-                      right: 0,
-                      child: IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => removeExisting(i),
-                      ),
-                    )
-                  ],
-                );
-              }),
+            // ================= AMENITIES =================
+            amenitiesAsync.when(
+              data: (amenities) => Wrap(
+                spacing: 8,
+                children: amenities.map((Amenity a) {
+                  final selected = selectedAmenities.contains(a.id);
 
-              // NEW
-              ...newImages.asMap().entries.map((e) {
-                final i = e.key;
-
-                return Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.file(
-                        File(newImages[i].path),
-                        width: 90,
-                        height: 90,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    Positioned(
-                      right: 0,
-                      child: IconButton(
-                        icon: const Icon(Icons.close),
-                        onPressed: () => removeNew(i),
-                      ),
-                    )
-                  ],
-                );
-              }),
-
-              // ADD BUTTON
-              GestureDetector(
-                onTap: pickImages,
-                child: Container(
-                  width: 90,
-                  height: 90,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurfaceVariant
-                        .withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(Icons.add),
-                ),
+                  return FilterChip(
+                    label: Text(a.name),
+                    selected: selected,
+                    onSelected: (v) {
+                      setState(() {
+                        if (v) {
+                          selectedAmenities.add(a.id);
+                        } else {
+                          selectedAmenities.remove(a.id);
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
               ),
-            ],
-          ),
-
-          const SizedBox(height: 30),
-
-          SizedBox(
-            height: 55,
-            child: ElevatedButton(
-              onPressed: isLoading ? null : updateLodge,
-              child: isLoading
-                  ? const CircularProgressIndicator()
-                  : const Text("Update Lodge"),
+              loading: () => const CircularProgressIndicator(),
+              error: (_, __) => const Text("Failed to load amenities"),
             ),
-          ),
-        ],
+
+            const SizedBox(height: 20),
+
+            const Text("Images",
+                style: TextStyle(fontWeight: FontWeight.bold)),
+
+            const SizedBox(height: 10),
+
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+
+                // EXISTING IMAGES
+                ...existingImages.asMap().entries.map((e) {
+                  return Stack(
+                    children: [
+                      Image.network(
+                        e.value,
+                        width: 90,
+                        height: 90,
+                        fit: BoxFit.cover,
+                      ),
+                      Positioned(
+                        right: 0,
+                        child: IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => removeExisting(e.key),
+                        ),
+                      )
+                    ],
+                  );
+                }),
+
+                // NEW IMAGES
+                ...newImages.asMap().entries.map((e) {
+                  return Stack(
+                    children: [
+                      Image.file(
+                        File(e.value.path),
+                        width: 90,
+                        height: 90,
+                        fit: BoxFit.cover,
+                      ),
+                      Positioned(
+                        right: 0,
+                        child: IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => removeNew(e.key),
+                        ),
+                      )
+                    ],
+                  );
+                }),
+
+                GestureDetector(
+                  onTap: pickImages,
+                  child: Container(
+                    width: 90,
+                    height: 90,
+                    color: Colors.grey.shade300,
+                    child: const Icon(Icons.add),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 30),
+
+            SizedBox(
+              height: 55,
+              child: ElevatedButton(
+                onPressed: isLoading ? null : updateLodge,
+                child: isLoading
+                    ? const CircularProgressIndicator()
+                    : const Text("Update Lodge"),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

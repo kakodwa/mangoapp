@@ -241,26 +241,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             const SizedBox(height: AppSpacing.lg),
 
             // PRODUCTS
-            _sectionHeader(context, 'Featured Products'),
-            productsAsync.when(
-              data: (products) {
-                final featured = products.take(4).toList();
-                return GridView.count(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.60,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  children: featured
-                      .map((p) => ProductCard(product: p))
-                      .toList(),
-                );
-              },
-              loading: () => CircularProgressIndicator(),
-              error: (_, __) => const SizedBox(),
-            ),
+            // PRODUCTS
+_sectionHeader(context, 'Featured Products'),
+productsAsync.when(
+  data: (products) {
+    final featured = products.take(4).toList();
 
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: AppSpacing.md), // 👈 ADD THIS
+      child: GridView.count(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        crossAxisCount: 2,
+        childAspectRatio: 0.60,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        children: featured
+            .map((p) => ProductCard(product: p))
+            .toList(),
+      ),
+    );
+  },
+  loading: () => const Center(
+    child: CircularProgressIndicator(),
+  ),
+  error: (_, __) => const SizedBox(),
+),
             const SizedBox(height: AppSpacing.lg),
 
             // PROPERTIES

@@ -5,14 +5,17 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../models/property_model.dart';
 import '../../providers/properties_provider.dart';
+
 import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_button.dart';
 import '../../theme/design_system/app_card.dart';
 import '../../theme/design_system/app_info_box.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_text_field.dart';
+
 import '../../widgets/image_crop_picker.dart';
 import '../../widgets/main_app_bar.dart';
+
 import '../../utils/app_toast.dart';
 
 class AddPropertyScreen extends ConsumerStatefulWidget {
@@ -27,7 +30,9 @@ class _AddPropertyScreenState
     extends ConsumerState<AddPropertyScreen> {
   final _formKey = GlobalKey<FormState>();
 
+  // =========================
   // CONTROLLERS
+  // =========================
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
   final latitudeController = TextEditingController();
@@ -49,6 +54,9 @@ class _AddPropertyScreenState
 
   List<XFile> images = [];
 
+  // =========================
+  // MALAWI DISTRICTS
+  // =========================
   final List<String> malawiDistricts = [
     'Blantyre',
     'Lilongwe',
@@ -86,7 +94,10 @@ class _AddPropertyScreenState
           await Geolocator.isLocationServiceEnabled();
 
       if (!serviceEnabled) {
-        AppToast.error(context, "Location services disabled");
+        AppToast.error(
+          context,
+          "Location services disabled",
+        );
         return;
       }
 
@@ -94,13 +105,16 @@ class _AddPropertyScreenState
           await Geolocator.checkPermission();
 
       if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
+        permission =
+            await Geolocator.requestPermission();
       }
 
       if (permission ==
           LocationPermission.deniedForever) {
         AppToast.error(
-            context, "Permission denied permanently");
+          context,
+          "Permission denied permanently",
+        );
         return;
       }
 
@@ -112,12 +126,15 @@ class _AddPropertyScreenState
       setState(() {
         latitudeController.text =
             position.latitude.toStringAsFixed(6);
+
         longitudeController.text =
             position.longitude.toStringAsFixed(6);
       });
 
       AppToast.success(
-          context, "GPS captured successfully");
+        context,
+        "GPS captured successfully",
+      );
     } catch (e) {
       AppToast.error(context, e.toString());
     } finally {
@@ -237,22 +254,29 @@ class _AddPropertyScreenState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor:
+          const Color(0xFFF5F7FA),
+
       appBar: const MainAppBar(
         title: 'Post Property',
       ),
+
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding:
+              const EdgeInsets.all(AppSpacing.md),
           children: [
+
             const AppInfoBox(
               icon: Icons.info_outline,
               message:
                   'Upload clear images. GPS will be used for navigation after property unlock.',
             ),
 
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(
+              height: AppSpacing.lg,
+            ),
 
             // =========================
             // BASIC INFO
@@ -262,6 +286,7 @@ class _AddPropertyScreenState
                 crossAxisAlignment:
                     CrossAxisAlignment.start,
                 children: [
+
                   const Text(
                     'Basic Information',
                     style: TextStyle(
@@ -270,24 +295,159 @@ class _AddPropertyScreenState
                     ),
                   ),
 
-                  const SizedBox(height: AppSpacing.md),
+                  const SizedBox(
+                    height: AppSpacing.md,
+                  ),
 
                   inputField(
-                      titleController, 'Property Title'),
+                    titleController,
+                    'Property Title',
+                  ),
 
                   inputField(
                     descriptionController,
                     'Description',
-                    type: TextFieldType.multiline,
+                    type:
+                        TextFieldType.multiline,
                     maxLines: 4,
                   ),
 
-                  const SizedBox(height: AppSpacing.md),
+                  DropdownButtonFormField<String>(
+                    value: propertyType,
+                    decoration: InputDecoration(
+                      labelText:
+                          'Property Type',
+                      filled: true,
+                      fillColor:
+                          Theme.of(context)
+                              .colorScheme
+                              .surface,
+                      border:
+                          OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(
+                          12,
+                        ),
+                      ),
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'house',
+                        child: Text('House'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'apartment',
+                        child:
+                            Text('Apartment'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'land',
+                        child: Text('Land'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'commercial',
+                        child:
+                            Text('Commercial'),
+                      ),
+                    ],
+                    onChanged: (v) {
+                      setState(() {
+                        propertyType = v!;
+                      });
+                    },
+                  ),
+
+                  const SizedBox(
+                    height: AppSpacing.md,
+                  ),
+
+                  DropdownButtonFormField<String>(
+                    value: listingPurpose,
+                    decoration: InputDecoration(
+                      labelText:
+                          'Listing Purpose',
+                      filled: true,
+                      fillColor:
+                          Theme.of(context)
+                              .colorScheme
+                              .surface,
+                      border:
+                          OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(
+                          12,
+                        ),
+                      ),
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'sale',
+                        child:
+                            Text('For Sale'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'rent',
+                        child:
+                            Text('For Rent'),
+                      ),
+                    ],
+                    onChanged: (v) {
+                      setState(() {
+                        listingPurpose = v!;
+                      });
+                    },
+                  ),
+
+                  const SizedBox(
+                    height: AppSpacing.md,
+                  ),
+
+                  DropdownButtonFormField<String>(
+                    value: propertyStatus,
+                    decoration: InputDecoration(
+                      labelText: 'Status',
+                      filled: true,
+                      fillColor:
+                          Theme.of(context)
+                              .colorScheme
+                              .surface,
+                      border:
+                          OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(
+                          12,
+                        ),
+                      ),
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'available',
+                        child:
+                            Text('Available'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'sold',
+                        child: Text('Sold'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'rented',
+                        child:
+                            Text('Rented'),
+                      ),
+                    ],
+                    onChanged: (v) {
+                      setState(() {
+                        propertyStatus = v!;
+                      });
+                    },
+                  ),
                 ],
               ),
             ),
 
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(
+              height: AppSpacing.lg,
+            ),
 
             // =========================
             // LOCATION
@@ -297,6 +457,7 @@ class _AddPropertyScreenState
                 crossAxisAlignment:
                     CrossAxisAlignment.start,
                 children: [
+
                   const Text(
                     'Location',
                     style: TextStyle(
@@ -305,25 +466,129 @@ class _AddPropertyScreenState
                     ),
                   ),
 
-                  const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: 6),
 
-                  inputField(addressController, 'Address'),
-                  inputField(cityController, 'City'),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  ElevatedButton.icon(
-                    onPressed:
-                        gettingGps ? null : getGPS,
-                    icon: const Icon(Icons.my_location),
-                    label: Text(
-                      gettingGps
-                          ? "Getting GPS..."
-                          : "Get GPS Location",
+                  Text(
+                    "📍 GPS used for navigation after unlock",
+                    style: TextStyle(
+                      color:
+                          Theme.of(context)
+                              .colorScheme
+                              .outline,
                     ),
                   ),
 
-                  const SizedBox(height: AppSpacing.md),
+                  const SizedBox(
+                    height: AppSpacing.md,
+                  ),
+
+                  inputField(
+                    addressController,
+                    'Address',
+                  ),
+
+                  inputField(
+                    cityController,
+                    'City',
+                  ),
+
+                  DropdownButtonFormField<String>(
+                    value:
+                        districtController
+                                .text
+                                .isEmpty
+                            ? null
+                            : districtController
+                                .text,
+                    decoration: InputDecoration(
+                      labelText: 'District',
+                      filled: true,
+                      fillColor:
+                          Theme.of(context)
+                              .colorScheme
+                              .surface,
+                      border:
+                          OutlineInputBorder(
+                        borderRadius:
+                            BorderRadius.circular(
+                          12,
+                        ),
+                      ),
+                    ),
+                    items:
+                        malawiDistricts
+                            .map(
+                              (d) =>
+                                  DropdownMenuItem(
+                                value: d,
+                                child:
+                                    Text(d),
+                              ),
+                            )
+                            .toList(),
+                    onChanged: (v) {
+                      setState(() {
+                        districtController
+                            .text = v!;
+                      });
+                    },
+                  ),
+
+                  const SizedBox(
+                    height: AppSpacing.md,
+                  ),
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child:
+                        ElevatedButton.icon(
+                      onPressed:
+                          gettingGps
+                              ? null
+                              : getGPS,
+                      style:
+                          ElevatedButton.styleFrom(
+                        backgroundColor:
+                            AppColors
+                                .mangoOrange,
+                        shape:
+                            RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(
+                            12,
+                          ),
+                        ),
+                      ),
+                      icon: gettingGps
+                          ? SizedBox(
+                              height: 18,
+                              width: 18,
+                              child:
+                                  CircularProgressIndicator(
+                                strokeWidth:
+                                    2,
+                                color: Theme.of(
+                                        context)
+                                    .colorScheme
+                                    .surface,
+                              ),
+                            )
+                          : const Icon(
+                              Icons
+                                  .my_location,
+                            ),
+                      label: Text(
+                        gettingGps
+                            ? "Getting GPS..."
+                            : "Get GPS Location",
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(
+                    height: AppSpacing.md,
+                  ),
 
                   Row(
                     children: [
@@ -332,16 +597,21 @@ class _AddPropertyScreenState
                           latitudeController,
                           'Latitude',
                           type:
-                              TextFieldType.number,
+                              TextFieldType
+                                  .number,
                         ),
                       ),
-                      const SizedBox(width: 10),
+
+                      const SizedBox(
+                          width: 10),
+
                       Expanded(
                         child: inputField(
                           longitudeController,
                           'Longitude',
                           type:
-                              TextFieldType.number,
+                              TextFieldType
+                                  .number,
                         ),
                       ),
                     ],
@@ -350,7 +620,80 @@ class _AddPropertyScreenState
               ),
             ),
 
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(
+              height: AppSpacing.lg,
+            ),
+
+            // =========================
+            // DETAILS
+            // =========================
+            AppCard(
+              child: Column(
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                children: [
+
+                  const Text(
+                    'Property Details',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 17,
+                    ),
+                  ),
+
+                  const SizedBox(
+                    height: AppSpacing.md,
+                  ),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: inputField(
+                          bedroomsController,
+                          'Bedrooms',
+                          type:
+                              TextFieldType
+                                  .number,
+                          required: false,
+                        ),
+                      ),
+
+                      const SizedBox(
+                          width: 10),
+
+                      Expanded(
+                        child: inputField(
+                          bathroomsController,
+                          'Bathrooms',
+                          type:
+                              TextFieldType
+                                  .number,
+                          required: false,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  inputField(
+                    sizeController,
+                    'Size (sqm)',
+                    type:
+                        TextFieldType.number,
+                  ),
+
+                  inputField(
+                    priceController,
+                    'Price',
+                    type:
+                        TextFieldType.number,
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(
+              height: AppSpacing.lg,
+            ),
 
             // =========================
             // IMAGES (RECTANGLE CROPPER)
@@ -360,6 +703,7 @@ class _AddPropertyScreenState
                 crossAxisAlignment:
                     CrossAxisAlignment.start,
                 children: [
+
                   const Text(
                     'Property Images',
                     style: TextStyle(
@@ -373,17 +717,22 @@ class _AddPropertyScreenState
                   Text(
                     "Upload clear landscape property photos",
                     style: TextStyle(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .outline,
+                      color:
+                          Theme.of(context)
+                              .colorScheme
+                              .outline,
                     ),
                   ),
 
-                  const SizedBox(height: AppSpacing.md),
+                  const SizedBox(
+                    height: AppSpacing.md,
+                  ),
 
                   ImageCropPicker(
                     maxImages: 6,
-                    cropType: CropShapeType.rectangle,
+                    cropType:
+                        CropShapeType
+                            .rectangle,
                     initialImages: images,
                     onChanged: (value) {
                       setState(() {
@@ -395,15 +744,22 @@ class _AddPropertyScreenState
               ),
             ),
 
-            const SizedBox(height: AppSpacing.xl),
-
-            AppButton(
-              text: isLoading ? "Saving..." : "Post Property",
-              loading: isLoading,
-              onPressed: isLoading ? null : submit,
+            const SizedBox(
+              height: AppSpacing.xl,
             ),
 
-            const SizedBox(height: AppSpacing.xl),
+            AppButton(
+              text: isLoading
+                  ? "Saving..."
+                  : "Post Property",
+              loading: isLoading,
+              onPressed:
+                  isLoading ? null : submit,
+            ),
+
+            const SizedBox(
+              height: AppSpacing.xl,
+            ),
           ],
         ),
       ),

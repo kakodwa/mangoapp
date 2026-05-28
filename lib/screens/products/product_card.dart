@@ -1,72 +1,56 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../models/product_model.dart';
-import '../../providers/products_provider.dart';
-import 'product_details_screen.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/products_provider.dart';
+
+import 'product_details_screen.dart';
 import '../auth/login_screen.dart';
 import '../products/edit_product_screen.dart';
-import '../../theme/design_system/app_card.dart';
-import '../../theme/design_system/app_badge.dart';
-import '../../theme/design_system/app_icon_button.dart';
-import '../../theme/design_system/app_spacing.dart';
+
 import '../../utils/app_toast.dart';
 
 class ProductCard extends ConsumerWidget {
   final Product product;
 
-  const ProductCard({Key? key, required this.product}) : super(key: key);
+  const ProductCard({super.key, required this.product});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
 
-    final authState = ref.watch(authProvider);
-    final isLoggedIn = authState.isAuthenticated;
+    final auth = ref.watch(authProvider);
+    final isLoggedIn = auth.isAuthenticated;
+
+    final isOwner =
+        auth.user?.id != null && auth.user!.id == product.ownerId;
 
     final favorites = ref.watch(favoriteProvider);
     final isFav = favorites.contains(product.id);
 
-    final currentUserId = authState.user?.id;
-    final isOwner =
-        currentUserId != null && product.ownerId == currentUserId;
-
     return InkWell(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(24),
       onTap: () {
-        Navigator.of(context).push(
-          PageRouteBuilder(
-            transitionDuration: const Duration(milliseconds: 250),
-            pageBuilder: (_, __, ___) =>
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) =>
                 ProductDetailsScreen(productId: product.id),
-            transitionsBuilder: (_, animation, __, child) {
-              return FadeTransition(
-                opacity: animation,
-                child: ScaleTransition(
-                  scale: Tween(begin: 0.95, end: 1.0).animate(
-                    CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
-                  ),
-                  child: child,
-                ),
-              );
-            },
           ),
         );
       },
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: Theme.of(context).colorScheme.surface,
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
-              blurRadius: 16,
-              offset: const Offset(0, 4),
-            ),
-            BoxShadow(
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
@@ -75,59 +59,86 @@ class ProductCard extends ConsumerWidget {
           children: [
 
             // ================= IMAGE =================
-            Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(16),
-                  ),
-                  child: SizedBox(
-                    height: 150,
-                    width: double.infinity,
-                    child: product.hasImage
-                        ? Image.network(
-                            product.safeImage,
-                            fit: BoxFit.cover,
-                          )
-                        : Container(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
-                            child: Icon(
-                              Icons.image,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4),
-                              size: 40,
+            Expanded(
+              child: Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(24),
+                    ),
+                    child: SizedBox.expand(
+                      child: product.hasImage
+                          ? Image.network(
+                              product.safeImage,
+                              fit: BoxFit.cover,
+                            )
+                          : Container(
+                              color: Colors.grey.shade100,
+                              child: const Icon(
+                                Icons.image_outlined,
+                                size: 45,
+                                color: Colors.grey,
+                              ),
                             ),
-                          ),
+                    ),
                   ),
-                ),
 
-                // DARK OVERLAY FOR MODERN LOOK
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          Theme.of(context).colorScheme.onSurface.withOpacity(0.0),
-                          Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
-                        ],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
+                  // gradient overlay
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withOpacity(0.18),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
 
-                // CATEGORY BADGE
-                Positioned(
-                  top: AppSpacing.sm,
-                  left: AppSpacing.sm,
-                  child: AppBadge(
-                    text: product.category,
-                    type: BadgeType.primary,
+                  // ================= FROSTED GLASS CATEGORY BADGE =================
+                  Positioned(
+                    top: 12,
+                    left: 12,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: BackdropFilter(
+                        filter: ImageFilter.blur(
+                          sigmaX: 10,
+                          sigmaY: 10,
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF2E7D32)
+                                .withOpacity(0.65),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: Colors.white.withOpacity(0.25),
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            product.category,
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                              letterSpacing: 0.3,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
 
-                // FAVORITE BUTTON
-                if (!isOwner)
+                  // FAVORITE
                   Positioned(
                     top: 12,
                     right: 12,
@@ -143,130 +154,98 @@ class ProductCard extends ConsumerWidget {
                           return;
                         }
 
-                        final updatedFav = await ref
+                        await ref
                             .read(favoriteProvider.notifier)
                             .toggle(product.id);
 
                         AppToast.info(
                           context,
-                          updatedFav
-                              ? 'Added to favorites'
-                              : 'Removed from favorites',
+                          isFav
+                              ? "Removed from favorites"
+                              : "Added to favorites",
                         );
                       },
-                      child: Container(
-                        padding: EdgeInsets.all(AppSpacing.xs),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.15),
-                              blurRadius: 10,
-                              offset: const Offset(0, 2),
-                            )
-                          ],
-                        ),
-                        child: Icon(
-                          isFav
-                              ? Icons.favorite
-                              : Icons.favorite_border,
-                          size: 20,
-                          color: isFav ? Theme.of(context).colorScheme.error : Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
-                        ),
+                      child: const Icon(
+                        Icons.favorite_border,
+                        color: Colors.white,
+                        size: 22,
                       ),
                     ),
                   ),
-              ],
+                ],
+              ),
             ),
 
             // ================= INFO =================
             Padding(
-              padding: EdgeInsets.all(AppSpacing.md),
+              padding: const EdgeInsets.all(14),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+
+                  // PRODUCT NAME
                   Text(
                     product.name,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurface,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      height: 1.3,
+                      color: Color(0xFF1A1A1A),
                     ),
                   ),
 
-                  //const SizedBox(height: AppSpacing.xs),
+                  const SizedBox(height: 12),
 
-                  // RATING
-                  /*Row(
-                    children: [
-                      Icon(Icons.star,
-                          size: 14, color: Color(0xFFFFC107)),
-                      const SizedBox(width: 4),
-                      Text(
-                        product.rating.toString(),
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        "(${product.totalReviews})",
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
-                        ),
-                      ),
-                    ],
-                  ),*/
-
-                  const SizedBox(height: AppSpacing.sm),
-
-                  // PRICE + ACTION
+                  // ================= PRICE + ACTION =================
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+
+                      // PRICE
                       Expanded(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          crossAxisAlignment:
+                              CrossAxisAlignment.start,
                           children: [
+
                             if (product.hasDiscount)
                               Text(
-                                'MWK ${product.originalPrice?.toStringAsFixed(2)}',
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  decoration: TextDecoration.lineThrough,
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5),
+                                "MWK ${product.originalPrice?.toStringAsFixed(0)}",
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey,
+                                  decoration:
+                                      TextDecoration.lineThrough,
                                 ),
                               ),
 
                             Text(
-                              'MWK ${product.price.toStringAsFixed(2)}',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                color: Theme.of(context).primaryColor,
-                                fontWeight: FontWeight.bold,
+                              "MWK ${product.price.toStringAsFixed(0)}",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: theme.primaryColor,
                               ),
-                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ),
                       ),
 
-                      const SizedBox(width: AppSpacing.sm),
+                      const SizedBox(width: 12),
 
-                      // Right Button
-                      AppIconButton(
-                        icon: isOwner ? Icons.edit : Icons.shopping_cart_outlined,
-                        color: isOwner
-                            ? const Color(0xFF1976D2)
-                            : (product.isInStock
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(context).colorScheme.outline),
-                        style: IconButtonStyle.filled,
+                      // ACTION ICON
+                      GestureDetector(
                         onTap: isOwner
                             ? () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (_) =>
-                                        EditProductScreen(product: product),
+                                        EditProductScreen(
+                                      product: product,
+                                    ),
                                   ),
                                 );
                               }
@@ -276,7 +255,8 @@ class ProductCard extends ConsumerWidget {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (_) => const LoginScreen(),
+                                          builder: (_) =>
+                                              const LoginScreen(),
                                         ),
                                       );
                                       return;
@@ -288,13 +268,24 @@ class ProductCard extends ConsumerWidget {
 
                                     AppToast.success(
                                       context,
-                                      '${product.name} added to cart',
+                                      "Added to cart",
                                     );
                                   }
                                 : null,
+                        child: Icon(
+                          isOwner
+                              ? Icons.edit_rounded
+                              : Icons.shopping_cart_outlined,
+                          size: 23,
+                          color: isOwner
+                              ? const Color(0xFF2E7D32)
+                              : product.isInStock
+                                  ? const Color(0xFFFF8C00)
+                                  : Colors.grey,
+                        ),
                       ),
                     ],
-                  )
+                  ),
                 ],
               ),
             ),
@@ -303,5 +294,4 @@ class ProductCard extends ConsumerWidget {
       ),
     );
   }
-
 }
