@@ -298,7 +298,7 @@ Container(
                           const SizedBox(height: 10),
 
                           SizedBox(
-                            height:280,
+                            height:235,
                             child: ListView.separated(
                               scrollDirection: Axis.horizontal,
                               itemCount: _related.length,

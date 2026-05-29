@@ -10,430 +10,433 @@ import '../../widgets/main_app_bar.dart';
 import '../../widgets/main_drawer.dart';
 import '../../widgets/app_scaffold.dart';
 
-import '../properties/add_property_screen.dart';
 import '../properties/my_properties_screen.dart';
 import '../payments/payment_history_screen.dart';
 import '../wallet/wallet_transactions_screen.dart';
 import '../delivery/seller_delivery_screen.dart';
 import '../events/manage_events_screen.dart';
 
-import '../cart/cart_screen.dart';
-import '../profile/profile_screen.dart';
 import '../orders/orders_screen.dart';
 import '../auth/login_screen.dart';
+
 import '../products/add_product_screen.dart';
 import '../shops/create_shop_screen.dart';
 import '../shops/my_shop_screen.dart';
+
 import '../events/my_tickets_screen.dart';
 import '../hospitality/lodge_owner_dashboard.dart';
 import '../hospitality/my_bookings_screen.dart';
-import '../../utils/user_role_utils.dart';
+
 import '../../theme/design_system/app_spacing.dart';
 
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  final Map<String, bool> _expanded = {
+    "payments": true,
+    "activity": false,
+    "management": false,
+    "shop": false,
+    "account": false,
+  };
+
+  void _toggle(String key) {
+    setState(() {
+      _expanded[key] = !(_expanded[key] ?? false);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final user = authState.user;
 
-
-
     final walletAsync = ref.watch(walletProvider);
-    final username = user?.username;
-
-    // ✅ SAFE ROLE CHECK
-    final isLoggedIn = authState.isAuthenticated;
-    final isShopOwner = user?.userType == "shop_owner";
-
-
-    final isHospitalityOwner = user?.userType == 'hospitality_owner';
-
-    // ⚠️ IMPORTANT: ensure fallback false if null
-    //final hasShop = ref.watch(hasShopProvider) == true;
     final hasShop = ref.watch(hasShopProvider);
-    //final hasShopAsync = ref.watch(hasShopProvider);
+
+    final width = MediaQuery.of(context).size.width;
+    final crossAxisCount = width < 360 ? 1 : 2;
 
     return AppScaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: MainAppBar(
-        title: username ?? 'Profile',
+        title: user?.username ?? 'Profile',
       ),
-
       drawer: const MainDrawer(),
-
-
       body: SingleChildScrollView(
         child: Column(
           children: [
-            const SizedBox(height: 45),
+            const SizedBox(height: 35),
 
             // ================= HEADER =================
-            Stack(
-              alignment: Alignment.center,
-              clipBehavior: Clip.none,
-              children: [
-                Container(
-                  margin: EdgeInsets.all(AppSpacing.md),
-                  padding: EdgeInsets.fromLTRB(20, 70, 20, 20),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        AppColors.mangoOrange,
-                        AppColors.leafGreen,
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(22),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        user?.firstName ?? "User Name",
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.surface,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        user?.email ?? "",
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 13,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                          ),
-                        decoration: BoxDecoration(
-                          color: UserRoleUtils.getColor(user?.userType ?? ''),
-                          borderRadius: BorderRadius.circular(20),
-                          ),
-                        child: Text(
-                          UserRoleUtils.getLabel(user?.userType ?? ''),
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.surface,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      const SizedBox(height: AppSpacing.md),
-
-                      walletAsync.when(
-                        data: (wallet) => Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
-                          children: [
-                            _stat(context, "Balance",
-                                "${wallet.currency} ${wallet.balance}"),
-                            _stat(context, "Earnings",
-                                "${wallet.currency} ${wallet.totalEarnings}"),
-                            _stat(context, "Withdrawn",
-                                "${wallet.currency} ${wallet.totalWithdrawn}"),
-                          ],
-                        ),
-                        loading: () =>
-                            CircularProgressIndicator(
-                          color: Theme.of(context).colorScheme.surface,
-                        ),
-                        error: (_, __) =>
-                            Text("Wallet error"),
-                      ),
-                    ],
-                  ),
+            Container(
+              margin: EdgeInsets.all(AppSpacing.md),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                gradient: const LinearGradient(
+                  colors: [
+                    AppColors.mangoOrange,
+                    AppColors.leafGreen,
+                  ],
                 ),
-
-                Positioned(
-                  top: -35,
-                  child: CircleAvatar(
-                    radius: 40,
-                    backgroundColor: AppColors.mangoOrange,
-                    child: Icon(Icons.person,
-                        size: 40, color: Theme.of(context).colorScheme.surface),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: AppSpacing.md),
-
-            // ================= MENU =================
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 14,
+                    offset: const Offset(0, 6),
+                  )
+                ],
+              ),
               child: Column(
                 children: [
+                  const CircleAvatar(
+                    radius: 28,
+                    backgroundColor: Colors.white24,
+                    child: Icon(Icons.person, size: 28, color: Colors.white),
+                  ),
+                  const SizedBox(height: 8),
 
-                  _menuTile(
-                    context,
-                    Icons.shopping_bag,
-                    "My Orders",
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const OrdersScreen(),
-                        ),
-                      );
-                    },
+                  Text(
+                    "${user?.firstName ?? ""} ${user?.lastName ?? ""}",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
 
-                  _menuTile(
-                    context,
-                    Icons.payment,
-                    "My Payments",
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              const PaymentHistoryScreen(),
-                        ),
-                      );
-                    },
+                  Text(
+                    user?.email ?? "",
+                    style: const TextStyle(
+                      color: Colors.white70,
+                      fontSize: 12,
+                    ),
                   ),
 
-                  _menuTile(
-                    context,
-  Icons.hotel,
-  "My Bookings",
-  onTap: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const MyBookingsScreen(),
-      ),
-    );
-  },
-),
+                  const SizedBox(height: 10),
 
-                  _menuTile(
-                    context,
-                    Icons.confirmation_number,
-                    "My Tickets",
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const MyTicketsScreen(),
-                          ),
-                        );
-                      },
-                  ),
-
-                  ///if (isLoggedIn && isHospitalityOwner)
-                  _menuTile(
-                    context,
-                    Icons.dashboard,
-                    "Lodge Dashboard",
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const LodgeOwnerDashboard(),
-                          ),
-                        );
-                      },
-                      ),
-
-                  _menuTile(
-                    context,
-                    Icons.home_work,
-                    "My Properties",
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              const MyPropertiesScreen(),
-                        ),
-                      );
-                    },
-                  ),
-
-                  _menuTile(
-                    context,
-                    Icons.account_balance_wallet,
-                    "Wallet Transactions",
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              const WalletTransactionsScreen(),
-                        ),
-                      );
-                    },
-                  ),
-
-                  _menuTile(
-                    context,
-                    Icons.event,
-                    "Manage Events",
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const ManageEventsScreen(),
-                          ),
-                        );
-                      },
-                      ),
-
-
-
-                  // ================= SHOP SECTION =================
-
-// ================= SHOP SECTION =================
-
-if (isLoggedIn && isShopOwner && !hasShop)
-  _menuTile(
-    context,
-    Icons.add_business,
-    "Create Shop",
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const CreateShopScreen(),
-        ),
-      );
-    },
-  ),
-
-if (isLoggedIn && isShopOwner && hasShop) ...[
-  _menuTile(
-    context,
-    Icons.store,
-    "My Shop",
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const MyShopScreen(),
-        ),
-      );
-    },
-  ),
-
-  _menuTile(
-    context,
-    Icons.local_shipping,
-    "Manage Deliveries",
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const SellerDeliveryScreen(),
-        ),
-      );
-    },
-  ),
-
-  _menuTile(
-    context,
-    Icons.add_box,
-    "Add Product",
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const AddProductScreen(),
-        ),
-      );
-    },
-  ),
-],
-
-        
-
-        
-                  _menuTile(
-                    context,
-                    Icons.settings,
-                    "Settings",
-                  ),
-
-                  _menuTile(
-                    context,
-                    Icons.logout,
-                    "Logout",
-                    onTap: () async {
-                      await ref
-                          .read(authProvider.notifier)
-                          .logout();
-
-                      if (context.mounted) {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => const LoginScreen()),
-                          (route) => false,
-                        );
-                      }
-                    },
+                  walletAsync.when(
+                    data: (wallet) => Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _miniStat("Bal", "${wallet.currency} ${wallet.balance}"),
+                        _miniStat("Earn", "${wallet.currency} ${wallet.totalEarnings}"),
+                        _miniStat("Out", "${wallet.currency} ${wallet.totalWithdrawn}"),
+                      ],
+                    ),
+                    loading: () =>
+                        const CircularProgressIndicator(color: Colors.white),
+                    error: (_, __) => const Text("Wallet error"),
                   ),
                 ],
               ),
             ),
 
-            const SizedBox(height: 40),
+            const SizedBox(height: 5),
+
+            // ================= MENU =================
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              child: Column(
+                children: [
+
+                  _sectionCard(
+                    key: "payments",
+                    title: "Payments & Wallet",
+                    crossAxisCount: crossAxisCount,
+                    children: [
+                      _gridCard(Icons.account_balance_wallet, "Wallet", () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                const WalletTransactionsScreen(),
+                          ),
+                        );
+                      }),
+                      _gridCard(Icons.payment, "Payments", () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const PaymentHistoryScreen(),
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
+
+                  _sectionCard(
+                    key: "activity",
+                    title: "My Activity",
+                    crossAxisCount: crossAxisCount,
+                    children: [
+                      _gridCard(Icons.shopping_bag, "Orders", () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const OrdersScreen(),
+                          ),
+                        );
+                      }),
+                      _gridCard(Icons.hotel, "Bookings", () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const MyBookingsScreen(),
+                          ),
+                        );
+                      }),
+                      _gridCard(Icons.confirmation_number, "Tickets", () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const MyTicketsScreen(),
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
+
+                  _sectionCard(
+                    key: "management",
+                    title: "Management",
+                    crossAxisCount: crossAxisCount,
+                    children: [
+                      _gridCard(Icons.dashboard, "Lodge", () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LodgeOwnerDashboard(),
+                          ),
+                        );
+                      }),
+                      _gridCard(Icons.home_work, "Properties", () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const MyPropertiesScreen(),
+                          ),
+                        );
+                      }),
+                      _gridCard(Icons.event, "Events", () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const ManageEventsScreen(),
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
+
+                  _sectionCard(
+                    key: "shop",
+                    title: "Shop Management",
+                    crossAxisCount: crossAxisCount,
+                    children: !hasShop
+                        ? [
+                            _gridCard(Icons.add_business, "Create Shop", () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      const CreateShopScreen(),
+                                ),
+                              );
+                            }),
+                          ]
+                        : [
+                            _gridCard(Icons.store, "My Shop", () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const MyShopScreen(),
+                                ),
+                              );
+                            }),
+                            _gridCard(Icons.add_box, "Add Product", () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const AddProductScreen(),
+                                ),
+                              );
+                            }),
+                            _gridCard(Icons.local_shipping, "Deliveries", () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      const SellerDeliveryScreen(),
+                                ),
+                              );
+                            }),
+                          ],
+                  ),
+
+                  _sectionCard(
+                    key: "account",
+                    title: "Account",
+                    crossAxisCount: crossAxisCount,
+                    children: [
+                      _gridCard(Icons.settings, "Settings", () {}),
+                      _gridCard(Icons.logout, "Logout", () async {
+                        await ref.read(authProvider.notifier).logout();
+                        if (context.mounted) {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const LoginScreen(),
+                            ),
+                            (route) => false,
+                          );
+                        }
+                      }),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 30),
           ],
         ),
       ),
     );
   }
 
-  // ================= WALLET STAT =================
-  Widget _stat(BuildContext context, String title, String value) {
+  // ================= SECTION CARD =================
+  Widget _sectionCard({
+    required String key,
+    required String title,
+    required List<Widget> children,
+    required int crossAxisCount,
+  }) {
+    final isOpen = _expanded[key] ?? false;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          InkWell(
+            onTap: () => _toggle(key),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 12, vertical: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Icon(
+                    isOpen
+                        ? Icons.keyboard_arrow_up
+                        : Icons.keyboard_arrow_down,
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          AnimatedCrossFade(
+            duration: const Duration(milliseconds: 200),
+            crossFadeState: isOpen
+                ? CrossFadeState.showFirst
+                : CrossFadeState.showSecond,
+            firstChild: Padding(
+              padding: const EdgeInsets.all(8),
+              child: GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: crossAxisCount,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+                childAspectRatio: 1.6,
+                children: children,
+              ),
+            ),
+            secondChild: const SizedBox(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ================= GRID CARD =================
+  Widget _gridCard(
+      IconData icon, String title, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFF7F8FA),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(8),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 22, color: AppColors.mangoOrange),
+              const SizedBox(height: 6),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ================= MINI STAT =================
+  Widget _miniStat(String label, String value) {
     return Column(
       children: [
         Text(
           value,
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.surface,
-            fontWeight: FontWeight.bold,
-            fontSize: 15,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.xxs),
-        Text(
-          title,
           style: const TextStyle(
-            color: Colors.white70,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
             fontSize: 12,
           ),
         ),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white70,
+            fontSize: 10,
+          ),
+        ),
       ],
-    );
-  }
-
-  // ================= MENU TILE =================
-  Widget _menuTile(
-    BuildContext context,
-    IconData icon,
-    String title, {
-    VoidCallback? onTap,
-  }) {
-    return Card(
-      elevation: 1,
-      margin: EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: ListTile(
-        leading: Icon(icon, color: AppColors.mangoOrange),
-        title: Text(title),
-        trailing: Icon(Icons.arrow_forward_ios, size: 16),
-        onTap: onTap ?? () {},
-      ),
     );
   }
 }

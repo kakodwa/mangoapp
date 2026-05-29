@@ -97,6 +97,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   // ============================
   Future<void> register({
     required String username,
+    required String phoneNumber,
     required String email,
     required String password,
     required String firstName,
@@ -113,6 +114,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         firstName: firstName,
         lastName: lastName,
         userType: userType,
+        phoneNumber: phoneNumber,
       );
 
       await _apiClient.saveTokens(

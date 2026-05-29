@@ -253,7 +253,7 @@ productsAsync.when(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         crossAxisCount: 2,
-        childAspectRatio: 0.60,
+        childAspectRatio: 0.70,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
         children: featured

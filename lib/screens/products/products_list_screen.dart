@@ -208,7 +208,7 @@ class _ProductsListScreenState extends ConsumerState<ProductsListScreen> {
                           crossAxisCount: crossAxisCount,
                           crossAxisSpacing: 10,
                           mainAxisSpacing: 10,
-                          childAspectRatio: 0.58,
+                          childAspectRatio: 0.73,
                         ),
                         itemBuilder: (context, index) {
                           return ProductCard(

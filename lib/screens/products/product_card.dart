@@ -12,11 +12,18 @@ import '../auth/login_screen.dart';
 import '../products/edit_product_screen.dart';
 
 import '../../utils/app_toast.dart';
+import '../../utils/price_helper.dart';
 
 class ProductCard extends ConsumerWidget {
   final Product product;
 
-  const ProductCard({super.key, required this.product});
+
+
+
+  const ProductCard({
+    super.key,
+    required this.product,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -26,7 +33,8 @@ class ProductCard extends ConsumerWidget {
     final isLoggedIn = auth.isAuthenticated;
 
     final isOwner =
-        auth.user?.id != null && auth.user!.id == product.ownerId;
+        auth.user?.id != null &&
+        auth.user!.id == product.ownerId;
 
     final favorites = ref.watch(favoriteProvider);
     final isFav = favorites.contains(product.id);
@@ -59,9 +67,12 @@ class ProductCard extends ConsumerWidget {
           children: [
 
             // ================= IMAGE =================
-            Expanded(
+            AspectRatio(
+              aspectRatio: 1,
               child: Stack(
                 children: [
+
+                  // IMAGE
                   ClipRRect(
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(24),
@@ -83,7 +94,7 @@ class ProductCard extends ConsumerWidget {
                     ),
                   ),
 
-                  // gradient overlay
+                  // GRADIENT
                   Positioned.fill(
                     child: Container(
                       decoration: BoxDecoration(
@@ -99,7 +110,7 @@ class ProductCard extends ConsumerWidget {
                     ),
                   ),
 
-                  // ================= FROSTED GLASS CATEGORY BADGE =================
+                  // CATEGORY
                   Positioned(
                     top: 12,
                     left: 12,
@@ -111,16 +122,19 @@ class ProductCard extends ConsumerWidget {
                           sigmaY: 10,
                         ),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
+                          padding:
+                              const EdgeInsets.symmetric(
                             horizontal: 10,
                             vertical: 5,
                           ),
                           decoration: BoxDecoration(
                             color: const Color(0xFF2E7D32)
                                 .withOpacity(0.65),
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius:
+                                BorderRadius.circular(20),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.25),
+                              color:
+                                  Colors.white.withOpacity(0.25),
                               width: 1,
                             ),
                           ),
@@ -130,7 +144,6 @@ class ProductCard extends ConsumerWidget {
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
                               color: Colors.white,
-                              letterSpacing: 0.3,
                             ),
                           ),
                         ),
@@ -148,14 +161,17 @@ class ProductCard extends ConsumerWidget {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const LoginScreen(),
+                              builder: (_) =>
+                                  const LoginScreen(),
                             ),
                           );
                           return;
                         }
 
                         await ref
-                            .read(favoriteProvider.notifier)
+                            .read(
+                              favoriteProvider.notifier,
+                            )
                             .toggle(product.id);
 
                         AppToast.info(
@@ -165,8 +181,10 @@ class ProductCard extends ConsumerWidget {
                               : "Added to favorites",
                         );
                       },
-                      child: const Icon(
-                        Icons.favorite_border,
+                      child: Icon(
+                        isFav
+                            ? Icons.favorite
+                            : Icons.favorite_border,
                         color: Colors.white,
                         size: 22,
                       ),
@@ -178,64 +196,75 @@ class ProductCard extends ConsumerWidget {
 
             // ================= INFO =================
             Padding(
-              padding: const EdgeInsets.all(14),
+              padding:
+                  const EdgeInsets.fromLTRB(14, 10, 14, 12),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
                 children: [
 
-                  // PRODUCT NAME
+                  // NAME
                   Text(
                     product.name,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
-                      fontSize: 15,
+                      fontSize: 14,
                       fontWeight: FontWeight.w700,
-                      height: 1.3,
-                      color: Color(0xFF1A1A1A),
+                      height: 1.1,
                     ),
                   ),
 
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 6),
 
-                  // ================= PRICE + ACTION =================
+                  // PRICE + ACTION
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    crossAxisAlignment:
+                        CrossAxisAlignment.end,
                     children: [
 
                       // PRICE
                       Expanded(
                         child: Column(
+                          mainAxisSize:
+                              MainAxisSize.min,
                           crossAxisAlignment:
                               CrossAxisAlignment.start,
                           children: [
 
                             if (product.hasDiscount)
                               Text(
-                                "MWK ${product.originalPrice?.toStringAsFixed(0)}",
-                                style: const TextStyle(
-                                  fontSize: 11,
+                                "MWK ${formatPrice(product.originalPrice ?? 0)}",
+                                style:
+                                    const TextStyle(
+                                  fontSize: 10,
+                                  height: 1,
                                   color: Colors.grey,
                                   decoration:
-                                      TextDecoration.lineThrough,
+                                      TextDecoration
+                                          .lineThrough,
                                 ),
                               ),
 
                             Text(
-                              "MWK ${product.price.toStringAsFixed(0)}",
+                              "MWK ${formatPrice(product.price)}",
                               style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: theme.primaryColor,
+                                fontSize: 13,
+                                height: 1,
+                                fontWeight:
+                                    FontWeight.w700,
+                                color:
+                                    theme.primaryColor,
                               ),
                             ),
                           ],
                         ),
                       ),
 
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 6),
 
-                      // ACTION ICON
+                      // ACTION
                       GestureDetector(
                         onTap: isOwner
                             ? () {
@@ -263,8 +292,13 @@ class ProductCard extends ConsumerWidget {
                                     }
 
                                     ref
-                                        .read(addToCartProvider)
-                                        .call(product, 1);
+                                        .read(
+                                          addToCartProvider,
+                                        )
+                                        .call(
+                                          product,
+                                          1,
+                                        );
 
                                     AppToast.success(
                                       context,
@@ -275,12 +309,14 @@ class ProductCard extends ConsumerWidget {
                         child: Icon(
                           isOwner
                               ? Icons.edit_rounded
-                              : Icons.shopping_cart_outlined,
-                          size: 23,
+                              : Icons
+                                  .shopping_cart_outlined,
+                          size: 19,
                           color: isOwner
                               ? const Color(0xFF2E7D32)
                               : product.isInStock
-                                  ? const Color(0xFFFF8C00)
+                                  ? const Color(
+                                      0xFFFF8C00)
                                   : Colors.grey,
                         ),
                       ),
