@@ -56,6 +56,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final authState = ref.watch(authProvider);
     final user = authState.user;
 
+
+    final isLoggedIn = authState.isAuthenticated;
+
     final walletAsync = ref.watch(walletProvider);
     final hasShop = ref.watch(hasShopProvider);
 
@@ -71,72 +74,99 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            const SizedBox(height: 35),
+          
+            const SizedBox(height: 45),
 
-            // ================= HEADER =================
-            Container(
-              margin: EdgeInsets.all(AppSpacing.md),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                gradient: const LinearGradient(
-                  colors: [
-                    AppColors.mangoOrange,
-                    AppColors.leafGreen,
-                  ],
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
-                    blurRadius: 14,
-                    offset: const Offset(0, 6),
-                  )
-                ],
-              ),
-              child: Column(
-                children: [
-                  const CircleAvatar(
-                    radius: 28,
-                    backgroundColor: Colors.white24,
-                    child: Icon(Icons.person, size: 28, color: Colors.white),
-                  ),
-                  const SizedBox(height: 8),
-
-                  Text(
-                    "${user?.firstName ?? ""} ${user?.lastName ?? ""}",
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  Text(
-                    user?.email ?? "",
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 12,
-                    ),
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  walletAsync.when(
-                    data: (wallet) => Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _miniStat("Bal", "${wallet.currency} ${wallet.balance}"),
-                        _miniStat("Earn", "${wallet.currency} ${wallet.totalEarnings}"),
-                        _miniStat("Out", "${wallet.currency} ${wallet.totalWithdrawn}"),
-                      ],
-                    ),
-                    loading: () =>
-                        const CircularProgressIndicator(color: Colors.white),
-                    error: (_, __) => const Text("Wallet error"),
-                  ),
-                ],
-              ),
+// ================= HEADER =================
+Stack(
+  alignment: Alignment.center,
+  clipBehavior: Clip.none,
+  children: [
+    Container(
+      margin: EdgeInsets.all(AppSpacing.md),
+      padding: const EdgeInsets.fromLTRB(20, 70, 20, 20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [
+            AppColors.mangoOrange,
+            AppColors.leafGreen,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Text(
+            "${user?.firstName ?? ""} ${user?.lastName ?? ""}",
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
             ),
+          ),
+
+          const SizedBox(height: 5),
+
+          Text(
+            user?.email ?? "",
+            style: const TextStyle(
+              color: Colors.white70,
+              fontSize: 13,
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          walletAsync.when(
+            data: (wallet) => Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _miniStat(
+                  "Balance",
+                  "${wallet.currency} ${wallet.balance}",
+                ),
+                _miniStat(
+                  "Earnings",
+                  "${wallet.currency} ${wallet.totalEarnings}",
+                ),
+                _miniStat(
+                  "Withdrawn",
+                  "${wallet.currency} ${wallet.totalWithdrawn}",
+                ),
+              ],
+            ),
+            loading: () => const CircularProgressIndicator(
+              color: Colors.white,
+            ),
+            error: (_, __) => const Text("Wallet error"),
+          ),
+        ],
+      ),
+    ),
+
+    const Positioned(
+      top: -35,
+      child: CircleAvatar(
+        radius: 40,
+        backgroundColor: AppColors.mangoOrange,
+        child: Icon(
+          Icons.person,
+          size: 40,
+          color: Colors.white,
+        ),
+      ),
+    ),
+  ],
+),
 
             const SizedBox(height: 5),
 
@@ -235,50 +265,69 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ],
                   ),
 
-                  _sectionCard(
-                    key: "shop",
-                    title: "Shop Management",
-                    crossAxisCount: crossAxisCount,
-                    children: !hasShop
-                        ? [
-                            _gridCard(Icons.add_business, "Create Shop", () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      const CreateShopScreen(),
-                                ),
-                              );
-                            }),
-                          ]
-                        : [
-                            _gridCard(Icons.store, "My Shop", () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const MyShopScreen(),
-                                ),
-                              );
-                            }),
-                            _gridCard(Icons.add_box, "Add Product", () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const AddProductScreen(),
-                                ),
-                              );
-                            }),
-                            _gridCard(Icons.local_shipping, "Deliveries", () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      const SellerDeliveryScreen(),
-                                ),
-                              );
-                            }),
-                          ],
+                  if (isLoggedIn)
+  _sectionCard(
+    key: "shop",
+    title: "Shop Management",
+    crossAxisCount: crossAxisCount,
+    children: !hasShop
+        ? [
+            _gridCard(
+              Icons.add_business,
+              "Create Shop",
+              () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        const CreateShopScreen(),
                   ),
+                );
+              },
+            ),
+          ]
+        : [
+            _gridCard(
+              Icons.store,
+              "My Shop",
+              () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        const MyShopScreen(),
+                  ),
+                );
+              },
+            ),
+            _gridCard(
+              Icons.add_box,
+              "Add Product",
+              () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        const AddProductScreen(),
+                  ),
+                );
+              },
+            ),
+            _gridCard(
+              Icons.local_shipping,
+              "Deliveries",
+              () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        const SellerDeliveryScreen(),
+                  ),
+                );
+              },
+            ),
+          ],
+  ),
 
                   _sectionCard(
                     key: "account",

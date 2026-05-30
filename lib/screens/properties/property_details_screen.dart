@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:url_launcher/url_launcher.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../auth/login_screen.dart';
+import '../../utils/app_toast.dart';
 import '../../providers/properties_provider.dart';
 import '../../providers/api_provider.dart';
 import '../../widgets/main_app_bar.dart';
@@ -8,6 +11,7 @@ import '../../widgets/shop_map_modal.dart';
 import '../../theme/app_colors.dart';
 import 'property_unlock_screen.dart';
 import 'property_card.dart';
+import '../../widgets/app_fab.dart';
 import '../../providers/auth_provider.dart';
 import '../auth/login_screen.dart';
 import '../../theme/design_system/app_spacing.dart';
@@ -30,6 +34,19 @@ class PropertyDetailsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final propertyAsync = ref.watch(propertyDetailsProvider(propertyId));
+
+
+    final authState = ref.watch(authProvider);
+    final isLoggedIn = authState.isAuthenticated;
+
+
+    void _openWhatsApp(String phone) async {
+          final uri = Uri.parse("https://wa.me/$phone");
+
+          if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+            AppToast.info(context, "Could not open WhatsApp");
+            }
+          }
 
 
     return Scaffold(
@@ -596,24 +613,66 @@ SizedBox(
 
               // ✅ FLOATING MAP BUTTON
               if (property.isUnlocked)
-                Positioned(
-                  bottom: 20,
-                  right: 16,
-                  child: FloatingActionButton(
-                    backgroundColor: AppColors.mangoOrange,
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        builder: (_) => ShopMapModal(
-                          shopLat: property.latitude,
-                          shopLng: property.longitude,
-                        ),
-                      );
-                    },
-                    child: Icon(Icons.map),
-                  ),
+  Positioned(
+    bottom: 20,
+    right: 16,
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+
+        // 🗺 MAP FAB
+        AppFab(
+          heroTag: "map",
+          icon: Icons.map,
+          tooltip: "View Map",
+          toastMessage: "Opening map",
+          onPressed: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              builder: (_) => ShopMapModal(
+                shopLat: property.latitude,
+                shopLng: property.longitude,
+              ),
+            );
+          },
+        ),
+
+        const SizedBox(height: AppSpacing.sm),
+
+        // 💬 WHATSAPP FAB (ALSO ONLY CHECK UNLOCKED)
+        AppFab(
+          heroTag: "whatsapp_property",
+          icon: FontAwesomeIcons.whatsapp,
+          tooltip: "Chat on WhatsApp",
+          toastMessage: "Opening WhatsApp...",
+          onPressed: () {
+            if (!isLoggedIn) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const LoginScreen(),
                 ),
+              );
+              return;
+            }
+
+            final phone = property.ownerPhoneNumber;
+
+            if (phone == null || phone.isEmpty) {
+              AppToast.info(
+                context,
+                "No WhatsApp number available",
+              );
+              return;
+            }
+
+            _openWhatsApp(phone);
+          },
+        ),
+      ],
+    ),
+  ),
             ],
           );
         },

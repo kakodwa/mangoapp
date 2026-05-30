@@ -43,6 +43,7 @@ class RoomDetailScreen extends ConsumerWidget {
               /// ================= IMAGE HEADER =================
               SliverAppBar(
                 expandedHeight: 320,
+                automaticallyImplyLeading: false,
                 pinned: true,
                 elevation: 0,
                 backgroundColor: Theme.of(context).colorScheme.surface,

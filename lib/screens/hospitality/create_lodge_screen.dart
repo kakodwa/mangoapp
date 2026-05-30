@@ -15,7 +15,7 @@ import '../../models/amenity_model.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_text_field.dart';
 import '../../theme/design_system/app_spacing.dart';
-
+import '../../widgets/app_fab.dart';
 import '../../widgets/image_crop_picker.dart';
 
 class CreateLodgeScreen extends ConsumerStatefulWidget {

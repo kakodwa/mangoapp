@@ -6,9 +6,12 @@ import '../../models/property_model.dart';
 import 'property_details_screen.dart';
 import 'edit_property_screen.dart';
 import 'add_property_screen.dart';
-
+import '../../utils/app_snackbar.dart';
+import '../../utils/app_toast.dart';
+import '../../theme/app_colors.dart';
 import '../../widgets/main_app_bar.dart';
 import '../../widgets/main_drawer.dart';
+import '../../widgets/app_fab.dart';
 import '../../widgets/app_scaffold.dart';
 
 class MyPropertiesScreen extends ConsumerWidget {
@@ -23,18 +26,20 @@ class MyPropertiesScreen extends ConsumerWidget {
       appBar: const MainAppBar(title: 'My Properties'),
 
       // ✅ ADD PROPERTY BUTTON
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        child: Icon(Icons.add),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const AddPropertyScreen(),
-            ),
-          );
-        },
+      floatingActionButton: AppFab(
+  heroTag: "add_property",
+  icon: Icons.add,
+  tooltip: "Add Property",
+  toastMessage: "Create new property",
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const AddPropertyScreen(),
       ),
+    );
+  },
+),
 
       body: asyncProps.when(
         data: (properties) {

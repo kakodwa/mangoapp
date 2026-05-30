@@ -232,7 +232,7 @@ class _CreateShopScreenState extends ConsumerState<CreateShopScreen> {
             const SizedBox(height: AppSpacing.md),
 
             AppTextField(
-              label: "City",
+              label: "Area/Town",
               controller: cityController,
               isRequired: true,
             ),
@@ -251,11 +251,28 @@ class _CreateShopScreenState extends ConsumerState<CreateShopScreen> {
             const SizedBox(height: AppSpacing.md),
 
             AppTextField(
-              label: "Phone",
-              controller: phoneController,
-              type: TextFieldType.phone,
-              isRequired: true,
-            ),
+  label: "Phone (WhatsApp)",
+  hint: "+265993344416",
+  controller: phoneController,
+  type: TextFieldType.phone,
+  isRequired: true,
+  validator: (value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Phone number is required';
+    }
+
+    final phone = value.trim();
+
+    // ✅ international WhatsApp format validation
+    final regex = RegExp(r'^\+[1-9]\d{7,14}$');
+
+    if (!regex.hasMatch(phone)) {
+      return 'Use format like +265993344416';
+    }
+
+    return null;
+  },
+),
 
             const SizedBox(height: AppSpacing.md),
 

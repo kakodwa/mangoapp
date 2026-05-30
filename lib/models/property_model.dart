@@ -30,9 +30,6 @@ class PropertyImage {
   }
 }
 
-
-
-
 class Property {
   final int id;
   final int ownerId;
@@ -57,8 +54,14 @@ class Property {
   final bool isPubliclyVisible;
   final double unlockFee;
   final int viewCount;
+
   final List<PropertyImage> images;
+
   final String ownerName;
+
+  // ✅ NEW FIELD
+  final String? ownerPhoneNumber;
+
   final bool isUnlocked;
   final DateTime createdAt;
 
@@ -69,10 +72,7 @@ class Property {
     required this.slug,
     required this.description,
     required this.propertyType,
-
-
     required this.listingPurpose,
-
     required this.status,
     required this.latitude,
     required this.longitude,
@@ -89,6 +89,7 @@ class Property {
     required this.viewCount,
     required this.images,
     required this.ownerName,
+    this.ownerPhoneNumber,
     required this.isUnlocked,
     required this.createdAt,
   });
@@ -101,10 +102,7 @@ class Property {
       slug: json['slug'] ?? '',
       description: json['description'] ?? '',
       propertyType: json['property_type'] ?? 'house',
-
-  
       listingPurpose: json['listing_purpose'] ?? 'sale',
-
       status: json['status'] ?? 'available',
       latitude: double.tryParse(json['latitude'].toString()) ?? 0.0,
       longitude: double.tryParse(json['longitude'].toString()) ?? 0.0,
@@ -119,11 +117,14 @@ class Property {
       isPubliclyVisible: json['is_publicly_visible'] ?? false,
       unlockFee: double.tryParse(json['unlock_fee'].toString()) ?? 0.0,
       viewCount: json['view_count'] ?? 0,
+
       images: (json['images'] as List<dynamic>?)
               ?.map((img) => PropertyImage.fromJson(img))
               .toList() ??
           [],
+
       ownerName: json['owner_name'] ?? '',
+      ownerPhoneNumber: json['owner_phone_number'], // ✅ ADDED
       isUnlocked: json['is_unlocked'] ?? false,
       createdAt: DateTime.parse(
         json['created_at'] ?? DateTime.now().toIso8601String(),
@@ -138,10 +139,7 @@ class Property {
       'slug': slug,
       'description': description,
       'property_type': propertyType,
-
-      
       'listing_purpose': listingPurpose,
-
       'status': status,
       'latitude': latitude,
       'longitude': longitude,
@@ -158,10 +156,14 @@ class Property {
       'view_count': viewCount,
       'images': images.map((e) => e.toJson()).toList(),
       'owner_name': ownerName,
+      'owner_phone_number': ownerPhoneNumber, // ✅ ADDED
       'is_unlocked': isUnlocked,
       'created_at': createdAt.toIso8601String(),
     };
   }
 
   String get priceFormatted => 'MWK $price';
+
+  // ✅ helper getter
+  String get phoneNumber => ownerPhoneNumber ?? '';
 }

@@ -23,6 +23,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _lastNameController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  String? _selectedDistrict;
+  String? _selectedGender;
+  DateTime? _dateOfBirth;
 
   String _selectedUserType = 'customer';
   bool _loading = false;
@@ -32,6 +35,39 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       SnackBar(content: Text(message)),
     );
   }
+
+
+  Future<void> _pickDateOfBirth() async {
+  final picked = await showDatePicker(
+    context: context,
+    initialDate: DateTime.now().subtract(
+      const Duration(days: 365 * 18),
+    ),
+    firstDate: DateTime(1900),
+    lastDate: DateTime.now(),
+  );
+
+  if (picked != null) {
+    setState(() {
+      _dateOfBirth = picked;
+    });
+  }
+}
+
+
+  final List<String> _districts = [
+  "Balaka","Blantyre","Chikwawa","Chiradzulu","Chitipa","Dedza",
+  "Dowa","Karonga","Kasungu","Likoma","Lilongwe","Machinga",
+  "Mangochi","Mchinji","Mulanje","Mwanza","Mzimba","Neno",
+  "Nkhata Bay","Nkhotakota","Nsanje","Ntcheu","Ntchisi",
+  "Phalombe","Rumphi","Salima","Thyolo","Zomba",
+];
+
+final List<String> _genders = [
+  "Male",
+  "Female",
+  "Other",
+];
 
   Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
@@ -49,7 +85,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
         userType: _selectedUserType,
-      );
+        district: _selectedDistrict,
+        gender: _selectedGender,
+        dateOfBirth: _dateOfBirth?.toIso8601String().split('T').first,
+        );
 
       final state = ref.read(authProvider);
 
@@ -131,6 +170,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
               AppTextField(
   label: "Phone Number (WhatsApp)",
+  hint: '+265993344416',
   controller: _phoneController,
   type: TextFieldType.phone,
   prefix: const Icon(Icons.phone),
@@ -193,6 +233,68 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ],
                 onChanged: (v) => setState(() => _selectedUserType = v!),
               ),
+
+              const SizedBox(height: AppSpacing.sm),
+
+DropdownButtonFormField<String>(
+  value: _selectedDistrict,
+  decoration: const InputDecoration(
+    labelText: "District",
+    border: OutlineInputBorder(),
+  ),
+  items: _districts
+      .map((d) => DropdownMenuItem(
+            value: d,
+            child: Text(d),
+          ))
+      .toList(),
+  onChanged: (v) => setState(() => _selectedDistrict = v),
+  validator: (value) {
+    if (value == null) return "Select district";
+    return null;
+  },
+),
+
+
+const SizedBox(height: AppSpacing.sm),
+
+DropdownButtonFormField<String>(
+  value: _selectedGender,
+  decoration: const InputDecoration(
+    labelText: "Gender",
+    border: OutlineInputBorder(),
+  ),
+  items: _genders
+      .map((g) => DropdownMenuItem(
+            value: g,
+            child: Text(g),
+          ))
+      .toList(),
+  onChanged: (v) => setState(() => _selectedGender = v),
+  validator: (value) {
+    if (value == null) return "Select gender";
+    return null;
+  },
+),
+
+const SizedBox(height: AppSpacing.sm),
+InkWell(
+  onTap: _pickDateOfBirth,
+  child: InputDecorator(
+    decoration: const InputDecoration(
+      labelText: "Date of Birth",
+      border: OutlineInputBorder(),
+      prefixIcon: Icon(Icons.cake),
+    ),
+    child: Text(
+      _dateOfBirth == null
+          ? "Select Date of Birth"
+          : "${_dateOfBirth!.day}/${_dateOfBirth!.month}/${_dateOfBirth!.year}",
+    ),
+  ),
+),
+
+const SizedBox(height: AppSpacing.sm),
 
               const SizedBox(height: AppSpacing.sm),
 

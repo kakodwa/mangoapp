@@ -1,5 +1,3 @@
-// lib/models/events/event_ticket_type_model.dart
-
 class EventTicketTypeModel {
   final int id;
   final String name; // regular, vip, vvip
@@ -23,5 +21,15 @@ class EventTicketTypeModel {
       totalSeats: json['total_seats'] ?? 0,
       availableSeats: json['available_seats'] ?? 0,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'price': price,
+      'total_seats': totalSeats,
+      'available_seats': availableSeats,
+    };
   }
 }

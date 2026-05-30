@@ -1,17 +1,22 @@
 // lib/screens/events/event_detail_screen.dart
-
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
-
+import '../../providers/auth_provider.dart';
 import '../../models/event_model.dart';
 import '../../models/event_ticket_type_model.dart';
-
+import '../../utils/app_toast.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/main_app_bar.dart';
 import '../../widgets/shop_map_modal.dart';
 import 'buy_ticket_screen.dart';
+import '../auth/login_screen.dart';
+import '../../utils/app_snackbar.dart';
+import '../../widgets/app_fab.dart';
 import '../../theme/design_system/app_spacing.dart';
 
-class EventDetailScreen extends StatelessWidget {
+class EventDetailScreen extends ConsumerWidget {
   final EventModel event;
 
   const EventDetailScreen({
@@ -20,7 +25,7 @@ class EventDetailScreen extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
 
     final totalSeats = event.ticketTypes.fold<int>(
       0,
@@ -38,6 +43,19 @@ class EventDetailScreen extends StatelessWidget {
     totalSeats == 0 ? 0.0 : soldTickets / totalSeats;
 
 
+    final authState = ref.watch(authProvider);
+    final isLoggedIn = authState.isAuthenticated;
+
+
+    void _openWhatsApp(String phone) async {
+          final uri = Uri.parse("https://wa.me/$phone");
+
+          if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+            AppToast.info(context, "Could not open WhatsApp");
+            }
+          }
+
+
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
@@ -48,24 +66,73 @@ class EventDetailScreen extends StatelessWidget {
       // =========================
       // FLOATING NAVIGATION BUTTON
       // =========================
-      floatingActionButton:
-    event.latitude != null && event.longitude != null
-        ? FloatingActionButton(
-            backgroundColor: AppColors.primary(context),
-            child: Icon(Icons.navigation),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ShopMapModal(
-                    shopLat: event.latitude!,
-                    shopLng: event.longitude!,
+      floatingActionButton: (event.latitude != null && event.longitude != null) ||
+        (event.organizerPhoneNumber  != null && event.organizerPhoneNumber!.isNotEmpty)
+    ? Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+
+          // 🗺 MAP BUTTON
+          if (event.latitude != null && event.longitude != null)
+            AppFab(
+              heroTag: "map_event",
+              icon: Icons.map,
+              tooltip: "Open Map",
+              toastMessage: "Opening location",
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ShopMapModal(
+                      shopLat: event.latitude!,
+                      shopLng: event.longitude!,
+                    ),
                   ),
-                ),
-              );
-            },
-          )
-        : null,
+                );
+              },
+            ),
+
+          if (event.latitude != null &&
+              event.longitude != null &&
+              event.organizerPhoneNumber!= null &&
+              event.organizerPhoneNumber!.isNotEmpty)
+            const SizedBox(height: AppSpacing.sm),
+
+          // 💬 WHATSAPP BUTTON
+          if (event.organizerPhoneNumber != null &&
+              event.organizerPhoneNumber!.isNotEmpty)
+            AppFab(
+              heroTag: "whatsapp_event",
+              icon: FontAwesomeIcons.whatsapp,
+              tooltip: "Chat on WhatsApp",
+              toastMessage: "Opening WhatsApp...",
+              onPressed: () {
+                if (!isLoggedIn) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const LoginScreen(),
+                    ),
+                  );
+                  return;
+                }
+
+                final phone = event.organizerPhoneNumber;
+
+                if (phone == null || phone.isEmpty) {
+                  AppToast.info(
+                    context,
+                    "No WhatsApp number available",
+                  );
+                  return;
+                }
+
+                _openWhatsApp(phone);
+              },
+            ),
+        ],
+      )
+    : null,
 
       body: ListView(
         padding: EdgeInsets.all(AppSpacing.md),

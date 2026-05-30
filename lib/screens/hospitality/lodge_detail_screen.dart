@@ -1,22 +1,25 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:url_launcher/url_launcher.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../models/lodge_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/rooms_provider.dart';
-
+import '../auth/login_screen.dart';
 import '../../widgets/main_drawer.dart';
 import '../../widgets/main_app_bar.dart';
-
+import '../../widgets/app_fab.dart';
 import '../../theme/design_system/app_button.dart';
 import '../../theme/design_system/app_card.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_typography.dart';
-
+import '../../utils/app_snackbar.dart';
 import '../../widgets/shop_map_modal.dart';
+import '../../theme/app_colors.dart';
 import '../../widgets/hospitality/room_card.dart';
-
+import '../../utils/app_toast.dart';
 import 'availability_calendar_screen.dart';
 
 class LodgeDetailScreen extends ConsumerWidget {
@@ -32,6 +35,16 @@ class LodgeDetailScreen extends ConsumerWidget {
     final roomsAsync = ref.watch(roomsProvider(lodge.id));
     final authState = ref.watch(authProvider);
     final user = authState.user;
+    final isLoggedIn = authState.isAuthenticated;
+
+
+    void _openWhatsApp(String phone) async {
+          final uri = Uri.parse("https://wa.me/$phone");
+
+          if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+            AppToast.info(context, "Could not open WhatsApp");
+            }
+          }
 
     return Scaffold(
       
@@ -49,6 +62,7 @@ class LodgeDetailScreen extends ConsumerWidget {
               /// ================= HERO APP BAR =================
               SliverAppBar(
                 expandedHeight: 320,
+                automaticallyImplyLeading: false,
                 pinned: true,
                 backgroundColor: Theme.of(context).colorScheme.surface,
                 elevation: 0,
@@ -273,33 +287,71 @@ class LodgeDetailScreen extends ConsumerWidget {
             ],
           ),
 
+
           /// ================= MAP BUTTON =================
-          if (lodge.latitude != null && lodge.longitude != null)
-            Positioned(
-              bottom: 20,
-              right: 16,
-              child: FloatingActionButton.extended(
-                heroTag: "mapBtn",
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                elevation: 4,
-                onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (_) => ShopMapModal(
-                      shopLat: lodge.latitude!,
-                      shopLng: lodge.longitude!,
-                    ),
-                  );
-                },
-                icon: Icon(Icons.map, color: Theme.of(context).colorScheme.surface),
-                label: Text(
-                  "View Map",
-                  style: TextStyle(color: Theme.of(context).colorScheme.surface),
+if (lodge.latitude != null && lodge.longitude != null)
+  Positioned(
+    bottom: 20,
+    right: 16,
+    child: Column(
+      children: [
+
+              // 💬 WHATSAPP BUTTON
+        AppFab(
+          heroTag: "whatsapp",
+          icon: FontAwesomeIcons.whatsapp,
+          tooltip: "Chat on WhatsApp",
+          toastMessage: "Opening WhatsApp...",
+          onPressed: () {
+            if (!isLoggedIn) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const LoginScreen(),
                 ),
+              );
+              return;
+            }
+
+            final phone = lodge.phoneNumber;
+
+            if (phone == null || phone.isEmpty) {
+              AppToast.info(
+                context,
+                "No WhatsApp number available",
+              );
+              return;
+            }
+
+            _openWhatsApp(phone);
+          },
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        // 🗺 MAP BUTTON
+        AppFab(
+          heroTag: "map_lodge",
+          icon: Icons.map,
+          tooltip: "View Map",
+          toastMessage: "Opening map",
+          onPressed: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (_) => ShopMapModal(
+                shopLat: lodge.latitude!,
+                shopLng: lodge.longitude!,
               ),
-            ),
+            );
+          },
+        ),
+
+        
+
+
+      ],
+    ),
+  ),
         ],
       ),
     );

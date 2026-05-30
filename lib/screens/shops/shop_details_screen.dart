@@ -1,107 +1,121 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../providers/shops_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../../providers/products_provider.dart';
-import '../../widgets/main_app_bar.dart';
-import '../../widgets/shop_map_modal.dart';
-import '../../theme/app_colors.dart';
-import '../products/product_card.dart';
-import '../../models/shop_model.dart';
-import 'shop_card.dart';
-import '../../theme/design_system/app_spacing.dart';
 
-class ShopDetailsScreen extends ConsumerWidget {
+import '../../widgets/shop_map_modal.dart';
+import '../../widgets/app_fab.dart';
+
+import '../auth/login_screen.dart';
+import '../products/product_card.dart';
+import 'shop_card.dart';
+
+import '../../theme/app_colors.dart';
+import '../../theme/design_system/app_spacing.dart';
+import '../../utils/app_toast.dart';
+
+class ShopDetailsScreen extends ConsumerStatefulWidget {
   final int shopId;
 
-  const ShopDetailsScreen({Key? key, required this.shopId})
-      : super(key: key);
+  const ShopDetailsScreen({super.key, required this.shopId});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final shopAsync = ref.watch(shopDetailsProvider(shopId));
-    final productsAsync = ref.watch(productsByShopProvider(shopId));
+  ConsumerState<ShopDetailsScreen> createState() => _ShopDetailsScreenState();
+}
 
-    // ✅ RELATED SHOPS
-    final relatedShopsAsync =
-        ref.watch(relatedShopsProvider(shopId));
+class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
+  void _openWhatsApp(BuildContext context, String phone) async {
+    final uri = Uri.parse("https://wa.me/$phone");
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      AppToast.info(context, "Could not open WhatsApp");
+    }
+  }
+
+
+    void _callPhone(String phone) async {
+    final uri = Uri.parse("tel:$phone");
+    await launchUrl(uri);
+  }
+
+  void _sendEmail(String email) async {
+    final uri = Uri.parse("mailto:$email");
+    await launchUrl(uri);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final shopAsync = ref.watch(shopDetailsProvider(widget.shopId));
+    final productsAsync = ref.watch(productsByShopProvider(widget.shopId));
+    final relatedShopsAsync = ref.watch(relatedShopsProvider(widget.shopId));
+    final auth = ref.watch(authProvider);
+    final isLoggedIn = auth.isAuthenticated;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: shopAsync.when(
-        data: (shop) => MainAppBar(title: shop.name),
-        loading: () => const MainAppBar(title: 'Loading...'),
-        error: (_, __) => const MainAppBar(title: 'Shop'),
-      ),
 
       body: shopAsync.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(
-            color: AppColors.mangoOrange,
-          ),
-        ),
-
-        error: (e, _) => Center(
-          child: Text("Error: $e"),
-        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(child: Text("Error: $e")),
 
         data: (shop) {
           return Stack(
             children: [
 
+              // ================= MAIN SCROLL
               CustomScrollView(
                 slivers: [
 
-                  // ================= HEADER
+                  // ================= INSTAGRAM STYLE HEADER
                   SliverAppBar(
-                    expandedHeight: 220,
-                    pinned: false,
-                    automaticallyImplyLeading: true,
+                    expandedHeight: 320,
+                    pinned: true,
+                    stretch: true,
+                    backgroundColor: Colors.black,
+                    leading: const BackButton(color: Colors.white),
+
                     flexibleSpace: FlexibleSpaceBar(
+                      collapseMode: CollapseMode.pin,
                       background: Stack(
                         fit: StackFit.expand,
                         children: [
 
-                          shop.banner != null
+                          // Banner image
+                          shop.banner != null && shop.banner!.isNotEmpty
                               ? Image.network(
                                   shop.banner!,
                                   fit: BoxFit.cover,
                                 )
-                              : Container(
-                                  color: Theme.of(context).colorScheme.outline.withOpacity(0.38),
-                                  child: Icon(
-                                    Icons.store,
-                                    size: 80,
-                                  ),
-                                ),
+                              : Container(color: Colors.grey.shade300),
 
+                          // Dark overlay
                           Container(
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.35),
-                          ),
-
-                          Positioned(
-                            top: 40,
-                            left: 16,
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: AppColors.mangoOrange,
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                shop.category,
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.surface,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.black.withOpacity(0.2),
+                                  Colors.black.withOpacity(0.6),
+                                  Colors.black.withOpacity(0.9),
+                                ],
                               ),
                             ),
                           ),
 
+                          // CATEGORY
                           Positioned(
-                            top: 40,
+                            top: 60,
+                            left: 16,
+                            child: _GlassTag(text: shop.category),
+                          ),
+
+                          // VERIFIED
+                          Positioned(
+                            top: 60,
                             right: 16,
                             child: Row(
                               children: [
@@ -109,17 +123,106 @@ class ShopDetailsScreen extends ConsumerWidget {
                                   shop.status == 'approved'
                                       ? Icons.verified
                                       : Icons.lock,
-                                  color: shop.status == 'approved'
-                                      ? Theme.of(context).colorScheme.secondary
-                                      : Theme.of(context).colorScheme.error,
+                                  color: Colors.white,
                                 ),
-                                const SizedBox(width: 4),
+                                const SizedBox(width: 6),
                                 Text(
                                   shop.status == 'approved'
                                       ? "Verified"
                                       : "Pending",
-                                  style: TextStyle(
-                                      color: Theme.of(context).colorScheme.surface),
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // ================= PROFILE SECTION (INSTAGRAM STYLE)
+                          Positioned(
+                            bottom: 16,
+                            left: 16,
+                            right: 16,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+
+                                    // LOGO
+                                    Container(
+                                      padding: const EdgeInsets.all(3),
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.white,
+                                      ),
+                                      child: CircleAvatar(
+                                        radius: 34,
+                                        backgroundImage: shop.logo.isNotEmpty
+                                            ? NetworkImage(shop.logo)
+                                            : null,
+                                        child: shop.logo.isEmpty
+                                            ? const Icon(Icons.store)
+                                            : null,
+                                      ),
+                                    ),
+
+                                    const SizedBox(width: 12),
+
+                                    // NAME + LOCATION
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            shop.name,
+                                            style: const TextStyle(
+                                              fontSize: 22,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Row(
+                                            children: [
+                                              const Icon(Icons.location_on,
+                                                  size: 14,
+                                                  color: Colors.white70),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                shop.district,
+                                                style: const TextStyle(
+                                                    color: Colors.white70),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                const SizedBox(height: 12),
+
+                                // ================= STATS ROW
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    _StatItem(
+                                      title: "Products",
+                                      value: "${shop.productCount ?? 0}",
+                                    ),
+                                    _StatItem(
+                                      title: "Rating",
+                                      value: "${shop.rating}",
+                                    ),
+                                    _StatItem(
+                                      title: "Reviews",
+                                      value: "${shop.totalReviews}",
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -129,195 +232,160 @@ class ShopDetailsScreen extends ConsumerWidget {
                     ),
                   ),
 
-                  // ================= SHOP INFO
-                  SliverToBoxAdapter(
-                    child: Container(
-                      margin: EdgeInsets.all(AppSpacing.md),
-                      padding: EdgeInsets.all(AppSpacing.md),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.04),
-                            blurRadius: 10,
-                          )
-                        ],
+
+              const SliverToBoxAdapter(child: SizedBox(height: 16)),
+
+              // ================= NAME + STATS
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                
+                      Text(
+                        shop.description,
+                        style: const TextStyle(color: Colors.grey),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              CircleAvatar(
-                                radius: 26,
-                                backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
-                                backgroundImage: shop.logo.isNotEmpty
-                                    ? NetworkImage(shop.logo)
-                                    : null,
-                                child: shop.logo.isEmpty
-                                    ? Icon(Icons.store)
-                                    : null,
-                              ),
-                              const SizedBox(width: AppSpacing.sm),
+                    ],
+                  ),
+                ),
+              ),
 
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      shop.name,
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: AppSpacing.xxs),
-                                    Row(
-                                      children: [
-                                        Icon(Icons.location_on,
-                                            size: 14, color: Theme.of(context).colorScheme.outline),
-                                        const SizedBox(width: 4),
-                                        Text(shop.district),
-                                        const SizedBox(width: AppSpacing.sm),
-                                        Icon(Icons.star,
-                                            size: 14,
-                                            color:
-                                                AppColors.mangoOrange),
-                                        const SizedBox(width: 4),
-                                        Text("${shop.rating}"),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
+              const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
-                              Text(
-                                "${shop.productCount ?? 0} items",
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ],
+                
+
+
+                  // ================= CONTACT CARD (NEW BELOW DESCRIPTION)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 10,
+                          color: Colors.black.withOpacity(0.05),
+                        )
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+
+                        const Text(
+                          "Contact Business",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
                           ),
-                          const SizedBox(height: AppSpacing.sm),
-                          Text(shop.description),
-                        ],
-                      ),
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        // PHONE
+                        Row(
+                          children: [
+                            const Icon(Icons.phone, color:AppColors.mangoOrange),
+                            const SizedBox(width: 10),
+                            Expanded(child: Text(shop.phoneNumber)),
+                            IconButton(
+                              icon: const Icon(Icons.call,color:AppColors.leafGreen),
+                              onPressed: () => _callPhone(shop.phoneNumber),
+                            ),
+                          ],
+                        ),
+
+                        // EMAIL
+                        Row(
+                          children: [
+                            const Icon(Icons.email, color: AppColors.mangoOrange),
+                            const SizedBox(width: 10),
+                            Expanded(child: Text(shop.email)),
+                            IconButton(
+                              icon: const Icon(Icons.send,color:AppColors.leafGreen),
+                              onPressed: () => _sendEmail(shop.email),
+                            ),
+                          ],
+                        ),
+
+                        // WHATSAPP
+                        Row(
+                          children: [
+                            const FaIcon(FontAwesomeIcons.whatsapp,color: AppColors.mangoOrange,),
+                            const SizedBox(width: 10),
+                            const Expanded(child: Text("WhatsApp Chat")),
+                            IconButton(
+                              icon: const Icon(Icons.message,color:AppColors.leafGreen),
+                              onPressed: () {
+                                if (!isLoggedIn) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const LoginScreen(),
+                                    ),
+                                  );
+                                  return;
+                                }
+                                _openWhatsApp(context, shop.phoneNumber);
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
+                ),
+              ),
 
-                  // ================= PRODUCTS TITLE
+              const SliverToBoxAdapter(child: SizedBox(height: 20)),
+
+                  // ================= PRODUCTS
                   const SliverToBoxAdapter(
                     child: Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 16),
+                      padding: EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
                         "Products",
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 20,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   ),
 
-                  const SliverToBoxAdapter(
-                      child: SizedBox(height: 10)),
-
-                  // ================= PRODUCTS GRID
                   productsAsync.when(
                     loading: () => const SliverToBoxAdapter(
-                      child: Center(
-                          child: CircularProgressIndicator()),
-                    ),
-                    error: (e, _) => SliverToBoxAdapter(
-                      child: Center(child: Text("Error: $e")),
-                    ),
+                        child: Center(child: CircularProgressIndicator())),
+                    error: (e, _) =>
+                        SliverToBoxAdapter(child: Text("Error: $e")),
                     data: (products) {
                       return SliverPadding(
-                        padding: EdgeInsets.all(AppSpacing.sm),
+                        padding: const EdgeInsets.all(12),
                         sliver: SliverGrid(
                           delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              return ProductCard(
-                                  product: products[index]);
-                            },
+                            (context, i) =>
+                                ProductCard(product: products[i]),
                             childCount: products.length,
                           ),
                           gridDelegate:
                               const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
-                            crossAxisSpacing: 10,
-                            mainAxisSpacing: 10,
-                            childAspectRatio: 0.70,
+                            childAspectRatio: 0.72,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
                           ),
                         ),
                       );
                     },
                   ),
 
-                  // ================= RELATED SHOPS TITLE
                   const SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 10),
-                      child: Text(
-                        "Related Shops",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // ================= RELATED SHOPS
-                  SliverToBoxAdapter(
-                    child: relatedShopsAsync.when(
-                      loading: () => const Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Center(
-                            child: CircularProgressIndicator()),
-                      ),
-                      error: (e, _) => Padding(
-                        padding: EdgeInsets.all(AppSpacing.md),
-                        child: Text("Error: $e"),
-                      ),
-                      data: (shops) {
-                        if (shops.isEmpty) {
-                          return const Padding(
-                            padding: EdgeInsets.all(16),
-                            child:
-                                Text("No related shops found"),
-                          );
-                        }
-
-                        return SizedBox(
-                          height:280,
-                          child: ListView.separated(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16),
-                            scrollDirection: Axis.horizontal,
-                            itemCount: shops.length,
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(width: 10),
-                                itemBuilder: (context, index) {
-                                  return SizedBox(
-                                    width: 280,
-                                    child: ShopCard(
-                                      shop: shops[index],
-                                      ),
-                                    );
-                                  },
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-
-                  const SliverToBoxAdapter(
-                      child: SizedBox(height: 100)),
+                      child: SizedBox(height: 120)),
                 ],
               ),
 
@@ -327,16 +395,49 @@ class ShopDetailsScreen extends ConsumerWidget {
                 right: 16,
                 child: Column(
                   children: [
-                    FloatingActionButton.small(
+
+                    AppFab(
                       heroTag: "fav",
-                      backgroundColor: Theme.of(context).colorScheme.error,
+                      icon: Icons.favorite_border,
+                      tooltip: "Favorite",
+                      toastMessage: "Saved",
                       onPressed: () {},
-                      child: Icon(Icons.favorite),
                     ),
-                    const SizedBox(height: AppSpacing.sm),
-                    FloatingActionButton(
+
+                    const SizedBox(height: 12),
+
+                    AppFab(
+                      heroTag: "whatsapp",
+                      icon: FontAwesomeIcons.whatsapp,
+                      tooltip: "WhatsApp",
+                      toastMessage: "Opening chat",
+                      onPressed: () {
+                        if (!isLoggedIn) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => const LoginScreen()),
+                          );
+                          return;
+                        }
+
+                        final phone = shop.phoneNumber;
+                        if (phone.isEmpty) {
+                          AppToast.info(context, "No phone number");
+                          return;
+                        }
+
+                        _openWhatsApp(context, phone);
+                      },
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    AppFab(
                       heroTag: "map",
-                      backgroundColor: AppColors.mangoOrange,
+                      icon: Icons.map_outlined,
+                      tooltip: "Map",
+                      toastMessage: "Opening map",
                       onPressed: () {
                         showModalBottomSheet(
                           context: context,
@@ -347,7 +448,6 @@ class ShopDetailsScreen extends ConsumerWidget {
                           ),
                         );
                       },
-                      child: Icon(Icons.map),
                     ),
                   ],
                 ),
@@ -355,6 +455,63 @@ class ShopDetailsScreen extends ConsumerWidget {
             ],
           );
         },
+      ),
+    );
+  }
+}
+
+// ================= STAT ITEM
+class _StatItem extends StatelessWidget {
+  final String title;
+  final String value;
+
+  const _StatItem({required this.title, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          title,
+          style: const TextStyle(
+            color: Colors.white70,
+            fontSize: 12,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ================= GLASS TAG
+class _GlassTag extends StatelessWidget {
+  final String text;
+
+  const _GlassTag({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

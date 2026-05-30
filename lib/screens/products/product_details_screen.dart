@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../providers/products_provider.dart';
 import '../../providers/shops_provider.dart';
 import '../../providers/auth_provider.dart';
@@ -13,8 +14,9 @@ import '../../models/product_model.dart';
 import '../shops/shop_details_screen.dart';
 import '../products/edit_product_screen.dart';
 import '../auth/login_screen.dart';
-
+import '../../widgets/app_fab.dart';
 import '../../utils/app_toast.dart';
+import '../../utils/app_snackbar.dart';
 import '../../theme/design_system/app_spacing.dart';
 
 class ProductDetailsScreen extends ConsumerStatefulWidget {
@@ -44,6 +46,15 @@ class _ProductDetailsScreenState
   void _toast(String msg) {
     AppToast.info(context, msg);
   }
+
+
+void _openWhatsApp(String phone) async {
+  final uri = Uri.parse("https://wa.me/$phone");
+
+  if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+    AppToast.info(context, "Could not open WhatsApp");
+  }
+}
 
 Future<void> _loadRelated(int productId) async {
   if (_loadingMore) return;
@@ -129,6 +140,7 @@ Future<void> _loadRelated(int productId) async {
 
                   // ================= IMAGE CAROUSEL
                   SliverAppBar(
+                    automaticallyImplyLeading: false,
                     expandedHeight: 340,
                     pinned: false,
                     flexibleSpace: FlexibleSpaceBar(
@@ -321,98 +333,121 @@ Container(
               ),
 
               // ================= FLOATING BUTTONS
-              Positioned(
-                bottom: 100,
-                right: 16,
-                child: Column(
-                  children: [
+       Positioned(
+  bottom:20,
+  right:10,
+  child: Column(
+    children: [
 
-                    if (!isOwner)
-                      FloatingActionButton(
-                        heroTag: "fav",
-                        backgroundColor: Theme.of(context).colorScheme.surface,
-                        onPressed: () {
-                          if (!isLoggedIn) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => const LoginScreen()),
-                            );
-                            return;
-                          }
 
-                          ref.read(favoriteProvider.notifier)
-                              .toggle(product.id);
 
-                          _toast("Updated favorites");
-                        },
-                        child: Icon(Icons.favorite_border, color: Theme.of(context).colorScheme.error),
-                      ),
+      
 
-                    const SizedBox(height: AppSpacing.sm),
+      // 🛒 CART (PRIMARY ACTION - KEEP ORANGE)
+      if (product.isInStock && !isOwner)
+        AppFab(
+  heroTag: "cart",
+  icon: Icons.shopping_cart,
+  tooltip: "Add to Cart",
+  toastMessage: "Added to cart",
+  onPressed: () {
+    if (!isLoggedIn) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+      return;
+    }
 
-                    if (product.isInStock && !isOwner)
-                      FloatingActionButton(
-                        heroTag: "cart",
-                        backgroundColor: AppColors.mangoOrange,
-                        onPressed: () {
-                          if (!isLoggedIn) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => const LoginScreen()),
-                            );
-                            return;
-                          }
+    ref.read(addToCartProvider).call(product, _quantity);
+  },
+),
+const SizedBox(height: AppSpacing.sm),
+      // ❤️ FAVORITE
+      if (!isOwner)
+        AppFab(
+  heroTag: "fav",
+  icon: Icons.favorite_border,
+  tooltip: "Favorite",
+  toastMessage: "Updated favorites",
+  onPressed: () {
+    if (!isLoggedIn) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+      return;
+    }
 
-                          ref.read(addToCartProvider)
-                              .call(product, _quantity);
+    ref.read(favoriteProvider.notifier).toggle(product.id);
+  },
+),
 
-                          _toast("Added to cart");
-                        },
-                        child: Icon(Icons.shopping_cart),
-                      ),
+      const SizedBox(height: AppSpacing.sm),
 
-                    const SizedBox(height: AppSpacing.sm),
+// 💬 WHATSAPP
+AppFab(
+  heroTag: "whatsapp",
+  icon: FontAwesomeIcons.whatsapp,
+  tooltip: "Chat on WhatsApp",
+  toastMessage: "Opening WhatsApp...",
+  onPressed: () {
+    if (!isLoggedIn) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+      return;
+    }
 
-                    FloatingActionButton(
-                      heroTag: "shop",
-                      backgroundColor: Theme.of(context).colorScheme.surface,
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => ShopDetailsScreen(
-                              shopId: product.shopId,
-                            ),
-                          ),
-                        );
-                      },
-                      child: Icon(Icons.storefront,
-                          color: AppColors.mangoOrange),
-                    ),
+    final phone = product.shopPhoneNumber;
 
-                    // ================= OWNER EDIT BUTTON (NEW BELOW SHOP)
-                    if (isOwner) ...[
-                      const SizedBox(height: AppSpacing.sm),
-                      FloatingActionButton(
-                        heroTag: "edit",
-                        backgroundColor: Theme.of(context).colorScheme.primary,
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  EditProductScreen(product: product),
-                            ),
-                          );
-                        },
-                        child: Icon(Icons.edit),
-                      ),
-                    ]
-                  ],
-                ),
-              ),
+if (phone == null || phone.isEmpty) {
+  AppToast.info(context, "No WhatsApp number available");
+  return;
+}
+    _openWhatsApp(phone);
+  },
+),
+
+      const SizedBox(height: AppSpacing.sm),
+
+      // 🏪 SHOP
+     AppFab(
+  heroTag: "shop",
+  icon: Icons.storefront,
+  tooltip: "View Shop",
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ShopDetailsScreen(shopId: product.shopId),
+      ),
+    );
+  },
+),
+
+      // ✏️ EDIT (OWNER ONLY)
+      if (isOwner) ...[
+        const SizedBox(height: AppSpacing.sm),
+
+      AppFab(
+  heroTag: "edit",
+  icon: Icons.edit,
+  tooltip: "Edit Product",
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => EditProductScreen(product: product),
+      ),
+    );
+  },
+),
+      ],
+    ],
+  ),
+),
             ],
           );
         },

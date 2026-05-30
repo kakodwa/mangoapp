@@ -8,6 +8,14 @@ class User {
   final String? phoneNumber;
   final String? profilePicture;
   final String? bio;
+
+  // ======================
+  // NEW FIELDS
+  // ======================
+  final String? gender;
+  final String? district;
+  final DateTime? dateOfBirth;
+
   final bool isVerified;
   final DateTime dateJoined;
 
@@ -21,6 +29,9 @@ class User {
     this.phoneNumber,
     this.profilePicture,
     this.bio,
+    this.gender,
+    this.district,
+    this.dateOfBirth,
     required this.isVerified,
     required this.dateJoined,
   });
@@ -36,8 +47,18 @@ class User {
       phoneNumber: json['phone_number'],
       profilePicture: json['profile_picture'],
       bio: json['bio'],
+
+      // NEW FIELDS
+      gender: json['gender'],
+      district: json['district'],
+      dateOfBirth: json['date_of_birth'] != null
+          ? DateTime.tryParse(json['date_of_birth'])
+          : null,
+
       isVerified: json['is_verified'] ?? false,
-      dateJoined: DateTime.parse(json['date_joined'] ?? DateTime.now().toIso8601String()),
+      dateJoined: DateTime.parse(
+        json['date_joined'] ?? DateTime.now().toIso8601String(),
+      ),
     );
   }
 
@@ -52,12 +73,30 @@ class User {
       'phone_number': phoneNumber,
       'profile_picture': profilePicture,
       'bio': bio,
+
+      // NEW FIELDS
+      'gender': gender,
+      'district': district,
+      'date_of_birth': dateOfBirth != null
+          ? "${dateOfBirth!.year.toString().padLeft(4, '0')}-"
+              "${dateOfBirth!.month.toString().padLeft(2, '0')}-"
+              "${dateOfBirth!.day.toString().padLeft(2, '0')}"
+          : null,
+
       'is_verified': isVerified,
       'date_joined': dateJoined.toIso8601String(),
     };
   }
 
   String get fullName => '$firstName $lastName';
+
+  String? get dateOfBirthString {
+    if (dateOfBirth == null) return null;
+
+    return "${dateOfBirth!.year.toString().padLeft(4, '0')}-"
+        "${dateOfBirth!.month.toString().padLeft(2, '0')}-"
+        "${dateOfBirth!.day.toString().padLeft(2, '0')}";
+  }
 
   User copyWith({
     int? id,
@@ -69,6 +108,9 @@ class User {
     String? phoneNumber,
     String? profilePicture,
     String? bio,
+    String? gender,
+    String? district,
+    DateTime? dateOfBirth,
     bool? isVerified,
     DateTime? dateJoined,
   }) {
@@ -82,6 +124,12 @@ class User {
       phoneNumber: phoneNumber ?? this.phoneNumber,
       profilePicture: profilePicture ?? this.profilePicture,
       bio: bio ?? this.bio,
+
+      // NEW FIELDS
+      gender: gender ?? this.gender,
+      district: district ?? this.district,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+
       isVerified: isVerified ?? this.isVerified,
       dateJoined: dateJoined ?? this.dateJoined,
     );

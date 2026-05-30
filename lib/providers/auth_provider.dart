@@ -103,6 +103,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required String firstName,
     required String lastName,
     required String userType,
+    String? district,
+    String? gender,
+    String? dateOfBirth,
   }) async {
     state = state.copyWith(isLoading: true, error: null);
 
@@ -115,6 +118,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         lastName: lastName,
         userType: userType,
         phoneNumber: phoneNumber,
+        district: district,
+        gender: gender,
+        dateOfBirth: dateOfBirth,
       );
 
       await _apiClient.saveTokens(

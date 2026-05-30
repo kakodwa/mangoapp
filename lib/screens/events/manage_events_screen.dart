@@ -7,7 +7,9 @@ import '../../models/event_model.dart';
 import '../../models/event_ticket_type_model.dart';
 import '../../providers/events_provider.dart';
 import '../../theme/app_colors.dart';
+import '../../utils/app_snackbar.dart';
 import '../../widgets/main_app_bar.dart';
+import '../../widgets/app_fab.dart';
 import 'event_tickets_screen.dart';
 import 'create_event_screen.dart';
 import '../../theme/design_system/app_spacing.dart';
@@ -566,21 +568,18 @@ class _ManageEventsScreenState
       ),
 
       floatingActionButton:
-          FloatingActionButton.extended(
-        backgroundColor:
-            AppColors.mangoOrange,
-        foregroundColor: Theme.of(context).colorScheme.surface,
-        icon: Icon(Icons.add),
-        label: Text("Add Event"),
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => AddEventScreen(),
-            ),
-          );
-        },
-      ),
+       AppFab(
+  heroTag: "add_event",
+  icon: Icons.add,
+  tooltip: "Add Event",
+  toastMessage: "Create event",
+  onPressed: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => AddEventScreen()),
+    );
+  },
+),
 
       body: eventsAsync.when(
         loading: () => const Center(

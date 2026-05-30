@@ -11,6 +11,7 @@ import '../products/add_product_screen.dart';
 import '../../widgets/main_app_bar.dart';
 import '../../theme/app_colors.dart';
 import '../../core/api/api_client.dart';
+import '../../utils/app_snackbar.dart';
 import '../../theme/design_system/app_spacing.dart';
 
 class MyShopScreen extends ConsumerWidget {
@@ -32,51 +33,58 @@ class MyShopScreen extends ConsumerWidget {
 
       // ================= FLOATING BUTTONS =================
       floatingActionButton: myShopAsync.maybeWhen(
-        data: (shops) {
-          if (shops.isEmpty) return null;
+  data: (shops) {
+    if (shops.isEmpty) return null;
 
-          final shop = shops.first;
+    final shop = shops.first;
 
-          return Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-
-              // ✏️ EDIT SHOP
-              FloatingActionButton(
-                heroTag: "edit_shop",
-                backgroundColor:AppColors.leafGreen,
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => EditShopScreen(shop: shop),
-                    ),
-                  );
-                },
-                child: Icon(Icons.edit),
-              ),
-
-              const SizedBox(height: AppSpacing.sm),
-
-              // ➕ ADD PRODUCT
-              FloatingActionButton(
-                heroTag: "add_product",
-                backgroundColor:AppColors.mangoOrange,
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => AddProductScreen(),
-                    ),
-                  );
-                },
-                child: Icon(Icons.add),
-              ),
-            ],
-          );
-        },
-        orElse: () => null,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // EDIT SHOP
+        FloatingActionButton(
+  heroTag: "edit_shop",
+  mini: true,
+  tooltip: "Edit Shop",
+  backgroundColor: Colors.white,
+  foregroundColor: AppColors.mangoOrange,
+  onPressed: () {
+    showInfoToast(context, "Edit your shop");
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => EditShopScreen(shop: shop),
       ),
+    );
+  },
+  child: const Icon(Icons.edit_rounded, size: 20),
+),
+
+        const SizedBox(height: 12),
+
+        // ADD PRODUCT
+       FloatingActionButton(
+  heroTag: "add_product",
+  mini: true,
+  tooltip: "Add Product",
+  backgroundColor: Colors.white,
+  foregroundColor: AppColors.mangoOrange,
+  onPressed: () {
+    showInfoToast(context, "Add a new product to your shop");
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const AddProductScreen(),
+      ),
+    );
+  },
+  child: const Icon(Icons.add_rounded, size: 22),
+),
+      ],
+    );
+  },
+  orElse: () => null,
+),
 
       body: myShopAsync.when(
         data: (shops) {

@@ -665,6 +665,9 @@ Future<T> patch<T>(
     required String lastName,
     required String userType,
     required String phoneNumber,
+    String? district,
+    String? gender,
+    String? dateOfBirth,
   }) async {
     try {
       final response = await _dio.post(
@@ -677,6 +680,9 @@ Future<T> patch<T>(
           'last_name': lastName,
           'user_type': userType,
           'phone_number': phoneNumber,
+          'district': district,
+          'gender': gender,
+          'date_of_birth': dateOfBirth,
         },
       );
       return response.data;

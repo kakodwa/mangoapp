@@ -14,8 +14,9 @@ class Lodge {
   final double? latitude;
   final double? longitude;
 
-  // 🔥 NEW FIELD
+  // 🔥 OWNER INFO
   final int? ownerId;
+  final String? ownerPhoneNumber;
 
   Lodge({
     required this.id,
@@ -32,6 +33,7 @@ class Lodge {
     this.latitude,
     this.longitude,
     this.ownerId,
+    this.ownerPhoneNumber,
   });
 
   factory Lodge.fromJson(Map<String, dynamic> json) {
@@ -61,9 +63,28 @@ class Lodge {
           ? double.tryParse(json['longitude'].toString())
           : null,
 
-
-      //ownerId: json['owner'] ?? json['owner_id'],
       ownerId: json['owner_id'],
+      ownerPhoneNumber: json['owner_phone_number'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'description': description,
+      'lodge_type': lodgeType,
+      'city': city,
+      'district': district,
+      'address': address,
+      'phone_number': phoneNumber,
+      'email': email,
+      'is_verified': isVerified,
+      'images': images,
+      'latitude': latitude,
+      'longitude': longitude,
+      'owner_id': ownerId,
+      'owner_phone_number': ownerPhoneNumber,
+    };
   }
 }

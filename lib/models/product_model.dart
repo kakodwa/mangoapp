@@ -2,6 +2,7 @@ class Product {
   final int id;
   final int? ownerId;
   final String? shopDistrict;
+  final String? shopPhoneNumber; // ✅ Added
   final int shopId;
   final String shopName;
   final String name;
@@ -27,6 +28,7 @@ class Product {
     this.ownerId,
     required this.shopId,
     this.shopDistrict,
+    this.shopPhoneNumber, // ✅ Added
     required this.shopName,
     required this.name,
     required this.slug,
@@ -47,10 +49,12 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      id: json['id'] ?? (throw Exception("Product ID missing from API response")),
+      id: json['id'] ??
+          (throw Exception("Product ID missing from API response")),
       ownerId: json['owner_id'],
       shopId: json['shop'] ?? 0,
       shopDistrict: json['shop_district'],
+      shopPhoneNumber: json['shop_phone_number'], // ✅ Added
       shopName: json['shop_name'] ?? '',
       name: json['name'] ?? '',
       slug: json['slug'] ?? '',
@@ -71,7 +75,7 @@ class Product {
         json['created_at'] ?? DateTime.now().toIso8601String(),
       ),
 
-      // ✅ FIXED MULTIPLE IMAGES
+      // ✅ MULTIPLE IMAGES
       images: (json['images'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
@@ -84,6 +88,7 @@ class Product {
       'id': id,
       'shop': shopId,
       'shop_district': shopDistrict,
+      'shop_phone_number': shopPhoneNumber, // ✅ Added
       'shop_name': shopName,
       'name': name,
       'slug': slug,
@@ -98,7 +103,7 @@ class Product {
       'total_reviews': totalReviews,
       'created_at': createdAt.toIso8601String(),
 
-      // ✅ ADD IMAGES
+      // ✅ IMAGES
       'images': images,
     };
   }
@@ -107,4 +112,7 @@ class Product {
   bool get isInStock => stock > 0;
   bool get hasImage => image?.isNotEmpty == true;
   String get safeImage => image ?? '';
+
+  // ✅ Convenience getter
+  String get phoneNumber => shopPhoneNumber ?? '';
 }

@@ -24,7 +24,10 @@ class EventModel {
   final int availableTickets;
   final bool isFeatured;
 
-  // 🎟️ NEW: Ticket types (VIP / VVIP / REGULAR)
+  // 📞 Organizer phone number
+  final String? organizerPhoneNumber;
+
+  // 🎟️ Ticket types (VIP / VVIP / REGULAR)
   final List<EventTicketTypeModel> ticketTypes;
 
   EventModel({
@@ -44,6 +47,7 @@ class EventModel {
     required this.totalTickets,
     required this.availableTickets,
     required this.isFeatured,
+    this.organizerPhoneNumber,
     required this.ticketTypes,
   });
 
@@ -69,21 +73,43 @@ class EventModel {
       endTime: json['end_time'] ?? '',
       banner: json['banner'] ?? '',
 
-      ticketPrice: double.tryParse(
-            json['ticket_price'].toString(),
-          ) ??
-          0.0,
+      ticketPrice:
+          double.tryParse(json['ticket_price'].toString()) ?? 0.0,
 
       totalTickets: json['total_tickets'] ?? 0,
       availableTickets: json['available_tickets'] ?? 0,
       isFeatured: json['is_featured'] ?? false,
 
+      // 📞 Organizer phone number
+      organizerPhoneNumber: json['organizer_phone_number'],
+
       // 🎟️ Ticket types
       ticketTypes: (json['ticket_types'] as List? ?? [])
           .map((e) => EventTicketTypeModel.fromJson(e))
           .toList(),
-
-          
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'description': description,
+      'venue': venue,
+      'district': district,
+      'city': city,
+      'latitude': latitude,
+      'longitude': longitude,
+      'event_date': eventDate,
+      'start_time': startTime,
+      'end_time': endTime,
+      'banner': banner,
+      'ticket_price': ticketPrice,
+      'total_tickets': totalTickets,
+      'available_tickets': availableTickets,
+      'is_featured': isFeatured,
+      'organizer_phone_number': organizerPhoneNumber,
+      'ticket_types': ticketTypes.map((e) => e.toJson()).toList(),
+    };
   }
 }
