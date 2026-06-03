@@ -24,21 +24,24 @@ class MyPropertiesScreen extends ConsumerWidget {
     return AppScaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: const MainAppBar(title: 'My Properties'),
-
+      
       // ✅ ADD PROPERTY BUTTON
-      floatingActionButton: AppFab(
-  heroTag: "add_property",
-  icon: Icons.add,
-  tooltip: "Add Property",
-  toastMessage: "Create new property",
-  onPressed: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const AddPropertyScreen(),
-      ),
-    );
-  },
+floatingActionButton: Padding(
+  padding: const EdgeInsets.only(bottom: 50),
+  child: AppFab(
+    heroTag: "add_property",
+    icon: Icons.add,
+    tooltip: "Add Property",
+    toastMessage: "Create new property",
+    onPressed: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const AddPropertyScreen(),
+        ),
+      );
+    },
+  ),
 ),
 
       body: asyncProps.when(

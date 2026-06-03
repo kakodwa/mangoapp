@@ -8,67 +8,10 @@ import '../../widgets/shop_map_modal.dart';
 import '../../widgets/main_app_bar.dart';
 import '../../core/api/api_client.dart';
 import '../../providers/api_provider.dart';
+import '../../models/delivery.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_spacing.dart';
 
-// ============================
-// DELIVERY MODEL (UPDATED)
-// ============================
-class Delivery {
-  final int id;
-  final String status;
-  final String orderNumber;
-  final String? deliveryCode;
-
-  final double? pickupLat;
-  final double? pickupLng;
-
-  final double? customerLat;
-  final double? customerLng;
-
-  final String? address;
-  final String? phone;
-
-  final List<dynamic>? items;
-
-  Delivery({
-    required this.id,
-    required this.status,
-    required this.orderNumber,
-    this.deliveryCode,
-    this.pickupLat,
-    this.pickupLng,
-    this.customerLat,
-    this.customerLng,
-    this.address,
-    this.phone,
-    this.items,
-  });
-
-  factory Delivery.fromJson(Map<String, dynamic> json) {
-    return Delivery(
-      id: json['id'],
-      status: json['status'] ?? '',
-      orderNumber: json['order_number'] ?? '',
-      deliveryCode: json['delivery_code'],
-      pickupLat: json['pickup_latitude'] != null
-          ? double.tryParse(json['pickup_latitude'].toString())
-          : null,
-      pickupLng: json['pickup_longitude'] != null
-          ? double.tryParse(json['pickup_longitude'].toString())
-          : null,
-      customerLat: json['customer_latitude'] != null
-          ? double.tryParse(json['customer_latitude'].toString())
-          : null,
-      customerLng: json['customer_longitude'] != null
-          ? double.tryParse(json['customer_longitude'].toString())
-          : null,
-      address: json['delivery_address'],
-      phone: json['delivery_phone_number'],
-      items: json['items'],
-    );
-  }
-}
 // ============================
 // PROVIDER
 // ============================
@@ -235,6 +178,45 @@ class SellerDeliveryScreen extends ConsumerWidget {
                       const SizedBox(height: AppSpacing.md),
 
 
+                      if (d.escrow != null && d.escrow!.isNotEmpty)
+  Container(
+    padding: const EdgeInsets.all(12),
+    width: double.infinity,
+    margin: const EdgeInsets.only(top: 10),
+    decoration: BoxDecoration(
+      color: Colors.blue.withOpacity(0.05),
+      borderRadius: BorderRadius.circular(12),
+      border: Border.all(color: Colors.blue.withOpacity(0.2)),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Column(
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    const Text(
+      "Payment Protection (Escrow)",
+      style: TextStyle(fontWeight: FontWeight.bold),
+    ),
+    const SizedBox(height: 4),
+    Text(
+      "Your money is safely held until delivery is completed",
+      style: TextStyle(fontSize: 12, color: Colors.grey),
+    ),
+  ],
+),
+
+        const SizedBox(height: 8),
+
+        ...d.escrow!.map((e) => Text(
+              "💰 MWK ${e.amount} • ${e.status.toUpperCase()}",
+              style: const TextStyle(fontSize: 13),
+            )),
+      ],
+    ),
+  ),
+
+const SizedBox(height: AppSpacing.md),
 
                       // =========================
                       // ITEMS

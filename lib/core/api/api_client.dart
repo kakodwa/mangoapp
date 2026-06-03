@@ -108,6 +108,35 @@ Future<List<Map<String, dynamic>>> fetchBanners() async {
 }
 
 
+Future<Map<String, dynamic>> searchUnified({
+  required String query,
+  required String type, // 'all', 'event', 'lodge', 'product', 'property', 'shop'
+  String? district,
+  String? city,
+  String? category,
+  String? listingPurpose,
+  int page = 1,
+}) async {
+  final Map<String, dynamic> params = {
+    'q': query,
+    'type': type,
+    'page': page,
+  };
+
+  if (district != null && district.isNotEmpty) params['district'] = district;
+  if (city != null && city.isNotEmpty) params['city'] = city;
+  if (category != null && category.isNotEmpty) params['category'] = category;
+  if (listingPurpose != null && listingPurpose.isNotEmpty) params['listing_purpose'] = listingPurpose;
+
+  // We utilize your custom get method while handling standard dictionary format
+  return await get(
+    'feed/search/',
+    queryParameters: params,
+    fromJson: (json) => json,
+  );
+}
+
+
 Future<Map<String, dynamic>> getAppVersion() async {
   try {
     final response = await _dio.get('products/app_version/');

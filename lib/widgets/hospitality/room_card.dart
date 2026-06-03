@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../models/room_model.dart';
-
-import '../../theme/design_system/app_button.dart';
-import '../../theme/design_system/app_card.dart';
-import '../../theme/design_system/app_spacing.dart';
-
 import '../../screens/hospitality/room_detail_screen.dart';
 
-class RoomCard extends StatelessWidget {
+class RoomCard extends StatefulWidget {
   final Room room;
   final List<String> lodgeImages;
   final bool isOwner;
@@ -25,175 +20,415 @@ class RoomCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 260,
-      child: AppCard(
-        padding: EdgeInsets.zero,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            /// ================= IMAGE =================
-            Stack(
-              children: [
-                SizedBox(
-                  height: 150,
-                  width: double.infinity,
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(14),
-                      topRight: Radius.circular(14),
-                    ),
-                    child: lodgeImages.isNotEmpty
-                        ? Image.network(
-                            lodgeImages.isNotEmpty
-                                ? lodgeImages.first
-                                : '',
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              color: Colors.grey.shade300,
-                              child: const Icon(Icons.hotel, size: 50),
-                            ),
-                          )
-                        : Container(
-                            color: Colors.grey.shade300,
-                            child: const Icon(Icons.hotel, size: 50),
-                          ),
-                  ),
-                ),
+  State<RoomCard> createState() => _RoomCardState();
+}
 
-                /// STATUS BADGE
-                Positioned(
-                  left: 12,
-                  top: 12,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: room.isAvailable ? Colors.green : Colors.red,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      room.isAvailable ? "Available" : "Booked",
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
+class _RoomCardState extends State<RoomCard> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final room = widget.room;
+
+    return SizedBox(
+      width: 280,
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _pressed = true),
+        onTapUp: (_) => setState(() => _pressed = false),
+        onTapCancel: () => setState(() => _pressed = false),
+        onTap: () {
+          Navigator.push(
+            context,
+            PageRouteBuilder(
+              transitionDuration:
+                  const Duration(milliseconds: 250),
+              pageBuilder: (_, __, ___) =>
+                  RoomDetailScreen(
+                room: room,
+                lodgeImages: widget.lodgeImages,
+              ),
+              transitionsBuilder:
+                  (_, animation, __, child) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: ScaleTransition(
+                    scale: Tween(
+                      begin: 0.95,
+                      end: 1.0,
+                    ).animate(
+                      CurvedAnimation(
+                        parent: animation,
+                        curve: Curves.easeOutCubic,
                       ),
                     ),
+                    child: child,
                   ),
+                );
+              },
+            ),
+          );
+        },
+        child: AnimatedScale(
+          duration:
+              const Duration(milliseconds: 120),
+          scale: _pressed ? 0.98 : 1.0,
+          child: Container(
+            margin: const EdgeInsets.symmetric(
+              horizontal: 10,
+              vertical: 8,
+            ),
+            decoration: BoxDecoration(
+              borderRadius:
+                  BorderRadius.circular(18),
+              color: Theme.of(context)
+                  .colorScheme
+                  .surface,
+              boxShadow: [
+                BoxShadow(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .onSurface
+                      .withOpacity(0.06),
+                  blurRadius: 14,
+                  offset: const Offset(0, 6),
                 ),
-
-                /// OWNER ACTIONS
-                if (isOwner)
-                  Positioned(
-                    right: 10,
-                    top: 10,
-                    child: Row(
-                      children: [
-                        _actionButton(
-                          icon: Icons.edit,
-                          color: Colors.blue,
-                          onTap: onEdit,
-                        ),
-                        const SizedBox(width: 8),
-                        _actionButton(
-                          icon: Icons.delete,
-                          color: Colors.red,
-                          onTap: onDelete,
-                        ),
-                      ],
-                    ),
-                  ),
               ],
             ),
+            child: Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
+              children: [
+                // ================= IMAGE =================
 
-            /// ================= DETAILS =================
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Stack(
                   children: [
-                    Text(
-                      room.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                    ClipRRect(
+                      borderRadius:
+                          const BorderRadius.vertical(
+                        top: Radius.circular(18),
                       ),
-                    ),
-
-                    const SizedBox(height: 6),
-
-                    Text(
-                      room.roomType.toUpperCase(),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 1,
-                      ),
-                    ),
-
-                    const SizedBox(height: 8),
-
-                    Row(
-                      children: [
-                        const Icon(
-                          Icons.meeting_room,
-                          size: 16,
-                          color: Colors.grey,
+                      child: AnimatedScale(
+                        duration:
+                            const Duration(
+                          milliseconds: 250,
                         ),
-                        const SizedBox(width: 5),
-                        Text(
-                          "Room ${room.roomNumber}",
-                          style: TextStyle(color: Colors.grey.shade700),
+                        scale:
+                            _pressed ? 1.08 : 1.0,
+                        child: SizedBox(
+                          height: 180,
+                          width:
+                              double.infinity,
+                          child: widget
+                                  .lodgeImages
+                                  .isNotEmpty
+                              ? Image.network(
+                                  widget
+                                      .lodgeImages
+                                      .first,
+                                  fit:
+                                      BoxFit.cover,
+                                  errorBuilder:
+                                      (
+                                    _,
+                                    __,
+                                    ___,
+                                  ) {
+                                    return Container(
+                                      color: Theme.of(
+                                              context)
+                                          .colorScheme
+                                          .surfaceContainerHighest,
+                                      child:
+                                          const Icon(
+                                        Icons.hotel,
+                                        size: 50,
+                                      ),
+                                    );
+                                  },
+                                )
+                              : Container(
+                                  color: Theme.of(
+                                          context)
+                                      .colorScheme
+                                      .surfaceContainerHighest,
+                                  child:
+                                      const Icon(
+                                    Icons.hotel,
+                                    size: 50,
+                                  ),
+                                ),
                         ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    Text(
-                      "MWK ${room.pricePerNight}",
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                        color: Colors.green,
                       ),
                     ),
 
-                    const SizedBox(height: 10),
+                    // Gradient Overlay
 
-                    /// BUTTON
-                    SizedBox(
-                      width: double.infinity,
-                      child: AppButton(
-                        text: "View Room",
-                        icon: Icons.visibility,
-                        type: AppButtonType.secondary,
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => RoomDetailScreen(
-                                room: room,
-                                lodgeImages: lodgeImages,
-                              ),
+                    Positioned.fill(
+                      child: Container(
+                        decoration:
+                            BoxDecoration(
+                          gradient:
+                              LinearGradient(
+                            begin:
+                                Alignment
+                                    .topCenter,
+                            end: Alignment
+                                .bottomCenter,
+                            colors: [
+                              Colors
+                                  .transparent,
+                              Colors.black
+                                  .withOpacity(
+                                      .45),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // STATUS BADGE
+
+                    Positioned(
+                      top: 12,
+                      left: 12,
+                      child: Container(
+                        padding:
+                            const EdgeInsets
+                                .symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        decoration:
+                            BoxDecoration(
+                          color: room
+                                  .isAvailable
+                              ? Colors.green
+                              : Colors.red,
+                          borderRadius:
+                              BorderRadius
+                                  .circular(
+                            20,
+                          ),
+                        ),
+                        child: Text(
+                          room.isAvailable
+                              ? "AVAILABLE"
+                              : "BOOKED",
+                          style:
+                              const TextStyle(
+                            color:
+                                Colors.white,
+                            fontSize: 10,
+                            fontWeight:
+                                FontWeight
+                                    .bold,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // ROOM TYPE
+
+                    Positioned(
+                      top: 12,
+                      right: 12,
+                      child: Container(
+                        padding:
+                            const EdgeInsets
+                                .symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        decoration:
+                            BoxDecoration(
+                          color:
+                              Theme.of(context)
+                                  .colorScheme
+                                  .primary,
+                          borderRadius:
+                              BorderRadius
+                                  .circular(
+                            20,
+                          ),
+                        ),
+                        child: Text(
+                          room.roomType
+                              .toUpperCase(),
+                          style:
+                              const TextStyle(
+                            color:
+                                Colors.white,
+                            fontSize: 10,
+                            fontWeight:
+                                FontWeight
+                                    .bold,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // OWNER ACTIONS
+
+                    if (widget.isOwner)
+                      Positioned(
+                        bottom: 12,
+                        right: 12,
+                        child: Row(
+                          children: [
+                            _actionButton(
+                              icon:
+                                  Icons.edit,
+                              color:
+                                  Colors.blue,
+                              onTap: widget
+                                  .onEdit,
                             ),
-                          );
-                        },
+                            const SizedBox(
+                              width: 8,
+                            ),
+                            _actionButton(
+                              icon: Icons
+                                  .delete,
+                              color:
+                                  Colors.red,
+                              onTap: widget
+                                  .onDelete,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
                   ],
                 ),
-              ),
+
+                // ================= INFO =================
+
+                Padding(
+                  padding:
+                      const EdgeInsets.all(
+                    16,
+                  ),
+                  child: Column(
+                    crossAxisAlignment:
+                        CrossAxisAlignment
+                            .start,
+                    children: [
+                      Text(
+                        room.title,
+                        maxLines: 1,
+                        overflow:
+                            TextOverflow
+                                .ellipsis,
+                        style: Theme.of(
+                                context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(
+                              fontWeight:
+                                  FontWeight
+                                      .bold,
+                            ),
+                      ),
+
+                      const SizedBox(
+                        height: 8,
+                      ),
+
+                      Row(
+                        children: [
+                          Icon(
+                            Icons
+                                .meeting_room,
+                            size: 14,
+                            color: Theme.of(
+                                    context)
+                                .colorScheme
+                                .onSurfaceVariant,
+                          ),
+                          const SizedBox(
+                            width: 4,
+                          ),
+                          Text(
+                            "Room ${room.roomNumber}",
+                            style: Theme.of(
+                                    context)
+                                .textTheme
+                                .labelSmall,
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(
+                        height: 6,
+                      ),
+
+                      Row(
+                        children: [
+                          Icon(
+                            Icons
+                                .hotel_outlined,
+                            size: 14,
+                            color: Theme.of(
+                                    context)
+                                .colorScheme
+                                .onSurfaceVariant,
+                          ),
+                          const SizedBox(
+                            width: 4,
+                          ),
+                          Expanded(
+                            child: Text(
+                              room.roomType,
+                              overflow:
+                                  TextOverflow
+                                      .ellipsis,
+                              style: Theme.of(
+                                      context)
+                                  .textTheme
+                                  .labelSmall,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(
+                        height: 12,
+                      ),
+
+                      Row(
+                        children: [
+                          Text(
+                            "MWK ${room.pricePerNight}",
+                            style:
+                                const TextStyle(
+                              fontWeight:
+                                  FontWeight
+                                      .bold,
+                              fontSize: 22,
+                              color:
+                                  Colors.green,
+                            ),
+                          ),
+                          const Spacer(),
+                          Icon(
+                            room.isAvailable
+                                ? Icons
+                                    .check_circle
+                                : Icons
+                                    .cancel,
+                            size: 16,
+                            color: room
+                                    .isAvailable
+                                ? Colors.green
+                                : Colors.red,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -206,13 +441,20 @@ class RoomCard extends StatelessWidget {
   }) {
     return Material(
       color: color,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius:
+          BorderRadius.circular(12),
       child: InkWell(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius:
+            BorderRadius.circular(12),
         onTap: onTap,
-        child: const Padding(
-          padding: EdgeInsets.all(8),
-          child: Icon(Icons.edit, color: Colors.white, size: 18),
+        child: Padding(
+          padding:
+              const EdgeInsets.all(8),
+          child: Icon(
+            icon,
+            color: Colors.white,
+            size: 18,
+          ),
         ),
       ),
     );

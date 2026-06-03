@@ -2,29 +2,31 @@ class Order {
   final int id;
   final String orderNumber;
   final int customerId;
-  final int shopId;
-  final String shopName;
+  final String customerName;
+
   final String status;
+
   final double subtotal;
   final double shippingFee;
   final double tax;
   final double totalAmount;
+
   final String deliveryAddress;
   final double? deliveryLatitude;
   final double? deliveryLongitude;
-  final DateTime? estimatedDeliveryDate;
-  final DateTime? actualDeliveryDate;
-  final OrderDelivery? delivery;
+
   final List<OrderItem> items;
+
+  /// ⭐ NEW: MULTI SELLER SUPPORT
+  final List<SellerOrder> sellerOrders;
+
   final DateTime createdAt;
-  final DateTime updatedAt;
 
   Order({
     required this.id,
     required this.orderNumber,
     required this.customerId,
-    required this.shopId,
-    required this.shopName,
+    required this.customerName,
     required this.status,
     required this.subtotal,
     required this.shippingFee,
@@ -33,165 +35,143 @@ class Order {
     required this.deliveryAddress,
     this.deliveryLatitude,
     this.deliveryLongitude,
-    this.estimatedDeliveryDate,
-    this.actualDeliveryDate,
-    this.delivery,
     required this.items,
+    required this.sellerOrders,
     required this.createdAt,
-    required this.updatedAt,
   });
-
-  static double _toDouble(dynamic v) =>
-      v == null ? 0.0 : double.tryParse(v.toString()) ?? 0.0;
-
-  static int _toInt(dynamic v) =>
-      v == null ? 0 : int.tryParse(v.toString()) ?? 0;
 
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(
-      id: _toInt(json['id']),
+      id: json['id'],
       orderNumber: json['order_number'] ?? '',
-      customerId: _toInt(json['customer_id']),
-      shopId: _toInt(json['shop']), // IMPORTANT: can be null
-      shopName: json['shop_name'] ?? '',
+      customerId: json['customer_id'] ?? 0,
+      customerName: json['customer_name'] ?? '',
       status: json['status'] ?? 'pending',
 
-      subtotal: _toDouble(json['subtotal']),
-      shippingFee: _toDouble(json['shipping_fee']),
-      tax: _toDouble(json['tax']),
-      totalAmount: _toDouble(json['total_amount']),
+      subtotal: double.tryParse(json['subtotal'].toString()) ?? 0,
+      shippingFee: double.tryParse(json['shipping_fee'].toString()) ?? 0,
+      tax: double.tryParse(json['tax'].toString()) ?? 0,
+      totalAmount: double.tryParse(json['total_amount'].toString()) ?? 0,
 
       deliveryAddress: json['delivery_address'] ?? '',
-
       deliveryLatitude: json['delivery_latitude'] == null
           ? null
-          : _toDouble(json['delivery_latitude']),
-
+          : double.tryParse(json['delivery_latitude'].toString()),
       deliveryLongitude: json['delivery_longitude'] == null
           ? null
-          : _toDouble(json['delivery_longitude']),
+          : double.tryParse(json['delivery_longitude'].toString()),
 
-      estimatedDeliveryDate: json['estimated_delivery_date'] != null
-          ? DateTime.tryParse(json['estimated_delivery_date'])
-          : null,
+      items: (json['items'] as List<dynamic>? ?? [])
+          .map((e) => OrderItem.fromJson(e))
+          .toList(),
 
-      actualDeliveryDate: json['actual_delivery_date'] != null
-          ? DateTime.tryParse(json['actual_delivery_date'])
-          : null,
-
-
-      delivery: json['delivery'] != null
-    ? OrderDelivery.fromJson(json['delivery'])
-    : null,
-
-      items: (json['items'] as List<dynamic>?)
-              ?.map((e) => OrderItem.fromJson(e))
-              .toList() ??
-          [],
+      sellerOrders: (json['seller_orders'] as List<dynamic>? ?? [])
+          .map((e) => SellerOrder.fromJson(e))
+          .toList(),
 
       createdAt: DateTime.tryParse(json['created_at'] ?? '') ??
-          DateTime.now(),
-
-      updatedAt: DateTime.tryParse(json['updated_at'] ?? '') ??
           DateTime.now(),
     );
   }
 }
+
+class SellerOrder {
+  final int id;
+  final int orderId;
+  final int sellerId;
+
+  final double subtotal;
+  final double commission;
+  final double sellerAmount;
+  final double total;
+
+  final String status;
+
+  final String? deliveryCode;
+  final String? deliveryStatus;
+
+  final double? pickupLatitude;
+  final double? pickupLongitude;
+
+  final DateTime createdAt;
+
+  SellerOrder({
+    required this.id,
+    required this.orderId,
+    required this.sellerId,
+    required this.subtotal,
+    required this.commission,
+    required this.sellerAmount,
+    required this.total,
+    required this.status,
+    this.deliveryCode,
+    this.deliveryStatus,
+    this.pickupLatitude,
+    this.pickupLongitude,
+    required this.createdAt,
+  });
+
+  factory SellerOrder.fromJson(Map<String, dynamic> json) {
+    return SellerOrder(
+      id: json['id'] ?? 0,
+      orderId: json['order'] ?? 0,
+      sellerId: json['seller'] ?? 0,
+
+      subtotal: double.tryParse(json['subtotal'].toString()) ?? 0,
+      commission: double.tryParse(json['commission'].toString()) ?? 0,
+      sellerAmount:
+          double.tryParse(json['seller_amount']?.toString() ?? '0') ?? 0,
+      total: double.tryParse(json['total']?.toString() ?? '0') ?? 0,
+
+      status: json['status'] ?? 'pending',
+      deliveryCode: json['delivery_code'],
+      deliveryStatus: json['delivery_status'],
+
+      pickupLatitude: json['pickup_latitude'] == null
+          ? null
+          : double.tryParse(json['pickup_latitude'].toString()),
+
+      pickupLongitude: json['pickup_longitude'] == null
+          ? null
+          : double.tryParse(json['pickup_longitude'].toString()),
+
+      createdAt: DateTime.tryParse(json['created_at'] ?? '') ??
+          DateTime.now(),
+    );
+  }
+}
+
 
 class OrderItem {
   final int id;
   final int productId;
   final String productName;
+  final String productImage;
   final int quantity;
   final double unitPrice;
   final double totalPrice;
-  final String productImage;
 
   OrderItem({
     required this.id,
     required this.productId,
     required this.productName,
+    required this.productImage,
     required this.quantity,
     required this.unitPrice,
     required this.totalPrice,
-    required this.productImage,
   });
-
-  static double _safeDouble(dynamic value) {
-    if (value == null) return 0.0;
-    return double.tryParse(value.toString()) ?? 0.0;
-  }
-
-  static int _safeInt(dynamic value) {
-    if (value == null) return 0;
-    return int.tryParse(value.toString()) ?? 0;
-  }
 
   factory OrderItem.fromJson(Map<String, dynamic> json) {
     final product = json['product'] ?? {};
 
     return OrderItem(
-      id: _safeInt(json['id']),
-      productId: _safeInt(product['id']),
+      id: json['id'] ?? 0,
+      productId: product['id'] ?? 0,
       productName: product['name'] ?? '',
-      quantity: _safeInt(json['quantity']),
-      unitPrice: _safeDouble(json['unit_price']),
-      totalPrice: _safeDouble(json['total_price']),
       productImage: product['image'] ?? '',
+      quantity: json['quantity'] ?? 0,
+      unitPrice: double.tryParse(json['unit_price'].toString()) ?? 0,
+      totalPrice: double.tryParse(json['total_price'].toString()) ?? 0,
     );
   }
-}
-
-
-class OrderDelivery {
-  final int id;
-  final String status;
-  final String? deliveryCode;
-  final double? pickupLat;
-  final double? pickupLng;
-  final double? customerLat;
-  final double? customerLng;
-  final String? deliveryPersonName;
-  final String? deliveryPersonPhone;
-
-  OrderDelivery({
-    required this.id,
-    required this.status,
-    this.deliveryCode,
-    this.pickupLat,
-    this.pickupLng,
-    this.customerLat,
-    this.customerLng,
-    this.deliveryPersonName,
-    this.deliveryPersonPhone,
-  });
-
-factory OrderDelivery.fromJson(Map<String, dynamic> json) {
-  final driver = json['delivery_person'] as Map<String, dynamic>?;
-
-  return OrderDelivery(
-    id: json['id'],
-    status: json['status'] ?? '',
-    deliveryCode: json['delivery_code'],
-
-    pickupLat: json['pickup_latitude'] == null
-        ? null
-        : double.tryParse(json['pickup_latitude'].toString()),
-
-    pickupLng: json['pickup_longitude'] == null
-        ? null
-        : double.tryParse(json['pickup_longitude'].toString()),
-
-    customerLat: json['customer_latitude'] == null
-        ? null
-        : double.tryParse(json['customer_latitude'].toString()),
-
-    customerLng: json['customer_longitude'] == null
-        ? null
-        : double.tryParse(json['customer_longitude'].toString()),
-
-    deliveryPersonName: driver != null ? driver['full_name'] : null,
-    deliveryPersonPhone: driver != null ? driver['phone_number'] : null,
-  );
-}
 }

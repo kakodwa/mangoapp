@@ -3,21 +3,28 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../../providers/products_provider.dart';
 import '../../providers/shops_provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../widgets/main_app_bar.dart';
-import '../../theme/app_colors.dart';
-import '../products/product_card.dart';
 import '../../providers/api_provider.dart' as api;
+
 import '../../models/product_model.dart';
+
+import '../products/product_card.dart';
+
 import '../shops/shop_details_screen.dart';
 import '../products/edit_product_screen.dart';
 import '../auth/login_screen.dart';
+
 import '../../widgets/app_fab.dart';
+import '../../widgets/main_app_bar.dart';
+
 import '../../utils/app_toast.dart';
 import '../../utils/app_snackbar.dart';
+
 import '../../theme/design_system/app_spacing.dart';
+import '../../theme/app_colors.dart';
 
 class ProductDetailsScreen extends ConsumerStatefulWidget {
   final int productId;
@@ -334,7 +341,7 @@ Container(
 
               // ================= FLOATING BUTTONS
        Positioned(
-  bottom:20,
+  bottom:50,
   right:10,
   child: Column(
     children: [

@@ -238,7 +238,7 @@ class LodgeDetailScreen extends ConsumerWidget {
                           }
 
                           return SizedBox(
-                            height: 380,
+                            height: 350,
                             child: ListView.separated(
                               scrollDirection: Axis.horizontal,
                               itemCount: rooms.length,
@@ -291,7 +291,7 @@ class LodgeDetailScreen extends ConsumerWidget {
           /// ================= MAP BUTTON =================
 if (lodge.latitude != null && lodge.longitude != null)
   Positioned(
-    bottom: 20,
+    bottom:50,
     right: 16,
     child: Column(
       children: [

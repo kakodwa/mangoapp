@@ -8,6 +8,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/app_scaffold.dart';
 import '../shops/shop_card.dart';
 import '../../widgets/search_filter_widgets.dart';
+import '../../widgets/update.dart';
 import '../../theme/design_system/app_spacing.dart';
 
 class ShopsListScreen extends ConsumerStatefulWidget {
@@ -156,9 +157,9 @@ class _ShopsListScreenState extends ConsumerState<ShopsListScreen> {
               ],
             ),
           ),
-
+          const UpdatesTicker(),
+          const UpdateBanner(),
           const SizedBox(height: AppSpacing.xxs),
-
           // ================= LIST =================
           Expanded(
             child: shopsAsync.when(

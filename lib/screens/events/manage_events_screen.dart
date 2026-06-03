@@ -567,18 +567,23 @@ class _ManageEventsScreenState
         title: "Manage Events",
       ),
 
-      floatingActionButton:
-       AppFab(
-  heroTag: "add_event",
-  icon: Icons.add,
-  tooltip: "Add Event",
-  toastMessage: "Create event",
-  onPressed: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => AddEventScreen()),
-    );
-  },
+
+      floatingActionButton: Padding(
+  padding: const EdgeInsets.only(bottom: 50),
+  child: AppFab(
+    heroTag: "add_event",
+    icon: Icons.add,
+    tooltip: "Add Event",
+    toastMessage: "Create event",
+    onPressed: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => AddEventScreen(),
+        ),
+      );
+    },
+  ),
 ),
 
       body: eventsAsync.when(

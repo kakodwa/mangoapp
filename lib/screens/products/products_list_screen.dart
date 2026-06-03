@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/products_provider.dart';
+
 import '../products/product_card.dart';
+
+import '../../widgets/app_scaffold.dart';
 import '../../widgets/main_drawer.dart';
 import '../../widgets/main_app_bar.dart';
-import '../../theme/app_colors.dart';
-import '../../widgets/app_scaffold.dart';
 import '../../widgets/search_filter_widgets.dart';
+
+import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_spacing.dart';
 
 class ProductsListScreen extends ConsumerStatefulWidget {

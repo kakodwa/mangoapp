@@ -206,15 +206,15 @@ class ProductCard extends ConsumerWidget {
 
                   // NAME
                   Text(
-                    product.name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      height: 1.1,
-                    ),
-                  ),
+  product.name,
+  maxLines: 1,
+  overflow: TextOverflow.ellipsis,
+  style: const TextStyle(
+    fontSize: 14,
+    fontWeight: FontWeight.w700,
+    height: 1.1,
+  ),
+),
 
                   const SizedBox(height: 6),
 

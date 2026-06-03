@@ -391,7 +391,7 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
 
               // ================= FLOATING ACTIONS
               Positioned(
-                bottom: 20,
+                bottom:50,
                 right: 16,
                 child: Column(
                   children: [

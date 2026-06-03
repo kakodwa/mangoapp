@@ -3,23 +3,29 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-
-import '../../screens/events/event_detail_screen.dart';
-import '../../theme/app_colors.dart';
-
 import '../../models/event_model.dart';
-import '../../models/event_ticket_type_model.dart';
+import '../../screens/events/event_detail_screen.dart';
+import '../../theme/design_system/app_badge.dart';
+import '../../theme/design_system/app_spacing.dart';
 
-class EventCard extends StatelessWidget {
+class EventCard extends StatefulWidget {
   final EventModel event;
 
   const EventCard({
-    super.key,
+    Key? key,
     required this.event,
-  });
+  }) : super(key: key);
+
+  @override
+  State<EventCard> createState() => _EventCardState();
+}
+
+class _EventCardState extends State<EventCard> {
+  bool _pressed = false;
 
   @override
   Widget build(BuildContext context) {
+    final event = widget.event;
 
     // ======================
     // LOWEST TICKET PRICE
@@ -49,325 +55,359 @@ class EventCard extends StatelessWidget {
 
     final soldTickets = totalSeats - availableSeats;
 
-    final soldPercentage = totalSeats == 0
-        ? 0.0
-        : soldTickets / totalSeats;
+    final soldPercentage =
+        totalSeats == 0 ? 0.0 : soldTickets / totalSeats;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(18),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => EventDetailScreen(
-                event: event,
-              ),
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapUp: (_) => setState(() => _pressed = false),
+      onTapCancel: () => setState(() => _pressed = false),
+      onTap: () {
+        Navigator.push(
+          context,
+          PageRouteBuilder(
+            transitionDuration:
+                const Duration(milliseconds: 250),
+            pageBuilder: (_, __, ___) => EventDetailScreen(
+              event: event,
             ),
-          );
-        },
-        child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.start,
-          children: [
-
-            // ======================
-            // IMAGE
-            // ======================
-
-            Stack(
-              children: [
-
-                ClipRRect(
-                  borderRadius:
-                      const BorderRadius.vertical(
-                    top: Radius.circular(18),
+            transitionsBuilder:
+                (_, animation, __, child) {
+              return FadeTransition(
+                opacity: animation,
+                child: ScaleTransition(
+                  scale: Tween(
+                    begin: 0.95,
+                    end: 1.0,
+                  ).animate(
+                    CurvedAnimation(
+                      parent: animation,
+                      curve: Curves.easeOutCubic,
+                    ),
                   ),
-                  child: Image.network(
-                    event.banner,
-                    width: double.infinity,
-                    height: 220,
-                    fit: BoxFit.cover,
-                    errorBuilder:
-                        (
-                          context,
-                          error,
-                          stackTrace,
-                        ) {
-                      return Container(
-                        height: 220,
-                        color: Colors.grey.shade200,
-                        alignment: Alignment.center,
-                        child: const Icon(
-                          Icons.image,
-                          size: 60,
-                          color: Colors.grey,
-                        ),
-                      );
-                    },
-                  ),
+                  child: child,
                 ),
+              );
+            },
+          ),
+        );
+      },
+      child: AnimatedScale(
+        duration: const Duration(milliseconds: 120),
+        scale: _pressed ? 0.98 : 1.0,
+        child: Container(
+          margin: const EdgeInsets.symmetric(
+            horizontal: 10,
+            vertical: 8,
+          ),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            color: Theme.of(context).colorScheme.surface,
+            boxShadow: [
+              BoxShadow(
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withOpacity(0.06),
+                blurRadius: 14,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
+            children: [
+              // ================= IMAGE =================
 
-                // FEATURED BADGE
-                if (event.isFeatured)
+              Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius:
+                        const BorderRadius.vertical(
+                      top: Radius.circular(18),
+                    ),
+                    child: AnimatedScale(
+                      duration:
+                          const Duration(milliseconds: 250),
+                      scale: _pressed ? 1.08 : 1.0,
+                      child: SizedBox(
+                        height: 190,
+                        width: double.infinity,
+                        child: Image.network(
+                          event.banner,
+                          fit: BoxFit.cover,
+                          errorBuilder:
+                              (_, __, ___) {
+                            return Container(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant
+                                  .withOpacity(0.25),
+                              child: const Icon(
+                                Icons.event,
+                                size: 50,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // GRADIENT OVERLAY
+
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin:
+                              Alignment.topCenter,
+                          end:
+                              Alignment.bottomCenter,
+                          colors: [
+                            Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(0.05),
+                            Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withOpacity(0.45),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // BADGES
+
                   Positioned(
-                    top: 14,
-                    left: 14,
+                    top: AppSpacing.sm,
+                    left: AppSpacing.sm,
+                    right: AppSpacing.sm,
+                    child: Row(
+                      children: [
+  if (event.isFeatured)
+    const AppBadge(
+      text: "FEATURED",
+      type: BadgeType.warning,
+      fontSize: 9,
+    ),
+
+  const Spacer(),
+
+  AppBadge(
+    text: "MWK ${lowestPrice.toStringAsFixed(0)}",
+    type: BadgeType.success,
+    fontSize: 9,
+  ),
+],
+                    ),
+                  ),
+
+                  // EVENT DATE CHIP
+
+                  Positioned(
+                    bottom: 12,
+                    left: 12,
                     child: Container(
                       padding:
                           const EdgeInsets.symmetric(
                         horizontal: 12,
-                        vertical: 6,
+                        vertical: 8,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.orange,
+                        color: Colors.black87,
                         borderRadius:
-                            BorderRadius.circular(30),
+                            BorderRadius.circular(
+                          12,
+                        ),
                       ),
-                      child: const Text(
-                        "FEATURED",
-                        style: TextStyle(
+                      child: Text(
+                        formatDate(event.eventDate),
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 11,
                           fontWeight:
-                              FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                // PRICE BADGE
-                Positioned(
-                  top: 14,
-                  right: 14,
-                  child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(.7),
-                      borderRadius:
-                          BorderRadius.circular(30),
-                    ),
-                    child: Text(
-                      "From MWK ${lowestPrice.toStringAsFixed(0)}",
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            // ======================
-            // CONTENT
-            // ======================
-
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
-                children: [
-
-                  // TITLE
-                  Text(
-                    event.title,
-                    style: const TextStyle(
-                      fontSize: 21,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  // LOCATION
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.location_on_outlined,
-                        size: 18,
-                        color:
-                            Colors.grey.shade600,
-                      ),
-
-                      const SizedBox(width: 6),
-
-                      Expanded(
-                        child: Text(
-                          "${event.venue}, ${event.city}",
-                          style: TextStyle(
-                            color:
-                                Colors.grey.shade700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  // DATE + TIME
-                  Row(
-                    children: [
-
-                      Icon(
-                        Icons.calendar_month,
-                        size: 18,
-                        color:
-                            Colors.grey.shade600,
-                      ),
-
-                      const SizedBox(width: 6),
-
-                      Text(
-                        formatDate(event.eventDate),
-                        style: TextStyle(
-                          color:
-                              Colors.grey.shade700,
-                        ),
-                      ),
-
-                      const Spacer(),
-
-                      Text(
-                        "${formatTime(event.startTime)} - ${formatTime(event.endTime)}",
-                        style: TextStyle(
-                          color:
-                              Colors.grey.shade700,
-                        ),
-                      ),
-                    ],
-                  ),
-
-      
-                  const SizedBox(height: 20),
-
-                  // ======================
-                  // BUTTON
-                  // ======================
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                EventDetailScreen(
-                              event: event,
-                            ),
-                          ),
-                        );
-                      },
-                      icon: const Icon(
-                        Icons.arrow_forward,
-                      ),
-                      label: const Text(
-                        "View Details",
-                      ),
-                      style:
-                          ElevatedButton.styleFrom(
-                        backgroundColor:
-                            AppColors.primary(
-                          context,
-                        ),
-                        foregroundColor:
-                            Colors.white,
-                        minimumSize:
-                            const Size(
-                          double.infinity,
-                          52,
-                        ),
-                        shape:
-                            RoundedRectangleBorder(
-                          borderRadius:
-                              BorderRadius.circular(
-                            14,
-                          ),
+                              FontWeight.w600,
                         ),
                       ),
                     ),
                   ),
                 ],
               ),
-            ),
-          ],
+
+              // ================= INFO =================
+
+              Padding(
+                padding:
+                    const EdgeInsets.all(AppSpacing.md),
+                child: Column(
+                  crossAxisAlignment:
+                      CrossAxisAlignment.start,
+                  children: [
+                    // TITLE
+
+                    Text(
+                      event.title,
+                      maxLines: 2,
+                      overflow:
+                          TextOverflow.ellipsis,
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleMedium
+                          ?.copyWith(
+                            fontWeight:
+                                FontWeight.bold,
+                          ),
+                    ),
+
+                    const SizedBox(
+                      height: AppSpacing.sm,
+                    ),
+
+                    // LOCATION
+
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.location_on,
+                          size: 14,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant
+                              .withOpacity(0.65),
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            "${event.venue}, ${event.city}",
+                            maxLines: 1,
+                            overflow:
+                                TextOverflow
+                                    .ellipsis,
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                          context)
+                                      .colorScheme
+                                      .onSurfaceVariant
+                                      .withOpacity(
+                                          0.65),
+                                ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(
+                      height: AppSpacing.xs,
+                    ),
+
+                    // TIME + TICKETS
+
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.schedule,
+                          size: 14,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant
+                              .withOpacity(0.65),
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            "${formatTime(event.startTime)} - ${formatTime(event.endTime)}",
+                            overflow:
+                                TextOverflow
+                                    .ellipsis,
+                            style: Theme.of(context)
+                                .textTheme
+                                .labelSmall
+                                ?.copyWith(
+                                  color: Theme.of(
+                                          context)
+                                      .colorScheme
+                                      .onSurfaceVariant
+                                      .withOpacity(
+                                          0.65),
+                                ),
+                          ),
+                        ),
+
+                        const SizedBox(width: 8),
+
+                        Icon(
+                          Icons.confirmation_num,
+                          size: 14,
+                          color: Colors.green,
+                        ),
+
+                        const SizedBox(width: 4),
+
+                        Text(
+                          "$availableSeats left",
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelSmall
+                              ?.copyWith(
+                                fontWeight:
+                                    FontWeight.w600,
+                              ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(
+                      height: AppSpacing.md,
+                    ),
+
+                    // SALES PROGRESS
+
+                    ClipRRect(
+                      borderRadius:
+                          BorderRadius.circular(10),
+                      child:
+                          LinearProgressIndicator(
+                        value: soldPercentage,
+                        minHeight: 6,
+                        backgroundColor:
+                            Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest,
+                      ),
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    Row(
+                      children: [
+                        Text(
+                          "$soldTickets sold",
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelSmall,
+                        ),
+                        const Spacer(),
+                        Text(
+                          "$totalSeats total",
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelSmall,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
-
-
-  // ======================
-  // STAT CARD
-  // ======================
-
-  Widget statCard({
-    required String title,
-    required String value,
-    required IconData icon,
-    required BuildContext context,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        vertical: 14,
-        horizontal: 10,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius:
-            BorderRadius.circular(14),
-      ),
-      child: Column(
-        children: [
-
-          Icon(
-            icon,
-            size: 20,
-            color: AppColors.primary(
-              context,
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          Text(
-            value,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
-            ),
-          ),
-
-          const SizedBox(height: 4),
-
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade700,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -383,7 +423,7 @@ class EventCard extends StatelessWidget {
       return DateFormat(
         "dd MMM yyyy",
       ).format(parsed);
-    } catch (e) {
+    } catch (_) {
       return date;
     }
   }
@@ -408,7 +448,7 @@ class EventCard extends StatelessWidget {
       );
 
       return DateFormat.jm().format(dt);
-    } catch (e) {
+    } catch (_) {
       return time;
     }
   }

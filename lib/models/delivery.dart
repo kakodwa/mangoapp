@@ -1,3 +1,19 @@
+class Escrow {
+  final double amount;
+  final String status;
+
+  Escrow({required this.amount, required this.status});
+
+  factory Escrow.fromJson(Map<String, dynamic> json) {
+    return Escrow(
+      amount: double.tryParse(json['amount'].toString()) ?? 0,
+      status: json['status'] ?? '',
+    );
+  }
+}
+
+
+
 class DeliveryPerson {
   final String fullName;
   final String phoneNumber;
@@ -23,17 +39,16 @@ class DeliveryPerson {
 
 
 
-
 class Delivery {
   final int id;
   final String status;
   final String orderNumber;
 
   final String? deliveryCode;
+  final String? customerDeliveryCode;
 
   final double? pickupLat;
   final double? pickupLng;
-
   final double? customerLat;
   final double? customerLng;
 
@@ -42,14 +57,15 @@ class Delivery {
 
   final List<dynamic>? items;
 
-  // ⭐ NEW: rider info
   final DeliveryPerson? rider;
+  final List<Escrow>? escrow;
 
   Delivery({
     required this.id,
     required this.status,
     required this.orderNumber,
     this.deliveryCode,
+    this.customerDeliveryCode,
     this.pickupLat,
     this.pickupLng,
     this.customerLat,
@@ -58,6 +74,7 @@ class Delivery {
     this.phone,
     this.items,
     this.rider,
+    this.escrow,
   });
 
   factory Delivery.fromJson(Map<String, dynamic> json) {
@@ -65,8 +82,8 @@ class Delivery {
       id: json['id'],
       status: json['status'] ?? '',
       orderNumber: json['order_number'] ?? '',
-
       deliveryCode: json['delivery_code'],
+      customerDeliveryCode: json['customer_delivery_code'],
 
       pickupLat: json['pickup_latitude'] != null
           ? double.tryParse(json['pickup_latitude'].toString())
@@ -89,10 +106,15 @@ class Delivery {
 
       items: json['items'] ?? [],
 
-      // ⭐ NEW: rider parsing
       rider: json['delivery_person'] != null
           ? DeliveryPerson.fromJson(json['delivery_person'])
           : null,
+
+      escrow: json['escrow'] != null
+          ? (json['escrow'] as List)
+              .map((e) => Escrow.fromJson(e))
+              .toList()
+          : [],
     );
   }
 }

@@ -7,6 +7,7 @@ import '../theme/design_system/app_spacing.dart';
 import '../screens/cart/cart_screen.dart';
 import '../screens/profile/profile_screen.dart';
 import '../screens/auth/login_screen.dart';
+import '../screens/search/unified_search_screen.dart'; 
 
 class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final String title;
@@ -29,10 +30,24 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
       title: Text(
         title,
         style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-          fontWeight: FontWeight.bold,
-        ),
+              fontWeight: FontWeight.bold,
+            ),
       ),
       actions: [
+        // 🔍 GLOBAL UNIFIED SEARCH BUTTON
+        IconButton(
+          icon: const Icon(Icons.search_rounded),
+          tooltip: 'Search Platform',
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const UnifiedSearchScreen(),
+              ),
+            );
+          },
+        ),
+
         // CART BUTTON
         Stack(
           clipBehavior: Clip.none,
@@ -75,7 +90,6 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
         // 👤 AUTH MENU ONLY
         PopupMenuButton<String>(
           icon: const Icon(Icons.person),
-
           onSelected: (value) async {
             if (value == 'login') {
               Navigator.push(
@@ -109,7 +123,6 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
               }
             }
           },
-
           itemBuilder: (_) {
             // 🚫 NOT LOGGED IN
             if (!isLoggedIn) {

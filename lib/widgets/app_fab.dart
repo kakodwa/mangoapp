@@ -25,8 +25,8 @@ class AppFab extends StatelessWidget {
     return FloatingActionButton(
       heroTag: heroTag,
       mini: mini,
-      backgroundColor: Colors.white,
-      foregroundColor: AppColors.mangoOrange,
+      backgroundColor:AppColors.mangoOrange,
+      foregroundColor:Colors.white,
       elevation: 4,
       tooltip: tooltip,
       shape: RoundedRectangleBorder(

@@ -69,10 +69,23 @@ class _EditShopScreenState extends ConsumerState<EditShopScreen> {
 
   final List<String> categories = [
     "Electronics",
-    "Fashion",
     "Groceries",
-    "Home",
-    "Beauty",
+    'Fashion',
+    'Home & Living',
+    'Beauty & Personal Care',
+    'Health & Wellness',
+    'Agriculture',
+    'Vehicles',
+    'Construction & Hardware',
+    'Books & Education',
+    'Sports & Outdoors',
+    'Baby & Kids',
+    'Food & Beverages',
+    'Pets & Animals',
+    'Office Supplies',
+    'Entertainment',
+    'Services',
+    'Industrial Equipment',
   ];
 
   @override
