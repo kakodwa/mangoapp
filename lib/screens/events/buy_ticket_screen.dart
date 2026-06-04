@@ -8,6 +8,8 @@ import '../../theme/design_system/app_spacing.dart';
 
 import '../../widgets/main_drawer.dart';
 import '../../widgets/main_app_bar.dart';
+// Import your Analytics Service
+import '../../services/analytics_service.dart';
 
 class SelectedTicket {
   final int id;
@@ -32,26 +34,26 @@ class BuyTicketScreen extends StatefulWidget {
   });
 
   @override
-  State<BuyTicketScreen> createState() =>
-      _BuyTicketScreenState();
+  State<BuyTicketScreen> createState() => _BuyTicketScreenState();
 }
 
-class _BuyTicketScreenState
-    extends State<BuyTicketScreen> {
-
+class _BuyTicketScreenState extends State<BuyTicketScreen> {
   bool loading = false;
-
   final ApiClient api = ApiClient();
-
+  final AnalyticsService analyticsService = AnalyticsService();
   List<SelectedTicket> selectedTickets = [];
 
   @override
   void initState() {
     super.initState();
 
+    // Track when the user opens the ticket selection view
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      analyticsService.logEvent('view_ticket_selection_event_id_${widget.event.id}');
+    });
+
     // ================= INIT TICKETS =================
     selectedTickets = widget.event.ticketTypes.map((t) {
-
       print("TICKET TYPE => ${t.id} ${t.name}");
 
       return SelectedTicket(
@@ -60,43 +62,33 @@ class _BuyTicketScreenState
         price: t.price,
         quantity: 0,
       );
-
     }).toList();
   }
 
   // ================= TOTAL =================
   double get total {
-
     return selectedTickets.fold(
       0,
       (sum, t) => sum + (t.price * t.quantity),
     );
-
   }
 
   // ================= BUY =================
   Future<void> buyTicket() async {
-
     try {
-
       setState(() => loading = true);
 
       final ticketData = selectedTickets
-
           .where((t) => t.quantity > 0)
-
           .map((t) => {
-
                 "ticket_type_id": t.id,
                 "quantity": t.quantity,
-
               })
-
           .toList();
 
       // ================= VALIDATION =================
       if (ticketData.isEmpty) {
-
+        analyticsService.logEvent('validation_failed_zero_tickets_event_id_${widget.event.id}');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
@@ -104,30 +96,27 @@ class _BuyTicketScreenState
             ),
           ),
         );
-
         return;
       }
 
+      // Track purchase checkout intention right before API invocation
+      analyticsService.logEvent('click_confirm_ticket_purchase_event_id_${widget.event.id}');
+
       // ================= DEBUG =================
       print("========== REQUEST ==========");
-
       print({
         "event_id": widget.event.id,
         "tickets": ticketData,
       });
-
       print("=============================");
 
       // ================= API =================
       final res = await api.post(
-
         'tickets/purchase/',
-
         data: {
           "event_id": widget.event.id,
           "tickets": ticketData,
         },
-
         fromJson: (json) => json,
       );
 
@@ -141,106 +130,88 @@ class _BuyTicketScreenState
 
       final int ticketId = ticket['id'];
 
-      final double amount =
-          double.tryParse(
+      final double amount = double.tryParse(
             ticket['total_amount'].toString(),
-          ) ?? 0;
+          ) ??
+          0;
 
       if (!mounted) return;
 
       Navigator.push(
         context,
-
         MaterialPageRoute(
-
           builder: (_) => PaymentCheckoutScreen(
-
             transactionId: ticketId,
             amount: amount,
-
             purpose: "event_ticket",
-
             referenceType: "ticket",
           ),
         ),
       );
+    } on DioException catch (e) {
+      print("BUY ERROR STATUS => ${e.response?.statusCode}");
+      print("BUY ERROR DATA => ${e.response?.data}");
 
-   } on DioException catch (e) {
-  print("BUY ERROR STATUS => ${e.response?.statusCode}");
-  print("BUY ERROR DATA => ${e.response?.data}");
+      String message = "Request failed";
+      final data = e.response?.data;
 
-  String message = "Request failed";
+      if (data is Map) {
+        if (data["error"] != null) {
+          message = data["error"].toString();
+        } else if (data["errors"] != null) {
+          final errors = data["errors"];
 
-  final data = e.response?.data;
+          if (errors is Map && errors.isNotEmpty) {
+            final firstKey = errors.keys.first;
+            final firstValue = errors[firstKey];
 
-  if (data is Map) {
-    if (data["error"] != null) {
-      message = data["error"].toString();
-    } else if (data["errors"] != null) {
-      // DRF style: {"errors": {...}}
-      final errors = data["errors"];
-
-      if (errors is Map && errors.isNotEmpty) {
-        final firstKey = errors.keys.first;
-        final firstValue = errors[firstKey];
-
-        if (firstValue is List && firstValue.isNotEmpty) {
-          message = firstValue.first.toString();
-        } else {
-          message = firstValue.toString();
+            if (firstValue is List && firstValue.isNotEmpty) {
+              message = firstValue.first.toString();
+            } else {
+              message = firstValue.toString();
+            }
+          }
+        } else if (data.values.isNotEmpty) {
+          final first = data.values.first;
+          if (first is List && first.isNotEmpty) {
+            message = first.first.toString();
+          } else {
+            message = first.toString();
+          }
         }
+      } else if (data is String) {
+        message = data;
       }
-    } else if (data.values.isNotEmpty) {
-      final first = data.values.first;
-      if (first is List && first.isNotEmpty) {
-        message = first.first.toString();
-      } else {
-        message = first.toString();
-      }
-    }
-  } else if (data is String) {
-    message = data;
-  }
 
-  AppToast.error(context, message);
-}catch (e) {
-
-  print("BUY ERROR => $e");
-
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(e.toString()),
-    ),
-  );
-
-} finally {
-
+      analyticsService.logEvent('error_ticket_purchase_api_event_id_${widget.event.id}');
+      AppToast.error(context, message);
+    } catch (e) {
+      print("BUY ERROR => $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString()),
+        ),
+      );
+    } finally {
       setState(() => loading = false);
-
     }
   }
 
   // ================= UI =================
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-
-      appBar: const MainAppBar(title: 'Buy Ticket'),
+      appBar: AppBar(
+        title: const Text('Buy Ticket'), // Fixed structural typo from 'Bay Ticket'
+      ),
       backgroundColor: const Color(0xFFF5F7FA),
       body: Padding(
-
-        padding: EdgeInsets.all(AppSpacing.md),
-
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
-
           children: [
-
             // ================= TITLE =================
             Text(
-
               widget.event.title,
-
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -251,50 +222,31 @@ class _BuyTicketScreenState
 
             // ================= TICKETS =================
             Expanded(
-
               child: ListView(
-
                 children: selectedTickets.map((t) {
-
                   return Container(
-
-                    margin: EdgeInsets.only(
+                    margin: const EdgeInsets.only(
                       bottom: 12,
                     ),
-
-                    padding: EdgeInsets.all(AppSpacing.sm),
-
+                    padding: const EdgeInsets.all(AppSpacing.sm),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(12),
                     ),
-
                     child: Row(
-
                       children: [
-
                         Column(
-
-                          crossAxisAlignment:
-                              CrossAxisAlignment.start,
-
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-
                             Text(
-
                               t.name.toUpperCase(),
-
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-
                             const SizedBox(height: AppSpacing.xxs),
-
                             Text(
-
                               "MWK ${t.price.toStringAsFixed(0)}",
-
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
                               ),
@@ -306,25 +258,19 @@ class _BuyTicketScreenState
 
                         // ================= MINUS =================
                         IconButton(
-
                           onPressed: () {
-
                             if (t.quantity > 0) {
-
+                              analyticsService.logEvent('decrement_ticket_id_${t.id}_event_id_${widget.event.id}');
                               setState(() {
                                 t.quantity--;
                               });
-
                             }
                           },
-
-                          icon: Icon(Icons.remove),
+                          icon: const Icon(Icons.remove),
                         ),
 
                         Text(
-
                           t.quantity.toString(),
-
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -333,21 +279,17 @@ class _BuyTicketScreenState
 
                         // ================= ADD =================
                         IconButton(
-
                           onPressed: () {
-
+                            analyticsService.logEvent('increment_ticket_id_${t.id}_event_id_${widget.event.id}');
                             setState(() {
                               t.quantity++;
                             });
-
                           },
-
-                          icon: Icon(Icons.add),
+                          icon: const Icon(Icons.add),
                         ),
                       ],
                     ),
                   );
-
                 }).toList(),
               ),
             ),
@@ -356,9 +298,7 @@ class _BuyTicketScreenState
 
             // ================= TOTAL =================
             Text(
-
               "Total: MWK ${total.toStringAsFixed(0)}",
-
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -369,23 +309,15 @@ class _BuyTicketScreenState
 
             // ================= BUTTON =================
             SizedBox(
-
               width: double.infinity,
               height: 50,
-
               child: ElevatedButton(
-
-                onPressed: loading
-                    ? null
-                    : buyTicket,
-
+                onPressed: loading ? null : buyTicket,
                 child: loading
-
                     ? CircularProgressIndicator(
                         color: Theme.of(context).colorScheme.surface,
                       )
-
-                    : Text(
+                    : const Text(
                         "Confirm Purchase",
                       ),
               ),

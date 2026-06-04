@@ -12,9 +12,19 @@ import '../../widgets/feed/feed_list_widget.dart';
 import '../../screens/delivery/delivery_code_entry_screen.dart';
 import '../../screens/events/scan_ticket_screen.dart';
 import '../../screens/shops/shops_list_screen.dart';
+import '../about/how_it_works.dart';
+
+import '../../services/analytics_service.dart'; 
 
 class HomeScreen extends ConsumerStatefulWidget {
-  const HomeScreen({super.key});
+  final VoidCallback onDeliveryTap;
+  final VoidCallback onTicketScanerTap;
+  
+  const HomeScreen({
+    super.key,
+    required this.onDeliveryTap,
+    required this.onTicketScanerTap,
+  });
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
@@ -22,11 +32,15 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final ScrollController controller = ScrollController();
+  final AnalyticsService _analytics = AnalyticsService(); // Analytics instance
   int bannerIndex = 0;
 
   @override
   void initState() {
     super.initState();
+
+    // 📊 TRACK EVENT: App / HomeScreen Opened
+    _analytics.logEvent('home_screen_open');
 
     controller.addListener(() {
       if (controller.position.pixels >
@@ -66,7 +80,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final feed = ref.watch(homeFeedProvider);
     final bannersAsync = ref.watch(bannersProvider);
 
-    // Returning content directly without AppScaffold wraps it into the parent's IndexedStack
     return feed.when(
       loading: () => const Center(
         child: CircularProgressIndicator(),
@@ -100,13 +113,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         SizedBox(
                           height: 190,
                           width: double.infinity,
-                          child: _buildBanner(
-                            context,
-                            image: banner.imageUrl,
-                            title: banner.title,
-                            subtitle: banner.subtitle,
-                            url: banner.url,
-                            ctaText: banner.ctaText,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(14),
+                            // 📊 TRACK EVENT: Banner Item Interaction
+                            onTap: () {
+                              _analytics.logEvent('banner_click_${banner.title.replaceAll(' ', '_').toLowerCase()}');
+                            },
+                            child: _buildBanner(
+                              context,
+                              image: banner.imageUrl,
+                              title: banner.title,
+                              subtitle: banner.subtitle,
+                              url: banner.url,
+                              ctaText: banner.ctaText,
+                            ),
                           ),
                         ),
                         const SizedBox(
@@ -147,7 +167,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             /// Quick Actions
             SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.symmetric(
+                padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.md,
                 ),
                 child: Row(
@@ -157,10 +177,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         icon: Icons.store,
                         label: 'Shops',
                         onTap: () {
+                          // 📊 TRACK EVENT: Shops Clicked
+                          _analytics.logEvent('click_shops');
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const ShopsListScreen(),
+                              builder: (_) => const MangoHubSpecScreen(),
                             ),
                           );
                         },
@@ -174,13 +196,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         icon: Icons.local_shipping,
                         label: 'Delivery',
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const DeliveryCodeScreen(),
-                            ),
-                          );
-                        },
+                          // 📊 TRACK EVENT: Delivery Clicked
+                          _analytics.logEvent('click_delivery');
+                          widget.onDeliveryTap();
+                        }, 
                       ),
                     ),
                     const SizedBox(
@@ -191,12 +210,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         icon: Icons.qr_code_scanner,
                         label: 'Scan Ticket',
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const ScanTicketScreen(),
-                            ),
-                          );
+                          // 📊 TRACK EVENT: Scan Ticket Clicked
+                          _analytics.logEvent('click_scan_ticket');
+                          widget.onTicketScanerTap();
                         },
                       ),
                     ),
@@ -332,7 +348,7 @@ class _QuickActionButtonState extends State<_QuickActionButton> {
             ),
             onTap: widget.onTap,
             child: Padding(
-              padding: EdgeInsets.all(
+              padding: const EdgeInsets.all(
                 AppSpacing.md,
               ),
               child: Column(

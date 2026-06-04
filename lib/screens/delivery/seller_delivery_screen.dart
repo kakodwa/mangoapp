@@ -37,9 +37,8 @@ class SellerDeliveryScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: const MainAppBar(
-        title: 'Seller Deliveries',
-      ),
+
+      appBar: AppBar(title: const Text('Seller Deliveries'),),
 
       body: deliveriesAsync.when(
         data: (deliveries) {

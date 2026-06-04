@@ -6,6 +6,8 @@ import '../../core/api/api_client.dart';
 import '../../providers/api_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_spacing.dart';
+// Import your Analytics Service
+import '../../services/analytics_service.dart';
 
 class RiderDeliveryScreen extends ConsumerStatefulWidget {
   final dynamic delivery;
@@ -24,61 +26,72 @@ class _RiderDeliveryScreenState
     extends ConsumerState<RiderDeliveryScreen> {
   bool loading = false;
 
-  final TextEditingController verifyCodeController =TextEditingController();
+  final TextEditingController verifyCodeController = TextEditingController();
+  final AnalyticsService analyticsService = AnalyticsService();
   String currentStatus = "";
 
   @override
   void initState() {
     super.initState();
     currentStatus = widget.delivery.status;
-  }
 
+    // Track when the rider views this specific delivery panel
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      analyticsService.logEvent('view_rider_delivery_id_${widget.delivery.id}');
+    });
+  }
 
   Future<void> _verifyDelivery() async {
-  if (verifyCodeController.text.trim().isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Enter customer verification code"),
-      ),
-    );
-    return;
+    if (verifyCodeController.text.trim().isEmpty) {
+      analyticsService.logEvent('delivery_verification_empty_code_id_${widget.delivery.id}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Enter customer verification code"),
+        ),
+      );
+      return;
+    }
+
+    setState(() => loading = true);
+
+    try {
+      analyticsService.logEvent('submit_delivery_verification_id_${widget.delivery.id}');
+      final api = ref.read(apiClientProvider);
+
+      await api.post(
+        "deliveries/${widget.delivery.id}/verify_delivery/",
+        data: {
+          "code": verifyCodeController.text.trim(),
+        },
+        fromJson: (json) => json,
+      );
+
+      analyticsService.logEvent('delivery_verification_success_id_${widget.delivery.id}');
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Delivery completed successfully"),
+        ),
+      );
+
+      setState(() {
+        currentStatus = "delivered";
+      });
+    } catch (e) {
+      analyticsService.logEvent('delivery_verification_failed_id_${widget.delivery.id}');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
+    }
+
+    setState(() => loading = false);
   }
-
-  setState(() => loading = true);
-
-  try {
-    final api = ref.read(apiClientProvider);
-
-    await api.post(
-      "deliveries/${widget.delivery.id}/verify_delivery/",
-      data: {
-        "code": verifyCodeController.text.trim(),
-      },
-      fromJson: (json) => json,
-    );
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("Delivery completed successfully"),
-      ),
-    );
-
-    setState(() {
-      currentStatus = "delivered";
-    });
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(e.toString())),
-    );
-  }
-
-  setState(() => loading = false);
-}
 
   Future<void> _updateStatus(String status) async {
     setState(() => loading = true);
 
     try {
+      analyticsService.logEvent('submit_delivery_status_update_${status}_id_${widget.delivery.id}');
       final api = ref.read(apiClientProvider);
 
       await api.post(
@@ -86,6 +99,8 @@ class _RiderDeliveryScreenState
         data: {"status": status},
         fromJson: (json) => json,
       );
+
+      analyticsService.logEvent('delivery_status_update_success_${status}_id_${widget.delivery.id}');
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -96,9 +111,9 @@ class _RiderDeliveryScreenState
 
       setState(() {
         currentStatus = status;
-
       });
     } catch (e) {
+      analyticsService.logEvent('delivery_status_update_failed_${status}_id_${widget.delivery.id}');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("Error: $e"),
@@ -130,7 +145,7 @@ class _RiderDeliveryScreenState
       ),
 
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsets.all(AppSpacing.md),
 
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -139,7 +154,7 @@ class _RiderDeliveryScreenState
             // ================= STATUS CARD =================
             Container(
               width: double.infinity,
-              padding: EdgeInsets.all(18),
+              padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   colors: [
@@ -160,11 +175,10 @@ class _RiderDeliveryScreenState
               child: Row(
                 children: [
                   Container(
-                    padding: EdgeInsets.all(AppSpacing.sm),
+                    padding: const EdgeInsets.all(AppSpacing.sm),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.surface.withOpacity(0.2),
-                      borderRadius:
-                          BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(14),
                     ),
                     child: Icon(
                       Icons.local_shipping,
@@ -177,10 +191,9 @@ class _RiderDeliveryScreenState
 
                   Expanded(
                     child: Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           "Delivery Status",
                           style: TextStyle(
                             color: Colors.white70,
@@ -210,7 +223,7 @@ class _RiderDeliveryScreenState
             // ================= CUSTOMER INFO =================
             Container(
               width: double.infinity,
-              padding: EdgeInsets.all(18),
+              padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(20),
@@ -224,16 +237,14 @@ class _RiderDeliveryScreenState
               ),
 
               child: Column(
-                crossAxisAlignment:
-                    CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
 
                   Row(
                     children: [
                       Icon(
                         Icons.person_outline,
-                        color:
-                            AppColors.primary(context),
+                        color: AppColors.primary(context),
                       ),
 
                       const SizedBox(width: AppSpacing.xs),
@@ -243,8 +254,7 @@ class _RiderDeliveryScreenState
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
-                          color:
-                              AppColors.text(context),
+                          color: AppColors.text(context),
                         ),
                       ),
                     ],
@@ -274,30 +284,18 @@ class _RiderDeliveryScreenState
             // ================= INFO MESSAGE =================
             Container(
               width: double.infinity,
-              padding: EdgeInsets.all(AppSpacing.md),
+              padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.05),
+                color: Colors.green.withOpacity(0.05),
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.25),
+                  color: Colors.green.withOpacity(0.2),
                 ),
               ),
-
-              child: Container(
-  width: double.infinity,
-  padding: EdgeInsets.all(AppSpacing.md),
-  decoration: BoxDecoration(
-    color: Colors.green.withOpacity(0.05),
-    borderRadius: BorderRadius.circular(18),
-    border: Border.all(
-      color: Colors.green.withOpacity(0.2),
-    ),
-  ),
-  child: const Text(
-    "Update delivery progress below. Once the order reaches the customer, ask for the verification code to complete delivery.",
-    style: TextStyle(height: 1.5),
-  ),
-),
+              child: const Text(
+                "Update delivery progress below. Once the order reaches the customer, ask for the verification code to complete delivery.",
+                style: TextStyle(height: 1.5),
+              ),
             ),
 
             const SizedBox(height: AppSpacing.lg),
@@ -306,14 +304,13 @@ class _RiderDeliveryScreenState
             if (d.items != null && d.items!.isNotEmpty)
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.all(18),
+                padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(20),
                   boxShadow: [
                     BoxShadow(
-                      color:
-                          Theme.of(context).colorScheme.onSurface.withOpacity(0.05),
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.05),
                       blurRadius: 10,
                       offset: const Offset(0, 4),
                     ),
@@ -321,16 +318,14 @@ class _RiderDeliveryScreenState
                 ),
 
                 child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
 
                     Row(
                       children: [
                         Icon(
                           Icons.inventory_2_outlined,
-                          color:
-                              AppColors.primary(context),
+                          color: AppColors.primary(context),
                         ),
 
                         const SizedBox(width: AppSpacing.xs),
@@ -338,11 +333,9 @@ class _RiderDeliveryScreenState
                         Text(
                           "Items to Deliver",
                           style: TextStyle(
-                            fontWeight:
-                                FontWeight.bold,
+                            fontWeight: FontWeight.bold,
                             fontSize: 16,
-                            color:
-                                AppColors.text(context),
+                            color: AppColors.text(context),
                           ),
                         ),
                       ],
@@ -352,17 +345,11 @@ class _RiderDeliveryScreenState
 
                     ...d.items!.map(
                       (item) => Container(
-                        margin:
-                            EdgeInsets.only(
-                          bottom: 10,
-                        ),
-                        padding:
-                            EdgeInsets.all(AppSpacing.sm),
+                        margin: const EdgeInsets.only(bottom: 10),
+                        padding: const EdgeInsets.all(AppSpacing.sm),
                         decoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.outline.withOpacity(0.05),
-                          borderRadius:
-                              BorderRadius.circular(
-                                  12),
+                          borderRadius: BorderRadius.circular(12),
                         ),
 
                         child: Row(
@@ -370,11 +357,8 @@ class _RiderDeliveryScreenState
                             Container(
                               width: 8,
                               height: 8,
-                              decoration:
-                                  BoxDecoration(
-                                color:
-                                    AppColors.primary(
-                                        context),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary(context),
                                 shape: BoxShape.circle,
                               ),
                             ),
@@ -385,10 +369,8 @@ class _RiderDeliveryScreenState
                               child: Text(
                                 "${item['product_name']} x${item['quantity']}",
                                 style: TextStyle(
-                                  fontWeight:
-                                      FontWeight.w500,
-                                  color:
-                                      Theme.of(context).colorScheme.outline.withOpacity(0.9),
+                                  fontWeight: FontWeight.w500,
+                                  color: Theme.of(context).colorScheme.outline.withOpacity(0.9),
                                 ),
                               ),
                             ),
@@ -400,203 +382,190 @@ class _RiderDeliveryScreenState
                 ),
               ),
 
+            const SizedBox(height: AppSpacing.lg),
 
-              const SizedBox(height: AppSpacing.lg),
-
-Container(
-  width: double.infinity,
-  padding: const EdgeInsets.all(18),
-  decoration: BoxDecoration(
-    color: Theme.of(context).colorScheme.surface,
-    borderRadius: BorderRadius.circular(20),
-  ),
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-
-      const Text(
-        "Delivery Actions",
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 16,
-        ),
-      ),
-
-      const SizedBox(height: 16),
-
-      if (currentStatus == "assigned")
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton.icon(
-            icon: const Icon(Icons.inventory),
-            label: const Text("Mark as Picked Up"),
-            onPressed: loading
-                ? null
-                : () => _updateStatus("picked_up"),
-          ),
-        ),
-
-      if (currentStatus == "picked_up")
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton.icon(
-            icon: const Icon(Icons.local_shipping),
-            label: const Text("Mark as In Transit"),
-            onPressed: loading
-                ? null
-                : () => _updateStatus("in_transit"),
-          ),
-        ),
-
-      if (currentStatus == "delivered")
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.green.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: const Row(
-            children: [
-              Icon(
-                Icons.check_circle,
-                color: Colors.green,
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                borderRadius: BorderRadius.circular(20),
               ),
-              SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  "Delivery completed successfully",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+
+                  const Text(
+                    "Delivery Actions",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
+
+                  const SizedBox(height: 16),
+
+                  if (currentStatus == "assigned")
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.inventory),
+                        label: const Text("Mark as Picked Up"),
+                        onPressed: loading
+                            ? null
+                            : () => _updateStatus("picked_up"),
+                      ),
+                    ),
+
+                  if (currentStatus == "picked_up")
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.local_shipping),
+                        label: const Text("Mark as In Transit"),
+                        onPressed: loading
+                            ? null
+                            : () => _updateStatus("in_transit"),
+                      ),
+                    ),
+
+                  if (currentStatus == "delivered")
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.green.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            color: Colors.green,
+                          ),
+                          SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              "Delivery completed successfully",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+
+            if (currentStatus == "in_transit") ...[
+              const SizedBox(height: AppSpacing.md),
+
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Colors.orange.withOpacity(0.2),
+                  ),
+                ),
+                child: Column(
+                  children: [
+
+                    const Icon(
+                      Icons.verified_user,
+                      size: 40,
+                      color: Colors.orange,
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    const Text(
+                      "Customer Verification",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    const Text(
+                      "Ask the customer for the delivery code before completing delivery.",
+                      textAlign: TextAlign.center,
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    TextField(
+                      controller: verifyCodeController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: "Customer Code",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.check_circle),
+                        label: const Text("Complete Delivery"),
+                        onPressed: loading
+                            ? null
+                            : _verifyDelivery,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
-          ),
-        ),
-    ],
-  ),
-),
-
-
-const SizedBox(height: AppSpacing.lg),
-
-if (currentStatus == "in_transit") ...[
-  const SizedBox(height: AppSpacing.md),
-
-  Container(
-    width: double.infinity,
-    padding: const EdgeInsets.all(18),
-    decoration: BoxDecoration(
-      color: Colors.orange.withOpacity(0.05),
-      borderRadius: BorderRadius.circular(20),
-      border: Border.all(
-        color: Colors.orange.withOpacity(0.2),
-      ),
-    ),
-    child: Column(
-      children: [
-
-        const Icon(
-          Icons.verified_user,
-          size: 40,
-          color: Colors.orange,
-        ),
-
-        const SizedBox(height: 10),
-
-        const Text(
-          "Customer Verification",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
-        ),
-
-        const SizedBox(height: 10),
-
-        const Text(
-          "Ask the customer for the delivery code before completing delivery.",
-          textAlign: TextAlign.center,
-        ),
-
-        const SizedBox(height: 16),
-
-        TextField(
-          controller: verifyCodeController,
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(
-            labelText: "Customer Code",
-            border: OutlineInputBorder(),
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton.icon(
-            icon: const Icon(Icons.check_circle),
-            label: const Text("Complete Delivery"),
-            onPressed: loading
-                ? null
-                : _verifyDelivery,
-          ),
-        ),
-      ],
-    ),
-  ),
-],
 
             const SizedBox(height: AppSpacing.lg),
 
             if (d.phone != null && d.phone.toString().isNotEmpty)
-  Padding(
-    padding: const EdgeInsets.only(bottom: 12),
-    child: SizedBox(
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        icon: const Icon(Icons.phone),
-        label: const Text("Call Customer"),
-        onPressed: () async {
-          await launchUrl(
-            Uri.parse("tel:${d.phone}"),
-          );
-        },
-      ),
-    ),
-  ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.phone),
+                    label: const Text("Call Customer"),
+                    onPressed: () async {
+                      analyticsService.logEvent('click_call_customer_id_${d.id}');
+                      await launchUrl(
+                        Uri.parse("tel:${d.phone}"),
+                      );
+                    },
+                  ),
+                ),
+              ),
 
-  const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.lg),
 
             // ================= MAP BUTTON =================
-            if (d.customerLat != null &&
-                d.customerLng != null)
+            if (d.customerLat != null && d.customerLng != null)
               SizedBox(
                 width: double.infinity,
-
                 child: ElevatedButton.icon(
-                  icon: Icon(Icons.navigation),
-                  label: Text(
-                    "Navigate to Customer",
-                  ),
-
+                  icon: const Icon(Icons.navigation),
+                  label: const Text("Navigate to Customer"),
                   style: ElevatedButton.styleFrom(
                     elevation: 0,
-                    backgroundColor:
-                        AppColors.leafGreen,
+                    backgroundColor: AppColors.leafGreen,
                     foregroundColor: Theme.of(context).colorScheme.surface,
-                    padding:
-                        EdgeInsets.symmetric(
-                      vertical: 16,
-                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                   ),
-
                   onPressed: () {
+                    analyticsService.logEvent('click_navigate_to_customer_id_${d.id}');
                     showModalBottomSheet(
                       context: context,
                       isScrollControlled: true,
@@ -621,8 +590,7 @@ if (currentStatus == "in_transit") ...[
     required String value,
   }) {
     return Row(
-      crossAxisAlignment:
-          CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Icon(
           icon,
@@ -635,12 +603,11 @@ if (currentStatus == "in_transit") ...[
         Expanded(
           child: RichText(
             text: TextSpan(
-              style:
-                  const TextStyle(fontSize: 14),
+              style: const TextStyle(fontSize: 14),
               children: [
                 TextSpan(
                   text: "$label: ",
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
                   ),

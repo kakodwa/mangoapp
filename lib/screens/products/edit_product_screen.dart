@@ -180,9 +180,7 @@ class _EditProductScreenState
       backgroundColor:
           const Color(0xFFF5F7FA),
 
-      appBar: const MainAppBar(
-        title: 'Edit Product',
-      ),
+      appBar: AppBar(title: const Text('Edit Product'),),
 
       body: SafeArea(
         child: Form(

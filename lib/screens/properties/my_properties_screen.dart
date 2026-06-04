@@ -21,9 +21,9 @@ class MyPropertiesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncProps = ref.watch(myPropertiesProvider);
 
-    return AppScaffold(
+    return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: const MainAppBar(title: 'My Properties'),
+      appBar: AppBar(title: const Text('My Property'),),
       
       // ✅ ADD PROPERTY BUTTON
 floatingActionButton: Padding(

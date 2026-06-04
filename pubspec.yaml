@@ -24,6 +24,8 @@ dependencies:
   font_awesome_flutter: ^10.7.0
   marquee: ^2.3.0
 
+  device_info_plus: ^10.1.0
+
 
   audioplayers: ^6.0.0
   vibration: ^3.1.3
@@ -54,7 +56,7 @@ dependencies:
   # Maps & Location
   google_maps_flutter: ^2.5.0
   flutter_polyline_points: ^2.0.0
-  geolocator: ^12.0.0
+  geolocator: ^14.0.2
   flutter_tts: ^4.0.2
 
   # WebSocket

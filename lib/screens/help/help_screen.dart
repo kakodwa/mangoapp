@@ -66,11 +66,7 @@ class HelpSupportScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppScaffold(
-      appBar: const MainAppBar(title: 'Help & Support'),
-      backgroundColor: const Color(0xFFF5F7FA),
-
-      body: SingleChildScrollView(
+    return SingleChildScrollView(
         padding: EdgeInsets.all(AppSpacing.md),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -208,7 +204,6 @@ class HelpSupportScreen extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 }

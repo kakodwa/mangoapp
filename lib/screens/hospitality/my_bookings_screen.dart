@@ -3,12 +3,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/bookings_provider.dart';
 import '../../widgets/hospitality/booking_card.dart';
-import '../../theme/design_system/app_spacing.dart';
 
-import '../../theme/app_colors.dart';
-import '../../widgets/main_app_bar.dart';
-import '../../widgets/main_drawer.dart';
+// Design System Imports
+import '../../theme/design_system/app_loader.dart';
+import '../../theme/design_system/app_info_box.dart';
+import '../../theme/design_system/app_spacing.dart';
+import '../../theme/design_system/app_typography.dart';
 import '../../widgets/app_scaffold.dart';
+
+// First-letter capitalization extension string utility
+extension CapitalizeString on String {
+  String toCapitalized() {
+    if (isEmpty) return this;
+    final lower = toLowerCase();
+    return "${lower[0].toUpperCase()}${lower.substring(1)}";
+  }
+}
 
 class MyBookingsScreen extends ConsumerWidget {
   const MyBookingsScreen({super.key});
@@ -19,24 +29,49 @@ class MyBookingsScreen extends ConsumerWidget {
 
     return AppScaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: MainAppBar(
-        title:'My Bookings',
+      appBar: AppBar(
+        title: Text(
+          'My bookings'.toCapitalized(),
+          style: AppTypography.headlineMedium,
+        ),
       ),
       body: bookingsAsync.when(
         data: (bookings) {
+          if (bookings.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: AppInfoBox(
+                  type: AppInfoType.info,
+                  message: "No bookings found".toCapitalized(),
+                ),
+              ),
+            );
+          }
+
           return ListView.builder(
-            padding: EdgeInsets.all(AppSpacing.md),
+            padding: const EdgeInsets.all(AppSpacing.md),
             itemCount: bookings.length,
             itemBuilder: (context, index) {
-              return BookingCard(booking: bookings[index]);
+              return Padding(
+                // FIXED: Changed from EdgeInsets.vertical to EdgeInsets.symmetric
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxs),
+                child: BookingCard(booking: bookings[index]),
+              );
             },
           );
         },
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
+        loading: () => Center(
+          child: AppLoader.inline(),
         ),
         error: (e, _) => Center(
-          child: Text(e.toString()),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: AppInfoBox(
+              type: AppInfoType.error,
+              message: e.toString().toCapitalized(),
+            ),
+          ),
         ),
       ),
     );

@@ -257,9 +257,7 @@ class _AddPropertyScreenState
       backgroundColor:
           const Color(0xFFF5F7FA),
 
-      appBar: const MainAppBar(
-        title: 'Post Property',
-      ),
+      appBar: AppBar(title: const Text('Post Property'),),
 
       body: Form(
         key: _formKey,

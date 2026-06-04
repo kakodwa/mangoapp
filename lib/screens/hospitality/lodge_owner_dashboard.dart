@@ -20,9 +20,7 @@ class LodgeOwnerDashboard extends StatelessWidget {
       backgroundColor: const Color(0xFFF5F7FA),
 
 
-      appBar: MainAppBar(
-        title:'Lodge Dashboard',
-      ),
+      appBar: AppBar(title: const Text('Lodge Dashboard'),),
 
       body: GridView.count(
         crossAxisCount: 2,

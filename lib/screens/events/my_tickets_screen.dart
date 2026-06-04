@@ -140,9 +140,7 @@ Future<void> captureTicket(GlobalKey key) async {
 
     return AppScaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: const MainAppBar(
-        title: 'My Tickets',
-      ),
+      appBar: AppBar(title: const Text('My Tickets'),),
       body: ticketsAsync.when(
         data: (tickets) {
           if (tickets.isEmpty) {

@@ -215,7 +215,8 @@ class _EditShopScreenState extends ConsumerState<EditShopScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: const MainAppBar(title: "Edit Shop"),
+
+      appBar: AppBar(title: const Text('Edit Shop'),),
 
       body: Form(
         key: _formKey,

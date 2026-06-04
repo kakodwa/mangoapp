@@ -18,6 +18,9 @@ import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../utils/app_toast.dart';
 
+// Analytics Import
+import '../../services/analytics_service.dart';
+
 class ShopDetailsScreen extends ConsumerStatefulWidget {
   final int shopId;
 
@@ -28,20 +31,31 @@ class ShopDetailsScreen extends ConsumerStatefulWidget {
 }
 
 class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
+  final AnalyticsService _analytics = AnalyticsService();
+  bool _hasLoggedView = false;
+
   void _openWhatsApp(BuildContext context, String phone) async {
+    // 📊 TRACK EVENT: User engaged with the vendor storefront via WhatsApp
+    _analytics.logEvent('shop_whatsapp_click');
+
     final uri = Uri.parse("https://wa.me/$phone");
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       AppToast.info(context, "Could not open WhatsApp");
     }
   }
 
+  void _callPhone(String phone) async {
+    // 📊 TRACK EVENT: User triggered a programmatic phone line callback request
+    _analytics.logEvent('shop_call_click');
 
-    void _callPhone(String phone) async {
     final uri = Uri.parse("tel:$phone");
     await launchUrl(uri);
   }
 
   void _sendEmail(String email) async {
+    // 📊 TRACK EVENT: User initiated an external messaging protocol intent via mailto URI
+    _analytics.logEvent('shop_email_click');
+
     final uri = Uri.parse("mailto:$email");
     await launchUrl(uri);
   }
@@ -56,19 +70,21 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-
       body: shopAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text("Error: $e")),
-
         data: (shop) {
+          // 📊 TRACK EVENT: Component received verified payload; log impression once per lifecycle
+          if (!_hasLoggedView) {
+            _analytics.logEvent('shop_view');
+            _hasLoggedView = true;
+          }
+
           return Stack(
             children: [
-
               // ================= MAIN SCROLL
               CustomScrollView(
                 slivers: [
-
                   // ================= INSTAGRAM STYLE HEADER
                   SliverAppBar(
                     expandedHeight: 320,
@@ -76,13 +92,11 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
                     stretch: true,
                     backgroundColor: Colors.black,
                     leading: const BackButton(color: Colors.white),
-
                     flexibleSpace: FlexibleSpaceBar(
                       collapseMode: CollapseMode.pin,
                       background: Stack(
                         fit: StackFit.expand,
                         children: [
-
                           // Banner image
                           shop.banner != null && shop.banner!.isNotEmpty
                               ? Image.network(
@@ -144,15 +158,13 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-
                                     // LOGO
                                     Container(
                                       padding: const EdgeInsets.all(3),
-                                      decoration: BoxDecoration(
+                                      decoration: const BoxDecoration(
                                         shape: BoxShape.circle,
                                         color: Colors.white,
                                       ),
@@ -232,117 +244,119 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
                     ),
                   ),
 
+                  const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
-              const SliverToBoxAdapter(child: SizedBox(height: 16)),
-
-              // ================= NAME + STATS
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                
-                      Text(
-                        shop.description,
-                        style: const TextStyle(color: Colors.grey),
+                  // ================= NAME + STATS
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            shop.description,
+                            style: const TextStyle(color: Colors.grey),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
 
-              const SliverToBoxAdapter(child: SizedBox(height: 16)),
-
-                
-
+                  const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
                   // ================= CONTACT CARD (NEW BELOW DESCRIPTION)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          blurRadius: 10,
-                          color: Colors.black.withOpacity(0.05),
-                        )
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-
-                        const Text(
-                          "Contact Business",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              blurRadius: 10,
+                              color: Colors.black.withOpacity(0.05),
+                            )
+                          ],
                         ),
-
-                        const SizedBox(height: 12),
-
-                        // PHONE
-                        Row(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.phone, color:AppColors.mangoOrange),
-                            const SizedBox(width: 10),
-                            Expanded(child: Text(shop.phoneNumber)),
-                            IconButton(
-                              icon: const Icon(Icons.call,color:AppColors.leafGreen),
-                              onPressed: () => _callPhone(shop.phoneNumber),
+                            const Text(
+                              "Contact Business",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+
+                            const SizedBox(height: 12),
+
+                            // PHONE
+                            Row(
+                              children: [
+                                const Icon(Icons.phone,
+                                    color: AppColors.mangoOrange),
+                                const SizedBox(width: 10),
+                                Expanded(child: Text(shop.phoneNumber)),
+                                IconButton(
+                                  icon: const Icon(Icons.call,
+                                      color: AppColors.leafGreen),
+                                  onPressed: () => _callPhone(shop.phoneNumber),
+                                ),
+                              ],
+                            ),
+
+                            // EMAIL
+                            Row(
+                              children: [
+                                const Icon(Icons.email,
+                                    color: AppColors.mangoOrange),
+                                const SizedBox(width: 10),
+                                Expanded(child: Text(shop.email)),
+                                IconButton(
+                                  icon: const Icon(Icons.send,
+                                      color: AppColors.leafGreen),
+                                  onPressed: () => _sendEmail(shop.email),
+                                ),
+                              ],
+                            ),
+
+                            // WHATSAPP
+                            Row(
+                              children: [
+                                const FaIcon(
+                                  FontAwesomeIcons.whatsapp,
+                                  color: AppColors.mangoOrange,
+                                ),
+                                const SizedBox(width: 10),
+                                const Expanded(child: Text("WhatsApp Chat")),
+                                IconButton(
+                                  icon: const Icon(Icons.message,
+                                      color: AppColors.leafGreen),
+                                  onPressed: () {
+                                    if (!isLoggedIn) {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => const LoginScreen(),
+                                        ),
+                                      );
+                                      return;
+                                    }
+                                    _openWhatsApp(context, shop.phoneNumber);
+                                  },
+                                ),
+                              ],
                             ),
                           ],
                         ),
-
-                        // EMAIL
-                        Row(
-                          children: [
-                            const Icon(Icons.email, color: AppColors.mangoOrange),
-                            const SizedBox(width: 10),
-                            Expanded(child: Text(shop.email)),
-                            IconButton(
-                              icon: const Icon(Icons.send,color:AppColors.leafGreen),
-                              onPressed: () => _sendEmail(shop.email),
-                            ),
-                          ],
-                        ),
-
-                        // WHATSAPP
-                        Row(
-                          children: [
-                            const FaIcon(FontAwesomeIcons.whatsapp,color: AppColors.mangoOrange,),
-                            const SizedBox(width: 10),
-                            const Expanded(child: Text("WhatsApp Chat")),
-                            IconButton(
-                              icon: const Icon(Icons.message,color:AppColors.leafGreen),
-                              onPressed: () {
-                                if (!isLoggedIn) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => const LoginScreen(),
-                                    ),
-                                  );
-                                  return;
-                                }
-                                _openWhatsApp(context, shop.phoneNumber);
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ),
 
-              const SliverToBoxAdapter(child: SizedBox(height: 20)),
+                  const SliverToBoxAdapter(child: SizedBox(height: 20)),
 
                   // ================= PRODUCTS
                   const SliverToBoxAdapter(
@@ -368,8 +382,7 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
                         padding: const EdgeInsets.all(12),
                         sliver: SliverGrid(
                           delegate: SliverChildBuilderDelegate(
-                            (context, i) =>
-                                ProductCard(product: products[i]),
+                            (context, i) => ProductCard(product: products[i]),
                             childCount: products.length,
                           ),
                           gridDelegate:
@@ -384,18 +397,16 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
                     },
                   ),
 
-                  const SliverToBoxAdapter(
-                      child: SizedBox(height: 120)),
+                  const SliverToBoxAdapter(child: SizedBox(height: 120)),
                 ],
               ),
 
               // ================= FLOATING ACTIONS
               Positioned(
-                bottom:50,
+                bottom: 50,
                 right: 16,
                 child: Column(
                   children: [
-
                     AppFab(
                       heroTag: "fav",
                       icon: Icons.favorite_border,
@@ -439,6 +450,9 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
                       tooltip: "Map",
                       toastMessage: "Opening map",
                       onPressed: () {
+                        // 📊 TRACK EVENT: User opened the integrated geolocation map sheet
+                        _analytics.logEvent('shop_map_click');
+
                         showModalBottomSheet(
                           context: context,
                           isScrollControlled: true,

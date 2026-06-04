@@ -8,15 +8,25 @@ import 'edit_shop_screen.dart';
 import '../products/edit_product_screen.dart';
 import '../products/product_details_screen.dart';
 import '../products/add_product_screen.dart';
-import '../../widgets/main_app_bar.dart';
-import '../../theme/app_colors.dart';
 import '../../widgets/app_fab.dart';
 import '../../core/api/api_client.dart';
-import '../../utils/app_snackbar.dart';
+
+// Design System Imports
+import '../../theme/design_system/app_card.dart';
+import '../../theme/design_system/app_loader.dart';
+import '../../theme/design_system/app_info_box.dart';
 import '../../theme/design_system/app_spacing.dart';
+import '../../theme/design_system/app_typography.dart';
 
 class MyShopScreen extends ConsumerWidget {
   const MyShopScreen({super.key});
+
+  /// Capitalizes only the first letter of a string and sets the rest to lowercase
+  String _capitalize(String text) {
+    if (text.isEmpty) return text;
+    final lower = text.toLowerCase();
+    return "${lower[0].toUpperCase()}${lower.substring(1)}";
+  }
 
   String fixImageUrl(String? url) {
     if (url == null || url.isEmpty) return '';
@@ -30,80 +40,84 @@ class MyShopScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: const MainAppBar(title: 'My Shop'),
+      appBar: AppBar(
+        title: Text(
+          _capitalize('My shop'),
+          style: AppTypography.headlineMedium,
+        ),
+      ),
 
       // ================= FLOATING BUTTONS =================
       floatingActionButton: myShopAsync.maybeWhen(
-  data: (shops) {
-    if (shops.isEmpty) return null;
+        data: (shops) {
+          if (shops.isEmpty) return null;
 
-    final shop = shops.first;
+          final shop = shops.first;
 
-    return Padding(
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).padding.bottom + 50,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AppFab(
-            heroTag: "edit_shop",
-            icon: Icons.edit,
-            tooltip: "Edit Shop",
-            toastMessage: "Edit your shop",
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => EditShopScreen(shop: shop),
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).padding.bottom + 50,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                AppFab(
+                  heroTag: "edit_shop",
+                  icon: Icons.edit,
+                  tooltip: _capitalize("Edit shop"),
+                  toastMessage: _capitalize("Edit your shop"),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => EditShopScreen(shop: shop),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
-
-          const SizedBox(height: 12),
-
-          AppFab(
-            heroTag: "add_product",
-            icon: Icons.add,
-            tooltip: "Add Product",
-            toastMessage: "Add a new product",
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const AddProductScreen(),
+                const SizedBox(height: AppSpacing.sm),
+                AppFab(
+                  heroTag: "add_product",
+                  icon: Icons.add,
+                  tooltip: _capitalize("Add product"),
+                  toastMessage: _capitalize("Add a new product"),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const AddProductScreen(),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
-        ],
+              ],
+            ),
+          );
+        },
+        orElse: () => null,
       ),
-    );
-  },
-  orElse: () => null,
-),
 
       body: myShopAsync.when(
         data: (shops) {
           if (shops.isEmpty) {
-            return const Center(
-              child: Text(
-                "You have not created a shop yet.",
-                style: TextStyle(fontSize: 16),
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: AppInfoBox(
+                  type: AppInfoType.info,
+                  message: _capitalize("You have not created a shop yet."),
+                ),
               ),
             );
           }
 
           final shop = shops.first;
-          final productsAsync =
-              ref.watch(productsByShopProvider(shop.id));
+          final productsAsync = ref.watch(productsByShopProvider(shop.id));
 
           return SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 // ================= BANNER =================
                 Stack(
                   children: [
@@ -125,10 +139,9 @@ class MyShopScreen extends ConsumerWidget {
                               child: Icon(Icons.store, size: 60),
                             ),
                     ),
-
                     Positioned(
                       bottom: -3,
-                      left: 16,
+                      left: AppSpacing.md,
                       child: CircleAvatar(
                         radius: 35,
                         backgroundColor: Theme.of(context).colorScheme.surface,
@@ -141,7 +154,7 @@ class MyShopScreen extends ConsumerWidget {
                                   fit: BoxFit.cover,
                                 ),
                               )
-                            : Icon(Icons.store),
+                            : const Icon(Icons.store),
                       ),
                     ),
                   ],
@@ -151,51 +164,59 @@ class MyShopScreen extends ConsumerWidget {
 
                 // ================= SHOP INFO =================
                 Padding(
-                  padding: EdgeInsets.all(AppSpacing.md),
+                  padding: const EdgeInsets.all(AppSpacing.md),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        shop.name,
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        _capitalize(shop.name),
+                        style: AppTypography.displaySmall,
                       ),
-                      const SizedBox(height: 10),
-                      Text(shop.description),
-
-                      const SizedBox(height: AppSpacing.md),
-
+                      const SizedBox(height: AppSpacing.xs),
                       Text(
-                        "Contact Information",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+                        _capitalize(shop.description),
+                        style: AppTypography.bodyMedium,
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      Text(
+                        _capitalize("Contact information"),
+                        style: AppTypography.headlineSmall,
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      ListTile(
+                        leading: const Icon(Icons.phone),
+                        title: Text(
+                          _capitalize("Phone"),
+                          style: AppTypography.titleMedium,
                         ),
-                      ),
-
-                      const SizedBox(height: 10),
-
-                      ListTile(
-                        leading: Icon(Icons.phone),
-                        title: Text("Phone"),
-                        subtitle: Text(shop.phoneNumber),
+                        subtitle: Text(
+                          shop.phoneNumber,
+                          style: AppTypography.bodyMedium,
+                        ),
                         contentPadding: EdgeInsets.zero,
                       ),
-
                       ListTile(
-                        leading: Icon(Icons.email),
-                        title: Text("Email"),
-                        subtitle: Text(shop.email),
+                        leading: const Icon(Icons.email),
+                        title: Text(
+                          _capitalize("Email"),
+                          style: AppTypography.titleMedium,
+                        ),
+                        subtitle: Text(
+                          shop.email.toLowerCase(),
+                          style: AppTypography.bodyMedium,
+                        ),
                         contentPadding: EdgeInsets.zero,
                       ),
-
                       ListTile(
-                        leading: Icon(Icons.location_on),
-                        title: Text("Location"),
-                        subtitle:
-                            Text("${shop.address}, ${shop.city}"),
+                        leading: const Icon(Icons.location_on),
+                        title: Text(
+                          _capitalize("Location"),
+                          style: AppTypography.titleMedium,
+                        ),
+                        subtitle: Text(
+                          _capitalize("${shop.address}, ${shop.city}"),
+                          style: AppTypography.bodyMedium,
+                        ),
                         contentPadding: EdgeInsets.zero,
                       ),
                     ],
@@ -203,133 +224,139 @@ class MyShopScreen extends ConsumerWidget {
                 ),
 
                 // ================= PRODUCTS =================
-                const Padding(
-                  padding: EdgeInsets.all(16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                   child: Text(
-                    "Products",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    _capitalize("Products"),
+                    style: AppTypography.headlineSmall,
                   ),
                 ),
+                const SizedBox(height: AppSpacing.xs),
 
                 productsAsync.when(
                   data: (products) {
                     if (products.isEmpty) {
-                      return const Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Text("No products yet"),
+                      return Padding(
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        child: Text(
+                          _capitalize("No products yet"),
+                          style: AppTypography.bodyMedium,
+                        ),
                       );
                     }
 
                     return ListView.builder(
                       shrinkWrap: true,
-                      physics:
-                          const NeverScrollableScrollPhysics(),
+                      physics: const NeverScrollableScrollPhysics(),
                       itemCount: products.length,
                       itemBuilder: (context, index) {
                         final product = products[index];
-                        return Card(
-  margin: EdgeInsets.symmetric(
-      horizontal: 16, vertical: 6),
-  child: ListTile(
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ProductDetailsScreen(
-            productId: product.id,
-          ),
-        ),
-      );
-    },
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md,
+                            vertical: AppSpacing.xxs,
+                          ),
+                          child: AppCard(
+                            padding: EdgeInsets.zero,
+                            child: ListTile(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => ProductDetailsScreen(
+                                      productId: product.id,
+                                    ),
+                                  ),
+                                );
+                              },
+                              leading: ClipRRect(
+                                borderRadius: BorderRadius.circular(AppSpacing.xs),
+                                child: (product.image != null && product.image!.isNotEmpty)
+                                    ? Image.network(
+                                        fixImageUrl(product.image),
+                                        width: 50,
+                                        height: 50,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return const Icon(Icons.image_not_supported);
+                                        },
+                                      )
+                                    : Icon(
+                                        Icons.image_not_supported,
+                                        size: 30,
+                                        color: Theme.of(context).colorScheme.outline,
+                                      ),
+                              ),
+                              title: Text(
+                                _capitalize(product.name),
+                                style: AppTypography.titleMedium,
+                              ),
+                              subtitle: Text(
+                                _capitalize("MWK ${product.price}"),
+                                style: AppTypography.bodyMedium,
+                              ),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(
+                                      Icons.edit,
+                                      color: Theme.of(context).colorScheme.primary,
+                                    ),
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => EditProductScreen(product: product),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: Icon(
+                                      Icons.delete,
+                                      color: Theme.of(context).colorScheme.error,
+                                    ),
+                                    onPressed: () async {
+                                      await ref
+                                          .read(apiClientProvider)
+                                          .delete("products/${product.id}/");
 
-    leading: (product.image != null && product.image!.isNotEmpty)
-    ? Image.network(
-        fixImageUrl(product.image),
-        width: 50,
-        height: 50,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Icon(Icons.image_not_supported);
-        },
-      )
-    : Icon(
-        Icons.image_not_supported,
-        size: 30,
-        color: Theme.of(context).colorScheme.outline,
-      ),
-
-    title: Text(product.name),
-    subtitle: Text("MWK ${product.price}"),
-
-    trailing: Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton(
-          icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.primary),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) =>
-                    EditProductScreen(product: product),
-              ),
-            );
-          },
-        ),
-        IconButton(
-          icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
-          onPressed: () async {
-            await ref
-                .read(apiClientProvider)
-                .delete("products/${product.id}/");
-
-            ref.invalidate(productsByShopProvider(shop.id));
-          },
-        ),
-      ],
-    ),
-  ),
-);
+                                      ref.invalidate(productsByShopProvider(shop.id));
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
                       },
                     );
                   },
-
-                  // 🔥 IMPROVED ERROR UI
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-
+                  loading: () => AppLoader.inline(),
                   error: (e, _) => Padding(
-                    padding: EdgeInsets.all(AppSpacing.md),
-                    child: Column(
-                      children: [
-                        Icon(Icons.error,
-                            color: Theme.of(context).colorScheme.error, size: 40),
-                        const SizedBox(height: 10),
-                        Text(
-                          "Failed to load products:\n$e",
-                          textAlign: TextAlign.center, style: TextStyle(color: Theme.of(context).colorScheme.error),
-                        ),
-                      ],
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    child: AppInfoBox(
+                      type: AppInfoType.error,
+                      message: _capitalize("Failed to load products: $e"),
                     ),
                   ),
                 ),
-
                 const SizedBox(height: AppSpacing.md),
               ],
             ),
           );
         },
-
-        loading: () =>
-            const Center(child: CircularProgressIndicator()),
-
+        loading: () => Center(
+          child: AppLoader.inline(),
+        ),
         error: (error, _) => Center(
-          child: Text(
-            "Error: $error",
-            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: AppInfoBox(
+              type: AppInfoType.error,
+              message: _capitalize("Error: $error"),
+            ),
           ),
         ),
       ),

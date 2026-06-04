@@ -21,9 +21,14 @@ import '../../theme/app_colors.dart';
 import '../../widgets/hospitality/room_card.dart';
 import '../../utils/app_toast.dart';
 import 'availability_calendar_screen.dart';
+// Import your Analytics Service (Adjust path matching your directory layout)
+import '../../services/analytics_service.dart';
 
 class LodgeDetailScreen extends ConsumerWidget {
   final Lodge lodge;
+
+  // Static final analytics instance
+  static final AnalyticsService _analyticsService = AnalyticsService();
 
   const LodgeDetailScreen({
     super.key,
@@ -32,27 +37,29 @@ class LodgeDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Automatically track screen view entry asynchronously
+    _analyticsService.logEvent('view_lodge_detail_${lodge.id}');
+
     final roomsAsync = ref.watch(roomsProvider(lodge.id));
     final authState = ref.watch(authProvider);
     final user = authState.user;
     final isLoggedIn = authState.isAuthenticated;
 
-
     void _openWhatsApp(String phone) async {
-          final uri = Uri.parse("https://wa.me/$phone");
+      final uri = Uri.parse("https://wa.me/$phone");
 
-          if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-            AppToast.info(context, "Could not open WhatsApp");
-            }
-          }
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        AppToast.info(context, "Could not open WhatsApp");
+      }
+    }
 
     return Scaffold(
-      
-      appBar: roomsAsync.when(
-        data: (_) => MainAppBar(title: lodge.name),
-        loading: () => const MainAppBar(title: "Loading..."),
-        error: (_, __) =>
-            const MainAppBar(title: "Details"),
+      appBar: AppBar(
+        title: roomsAsync.when(
+          data: (_) => Text(lodge.name),
+          loading: () => const Text('Loading...'),
+          error: (_, __) => const Text('Details'),
+        ),
       ),
       backgroundColor: const Color(0xFFF5F7FA),
       body: Stack(
@@ -69,7 +76,7 @@ class LodgeDetailScreen extends ConsumerWidget {
                 iconTheme: IconThemeData(color: Theme.of(context).colorScheme.surface),
                 flexibleSpace: FlexibleSpaceBar(
                   collapseMode: CollapseMode.parallax,
-                  titlePadding: EdgeInsets.only(
+                  titlePadding: const EdgeInsets.only(
                     left: 16,
                     bottom: 16,
                     right: 16,
@@ -82,7 +89,7 @@ class LodgeDetailScreen extends ConsumerWidget {
                       color: Theme.of(context).colorScheme.surface,
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
-                      shadows: [
+                      shadows: const [
                         Shadow(
                           blurRadius: 10,
                           color: Colors.black54,
@@ -138,7 +145,7 @@ class LodgeDetailScreen extends ConsumerWidget {
                         left: 16,
                         bottom: 60,
                         child: Container(
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                             horizontal: 12,
                             vertical: 7,
                           ),
@@ -177,17 +184,17 @@ class LodgeDetailScreen extends ConsumerWidget {
               /// ================= MAIN CONTENT =================
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.all(AppSpacing.md),
+                  padding: const EdgeInsets.all(AppSpacing.md),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       /// DESCRIPTION
                       AppCard(
-                        padding: EdgeInsets.all(AppSpacing.lg),
+                        padding: const EdgeInsets.all(AppSpacing.lg),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            const Text(
                               "About Lodge",
                               style: AppTypography.titleMedium,
                             ),
@@ -200,13 +207,12 @@ class LodgeDetailScreen extends ConsumerWidget {
                         ),
                       ),
 
-
                       const SizedBox(height: AppSpacing.xl),
 
                       /// SECTION HEADER
-                      Text(
+                      const Text(
                         'Available Rooms',
-                         style: AppTypography.headlineLarge,
+                        style: AppTypography.headlineLarge,
                       ),
 
                       const SizedBox(height: AppSpacing.md),
@@ -216,7 +222,7 @@ class LodgeDetailScreen extends ConsumerWidget {
                         data: (rooms) {
                           if (rooms.isEmpty) {
                             return AppCard(
-                              padding: EdgeInsets.all(AppSpacing.xl),
+                              padding: const EdgeInsets.all(AppSpacing.xl),
                               child: Column(
                                 children: [
                                   Icon(
@@ -225,7 +231,7 @@ class LodgeDetailScreen extends ConsumerWidget {
                                     color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4),
                                   ),
                                   const SizedBox(height: AppSpacing.sm),
-                                  Text(
+                                  const Text(
                                     "No rooms available yet",
                                     style: TextStyle(
                                       fontWeight: FontWeight.w600,
@@ -257,9 +263,11 @@ class LodgeDetailScreen extends ConsumerWidget {
                                   lodgeImages: lodge.images,
                                   isOwner: isOwner,
                                   onEdit: () {
+                                    _analyticsService.logEvent('lodge_room_edit_click_${room.id}');
                                     debugPrint("Edit room: ${room.id}");
                                   },
                                   onDelete: () {
+                                    _analyticsService.logEvent('lodge_room_delete_click_${room.id}');
                                     debugPrint("Delete room: ${room.id}");
                                   },
                                 );
@@ -272,7 +280,7 @@ class LodgeDetailScreen extends ConsumerWidget {
                           child: Center(child: CircularProgressIndicator()),
                         ),
                         error: (e, _) => Padding(
-                          padding: EdgeInsets.all(20),
+                          padding: const EdgeInsets.all(20),
                           child: Text(
                             e.toString(), style: TextStyle(color: Theme.of(context).colorScheme.error),
                           ),
@@ -287,71 +295,68 @@ class LodgeDetailScreen extends ConsumerWidget {
             ],
           ),
 
+          /// ================= FAB BUTTONS =================
+          if (lodge.latitude != null && lodge.longitude != null)
+            Positioned(
+              bottom: 50,
+              right: 16,
+              child: Column(
+                children: [
+                  // 💬 WHATSAPP BUTTON
+                  AppFab(
+                    heroTag: "whatsapp",
+                    icon: FontAwesomeIcons.whatsapp,
+                    tooltip: "Chat on WhatsApp",
+                    toastMessage: "Opening WhatsApp...",
+                    onPressed: () {
+                      if (!isLoggedIn) {
+                        _analyticsService.logEvent('lodge_whatsapp_unauthenticated_redirect');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LoginScreen(),
+                          ),
+                        );
+                        return;
+                      }
 
-          /// ================= MAP BUTTON =================
-if (lodge.latitude != null && lodge.longitude != null)
-  Positioned(
-    bottom:50,
-    right: 16,
-    child: Column(
-      children: [
+                      final phone = lodge.phoneNumber;
 
-              // 💬 WHATSAPP BUTTON
-        AppFab(
-          heroTag: "whatsapp",
-          icon: FontAwesomeIcons.whatsapp,
-          tooltip: "Chat on WhatsApp",
-          toastMessage: "Opening WhatsApp...",
-          onPressed: () {
-            if (!isLoggedIn) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const LoginScreen(),
-                ),
-              );
-              return;
-            }
+                      if (phone == null || phone.isEmpty) {
+                        AppToast.info(
+                          context,
+                          "No WhatsApp number available",
+                        );
+                        return;
+                      }
 
-            final phone = lodge.phoneNumber;
-
-            if (phone == null || phone.isEmpty) {
-              AppToast.info(
-                context,
-                "No WhatsApp number available",
-              );
-              return;
-            }
-
-            _openWhatsApp(phone);
-          },
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        // 🗺 MAP BUTTON
-        AppFab(
-          heroTag: "map_lodge",
-          icon: Icons.map,
-          tooltip: "View Map",
-          toastMessage: "Opening map",
-          onPressed: () {
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              backgroundColor: Colors.transparent,
-              builder: (_) => ShopMapModal(
-                shopLat: lodge.latitude!,
-                shopLng: lodge.longitude!,
+                      _analyticsService.logEvent('lodge_whatsapp_chat_start_${lodge.id}');
+                      _openWhatsApp(phone);
+                    },
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  // 🗺 MAP BUTTON
+                  AppFab(
+                    heroTag: "map_lodge",
+                    icon: Icons.map,
+                    tooltip: "View Map",
+                    toastMessage: "Opening map",
+                    onPressed: () {
+                      _analyticsService.logEvent('lodge_map_view_${lodge.id}');
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (_) => ShopMapModal(
+                          shopLat: lodge.latitude!,
+                          shopLng: lodge.longitude!,
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
-            );
-          },
-        ),
-
-        
-
-
-      ],
-    ),
-  ),
+            ),
         ],
       ),
     );

@@ -165,7 +165,7 @@ void _openViewAll(
                       crossAxisCount: 2,
                       crossAxisSpacing: 8,
                       mainAxisSpacing: 8,
-                      childAspectRatio: 0.72,
+                      childAspectRatio: 0.62,
                     ),
                     itemBuilder: (_, i) =>
                         ProductCard(product: products[i]),

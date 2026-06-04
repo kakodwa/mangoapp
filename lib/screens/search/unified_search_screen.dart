@@ -17,10 +17,6 @@ import '../../models/shop_model.dart';
 import '../../models/event_model.dart';
 import '../../models/lodge_model.dart';
 
-import '../../widgets/main_drawer.dart';
-import '../../widgets/main_app_bar.dart';
-import '../../widgets/app_scaffold.dart';
-
 // --- PLUGGED NATIVE FEED CARDS ---
 import '../../screens/products/product_card.dart';
 import '../../screens/shops/shop_card.dart';
@@ -261,196 +257,195 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AppScaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-      appBar: const MainAppBar(title: "MangoHub"),
-      drawer: const MainDrawer(),
-      body: AnimatedBuilder(
-        animation: _provider,
-        builder: (context, child) {
-          final isFilterActive = _provider.selectedDistrict != null || 
-                                 _provider.selectedCategory != null || 
-                                 _provider.selectedListingPurpose != null;
+    // FIX: Removed the nested Scaffold and appBar initialization completely.
+    // This widget now outputs its body content seamlessly, allowing MainTabsScreen 
+    // and AppScaffold to manage the unified global layout structure cleanly.
+    return AnimatedBuilder(
+      animation: _provider,
+      builder: (context, child) {
+        final isFilterActive = _provider.selectedDistrict != null || 
+                               _provider.selectedCategory != null || 
+                               _provider.selectedListingPurpose != null;
 
-          final bool isProductTabOnly = _provider.selectedType == 'product';
+        final bool isProductTabOnly = _provider.selectedType == 'product';
 
-          // --- SPLIT THE DATA TO SOLVE THE MIXED LAYOUT BUG NATIVELY ---
-          final List<SearchResultItem> productItems = _provider.results.where((e) => e.resultType == 'product').toList();
-          final List<SearchResultItem> bannerItems = _provider.results.where((e) => e.resultType != 'product').toList();
+        // --- SPLIT THE DATA TO SOLVE THE MIXED LAYOUT BUG NATIVELY ---
+        final List<SearchResultItem> productItems = _provider.results.where((e) => e.resultType == 'product').toList();
+        final List<SearchResultItem> bannerItems = _provider.results.where((e) => e.resultType != 'product').toList();
 
-          return Column(
-            children: [
-              // 1. INPUT SEARCH BAR & ACTIONS FILTER BUTTON
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 8.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _searchController,
-                        onChanged: _onSearchChanged,
-                        decoration: InputDecoration(
-                          hintText: 'Search matching items...',
-                          prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                          suffixIcon: _searchController.text.isNotEmpty
-                              ? IconButton(
-                                  icon: const Icon(Icons.clear, color: Colors.grey),
-                                  onPressed: () {
-                                    _searchController.clear();
-                                    _provider.updateFilters(query: '');
-                                  },
-                                )
-                              : null,
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: Colors.grey.shade300),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: AppColors.primary(context), width: 2),
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    InkWell(
-                      onTap: _showFilterBottomSheet,
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        height: 48,
-                        width: 48,
-                        decoration: BoxDecoration(
-                          color: isFilterActive ? AppColors.mangoOrange.withOpacity(0.15) : Colors.white,
+        return Column(
+          children: [
+            // 1. INPUT SEARCH BAR & ACTIONS FILTER BUTTON
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 8.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      onChanged: _onSearchChanged,
+                      decoration: InputDecoration(
+                        hintText: 'Search matching items...',
+                        prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                        suffixIcon: _searchController.text.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.clear, color: Colors.grey),
+                                onPressed: () {
+                                  _searchController.clear();
+                                  _provider.updateFilters(query: '');
+                                },
+                              )
+                            : null,
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isFilterActive ? AppColors.mangoOrange : Colors.grey.shade300,
-                            width: isFilterActive ? 1.6 : 1,
-                          ),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
                         ),
-                        child: const Icon(Icons.tune_rounded),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: AppColors.primary(context), width: 2),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 12),
                       ),
                     ),
-                  ],
-                ),
-              ),
-
-              // 2. HORIZONTAL SCROLL CHIP TABS
-              SizedBox(
-                height: 40,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  itemCount: _types.length,
-                  itemBuilder: (context, index) {
-                    final type = _types[index];
-                    final isSelected = _provider.selectedType == type['key'];
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: FilterChip(
-                        label: Text(type['label']!),
-                        selected: isSelected,
-                        selectedColor: AppColors.primary(context).withOpacity(0.2),
-                        checkmarkColor: AppColors.primary(context),
-                        labelStyle: TextStyle(
-                          color: isSelected ? AppColors.primary(context) : AppColors.darkText,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  ),
+                  const SizedBox(width: 8),
+                  InkWell(
+                    onTap: _showFilterBottomSheet,
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      height: 48,
+                      width: 48,
+                      decoration: BoxDecoration(
+                        color: isFilterActive ? AppColors.mangoOrange.withOpacity(0.15) : Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isFilterActive ? AppColors.mangoOrange : Colors.grey.shade300,
+                          width: isFilterActive ? 1.6 : 1,
                         ),
-                        onSelected: (bool selected) {
-                          _provider.updateFilters(
-                            type: type['key'],
-                            district: SearchProvider.isUnchanged,
-                            category: null,
-                            listingPurpose: null,
-                          );
-                        },
                       ),
-                    );
-                  },
-                ),
+                      child: const Icon(Icons.tune_rounded),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
+            ),
 
-              // 3. ADAPTIVE HYBRID SLIVER VIEW ENGINE
-              Expanded(
-                child: _provider.isLoading
-                    ? const Center(child: CircularProgressIndicator(color: AppColors.mangoOrange))
-                    : _provider.errorMessage.isNotEmpty
-                        ? Center(child: Text(_provider.errorMessage, style: const TextStyle(color: Colors.red)))
-                        : _provider.results.isEmpty
-                            ? const Center(child: Text('No matching items found.'))
-                            : RefreshIndicator(
-                                onRefresh: () async => _provider.resetSearch(),
-                                color: AppColors.mangoOrange,
-                                child: CustomScrollView(
-                                  controller: _scrollController,
-                                  slivers: [
-                                    
-                                    // =========================================================
-                                    // SECTION A: IF THERE ARE PRODUCTS, RENDER THEM IN A 2-COLUMN GRID
-                                    // =========================================================
-                                    if (isProductTabOnly || productItems.isNotEmpty)
-                                      SliverPadding(
-                                        padding: const EdgeInsets.all(12.0),
-                                        sliver: SliverGrid(
-                                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                            crossAxisCount: 2,
-                                            childAspectRatio: 0.72, // Perfect ProductCard layout bounding boxes
-                                            crossAxisSpacing: 12,
-                                            mainAxisSpacing: 12,
-                                          ),
-                                          delegate: SliverChildBuilderDelegate(
-                                            (context, index) {
-                                              final item = isProductTabOnly ? _provider.results[index] : productItems[index];
-                                              return _buildDynamicFeedCard(item);
-                                            },
-                                            childCount: isProductTabOnly ? _provider.results.length : productItems.length,
-                                          ),
+            // 2. HORIZONTAL SCROLL CHIP TABS
+           // 2. HORIZONTAL SCROLL CHIP TABS
+            SizedBox(
+              height: 40,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                itemCount: _types.length,
+                itemBuilder: (context, index) {
+                  final type = _types[index];
+                  final isSelected = _provider.selectedType == type['key'];
+                  
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: FilterChip(
+                      label: Text(type['label']!),
+                      selected: isSelected,
+                      selectedColor: AppColors.primary(context).withOpacity(0.2),
+                      checkmarkColor: AppColors.primary(context),
+                      labelStyle: TextStyle(
+                        color: isSelected ? AppColors.primary(context) : AppColors.darkText,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                      ),
+                      onSelected: (bool selected) {
+                        _provider.updateFilters(
+                          type: type['key'],
+                          district: SearchProvider.isUnchanged,
+                          category: null,
+                          listingPurpose: null,
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            // 3. ADAPTIVE HYBRID SLIVER VIEW ENGINE
+            Expanded(
+              child: _provider.isLoading
+                  ? const Center(child: CircularProgressIndicator(color: AppColors.mangoOrange))
+                  : _provider.errorMessage.isNotEmpty
+                      ? Center(child: Text(_provider.errorMessage, style: const TextStyle(color: Colors.red)))
+                      : _provider.results.isEmpty
+                          ? const Center(child: Text('No matching items found.'))
+                          : RefreshIndicator(
+                              onRefresh: () async => _provider.resetSearch(),
+                              color: AppColors.mangoOrange,
+                              child: CustomScrollView(
+                                controller: _scrollController,
+                                slivers: [
+                                  
+                                  // =========================================================
+                                  // SECTION A: IF THERE ARE PRODUCTS, RENDER THEM IN A 2-COLUMN GRID
+                                  // =========================================================
+                                  if (isProductTabOnly || productItems.isNotEmpty)
+                                    SliverPadding(
+                                      padding: const EdgeInsets.all(12.0),
+                                      sliver: SliverGrid(
+                                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 2,
+                                          childAspectRatio: 0.62,
+                                          crossAxisSpacing: 12,
+                                          mainAxisSpacing: 12,
+                                        ),
+                                        delegate: SliverChildBuilderDelegate(
+                                          (context, index) {
+                                            final item = isProductTabOnly ? _provider.results[index] : productItems[index];
+                                            return _buildDynamicFeedCard(item);
+                                          },
+                                          childCount: isProductTabOnly ? _provider.results.length : productItems.length,
                                         ),
                                       ),
+                                    ),
 
-                                    // =========================================================
-                                    // SECTION B: RENDER PROPERTIES, EVENT BANNERS, SHOPS FULL-WIDTH
-                                    // =========================================================
-                                    if (!isProductTabOnly && bannerItems.isNotEmpty)
-                                      SliverPadding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                        sliver: SliverList(
-                                          delegate: SliverChildBuilderDelegate(
-                                            (context, index) => _buildDynamicFeedCard(bannerItems[index]),
-                                            childCount: bannerItems.length,
-                                          ),
+                                  // =========================================================
+                                  // SECTION B: RENDER PROPERTIES, EVENT BANNERS, SHOPS FULL-WIDTH
+                                  // =========================================================
+                                  if (!isProductTabOnly && bannerItems.isNotEmpty)
+                                    SliverPadding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                      sliver: SliverList(
+                                        delegate: SliverChildBuilderDelegate(
+                                          (context, index) => _buildDynamicFeedCard(bannerItems[index]),
+                                          childCount: bannerItems.length,
                                         ),
                                       ),
+                                    ),
 
-                                    // Infinite scrolling pagination item loading indicators
-                                    if (_provider.isLoadingMore)
-                                      const SliverToBoxAdapter(
-                                        child: Padding(
-                                          padding: EdgeInsets.symmetric(vertical: 16),
-                                          child: Center(child: CircularProgressIndicator(color: AppColors.mangoOrange)),
-                                        ),
+                                  // Infinite scrolling pagination item loading indicators
+                                  if (_provider.isLoadingMore)
+                                    const SliverToBoxAdapter(
+                                      child: Padding(
+                                        padding: EdgeInsets.symmetric(vertical: 16),
+                                        child: Center(child: CircularProgressIndicator(color: AppColors.mangoOrange)),
                                       ),
-                                  ],
-                                ),
+                                    ),
+                                ],
                               ),
-              ),
-            ],
-          );
-        },
-      ),
+                            ),
+            ),
+          ],
+        );
+      },
     );
   }
 
   Widget _buildDynamicFeedCard(SearchResultItem item) {
     switch (item.resultType) {
-      
       case 'product':
         final product = Product(
           id: item.id,

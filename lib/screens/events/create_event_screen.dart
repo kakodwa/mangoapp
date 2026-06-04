@@ -283,7 +283,7 @@ class _AddEventScreenState extends ConsumerState<AddEventScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const MainAppBar(title: "Create Event"),
+      appBar: AppBar(title: const Text('Create Event'),),
       body: Form(
         key: _formKey,
         child: ListView(

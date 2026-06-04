@@ -173,9 +173,7 @@ class _EditRoomScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: MainAppBar(
-        title:"Edit Room"
-      ),
+      appBar: AppBar(title: const Text('Edit Room'),),
 
       body: Form(
         key: _formKey,

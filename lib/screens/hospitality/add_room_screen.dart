@@ -93,9 +93,7 @@ class _AddRoomScreenState extends ConsumerState<AddRoomScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: MainAppBar(
-        title:'Add room',
-      ),
+      appBar: AppBar(title: const Text('Add Room'),),
       body: Form(
         key: _formKey,
         child: ListView(

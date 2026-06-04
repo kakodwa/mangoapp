@@ -11,6 +11,8 @@ import '../../widgets/main_app_bar.dart';
 
 import '../payments/payment_checkout_screen.dart';
 import '../../theme/design_system/app_spacing.dart';
+// Import your Analytics Service (Adjust path matching your directory layout)
+import '../../services/analytics_service.dart';
 
 class BookingCheckoutScreen extends ConsumerStatefulWidget {
   final Room room;
@@ -32,6 +34,9 @@ class _BookingCheckoutScreenState
 
   bool loading = false;
 
+  // Static final analytics instance
+  static final AnalyticsService _analyticsService = AnalyticsService();
+
   String formatDate(DateTime date) =>
       DateFormat('yyyy-MM-dd').format(date);
 
@@ -44,6 +49,9 @@ class _BookingCheckoutScreenState
     }
 
     setState(() => loading = true);
+
+    // Track the initiation of the booking API request submission
+    _analyticsService.logEvent('booking_submit_attempt_room_${widget.room.id}');
 
     try {
       final api = ref.read(apiClientProvider);
@@ -67,6 +75,9 @@ class _BookingCheckoutScreenState
 
       print("🔥 BOOKING CREATED => $bookingId");
 
+      // Track server-side creation success before shifting down onto checkout views
+      _analyticsService.logEvent('booking_created_success_$bookingId');
+
       if (!mounted) return;
 
       /// 2. OPEN PAYMENT SCREEN
@@ -80,6 +91,9 @@ class _BookingCheckoutScreenState
             referenceType: "booking", // now FIXED
 
             onSuccess: (payment) {
+              // Track successful terminal payments matching the record hook
+              _analyticsService.logEvent('booking_payment_success_$bookingId');
+
               Navigator.pop(context); // payment screen
               Navigator.pop(context); // booking screen
             },
@@ -88,6 +102,9 @@ class _BookingCheckoutScreenState
       );
     } catch (e) {
       print("❌ BOOKING ERROR => $e");
+
+      // Track failures to catch layout blockades or network drops
+      _analyticsService.logEvent('booking_submit_failed_room_${widget.room.id}');
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Booking failed: $e")),
@@ -98,22 +115,29 @@ class _BookingCheckoutScreenState
   }
 
   @override
+  void initState() {
+    super.initState();
+    // Track screen entry point initialization 
+    _analyticsService.logEvent('view_booking_checkout_room_${widget.room.id}');
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: const MainAppBar(title: 'Booking Checkout'),
+      appBar: AppBar(title: const Text('Booking Checkout'),),
       body: Padding(
         padding: EdgeInsets.all(AppSpacing.md),
         child: Column(
           children: [
             ListTile(
-              title: Text('Check In'),
+              title: const Text('Check In'),
               subtitle: Text(
                 checkIn != null
                     ? formatDate(checkIn!)
                     : 'Select date',
               ),
-              trailing: Icon(Icons.calendar_month),
+              trailing: const Icon(Icons.calendar_month),
               onTap: () async {
                 final picked = await showDatePicker(
                   context: context,
@@ -122,19 +146,20 @@ class _BookingCheckoutScreenState
                 );
 
                 if (picked != null) {
+                  _analyticsService.logEvent('booking_date_select_checkin');
                   setState(() => checkIn = picked);
                 }
               },
             ),
 
             ListTile(
-              title: Text('Check Out'),
+              title: const Text('Check Out'),
               subtitle: Text(
                 checkOut != null
                     ? formatDate(checkOut!)
                     : 'Select date',
               ),
-              trailing: Icon(Icons.calendar_month),
+              trailing: const Icon(Icons.calendar_month),
               onTap: () async {
                 final picked = await showDatePicker(
                   context: context,
@@ -143,6 +168,7 @@ class _BookingCheckoutScreenState
                 );
 
                 if (picked != null) {
+                  _analyticsService.logEvent('booking_date_select_checkout');
                   setState(() => checkOut = picked);
                 }
               },
@@ -157,7 +183,7 @@ class _BookingCheckoutScreenState
                 onPressed: loading ? null : submitBooking,
                 child: loading
                     ? CircularProgressIndicator(color: Theme.of(context).colorScheme.surface)
-                    : Text("Proceed To Payment"),
+                    : const Text("Proceed To Payment"),
               ),
             ),
           ],

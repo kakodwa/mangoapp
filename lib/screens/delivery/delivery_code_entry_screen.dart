@@ -14,6 +14,8 @@ import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_button.dart';
 import '../../widgets/main_app_bar.dart';
 import '../../widgets/app_scaffold.dart';
+// Import your Analytics Service
+import '../../services/analytics_service.dart';
 
 class DeliveryCodeScreen extends ConsumerStatefulWidget {
   const DeliveryCodeScreen({super.key});
@@ -25,12 +27,24 @@ class DeliveryCodeScreen extends ConsumerStatefulWidget {
 
 class _DeliveryCodeScreenState extends ConsumerState<DeliveryCodeScreen> {
   final TextEditingController codeController = TextEditingController();
+  final AnalyticsService analyticsService = AnalyticsService();
   bool loading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Track when the user opens the delivery code screen view
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      analyticsService.logEvent('view_delivery_code_screen');
+    });
+  }
 
   Future<void> openDelivery() async {
     final code = codeController.text.trim();
 
     if (code.isEmpty) {
+      analyticsService.logEvent('validation_failed_empty_delivery_code');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Enter delivery code")),
       );
@@ -40,6 +54,7 @@ class _DeliveryCodeScreenState extends ConsumerState<DeliveryCodeScreen> {
     setState(() => loading = true);
 
     try {
+      analyticsService.logEvent('submit_delivery_code_verification');
       final api = ref.read(apiClientProvider);
 
       final delivery = await api.post(
@@ -47,6 +62,8 @@ class _DeliveryCodeScreenState extends ConsumerState<DeliveryCodeScreen> {
         data: {"code": code},
         fromJson: (json) => Delivery.fromJson(json),
       );
+
+      analyticsService.logEvent('delivery_code_verify_success_id_${delivery.id}');
 
       if (!mounted) return;
 
@@ -57,6 +74,7 @@ class _DeliveryCodeScreenState extends ConsumerState<DeliveryCodeScreen> {
         ),
       );
     } catch (e) {
+      analyticsService.logEvent('delivery_code_verify_failed');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Invalid code or server error")),
       );
@@ -67,11 +85,8 @@ class _DeliveryCodeScreenState extends ConsumerState<DeliveryCodeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AppScaffold(
-     backgroundColor: const Color(0xFFF5F7FA),
-      appBar: const MainAppBar(title: 'Enter Delivery Code'),
-      body: Padding(
-        padding: EdgeInsets.all(20),
+    return Padding(
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -119,7 +134,6 @@ class _DeliveryCodeScreenState extends ConsumerState<DeliveryCodeScreen> {
             ),
           ],
         ),
-      ),
     );
   }
 }

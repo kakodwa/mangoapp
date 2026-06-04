@@ -563,9 +563,7 @@ class _ManageEventsScreenState
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: const MainAppBar(
-        title: "Manage Events",
-      ),
+      appBar: AppBar(title: const Text('Manage Event'),),
 
 
       floatingActionButton: Padding(

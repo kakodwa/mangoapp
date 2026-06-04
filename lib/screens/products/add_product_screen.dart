@@ -166,9 +166,7 @@ class _AddProductScreenState
         0xFFF5F7FA,
       ),
 
-      appBar: const MainAppBar(
-        title: 'Add Product',
-      ),
+      appBar: AppBar(title: const Text('Add Product'),),
 
       body: SafeArea(
         child: Form(

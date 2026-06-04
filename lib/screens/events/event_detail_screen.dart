@@ -15,6 +15,8 @@ import '../auth/login_screen.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/app_fab.dart';
 import '../../theme/design_system/app_spacing.dart';
+// Import your Analytics Service
+import '../../services/analytics_service.dart';
 
 class EventDetailScreen extends ConsumerWidget {
   final EventModel event;
@@ -26,128 +28,127 @@ class EventDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Instantiate or reference the analytics pipeline
+    final AnalyticsService analyticsService = AnalyticsService();
+
+    // Track the initial screen mounting state 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      analyticsService.logEvent('view_event_details_id_${event.id}');
+    });
 
     final totalSeats = event.ticketTypes.fold<int>(
       0,
       (sum, item) => sum + item.totalSeats,
-      );
+    );
 
     final availableSeats = event.ticketTypes.fold<int>(
       0,
       (sum, item) => sum + item.availableSeats,
-      );
+    );
 
     final soldTickets = totalSeats - availableSeats;
 
     final soldPercentage =
-    totalSeats == 0 ? 0.0 : soldTickets / totalSeats;
-
+        totalSeats == 0 ? 0.0 : soldTickets / totalSeats;
 
     final authState = ref.watch(authProvider);
     final isLoggedIn = authState.isAuthenticated;
 
-
     void _openWhatsApp(String phone) async {
-          final uri = Uri.parse("https://wa.me/$phone");
+      final uri = Uri.parse("https://wa.me/$phone");
 
-          if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-            AppToast.info(context, "Could not open WhatsApp");
-            }
-          }
-
-
+      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+        AppToast.info(context, "Could not open WhatsApp");
+      }
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: const MainAppBar(
-        title: "Event Details",
-      ),
+      appBar: AppBar(title: const Text('Event Details')),
 
       // =========================
       // FLOATING NAVIGATION BUTTON
       // =========================
       floatingActionButton: (event.latitude != null && event.longitude != null) ||
-        (event.organizerPhoneNumber  != null && event.organizerPhoneNumber!.isNotEmpty)
-    ? Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-
-          // 🗺 MAP BUTTON
-          if (event.latitude != null && event.longitude != null)
-            AppFab(
-              heroTag: "map_event",
-              icon: Icons.map,
-              tooltip: "Open Map",
-              toastMessage: "Opening location",
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ShopMapModal(
-                      shopLat: event.latitude!,
-                      shopLng: event.longitude!,
-                    ),
+              (event.organizerPhoneNumber != null && event.organizerPhoneNumber!.isNotEmpty)
+          ? Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 🗺 MAP BUTTON
+                if (event.latitude != null && event.longitude != null)
+                  AppFab(
+                    heroTag: "map_event",
+                    icon: Icons.map,
+                    tooltip: "Open Map",
+                    toastMessage: "Opening location",
+                    onPressed: () {
+                      analyticsService.logEvent('click_event_map_id_${event.id}');
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ShopMapModal(
+                            shopLat: event.latitude!,
+                            shopLng: event.longitude!,
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
 
-          if (event.latitude != null &&
-              event.longitude != null &&
-              event.organizerPhoneNumber!= null &&
-              event.organizerPhoneNumber!.isNotEmpty)
-            const SizedBox(height: AppSpacing.sm),
+                if (event.latitude != null &&
+                    event.longitude != null &&
+                    event.organizerPhoneNumber != null &&
+                    event.organizerPhoneNumber!.isNotEmpty)
+                  const SizedBox(height: AppSpacing.sm),
 
-          // 💬 WHATSAPP BUTTON
-          if (event.organizerPhoneNumber != null &&
-              event.organizerPhoneNumber!.isNotEmpty)
-            AppFab(
-              heroTag: "whatsapp_event",
-              icon: FontAwesomeIcons.whatsapp,
-              tooltip: "Chat on WhatsApp",
-              toastMessage: "Opening WhatsApp...",
-              onPressed: () {
-                if (!isLoggedIn) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const LoginScreen(),
-                    ),
-                  );
-                  return;
-                }
+                // 💬 WHATSAPP BUTTON
+                if (event.organizerPhoneNumber != null &&
+                    event.organizerPhoneNumber!.isNotEmpty)
+                  AppFab(
+                    heroTag: "whatsapp_event",
+                    icon: FontAwesomeIcons.whatsapp,
+                    tooltip: "Chat on WhatsApp",
+                    toastMessage: "Opening WhatsApp...",
+                    onPressed: () {
+                      analyticsService.logEvent('click_event_whatsapp_id_${event.id}');
+                      
+                      if (!isLoggedIn) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LoginScreen(),
+                          ),
+                        );
+                        return;
+                      }
 
-                final phone = event.organizerPhoneNumber;
+                      final phone = event.organizerPhoneNumber;
 
-                if (phone == null || phone.isEmpty) {
-                  AppToast.info(
-                    context,
-                    "No WhatsApp number available",
-                  );
-                  return;
-                }
+                      if (phone == null || phone.isEmpty) {
+                        AppToast.info(
+                          context,
+                          "No WhatsApp number available",
+                        );
+                        return;
+                      }
 
-                _openWhatsApp(phone);
-              },
-            ),
-        ],
-      )
-    : null,
+                      _openWhatsApp(phone);
+                    },
+                  ),
+              ],
+            )
+          : null,
 
       body: ListView(
         padding: EdgeInsets.all(AppSpacing.md),
         children: [
-
           // ======================
           // EVENT CARD
           // ======================
-
           Container(
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
-              borderRadius:
-                  BorderRadius.circular(20),
-
+              borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
                   color: Theme.of(context).colorScheme.onSurface.withOpacity(.04),
@@ -156,41 +157,33 @@ class EventDetailScreen extends ConsumerWidget {
                 ),
               ],
             ),
-
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 // ======================
                 // IMAGE
                 // ======================
-
                 Stack(
                   children: [
                     ClipRRect(
-                      borderRadius:
-                          const BorderRadius.vertical(
+                      borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(20),
                       ),
-
                       child: Image.network(
                         event.banner,
                         width: double.infinity,
                         height: 260,
                         fit: BoxFit.cover,
-
-                        errorBuilder:
-                            (
-                              context,
-                              error,
-                              stackTrace,
-                            ) {
+                        errorBuilder: (
+                          context,
+                          error,
+                          stackTrace,
+                        ) {
                           return Container(
                             height: 260,
                             color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
                             alignment: Alignment.center,
-                            child: Icon(
+                            child: const Icon(
                               Icons.image,
                               size: 50,
                             ),
@@ -198,32 +191,24 @@ class EventDetailScreen extends ConsumerWidget {
                         },
                       ),
                     ),
-
                     if (event.isFeatured)
                       Positioned(
                         top: 14,
                         left: 14,
                         child: Container(
-                          padding:
-                              EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                             horizontal: 14,
                             vertical: 7,
                           ),
-
                           decoration: BoxDecoration(
                             color: Theme.of(context).colorScheme.primary,
-                            borderRadius:
-                                BorderRadius.circular(
-                              30,
-                            ),
+                            borderRadius: BorderRadius.circular(30),
                           ),
-
                           child: Text(
                             "FEATURED",
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.surface,
-                              fontWeight:
-                                  FontWeight.bold,
+                              fontWeight: FontWeight.bold,
                               fontSize: 11,
                             ),
                           ),
@@ -235,21 +220,17 @@ class EventDetailScreen extends ConsumerWidget {
                 // ======================
                 // CONTENT
                 // ======================
-
                 Padding(
-                  padding: EdgeInsets.all(18),
+                  padding: const EdgeInsets.all(18),
                   child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-
                       // TITLE
                       Text(
                         event.title,
                         style: const TextStyle(
                           fontSize: 24,
-                          fontWeight:
-                              FontWeight.bold,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
 
@@ -261,19 +242,14 @@ class EventDetailScreen extends ConsumerWidget {
                           Icon(
                             Icons.location_on_outlined,
                             size: 20,
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                           ),
-
                           const SizedBox(width: AppSpacing.xs),
-
                           Expanded(
                             child: Text(
                               "${event.venue}, ${event.city}",
                               style: TextStyle(
-                                color: Colors
-                                    .grey
-                                    .withOpacity(0.8),
+                                color: Colors.grey.withOpacity(0.8),
                               ),
                             ),
                           ),
@@ -288,29 +264,20 @@ class EventDetailScreen extends ConsumerWidget {
                           Icon(
                             Icons.calendar_month,
                             size: 20,
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
                           ),
-
                           const SizedBox(width: AppSpacing.xs),
-
                           Text(
                             event.eventDate,
                             style: TextStyle(
-                              color: Colors
-                                  .grey
-                                  .withOpacity(0.8),
+                              color: Colors.grey.withOpacity(0.8),
                             ),
                           ),
-
                           const Spacer(),
-
                           Text(
                             "${event.startTime} - ${event.endTime}",
                             style: TextStyle(
-                              color: Colors
-                                  .grey
-                                  .withOpacity(0.8),
+                              color: Colors.grey.withOpacity(0.8),
                             ),
                           ),
                         ],
@@ -321,71 +288,53 @@ class EventDetailScreen extends ConsumerWidget {
                       // ======================
                       // STATS
                       // ======================
+                      Row(
+                        children: [
+                          // TOTAL TICKETS
+                          Expanded(
+                            child: statCard(
+                              title: "Tickets",
+                              value: totalSeats.toString(),
+                              icon: Icons.confirmation_num,
+                              context: context,
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
 
-                      // ======================
-// STATS (UPDATED)
-// ======================
+                          // AVAILABLE
+                          Expanded(
+                            child: statCard(
+                              title: "Available",
+                              value: availableSeats.toString(),
+                              icon: Icons.event_available,
+                              context: context,
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
 
-Row(
-  children: [
-
-    // TOTAL TICKETS
-    Expanded(
-      child: statCard(
-        title: "Tickets",
-        value: totalSeats.toString(),
-        icon: Icons.confirmation_num,
-        context: context,
-      ),
-    ),
-
-    const SizedBox(width: AppSpacing.sm),
-
-    // AVAILABLE
-    Expanded(
-      child: statCard(
-        title: "Available",
-        value: availableSeats.toString(),
-        icon: Icons.event_available,
-        context: context,
-      ),
-    ),
-
-    const SizedBox(width: AppSpacing.sm),
-
-    // SOLD
-    Expanded(
-      child: statCard(
-        title: "Sold",
-        value: soldTickets.toString(),
-        icon: Icons.people,
-        context: context,
-      ),
-    ),
-  ],
-),
+                          // SOLD
+                          Expanded(
+                            child: statCard(
+                              title: "Sold",
+                              value: soldTickets.toString(),
+                              icon: Icons.people,
+                              context: context,
+                            ),
+                          ),
+                        ],
+                      ),
 
                       const SizedBox(height: AppSpacing.md),
 
                       // ======================
                       // PROGRESS
                       // ======================
-
                       LinearProgressIndicator(
                         value: soldPercentage,
                         minHeight: 8,
-
-                        borderRadius:
-                            BorderRadius.circular(
-                          30,
-                        ),
-
-                        backgroundColor:
-                            Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
-
-                        color: AppColors.primary(
-                          context,
-                        ),
+                        borderRadius: BorderRadius.circular(30),
+                        backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
+                        color: AppColors.primary(context),
                       ),
 
                       const SizedBox(height: AppSpacing.xs),
@@ -403,21 +352,18 @@ Row(
                       // ======================
                       // TICKET TYPES
                       // ======================
-
-                      Text(
+                      const Text(
                         "Available Tickets",
                         style: TextStyle(
                           fontSize: 18,
-                          fontWeight:
-                              FontWeight.bold,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
 
                       const SizedBox(height: 14),
 
                       ...event.ticketTypes.map(
-                        (ticket) =>
-                            ticketCard(context, ticket),
+                        (ticket) => ticketCard(context, ticket),
                       ),
                     ],
                   ),
@@ -431,16 +377,11 @@ Row(
           // ======================
           // DESCRIPTION CARD
           // ======================
-
           Container(
-            padding: EdgeInsets.all(18),
-
+            padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
-
-              borderRadius:
-                  BorderRadius.circular(20),
-
+              borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
                   color: Theme.of(context).colorScheme.onSurface.withOpacity(.04),
@@ -449,23 +390,17 @@ Row(
                 ),
               ],
             ),
-
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
-                Text(
+                const Text(
                   "Description",
                   style: TextStyle(
                     fontSize: 18,
-                    fontWeight:
-                        FontWeight.bold,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-
                 const SizedBox(height: 14),
-
                 Text(
                   event.description,
                   style: TextStyle(
@@ -485,68 +420,68 @@ Row(
       // BUY TICKET BUTTON
       // =========================
       bottomNavigationBar: Container(
-  padding: EdgeInsets.fromLTRB(16, 14, 16, 20),
-  decoration: BoxDecoration(
-    color: Theme.of(context).colorScheme.surface,
-    boxShadow: [
-      BoxShadow(
-        color: Theme.of(context).colorScheme.onSurface.withOpacity(.06),
-        blurRadius: 10,
-        offset: const Offset(0, -2),
-      ),
-    ],
-  ),
-  child: SafeArea(
-    top: false,
-    child: SizedBox(
-      height: 56,
-      child: ElevatedButton.icon(
-        icon: Icon(Icons.confirmation_num),
-        label: Text(
-          "Buy Ticket",
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary(context),
-          foregroundColor: Theme.of(context).colorScheme.surface,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-        ),
-
-        onPressed: () {
-          if (event.ticketTypes.isEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("No tickets available"),
-              ),
-            );
-            return;
-          }
-
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => BuyTicketScreen(
-                event: event,
-              ),
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(.06),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
             ),
-          );
-        },
+          ],
+        ),
+        child: SafeArea(
+          top: false,
+          child: SizedBox(
+            height: 56,
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.confirmation_num),
+              label: const Text(
+                "Buy Ticket",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary(context),
+                foregroundColor: Theme.of(context).colorScheme.surface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              onPressed: () {
+                analyticsService.logEvent('click_buy_ticket_button_event_id_${event.id}');
+                
+                if (event.ticketTypes.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("No tickets available"),
+                    ),
+                  );
+                  return;
+                }
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => BuyTicketScreen(
+                      event: event,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
       ),
-    ),
-  ),
-),
     );
   }
 
   // ======================
   // STAT CARD
   // ======================
-
   Widget statCard({
     required String title,
     required String value,
@@ -554,46 +489,33 @@ Row(
     required BuildContext context,
   }) {
     return Container(
-      padding: EdgeInsets.symmetric(
+      padding: const EdgeInsets.symmetric(
         vertical: 14,
         horizontal: 10,
       ),
-
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
-
-        borderRadius:
-            BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(14),
       ),
-
       child: Column(
         children: [
-
           Icon(
             icon,
             size: 20,
-            color: AppColors.primary(
-              context,
-            ),
+            color: AppColors.primary(context),
           ),
-
           const SizedBox(height: AppSpacing.xs),
-
           Text(
             value,
             textAlign: TextAlign.center,
-
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 15,
             ),
           ),
-
           const SizedBox(height: AppSpacing.xxs),
-
           Text(
             title,
-
             style: TextStyle(
               fontSize: 12,
               color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
@@ -607,69 +529,49 @@ Row(
   // ======================
   // TICKET CARD
   // ======================
-
+  // ======================
+  // TICKET CARD
+  // ======================
   Widget ticketCard(
     BuildContext context,
     EventTicketTypeModel ticket,
   ) {
     return Container(
-      margin: EdgeInsets.only(bottom: 12),
-
-      padding: EdgeInsets.all(14),
-
+      // FIXED: Changed EdgeInsets.offset to EdgeInsets.only
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
-
-        borderRadius:
-            BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16),
       ),
-
       child: Row(
         children: [
-
           Container(
-            padding: EdgeInsets.all(AppSpacing.sm),
-
+            padding: const EdgeInsets.all(AppSpacing.sm),
             decoration: BoxDecoration(
-              color: AppColors.primary(
-                context,
-              ).withOpacity(.12),
-
-              borderRadius:
-                  BorderRadius.circular(12),
+              color: AppColors.primary(context).withOpacity(.12),
+              borderRadius: BorderRadius.circular(12),
             ),
-
             child: Icon(
               Icons.confirmation_num,
-              color: AppColors.primary(
-                context,
-              ),
+              color: AppColors.primary(context),
             ),
           ),
-
           const SizedBox(width: 14),
-
           Expanded(
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 Text(
                   ticket.name.toUpperCase(),
-
                   style: const TextStyle(
-                    fontWeight:
-                        FontWeight.bold,
+                    fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
                 ),
-
                 const SizedBox(height: AppSpacing.xxs),
-
                 Text(
                   "${ticket.availableSeats} seats available",
-
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
                   ),
@@ -677,17 +579,12 @@ Row(
               ],
             ),
           ),
-
           Text(
             "MWK ${ticket.price.toStringAsFixed(0)}",
-
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 16,
-
-              color: AppColors.primary(
-                context,
-              ),
+              color: AppColors.primary(context),
             ),
           ),
         ],

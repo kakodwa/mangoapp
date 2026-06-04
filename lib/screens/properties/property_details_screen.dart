@@ -13,16 +13,25 @@ import 'property_unlock_screen.dart';
 import 'property_card.dart';
 import '../../widgets/app_fab.dart';
 import '../../providers/auth_provider.dart';
-import '../auth/login_screen.dart';
 import '../../theme/design_system/app_spacing.dart';
 
-class PropertyDetailsScreen extends ConsumerWidget {
+// Analytics Import
+import '../../services/analytics_service.dart';
+
+class PropertyDetailsScreen extends ConsumerStatefulWidget {
   final int propertyId;
 
   const PropertyDetailsScreen({
-    Key? key,
+    super.key,
     required this.propertyId,
-  }) : super(key: key);
+  });
+
+  @override
+  ConsumerState<PropertyDetailsScreen> createState() => _PropertyDetailsScreenState();
+}
+
+class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
+  bool _hasLoggedView = false;
 
   bool _isLandProperty(String type) {
     final value = type.toLowerCase();
@@ -31,40 +40,48 @@ class PropertyDetailsScreen extends ConsumerWidget {
         value.contains('farm');
   }
 
+  void _openWhatsApp(String phone) async {
+    final uri = Uri.parse("https://wa.me/$phone");
+
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (mounted) {
+        AppToast.info(context, "Could not open WhatsApp");
+      }
+    }
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final propertyAsync = ref.watch(propertyDetailsProvider(propertyId));
-
-
+  Widget build(BuildContext context) {
+    final propertyAsync = ref.watch(propertyDetailsProvider(widget.propertyId));
     final authState = ref.watch(authProvider);
     final isLoggedIn = authState.isAuthenticated;
-
-
-    void _openWhatsApp(String phone) async {
-          final uri = Uri.parse("https://wa.me/$phone");
-
-          if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-            AppToast.info(context, "Could not open WhatsApp");
-            }
-          }
-
+    final AnalyticsService analytics = AnalyticsService();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: propertyAsync.when(
-        data: (property) => MainAppBar(title: property.title),
-        loading: () => const MainAppBar(title: 'Loading...'),
-        error: (_, __) => MainAppBar(title: 'Property detail'),
+        data: (property) => AppBar(
+          title: Text(property.title),
+        ),
+        loading: () => AppBar(
+          title: const Text('Loading...'),
+        ),
+        error: (_, __) => AppBar(
+          title: const Text('Property Detail'),
+        ),
       ),
       body: propertyAsync.when(
         data: (property) {
-          final authState = ref.watch(authProvider);
-          final isLoggedIn = authState.isAuthenticated;
           final currentUserId = authState.user?.id;
           final relatedAsync = ref.watch(relatedPropertiesProvider(property.id));
           final isOwner = currentUserId == property.ownerId;
-
           final isLand = _isLandProperty(property.propertyType);
+
+          // 📊 TRACK EVENT: Screen renders loaded item details successfully
+          if (!_hasLoggedView) {
+            analytics.logEvent('property_details_view');
+            _hasLoggedView = true;
+          }
 
           return Stack(
             children: [
@@ -114,15 +131,13 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                             top: 50,
                                             right: 16,
                                             child: Container(
-                                              padding:
-                                                  EdgeInsets.symmetric(
+                                              padding: const EdgeInsets.symmetric(
                                                 horizontal: 10,
                                                 vertical: 5,
                                               ),
                                               decoration: BoxDecoration(
                                                 color: AppColors.mangoOrange,
-                                                borderRadius:
-                                                    BorderRadius.circular(20),
+                                                borderRadius: BorderRadius.circular(20),
                                               ),
                                               child: Text(
                                                 'Primary',
@@ -136,22 +151,19 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                           ),
 
                                         // alt text
-                                        if (image.altText != null &&
-                                            image.altText!.isNotEmpty)
+                                        if (image.altText != null && image.altText!.isNotEmpty)
                                           Positioned(
                                             left: 16,
                                             bottom: 20,
                                             right: 16,
                                             child: Container(
-                                              padding:
-                                                  EdgeInsets.symmetric(
+                                              padding: const EdgeInsets.symmetric(
                                                 horizontal: 10,
                                                 vertical: 8,
                                               ),
                                               decoration: BoxDecoration(
                                                 color: Colors.black54,
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
+                                                borderRadius: BorderRadius.circular(10),
                                               ),
                                               child: Text(
                                                 image.altText!,
@@ -173,7 +185,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                     right: 16,
                                     bottom: 16,
                                     child: Container(
-                                      padding: EdgeInsets.symmetric(
+                                      padding: const EdgeInsets.symmetric(
                                         horizontal: 10,
                                         vertical: 6,
                                       ),
@@ -208,17 +220,14 @@ class PropertyDetailsScreen extends ConsumerWidget {
                   // 📄 CONTENT
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: EdgeInsets.all(AppSpacing.md),
+                      padding: const EdgeInsets.all(AppSpacing.md),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // 🏷 TITLE
                           Text(
                             property.title,
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineSmall
-                                ?.copyWith(
+                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
                                 ),
                           ),
@@ -250,10 +259,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                           // 💰 PRICE
                           Text(
                             '${property.currency} ${property.price.toStringAsFixed(0)}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineSmall
-                                ?.copyWith(
+                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.mangoOrange,
                                 ),
@@ -274,8 +280,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                   property.isUnlocked || isOwner
                                       ? '${property.address}, ${property.city}, ${property.district}, Malawi'
                                       : '${property.city}, ${property.district}, Malawi',
-                                  style:
-                                      Theme.of(context).textTheme.bodyMedium,
+                                  style: Theme.of(context).textTheme.bodyMedium,
                                 ),
                               ),
                             ],
@@ -298,21 +303,18 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                 'Type',
                                 property.propertyType,
                               ),
-
                               _buildDetail(
                                 context,
                                 Icons.sell,
                                 'Purpose',
                                 property.listingPurpose,
                               ),
-
                               _buildDetail(
                                 context,
                                 Icons.check_circle,
                                 'Status',
                                 property.status,
                               ),
-
                               if (!isLand && property.bedrooms != null)
                                 _buildDetail(
                                   context,
@@ -320,7 +322,6 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                   'Bedrooms',
                                   '${property.bedrooms}',
                                 ),
-
                               if (!isLand && property.bathrooms != null)
                                 _buildDetail(
                                   context,
@@ -328,30 +329,24 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                   'Bathrooms',
                                   '${property.bathrooms}',
                                 ),
-
                               _buildDetail(
                                 context,
                                 Icons.square_foot,
                                 'Size',
                                 '${property.sizeSqm} sqm',
                               ),
-
                               _buildDetail(
                                 context,
                                 Icons.visibility,
                                 'Views',
                                 '${property.viewCount}',
                               ),
-
                               _buildDetail(
                                 context,
                                 Icons.public,
                                 'Visibility',
-                                property.isPubliclyVisible
-                                    ? 'Public'
-                                    : 'Private',
+                                property.isPubliclyVisible ? 'Public' : 'Private',
                               ),
-
                               _buildDetail(
                                 context,
                                 Icons.calendar_today,
@@ -369,10 +364,7 @@ class PropertyDetailsScreen extends ConsumerWidget {
                             children: [
                               Text(
                                 'Description',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                       fontWeight: FontWeight.bold,
                                     ),
                               ),
@@ -385,20 +377,17 @@ class PropertyDetailsScreen extends ConsumerWidget {
                           if (!property.isUnlocked && !isOwner)
                             Container(
                               width: double.infinity,
-                              margin: EdgeInsets.symmetric(vertical: AppSpacing.md),
-                              padding: EdgeInsets.all(AppSpacing.md),
+                              margin: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                              padding: const EdgeInsets.all(AppSpacing.md),
                               decoration: BoxDecoration(
-                                color:
-                                    AppColors.mangoOrange.withOpacity(0.1),
+                                color: AppColors.mangoOrange.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(12),
                                 border: Border.all(
-                                  color: AppColors.mangoOrange
-                                      .withOpacity(0.4),
+                                  color: AppColors.mangoOrange.withOpacity(0.4),
                                 ),
                               ),
                               child: Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
                                     children: [
@@ -410,65 +399,45 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                       Expanded(
                                         child: Text(
                                           'Full Details Locked',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium
-                                              ?.copyWith(
-                                                color:
-                                                    AppColors.mangoOrange,
-                                                fontWeight:
-                                                    FontWeight.bold,
+                                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                                color: AppColors.mangoOrange,
+                                                fontWeight: FontWeight.bold,
                                               ),
                                         ),
                                       ),
                                     ],
                                   ),
-
                                   const SizedBox(height: 10),
-
-                                  Text(
+                                  const Text(
                                     'Unlock this property to view full description, exact location, and contact details.',
                                   ),
-
                                   const SizedBox(height: AppSpacing.sm),
-
                                   Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text('Unlock Fee'),
+                                      const Text('Unlock Fee'),
                                       Text(
                                         'MWK ${property.unlockFee.toStringAsFixed(0)}',
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleMedium
-                                            ?.copyWith(
-                                              color:
-                                                  AppColors.mangoOrange,
-                                              fontWeight:
-                                                  FontWeight.bold,
+                                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                              color: AppColors.mangoOrange,
+                                              fontWeight: FontWeight.bold,
                                             ),
                                       ),
                                     ],
                                   ),
-
                                   const SizedBox(height: AppSpacing.sm),
-
                                   SizedBox(
                                     width: double.infinity,
                                     child: ElevatedButton(
-                                      style:
-                                          ElevatedButton.styleFrom(
-                                        backgroundColor:
-                                            AppColors.mangoOrange,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.mangoOrange,
                                       ),
                                       onPressed: () {
                                         if (!isLoggedIn) {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (_) =>
-                                                  const LoginScreen(),
+                                              builder: (_) => const LoginScreen(),
                                             ),
                                           );
                                           return;
@@ -477,13 +446,10 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (_) =>
-                                                PropertyUnlockScreen(
+                                            builder: (_) => PropertyUnlockScreen(
                                               propertyId: property.id,
-                                              propertyTitle:
-                                                  property.title,
-                                              unlockFee:
-                                                  property.unlockFee,
+                                              propertyTitle: property.title,
+                                              unlockFee: property.unlockFee,
                                             ),
                                           ),
                                         );
@@ -502,33 +468,27 @@ class PropertyDetailsScreen extends ConsumerWidget {
                           // 👤 OWNER
                           Container(
                             width: double.infinity,
-                            padding: EdgeInsets.all(AppSpacing.sm),
+                            padding: const EdgeInsets.all(AppSpacing.sm),
                             decoration: BoxDecoration(
                               color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   'Property Owner',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelMedium,
+                                  style: Theme.of(context).textTheme.labelMedium,
                                 ),
                                 const SizedBox(height: AppSpacing.xs),
                                 Row(
                                   children: [
                                     CircleAvatar(
                                       radius: 18,
-                                      backgroundColor:
-                                          AppColors.mangoOrange
-                                              .withOpacity(0.1),
+                                      backgroundColor: AppColors.mangoOrange.withOpacity(0.1),
                                       child: Icon(
                                         Icons.person,
-                                        color:
-                                            AppColors.mangoOrange,
+                                        color: AppColors.mangoOrange,
                                         size: 20,
                                       ),
                                     ),
@@ -540,11 +500,9 @@ class PropertyDetailsScreen extends ConsumerWidget {
                                             child: Text(
                                               property.ownerName,
                                               style: const TextStyle(
-                                                fontWeight:
-                                                    FontWeight.bold,
+                                                fontWeight: FontWeight.bold,
                                               ),
-                                              overflow:
-                                                  TextOverflow.ellipsis,
+                                              overflow: TextOverflow.ellipsis,
                                             ),
                                           ),
                                           const SizedBox(width: 6),
@@ -562,48 +520,43 @@ class PropertyDetailsScreen extends ConsumerWidget {
                             ),
                           ),
 
-                          
                           // ================= RELATED PROPERTIES =================
-const SizedBox(height: 25),
-
-Text(
-  "Related Properties",
-  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-        fontWeight: FontWeight.bold,
-      ),
-),
-
-const SizedBox(height: 10),
-
-SizedBox(
-  height: 340,
-  child:relatedAsync.when(
-        data: (items) {
-          return ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: items.length,
-            itemBuilder: (context, index) {
-              return SizedBox(
-                width: 280,
-                child: PropertyCard(property: items[index]),
-              );
-            },
-          );
-        },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, stack) {
-  print(e);
-  print(stack);
-
-  return Center(
-    child: Text(
-      "Failed to load related properties\n$e",
-      textAlign: TextAlign.center,
-    ),
-  );
-},
-      ),
-),
+                          const SizedBox(height: 25),
+                          Text(
+                            "Related Properties",
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                          ),
+                          const SizedBox(height: 10),
+                          SizedBox(
+                            height: 340,
+                            child: relatedAsync.when(
+                              data: (items) {
+                                return ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: items.length,
+                                  itemBuilder: (context, index) {
+                                    return SizedBox(
+                                      width: 280,
+                                      child: PropertyCard(property: items[index]),
+                                    );
+                                  },
+                                );
+                              },
+                              loading: () => const Center(child: CircularProgressIndicator()),
+                              error: (e, stack) {
+                                debugPrint(e.toString());
+                                debugPrint(stack.toString());
+                                return Center(
+                                  child: Text(
+                                    "Failed to load related properties\n$e",
+                                    textAlign: TextAlign.center,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -613,88 +566,90 @@ SizedBox(
 
               // ✅ FLOATING MAP BUTTON
               if (property.isUnlocked)
-  Positioned(
-    bottom: 20,
-    right: 16,
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
+                Positioned(
+                  bottom: 20,
+                  right: 16,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // 🗺 MAP FAB
+                      AppFab(
+                        heroTag: "map",
+                        icon: Icons.map,
+                        tooltip: "View Map",
+                        toastMessage: "Opening map",
+                        onPressed: () {
+                          // 📊 TRACK EVENT: Map modal revealed
+                          analytics.logEvent('property_details_map_click');
 
-        // 🗺 MAP FAB
-        AppFab(
-          heroTag: "map",
-          icon: Icons.map,
-          tooltip: "View Map",
-          toastMessage: "Opening map",
-          onPressed: () {
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              builder: (_) => ShopMapModal(
-                shopLat: property.latitude,
-                shopLng: property.longitude,
-              ),
-            );
-          },
-        ),
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            builder: (_) => ShopMapModal(
+                              shopLat: property.latitude,
+                              shopLng: property.longitude,
+                            ),
+                          );
+                        },
+                      ),
 
-        const SizedBox(height: AppSpacing.sm),
+                      const SizedBox(height: AppSpacing.sm),
 
-        // 💬 WHATSAPP FAB (ALSO ONLY CHECK UNLOCKED)
-        AppFab(
-          heroTag: "whatsapp_property",
-          icon: FontAwesomeIcons.whatsapp,
-          tooltip: "Chat on WhatsApp",
-          toastMessage: "Opening WhatsApp...",
-          onPressed: () {
-            if (!isLoggedIn) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const LoginScreen(),
+                      // 💬 WHATSAPP FAB (ALSO ONLY CHECK UNLOCKED)
+                      AppFab(
+                        heroTag: "whatsapp_property",
+                        icon: FontAwesomeIcons.whatsapp,
+                        tooltip: "Chat on WhatsApp",
+                        toastMessage: "Opening WhatsApp...",
+                        onPressed: () {
+                          if (!isLoggedIn) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const LoginScreen(),
+                              ),
+                            );
+                            return;
+                          }
+
+                          final phone = property.ownerPhoneNumber;
+
+                          if (phone == null || phone.isEmpty) {
+                            AppToast.info(
+                              context,
+                              "Mailing reference invalid or missing",
+                            );
+                            return;
+                          }
+
+                          // 📊 TRACK EVENT: Communication external redirection triggered
+                          analytics.logEvent('property_details_whatsapp_click');
+
+                          _openWhatsApp(phone);
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-              );
-              return;
-            }
-
-            final phone = property.ownerPhoneNumber;
-
-            if (phone == null || phone.isEmpty) {
-              AppToast.info(
-                context,
-                "No WhatsApp number available",
-              );
-              return;
-            }
-
-            _openWhatsApp(phone);
-          },
-        ),
-      ],
-    ),
-  ),
             ],
           );
         },
-
         loading: () => const Center(
           child: CircularProgressIndicator(
             color: AppColors.mangoOrange,
           ),
         ),
-
         error: (error, stack) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, size: 48),
+              const Icon(Icons.error_outline, size: 48),
               const SizedBox(height: AppSpacing.md),
               Text('Error: $error'),
               const SizedBox(height: AppSpacing.md),
               ElevatedButton(
-                onPressed: () =>
-                    ref.refresh(propertyDetailsProvider(propertyId)),
-                child: Text('Retry'),
+                onPressed: () => ref.refresh(propertyDetailsProvider(widget.propertyId)),
+                child: const Text('Retry'),
               ),
             ],
           ),
@@ -705,7 +660,7 @@ SizedBox(
 
   Widget _buildTag(String text, Color color) {
     return Container(
-      padding: EdgeInsets.symmetric(
+      padding: const EdgeInsets.symmetric(
         horizontal: 12,
         vertical: 7,
       ),
@@ -736,7 +691,7 @@ SizedBox(
         borderRadius: BorderRadius.circular(10),
         border: Border.all(color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25)),
       ),
-      padding: EdgeInsets.all(AppSpacing.sm),
+      padding: const EdgeInsets.all(AppSpacing.sm),
       child: Row(
         children: [
           Icon(
@@ -746,15 +701,12 @@ SizedBox(
           const SizedBox(width: 10),
           Expanded(
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
-              mainAxisAlignment:
-                  MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   label,
-                  style:
-                      Theme.of(context).textTheme.labelSmall,
+                  style: Theme.of(context).textTheme.labelSmall,
                 ),
                 Text(
                   value,

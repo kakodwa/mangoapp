@@ -19,7 +19,7 @@ class AvailabilityCalendarScreen extends StatelessWidget {
     
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: const MainAppBar(title: 'Availability Calendar'),
+      appBar: AppBar(title: const Text('Availability Calendar'),),
       body: Padding(
         padding: EdgeInsets.all(AppSpacing.md),
         child: AvailabilityCalendar(

@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/feed/main_feed_providers.dart';
 import '../../widgets/feed/feed_list_widget.dart';
 
+// Analytics Import
+import '../../services/analytics_service.dart';
+
 class PropertiesListScreen extends ConsumerStatefulWidget {
   const PropertiesListScreen({
     super.key,
@@ -16,6 +19,9 @@ class PropertiesListScreen extends ConsumerStatefulWidget {
 
 class _PropertiesListScreenState extends ConsumerState<PropertiesListScreen> {
   final ScrollController _controller = ScrollController();
+  
+  // Track viewed state to avoid duplicate triggers during local state changes
+  bool _hasLoggedView = false;
 
   @override
   void initState() {
@@ -45,6 +51,7 @@ class _PropertiesListScreenState extends ConsumerState<PropertiesListScreen> {
   @override
   Widget build(BuildContext context) {
     final feed = ref.watch(propertyFeedProvider);
+    final AnalyticsService analytics = AnalyticsService();
 
     // Returning content directly lets IndexedStack handle the view persistence seamlessly
     return feed.when(
@@ -56,29 +63,40 @@ class _PropertiesListScreenState extends ConsumerState<PropertiesListScreen> {
           e.toString(),
         ),
       ),
-      data: (items) => RefreshIndicator(
-        onRefresh: () async {
-          await ref.read(propertyFeedProvider.notifier).refresh();
-        },
-        child: CustomScrollView(
-          controller: _controller,
-          slivers: [
-            FeedListWidget(
-              items: items,
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Center(
-                  child: ref.watch(propertyFeedProvider.notifier).loadingMore
-                      ? const CircularProgressIndicator()
-                      : const SizedBox(),
+      data: (items) {
+        // 📊 TRACK EVENT: Real estate feed items have successfully loaded and rendered
+        if (!_hasLoggedView) {
+          analytics.logEvent('feed_properties_view');
+          _hasLoggedView = true;
+        }
+
+        return RefreshIndicator(
+          onRefresh: () async {
+            // 📊 TRACK EVENT: User pulls down to manual refresh the properties feed
+            analytics.logEvent('feed_properties_refresh');
+
+            await ref.read(propertyFeedProvider.notifier).refresh();
+          },
+          child: CustomScrollView(
+            controller: _controller,
+            slivers: [
+              FeedListWidget(
+                items: items,
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Center(
+                    child: ref.watch(propertyFeedProvider.notifier).loadingMore
+                        ? const CircularProgressIndicator()
+                        : const SizedBox(),
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

@@ -1,3 +1,5 @@
+// lib/screens/products/product_details_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -26,6 +28,9 @@ import '../../utils/app_snackbar.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/app_colors.dart';
 
+// Analytics Import
+import '../../services/analytics_service.dart';
+
 class ProductDetailsScreen extends ConsumerStatefulWidget {
   final int productId;
 
@@ -49,42 +54,44 @@ class _ProductDetailsScreenState
   List _related = [];
   int _page = 1;
   bool _loadingMore = false;
+  
+  // Track viewed state to avoid duplicate triggers during local UI builds
+  bool _hasLoggedView = false;
 
   void _toast(String msg) {
     AppToast.info(context, msg);
   }
 
+  void _openWhatsApp(String phone) async {
+    final uri = Uri.parse("https://wa.me/$phone");
 
-void _openWhatsApp(String phone) async {
-  final uri = Uri.parse("https://wa.me/$phone");
-
-  if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-    AppToast.info(context, "Could not open WhatsApp");
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      AppToast.info(context, "Could not open WhatsApp");
+    }
   }
-}
 
-Future<void> _loadRelated(int productId) async {
-  if (_loadingMore) return;
+  Future<void> _loadRelated(int productId) async {
+    if (_loadingMore) return;
 
-  setState(() => _loadingMore = true);
+    setState(() => _loadingMore = true);
 
-  try {
-    final apiClient = ref.read(api.apiClientProvider);
+    try {
+      final apiClient = ref.read(api.apiClientProvider);
 
-    final res = await apiClient.getList(
-      'products/$productId/related/',
-      fromJson: (json) => Product.fromJson(json),
-    );
+      final res = await apiClient.getList(
+        'products/$productId/related/',
+        fromJson: (json) => Product.fromJson(json),
+      );
 
-    setState(() {
-      _related.addAll(res); // ✅ NO mapping again
-      _loadingMore = false;
-    });
-  } catch (e) {
-    print("❌ RELATED ERROR: $e");
-    setState(() => _loadingMore = false);
+      setState(() {
+        _related.addAll(res);
+        _loadingMore = false;
+      });
+    } catch (e) {
+      print("❌ RELATED ERROR: $e");
+      setState(() => _loadingMore = false);
+    }
   }
-}
 
   @override
   void initState() {
@@ -114,14 +121,16 @@ Future<void> _loadRelated(int productId) async {
         ref.watch(productDetailsProvider(widget.productId));
 
     final auth = ref.watch(authProvider);
+    final AnalyticsService analytics = AnalyticsService();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: productAsync.when(
-        data: (p) => MainAppBar(title: p.name),
-        loading: () => const MainAppBar(title: "Loading..."),
-        error: (_, __) =>
-            const MainAppBar(title: "Product"),
+      appBar: AppBar(
+        title: productAsync.when(
+          data: (p) => Text(p.name),
+          loading: () => const Text('Loading...'),
+          error: (_, __) => const Text('Product'),
+        ),
       ),
 
       body: productAsync.when(
@@ -134,6 +143,12 @@ Future<void> _loadRelated(int productId) async {
         data: (product) {
           final isOwner = auth.user?.id == product.ownerId;
           final isLoggedIn = auth.isAuthenticated;
+
+          // 📊 TRACK EVENT: Screen viewed by user
+          if (!_hasLoggedView) {
+            analytics.logEvent('product_view_${product.id}');
+            _hasLoggedView = true;
+          }
 
           final images = product.images.isNotEmpty
               ? product.images
@@ -194,54 +209,53 @@ Future<void> _loadRelated(int productId) async {
                           ),
                           const SizedBox(height: 10),
 
-// ================= STOCK
-Container(
-  padding: EdgeInsets.symmetric(
-    horizontal: 12,
-    vertical: 8,
-  ),
-  decoration: BoxDecoration(
-    color: product.stock > 0
-        ? Theme.of(context).colorScheme.secondary.withOpacity(0.1)
-        : Theme.of(context).colorScheme.error.withOpacity(0.1),
-    borderRadius: BorderRadius.circular(12),
-  ),
-  child: Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Icon(
-        product.stock > 0
-            ? Icons.check_circle
-            : Icons.cancel,
-        size: 18,
-        color: product.stock > 0
-            ? Theme.of(context).colorScheme.secondary
-            : Theme.of(context).colorScheme.error,
-      ),
+                          // ================= STOCK
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: product.stock > 0
+                                  ? Theme.of(context).colorScheme.secondary.withOpacity(0.1)
+                                  : Theme.of(context).colorScheme.error.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  product.stock > 0
+                                      ? Icons.check_circle
+                                      : Icons.cancel,
+                                  size: 18,
+                                  color: product.stock > 0
+                                      ? Theme.of(context).colorScheme.secondary
+                                      : Theme.of(context).colorScheme.error,
+                                ),
 
-      const SizedBox(width: 6),
+                                const SizedBox(width: 6),
 
-      Text(
-        product.stock > 0
-            ? "${product.stock} items in stock"
-            : "Out of stock",
-        style: TextStyle(
-          color: product.stock > 0
-              ? Theme.of(context).colorScheme.secondary
-              : Theme.of(context).colorScheme.error,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    ],
-  ),
-),
+                                Text(
+                                  product.stock > 0
+                                      ? "${product.stock} items in stock"
+                                      : "Out of stock",
+                                  style: TextStyle(
+                                    color: product.stock > 0
+                                        ? Theme.of(context).colorScheme.secondary
+                                        : Theme.of(context).colorScheme.error,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
 
                           const SizedBox(height: 10),
 
                           Row(
                             children: [
-                              Icon(Icons.star,
-                                  color: Colors.amber),
+                              const Icon(Icons.star, color: Colors.amber),
                               const SizedBox(width: 4),
                               Text(
                                 "${product.rating} (${product.totalReviews})",
@@ -253,7 +267,7 @@ Container(
 
                           // ================= SHOP INFO + DISTRICT
                           Container(
-                            padding: EdgeInsets.all(14),
+                            padding: const EdgeInsets.all(14),
                             decoration: BoxDecoration(
                               color: Theme.of(context).colorScheme.surface,
                               borderRadius: BorderRadius.circular(14),
@@ -263,13 +277,11 @@ Container(
                               children: [
                                 Row(
                                   children: [
-                                    Icon(Icons.store,
-                                        color: AppColors.mangoOrange),
+                                    Icon(Icons.store, color: AppColors.mangoOrange),
                                     const SizedBox(width: AppSpacing.xs),
                                     Text(
                                       product.shopName,
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold),
+                                      style: const TextStyle(fontWeight: FontWeight.bold),
                                     ),
                                   ],
                                 ),
@@ -278,13 +290,11 @@ Container(
 
                                 Row(
                                   children: [
-                                    Icon(Icons.location_on,
-                                        size: 18),
+                                    const Icon(Icons.location_on, size: 18),
                                     const SizedBox(width: 6),
                                     Text(
                                       product.shopDistrict ?? 'Unknown',
-                                      style: TextStyle(
-                                          color: Theme.of(context).colorScheme.outline),
+                                      style: TextStyle(color: Theme.of(context).colorScheme.outline),
                                     ),
                                   ],
                                 ),
@@ -307,7 +317,7 @@ Container(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             "Related Products",
                             style: TextStyle(
                               fontSize: 18,
@@ -317,12 +327,11 @@ Container(
                           const SizedBox(height: 10),
 
                           SizedBox(
-                            height:235,
+                            height: 270,
                             child: ListView.separated(
                               scrollDirection: Axis.horizontal,
                               itemCount: _related.length,
-                              separatorBuilder: (_, __) =>
-                                  const SizedBox(width: 10),
+                              separatorBuilder: (_, __) => const SizedBox(width: 10),
                               itemBuilder: (context, index) {
                                 final p = _related[index];
                                 return SizedBox(
@@ -340,121 +349,136 @@ Container(
               ),
 
               // ================= FLOATING BUTTONS
-       Positioned(
-  bottom:50,
-  right:10,
-  child: Column(
-    children: [
+              Positioned(
+                bottom: 50,
+                right: 10,
+                child: Column(
+                  children: [
 
+                    // 🛒 CART (PRIMARY ACTION - KEEP ORANGE)
+                    if (product.isInStock && !isOwner)
+                      AppFab(
+                        heroTag: "cart",
+                        icon: Icons.shopping_cart,
+                        tooltip: "Add to Cart",
+                        toastMessage: "Added to cart",
+                        onPressed: () {
+                          if (!isLoggedIn) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const LoginScreen()),
+                            );
+                            return;
+                          }
 
+                          // 📊 TRACK EVENT: Product added to cart from details page
+                          analytics.logEvent('product_details_add_to_cart_${product.id}');
 
-      
+                          ref.read(addToCartProvider).call(product, _quantity);
+                        },
+                      ),
+                    
+                    if (product.isInStock && !isOwner)
+                      const SizedBox(height: AppSpacing.sm),
 
-      // 🛒 CART (PRIMARY ACTION - KEEP ORANGE)
-      if (product.isInStock && !isOwner)
-        AppFab(
-  heroTag: "cart",
-  icon: Icons.shopping_cart,
-  tooltip: "Add to Cart",
-  toastMessage: "Added to cart",
-  onPressed: () {
-    if (!isLoggedIn) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-      );
-      return;
-    }
+                    // ❤️ FAVORITE
+                    if (!isOwner)
+                      AppFab(
+                        heroTag: "fav",
+                        icon: Icons.favorite_border,
+                        tooltip: "Favorite",
+                        toastMessage: "Updated favorites",
+                        onPressed: () {
+                          if (!isLoggedIn) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const LoginScreen()),
+                            );
+                            return;
+                          }
 
-    ref.read(addToCartProvider).call(product, _quantity);
-  },
-),
-const SizedBox(height: AppSpacing.sm),
-      // ❤️ FAVORITE
-      if (!isOwner)
-        AppFab(
-  heroTag: "fav",
-  icon: Icons.favorite_border,
-  tooltip: "Favorite",
-  toastMessage: "Updated favorites",
-  onPressed: () {
-    if (!isLoggedIn) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-      );
-      return;
-    }
+                          // 📊 TRACK EVENT: Product toggled to favorite from details page
+                          analytics.logEvent('product_details_favorite_toggle_${product.id}');
 
-    ref.read(favoriteProvider.notifier).toggle(product.id);
-  },
-),
+                          ref.read(favoriteProvider.notifier).toggle(product.id);
+                        },
+                      ),
 
-      const SizedBox(height: AppSpacing.sm),
+                    if (!isOwner)
+                      const SizedBox(height: AppSpacing.sm),
 
-// 💬 WHATSAPP
-AppFab(
-  heroTag: "whatsapp",
-  icon: FontAwesomeIcons.whatsapp,
-  tooltip: "Chat on WhatsApp",
-  toastMessage: "Opening WhatsApp...",
-  onPressed: () {
-    if (!isLoggedIn) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-      );
-      return;
-    }
+                    // 💬 WHATSAPP
+                    AppFab(
+                      heroTag: "whatsapp",
+                      icon: FontAwesomeIcons.whatsapp,
+                      tooltip: "Chat on WhatsApp",
+                      toastMessage: "Opening WhatsApp...",
+                      onPressed: () {
+                        if (!isLoggedIn) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const LoginScreen()),
+                          );
+                          return;
+                        }
 
-    final phone = product.shopPhoneNumber;
+                        final phone = product.shopPhoneNumber;
 
-if (phone == null || phone.isEmpty) {
-  AppToast.info(context, "No WhatsApp number available");
-  return;
-}
-    _openWhatsApp(phone);
-  },
-),
+                        if (phone == null || phone.isEmpty) {
+                          AppToast.info(context, "No WhatsApp number available");
+                          return;
+                        }
 
-      const SizedBox(height: AppSpacing.sm),
+                        // 📊 TRACK EVENT: Click to contact vendor on WhatsApp
+                        analytics.logEvent('product_whatsapp_contact_${product.id}');
 
-      // 🏪 SHOP
-     AppFab(
-  heroTag: "shop",
-  icon: Icons.storefront,
-  tooltip: "View Shop",
-  onPressed: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ShopDetailsScreen(shopId: product.shopId),
-      ),
-    );
-  },
-),
+                        _openWhatsApp(phone);
+                      },
+                    ),
 
-      // ✏️ EDIT (OWNER ONLY)
-      if (isOwner) ...[
-        const SizedBox(height: AppSpacing.sm),
+                    const SizedBox(height: AppSpacing.sm),
 
-      AppFab(
-  heroTag: "edit",
-  icon: Icons.edit,
-  tooltip: "Edit Product",
-  onPressed: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => EditProductScreen(product: product),
-      ),
-    );
-  },
-),
-      ],
-    ],
-  ),
-),
+                    // 🏪 SHOP
+                    AppFab(
+                      heroTag: "shop",
+                      icon: Icons.storefront,
+                      tooltip: "View Shop",
+                      onPressed: () {
+                        // 📊 TRACK EVENT: Navigating to shop overview from product
+                        analytics.logEvent('product_view_shop_click_${product.shopId}');
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => ShopDetailsScreen(shopId: product.shopId),
+                          ),
+                        );
+                      },
+                    ),
+
+                    // ✏️ EDIT (OWNER ONLY)
+                    if (isOwner) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      AppFab(
+                        heroTag: "edit",
+                        icon: Icons.edit,
+                        tooltip: "Edit Product",
+                        onPressed: () {
+                          // 📊 TRACK EVENT: Owner editing product from details page
+                          analytics.logEvent('product_details_owner_edit_${product.id}');
+
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => EditProductScreen(product: product),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             ],
           );
         },

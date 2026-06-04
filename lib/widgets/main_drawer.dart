@@ -3,9 +3,22 @@ import '../screens/about/about_screen.dart';
 import '../screens/help/help_screen.dart';
 import '../theme/app_colors.dart';
 import '../theme/design_system/app_spacing.dart';
+// Import your Analytics Service (Adjust this path matching your actual directory structure)
+import '../services/analytics_service.dart'; 
 
 class MainDrawer extends StatelessWidget {
-  const MainDrawer({super.key});
+  final VoidCallback? onAboutTap;
+  final VoidCallback? onHelpTap;
+
+  // Change this to a static final (or static const) variable
+  static final AnalyticsService _analyticsService = AnalyticsService();
+
+  // Now you can restore the const keyword on the constructor
+  const MainDrawer({
+    super.key,
+    this.onAboutTap,
+    this.onHelpTap,
+  });
 
   Widget _menuItem({
     required BuildContext context,
@@ -53,8 +66,8 @@ class MainDrawer extends StatelessWidget {
                   child: Text(
                     title,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                          fontWeight: FontWeight.w600,
+                        ),
                   ),
                 ),
                 Icon(
@@ -78,7 +91,6 @@ class MainDrawer extends StatelessWidget {
       backgroundColor: const Color(0xFFF6F7FB),
       child: Column(
         children: [
-
           // HEADER
           Container(
             width: double.infinity,
@@ -128,10 +140,7 @@ class MainDrawer extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       'Everything Local.One Hub.',
-                      style: Theme.of(context)
-                          .textTheme
-                          .labelSmall
-                          ?.copyWith(
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
                             color: Colors.white70,
                           ),
                     ),
@@ -152,13 +161,13 @@ class MainDrawer extends StatelessWidget {
             title: "About App",
             color: AppColors.mangoOrange,
             onTap: () {
+              // Trigger analytics event safely in the background
+              _analyticsService.logEvent('drawer_about_click');
+              
               Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const AboutScreen(),
-                ),
-              );
+              if (onAboutTap != null) {
+                onAboutTap!();
+              }
             },
           ),
 
@@ -168,13 +177,13 @@ class MainDrawer extends StatelessWidget {
             title: "Help & Support",
             color: AppColors.leafGreen,
             onTap: () {
+              // Trigger analytics event safely in the background
+              _analyticsService.logEvent('drawer_help_click');
+              
               Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const HelpSupportScreen(),
-                ),
-              );
+              if (onHelpTap != null) {
+                onHelpTap!();
+              }
             },
           ),
 
@@ -186,8 +195,8 @@ class MainDrawer extends StatelessWidget {
             child: Text(
               "Version 1.0.0",
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: colorScheme.onSurface.withOpacity(0.5),
-              ),
+                    color: colorScheme.onSurface.withOpacity(0.5),
+                  ),
             ),
           ),
         ],

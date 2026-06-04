@@ -13,7 +13,7 @@ class OwnerBookingsScreen extends ConsumerWidget {
     final bookingsAsync = ref.watch(ownerBookingsProvider);
 
     return Scaffold(
-      appBar: const MainAppBar(title: "Owner Bookings"),
+      appBar: AppBar(title: const Text('Owner Bookings'),),
       body: bookingsAsync.when(
         data: (bookings) {
           if (bookings.isEmpty) {

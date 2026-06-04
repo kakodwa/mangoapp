@@ -245,7 +245,7 @@ class _EditLodgeScreenState extends ConsumerState<EditLodgeScreen> {
     final amenitiesAsync = ref.watch(amenitiesProvider);
 
     return Scaffold(
-      appBar: const MainAppBar(title: "Edit Lodge"),
+      appBar: AppBar(title: const Text('Edit Lodge'),),
       body: Form(
         key: _formKey,
         child: ListView(

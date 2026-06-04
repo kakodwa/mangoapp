@@ -2,15 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/wallet_provider.dart';
-import '../../theme/app_colors.dart';
-import '../../theme/design_system/app_spacing.dart';
 
-import '../../widgets/main_app_bar.dart';
-import '../../widgets/main_drawer.dart';
+// Design System Imports
+import '../../theme/design_system/app_card.dart';
+import '../../theme/design_system/app_loader.dart';
+import '../../theme/design_system/app_info_box.dart';
+import '../../theme/design_system/app_spacing.dart';
+import '../../theme/design_system/app_typography.dart';
 import '../../widgets/app_scaffold.dart';
 
 class WalletTransactionsScreen extends ConsumerWidget {
   const WalletTransactionsScreen({super.key});
+
+  /// Capitalizes only the first letter of a string and sets the rest to lowercase
+  String _capitalize(String text) {
+    if (text.isEmpty) return text;
+    final lower = text.toLowerCase();
+    return "${lower[0].toUpperCase()}${lower.substring(1)}";
+  }
 
   String formatDate(String date) {
     return date.substring(0, 10);
@@ -39,7 +48,9 @@ class WalletTransactionsScreen extends ConsumerWidget {
   }
 
   Color getColor(BuildContext context, String type) {
-    return type == "credit" ? Theme.of(context).colorScheme.secondary : Theme.of(context).colorScheme.error;
+    return type == "credit"
+        ? Theme.of(context).colorScheme.secondary
+        : Theme.of(context).colorScheme.error;
   }
 
   @override
@@ -48,13 +59,23 @@ class WalletTransactionsScreen extends ConsumerWidget {
 
     return AppScaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: const MainAppBar(title: 'Wallet Activity'),
-
+      appBar: AppBar(
+        title: Text(
+          _capitalize('Wallet activity'),
+          style: AppTypography.headlineMedium,
+        ),
+      ),
       body: txAsync.when(
         data: (transactions) {
           if (transactions.isEmpty) {
-            return const Center(
-              child: Text("No transactions yet"),
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: AppInfoBox(
+                  type: AppInfoType.info,
+                  message: _capitalize("No transactions yet"),
+                ),
+              ),
             );
           }
 
@@ -68,7 +89,7 @@ class WalletTransactionsScreen extends ConsumerWidget {
           }
 
           return ListView(
-            padding: EdgeInsets.all(AppSpacing.sm),
+            padding: const EdgeInsets.all(AppSpacing.md),
             children: grouped.entries.map((entry) {
               final date = entry.key;
               final items = entry.value;
@@ -76,14 +97,12 @@ class WalletTransactionsScreen extends ConsumerWidget {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-
                   // ================= DATE HEADER =================
                   Padding(
-                    padding: EdgeInsets.symmetric(vertical: 10),
+                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
                     child: Text(
-                      sectionTitle(date),
-                      style: TextStyle(
-                        fontSize: 14,
+                      _capitalize(sectionTitle(date)),
+                      style: AppTypography.titleMedium.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.outline,
                       ),
@@ -94,108 +113,85 @@ class WalletTransactionsScreen extends ConsumerWidget {
                   ...items.map((tx) {
                     final isCredit = tx.transactionType == "credit";
 
-                    return Container(
-                      margin: EdgeInsets.only(bottom: 10),
-                      padding: EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
-                            blurRadius: 8,
-                            spreadRadius: 2,
-                          )
-                        ],
-                      ),
-
-                      child: Row(
-                        children: [
-
-                          // ICON
-                          Container(
-                            height: 45,
-                            width: 45,
-                            decoration: BoxDecoration(
-                              color: getColor(context, tx.transactionType)
-                                  .withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+                      child: AppCard(
+                        padding: const EdgeInsets.all(AppSpacing.sm),
+                        child: Row(
+                          children: [
+                            // ICON Container
+                            Container(
+                              height: 45,
+                              width: 45,
+                              decoration: BoxDecoration(
+                                color: getColor(context, tx.transactionType)
+                                    .withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                getIcon(tx.source),
+                                color: getColor(context, tx.transactionType),
+                              ),
                             ),
-                            child: Icon(
-                              getIcon(tx.source),
-                              color: getColor(context, tx.transactionType),
-                            ),
-                          ),
+                            const SizedBox(width: AppSpacing.sm),
 
-                          const SizedBox(width: AppSpacing.sm),
-
-                          // DETAILS
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment.start,
-                              children: [
-
-                                Text(
-                                  tx.source.replaceAll("_", " "),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                  ),
-                                ),
-
-                                const SizedBox(height: AppSpacing.xxs),
-
-                                Text(
-                                  tx.description,
-                                  style: TextStyle(
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
-                                    fontSize: 12,
-                                  ),
-                                ),
-
-                                const SizedBox(height: AppSpacing.xxs),
-
-                                // 🔥 PLATFORM FEE TRANSPARENCY
-                                if (tx.transactionRate > 0)
+                            // DETAILS COLUMN
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
                                   Text(
-                                    "${tx.transactionRate}% platform fee applied",
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: Theme.of(context).colorScheme.outline,
+                                    _capitalize(tx.source.replaceAll("_", " ")),
+                                    style: AppTypography.titleMedium.copyWith(
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
+                                  const SizedBox(height: AppSpacing.xxs),
+                                  Text(
+                                    _capitalize(tx.description),
+                                    style: AppTypography.bodySmall.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant
+                                          .withOpacity(0.6),
+                                    ),
+                                  ),
+                                  if (tx.transactionRate > 0) ...[
+                                    const SizedBox(height: AppSpacing.xxs),
+                                    Text(
+                                      _capitalize("${tx.transactionRate}% platform fee applied"),
+                                      style: AppTypography.labelSmall.copyWith(
+                                        color: Theme.of(context).colorScheme.outline,
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.xs),
+
+                            // AMOUNT & TIMESTAMP COLUMN
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  "${isCredit ? '+' : '-'} MWK ${tx.amount}",
+                                  style: AppTypography.titleMedium.copyWith(
+                                    color: getColor(context, tx.transactionType),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: AppSpacing.xxs),
+                                Text(
+                                  _capitalize(tx.createdAt.substring(11, 16)),
+                                  style: AppTypography.labelSmall.copyWith(
+                                    color: Theme.of(context).colorScheme.outline,
+                                  ),
+                                ),
                               ],
                             ),
-                          ),
-
-                          // AMOUNT
-                          Column(
-                            crossAxisAlignment:
-                                CrossAxisAlignment.end,
-                            children: [
-
-                              Text(
-                                "${isCredit ? '+' : '-'} MWK ${tx.amount}",
-                                style: TextStyle(
-                                  color: getColor(context, tx.transactionType),
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                ),
-                              ),
-
-                              const SizedBox(height: AppSpacing.xxs),
-
-                              Text(
-                                tx.createdAt.substring(11, 16),
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Theme.of(context).colorScheme.outline,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     );
                   }).toList(),
@@ -204,13 +200,17 @@ class WalletTransactionsScreen extends ConsumerWidget {
             }).toList(),
           );
         },
-
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
+        loading: () => Center(
+          child: AppLoader.inline(),
         ),
-
         error: (e, _) => Center(
-          child: Text("Error: $e"),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: AppInfoBox(
+              type: AppInfoType.error,
+              message: _capitalize("Error: $e"),
+            ),
+          ),
         ),
       ),
     );

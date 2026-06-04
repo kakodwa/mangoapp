@@ -5,7 +5,6 @@ import '../../providers/products_provider.dart';
 import '../../theme/design_system/app_button.dart';
 import '../../providers/api_provider.dart';
 import 'checkout_screen.dart';
-import '../../widgets/main_app_bar.dart';
 
 class CartScreen extends ConsumerWidget {
   const CartScreen({Key? key}) : super(key: key);
@@ -15,10 +14,11 @@ class CartScreen extends ConsumerWidget {
     final cart = ref.watch(cartProvider);
     final total = ref.watch(cartTotalProvider);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-      appBar: const MainAppBar(title: 'Shopping Cart'),
-      body: cart.isEmpty
+    // Using Material to ensure standard text, container decoration layering, 
+    // and ink elements render correctly outside of an independent explicit Scaffold shell.
+    return Material(
+      color: const Color(0xFFF5F7FA),
+      child: cart.isEmpty
           ? Center(
               child: Container(
                 padding: const EdgeInsets.all(24),
@@ -53,18 +53,12 @@ class CartScreen extends ConsumerWidget {
                         color: Colors.grey[600],
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Continue Shopping'),
-                    ),
                   ],
                 ),
               ),
             )
           : Column(
               children: [
-
                 // =========================
                 // CART ITEMS
                 // =========================
@@ -92,7 +86,6 @@ class CartScreen extends ConsumerWidget {
                         ),
                         child: Row(
                           children: [
-
                             // IMAGE
                             ClipRRect(
                               borderRadius: BorderRadius.circular(12),
@@ -144,76 +137,73 @@ class CartScreen extends ConsumerWidget {
                                   // =========================
                                   // QUANTITY CONTROL (MODERN)
                                   // =========================
-           
-Container(
-  padding: const EdgeInsets.symmetric(
-    horizontal: 10,
-    vertical: 4,
-  ),
-  decoration: BoxDecoration(
-    color: Colors.grey[100],
-    borderRadius: BorderRadius.circular(20),
-  ),
-  child: Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-    GestureDetector(
-  onTap: () {
-    if (item.quantity > 1) {
-      final updatedCart = [...cart];
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[100],
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () {
+                                            if (item.quantity > 1) {
+                                              final updatedCart = [...cart];
 
-      updatedCart[index] = CartItem(
-        product: item.product,
-        quantity: item.quantity - 1,
-      );
+                                              updatedCart[index] = CartItem(
+                                                product: item.product,
+                                                quantity: item.quantity - 1,
+                                              );
 
-      ref
-          .read(cartProvider.notifier)
-          .state = updatedCart;
-    }
-  },
-  child: const Icon(
-    Icons.remove,
-    size: 18,
-  ),
-),
+                                              ref
+                                                  .read(cartProvider.notifier)
+                                                  .state = updatedCart;
+                                            }
+                                          },
+                                          child: const Icon(
+                                            Icons.remove,
+                                            size: 18,
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
+                                          ),
+                                          child: Text(
+                                            item.quantity.toString(),
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            if (item.quantity <
+                                                item.product.stock) {
+                                              final updatedCart = [...cart];
 
-Padding(
-  padding: const EdgeInsets.symmetric(
-    horizontal: 10,
-  ),
-  child: Text(
-    item.quantity.toString(),
-    style: const TextStyle(
-      fontWeight: FontWeight.bold,
-    ),
-  ),
-),
+                                              updatedCart[index] = CartItem(
+                                                product: item.product,
+                                                quantity: item.quantity + 1,
+                                              );
 
-GestureDetector(
-  onTap: () {
-    if (item.quantity <
-        item.product.stock) {
-      final updatedCart = [...cart];
-
-      updatedCart[index] = CartItem(
-        product: item.product,
-        quantity: item.quantity + 1,
-      );
-
-      ref
-          .read(cartProvider.notifier)
-          .state = updatedCart;
-    }
-  },
-  child: const Icon(
-    Icons.add,
-    size: 18,
-  ),
-),
-    ],
-  ),
-),
+                                              ref
+                                                  .read(cartProvider.notifier)
+                                                  .state = updatedCart;
+                                            }
+                                          },
+                                          child: const Icon(
+                                            Icons.add,
+                                            size: 18,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -256,7 +246,6 @@ GestureDetector(
                   ),
                   child: Column(
                     children: [
-
                       Row(
                         mainAxisAlignment:
                             MainAxisAlignment.spaceBetween,
@@ -314,17 +303,17 @@ GestureDetector(
                       AppButton(
                         text: "Checkout",
                         fullWidth: true,
-                         onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => CheckoutScreen(
-                                  items: cart,
-                                  total: total,
-                                ),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => CheckoutScreen(
+                                items: cart,
+                                total: total,
                               ),
-                            );
-                          },
-                        ),
+                            ),
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),

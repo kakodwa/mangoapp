@@ -1,9 +1,22 @@
+// lib/widgets/hospitality/lodge_card.dart
+
 import 'package:flutter/material.dart';
 
 import '../../models/lodge_model.dart';
 import '../../screens/hospitality/add_room_screen.dart';
 import '../../screens/hospitality/edit_lodge_screen.dart';
 import '../../screens/hospitality/lodge_detail_screen.dart';
+
+import '../../widgets/capitalize_text.dart';
+
+// Design System Imports
+import '../../theme/design_system/app_icon_button.dart';
+import '../../theme/app_colors.dart';
+import '../../theme/design_system/app_card.dart';
+import '../../theme/design_system/app_image_card.dart';
+import '../../theme/design_system/app_badge.dart';
+import '../../theme/design_system/app_typography.dart';
+import '../../theme/design_system/app_spacing.dart';
 
 class LodgeCard extends StatefulWidget {
   final Lodge lodge;
@@ -21,65 +34,29 @@ class LodgeCard extends StatefulWidget {
 
 class _LodgeCardState extends State<LodgeCard> {
   bool isFavorite = false;
-  bool _pressed = false;
 
   void _showDeleteDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("Delete Lodge"),
-        content: const Text(
-          "Are you sure you want to delete this lodge?",
-        ),
+        title: const Text("DELETE LODGE"),
+        content: const Text("ARE YOU SURE YOU WANT TO DELETE THIS LODGE?"), // UPDATED: Transformed to UPPERCASE
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
+            child: const Text("CANCEL"),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               debugPrint("DELETE lodge: ${widget.lodge.id}");
-              // TODO: Delete API
             },
-            child: const Text(
-              "Delete",
-              style: TextStyle(color: Colors.red),
+            child: Text(
+              "DELETE",
+              style: TextStyle(color: AppColors.error(context)),
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildActionButton({
-    required IconData icon,
-    required Color color,
-    required String tooltip,
-    required VoidCallback onTap,
-  }) {
-    return Tooltip(
-      message: tooltip,
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(.95),
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(.15),
-                blurRadius: 8,
-              ),
-            ],
-          ),
-          child: Icon(
-            icon,
-            color: color,
-            size: 20,
-          ),
-        ),
       ),
     );
   }
@@ -88,383 +65,179 @@ class _LodgeCardState extends State<LodgeCard> {
   Widget build(BuildContext context) {
     final lodge = widget.lodge;
 
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) => setState(() => _pressed = false),
-      onTapCancel: () => setState(() => _pressed = false),
-      onTap: () {
-        Navigator.push(
-          context,
-          PageRouteBuilder(
-            transitionDuration:
-                const Duration(milliseconds: 250),
-            pageBuilder: (_, __, ___) =>
-                LodgeDetailScreen(lodge: lodge),
-            transitionsBuilder:
-                (_, animation, __, child) {
-              return FadeTransition(
-                opacity: animation,
-                child: ScaleTransition(
-                  scale: Tween(
-                    begin: 0.95,
-                    end: 1.0,
-                  ).animate(
-                    CurvedAnimation(
-                      parent: animation,
-                      curve: Curves.easeOutCubic,
+    final List<Widget> cardBadges = [
+      AppBadge(
+        text: lodge.lodgeType.toUpperCase(),
+        type: BadgeType.primary,
+      ),
+      AppBadge(
+        text: lodge.isVerified ? "VERIFIED" : "PENDING",
+        type: lodge.isVerified ? BadgeType.success : BadgeType.warning,
+      ),
+    ];
+
+    return Padding(
+      // UPDATED: Set left and right padding to 2.0
+      padding: const EdgeInsets.only(
+        left: 2.0,
+        right: 2.0,
+        bottom: AppSpacing.sm,
+      ),
+      child: AppCard(
+        padding: EdgeInsets.zero, 
+        onTap: () {
+          Navigator.push(
+            context,
+            PageRouteBuilder(
+              transitionDuration: const Duration(milliseconds: 250),
+              pageBuilder: (_, __, ___) => LodgeDetailScreen(lodge: lodge),
+              transitionsBuilder: (_, animation, __, child) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: ScaleTransition(
+                    scale: Tween(begin: 0.95, end: 1.0).animate(
+                      CurvedAnimation(
+                        parent: animation,
+                        curve: Curves.easeOutCubic,
+                      ),
                     ),
+                    child: child,
                   ),
-                  child: child,
+                );
+              },
+            ),
+          );
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              children: [
+                AppImageCard(
+                  imageUrl: lodge.images.isNotEmpty ? lodge.images.first : null,
+                  height: 190,
+                  borderRadius: 14, 
+                  placeholderIcon: Icons.hotel,
+                  badges: cardBadges,
                 ),
-              );
-            },
-          ),
-        );
-      },
-      child: AnimatedScale(
-        duration: const Duration(milliseconds: 120),
-        scale: _pressed ? 0.98 : 1.0,
-        child: Container(
-          margin: const EdgeInsets.symmetric(
-            horizontal: 10,
-            vertical: 8,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            color: Theme.of(context).colorScheme.surface,
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withOpacity(0.06),
-                blurRadius: 14,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.start,
-            children: [
-              // ================= IMAGE =================
 
-              Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius:
-                        const BorderRadius.vertical(
-                      top: Radius.circular(18),
-                    ),
-                    child: AnimatedScale(
-                      duration:
-                          const Duration(milliseconds: 250),
-                      scale: _pressed ? 1.08 : 1.0,
-                      child: SizedBox(
-                        height: 190,
-                        width: double.infinity,
-                        child: lodge.images.isNotEmpty
-                            ? Image.network(
-                                lodge.images.first,
-                                fit: BoxFit.cover,
-                                errorBuilder:
-                                    (_, __, ___) {
-                                  return Container(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .surfaceContainerHighest,
-                                    child: const Icon(
-                                      Icons.hotel,
-                                      size: 50,
-                                    ),
-                                  );
-                                },
-                              )
-                            : Container(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .surfaceContainerHighest,
-                                child: const Icon(
-                                  Icons.hotel,
-                                  size: 50,
-                                ),
-                              ),
-                      ),
-                    ),
-                  ),
-
-                  // Gradient Overlay
-
-                  Positioned.fill(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin:
-                              Alignment.topCenter,
-                          end:
-                              Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            Colors.black.withOpacity(
-                              .45,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // TOP BADGES
-
+                if (!widget.isOwner)
                   Positioned(
-                    top: 12,
-                    left: 12,
-                    right: 12,
-                    child: Row(
+                    bottom: AppSpacing.sm,
+                    right: AppSpacing.sm,
+                    child: AppIconButton(
+                      icon: isFavorite ? Icons.favorite : Icons.favorite_border,
+                      style: IconButtonStyle.filled,
+                      backgroundColor: Colors.white,
+                      color: isFavorite ? AppColors.error(context) : Colors.black54,
+                      onTap: () => setState(() => isFavorite = !isFavorite),
+                    ),
+                  ),
+
+                if (widget.isOwner)
+                  Positioned(
+                    top: 55,
+                    right: AppSpacing.sm,
+                    child: Column(
                       children: [
-                        Container(
-                          padding:
-                              const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 5,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primary,
-                            borderRadius:
-                                BorderRadius.circular(
-                              20,
-                            ),
-                          ),
-                          child: Text(
-                            lodge.lodgeType
-                                .toUpperCase(),
-                            style:
-                                const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight:
-                                  FontWeight.bold,
-                            ),
-                          ),
+                        AppIconButton(
+                          icon: Icons.meeting_room,
+                          style: IconButtonStyle.filled,
+                          backgroundColor: Colors.white,
+                          color: AppColors.leafGreen,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => AddRoomScreen(lodgeId: lodge.id),
+                              ),
+                            );
+                          },
                         ),
-
-                        const Spacer(),
-
-                        Container(
-                          padding:
-                              const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 5,
-                          ),
-                          decoration: BoxDecoration(
-                            color: lodge.isVerified
-                                ? Colors.green
-                                : Colors.orange,
-                            borderRadius:
-                                BorderRadius.circular(
-                              20,
-                            ),
-                          ),
-                          child: Text(
-                            lodge.isVerified
-                                ? "VERIFIED"
-                                : "PENDING",
-                            style:
-                                const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight:
-                                  FontWeight.bold,
-                            ),
-                          ),
+                        const SizedBox(height: AppSpacing.xs),
+                        AppIconButton(
+                          icon: Icons.edit,
+                          style: IconButtonStyle.filled,
+                          backgroundColor: Colors.white,
+                          color: Colors.blue,
+                          onTap: () async {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => EditLodgeScreen(lodge: lodge),
+                              ),
+                            );
+                            if (result == true && mounted) {
+                              setState(() {});
+                            }
+                          },
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        AppIconButton(
+                          icon: Icons.delete,
+                          style: IconButtonStyle.filled,
+                          backgroundColor: Colors.white,
+                          color: AppColors.error(context),
+                          onTap: () => _showDeleteDialog(context),
                         ),
                       ],
                     ),
                   ),
+              ],
+            ),
 
-                  // FAVORITE BUTTON
-
-                  if (!widget.isOwner)
-                    Positioned(
-                      bottom: 12,
-                      right: 12,
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            isFavorite =
-                                !isFavorite;
-                          });
-                        },
-                        child: Container(
-                          padding:
-                              const EdgeInsets.all(
-                            10,
-                          ),
-                          decoration:
-                              const BoxDecoration(
-                            color: Colors.white,
-                            shape:
-                                BoxShape.circle,
-                          ),
-                          child: Icon(
-                            isFavorite
-                                ? Icons.favorite
-                                : Icons.favorite_border,
-                            color: isFavorite
-                                ? Colors.red
-                                : Colors.black54,
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          capitalizeText(lodge.name).toUpperCase(), // UPDATED: Transformed to UPPERCASE
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.titleMedium.copyWith(
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
-                    ),
-
-                  // OWNER ACTIONS
-
-                  if (widget.isOwner)
-                    Positioned(
-                      top: 55,
-                      right: 12,
-                      child: Column(
-                        children: [
-                          _buildActionButton(
-                            icon:
-                                Icons.meeting_room,
-                            color: Colors.green,
-                            tooltip:
-                                "Add Room",
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      AddRoomScreen(
-                                    lodgeId:
-                                        lodge.id,
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                          const SizedBox(
-                            height: 8,
-                          ),
-                          _buildActionButton(
-                            icon: Icons.edit,
-                            color: Colors.blue,
-                            tooltip:
-                                "Edit Lodge",
-                            onTap: () async {
-                              final result =
-                                  await Navigator
-                                      .push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) =>
-                                      EditLodgeScreen(
-                                    lodge: lodge,
-                                  ),
-                                ),
-                              );
-
-                              if (result ==
-                                      true &&
-                                  mounted) {
-                                setState(() {});
-                              }
-                            },
-                          ),
-                          const SizedBox(
-                            height: 8,
-                          ),
-                          _buildActionButton(
-                            icon: Icons.delete,
-                            color: Colors.red,
-                            tooltip:
-                                "Delete Lodge",
-                            onTap: () {
-                              _showDeleteDialog(
-                                context,
-                              );
-                            },
-                          ),
-                        ],
+                      if (lodge.isVerified) ...[
+                        const SizedBox(width: AppSpacing.xxs),
+                        Icon(
+                          Icons.verified,
+                          color: AppColors.leafGreen,
+                          size: 18,
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on,
+                        size: 14,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
-                    ),
+                      const SizedBox(width: AppSpacing.xxs),
+                      Expanded(
+                        child: Text(
+                          "${capitalizeText(lodge.city)}, ${capitalizeText(lodge.district)}".toUpperCase(),
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.labelSmall.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
-
-              // ================= INFO =================
-
-              Padding(
-                padding:
-                    const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            lodge.name,
-                            maxLines: 1,
-                            overflow:
-                                TextOverflow
-                                    .ellipsis,
-                            style:
-                                Theme.of(context)
-                                    .textTheme
-                                    .titleMedium
-                                    ?.copyWith(
-                                      fontWeight:
-                                          FontWeight
-                                              .bold,
-                                    ),
-                          ),
-                        ),
-                        if (lodge.isVerified)
-                          const Icon(
-                            Icons.verified,
-                            color: Colors.green,
-                            size: 18,
-                          ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 6),
-
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.location_on,
-                          size: 14,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            "${lodge.city}, ${lodge.district}",
-                            overflow:
-                                TextOverflow
-                                    .ellipsis,
-                            style:
-                                Theme.of(context)
-                                    .textTheme
-                                    .labelSmall,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                  ],
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

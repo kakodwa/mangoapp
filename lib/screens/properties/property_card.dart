@@ -1,12 +1,24 @@
-import 'package:flutter/material.dart';
+// lib/widgets/properties/property_card.dart
 
+import 'package:flutter/material.dart';
 import '../../models/property_model.dart';
 import '../../theme/app_colors.dart';
+
+// Design System Imports
+import '../../theme/design_system/app_card.dart';
+import '../../theme/design_system/app_image_card.dart';
 import '../../theme/design_system/app_badge.dart';
+import '../../theme/design_system/app_typography.dart';
 import '../../theme/design_system/app_spacing.dart';
+
+import '../../widgets/capitalize_text.dart';
+
 import 'property_details_screen.dart';
 
-class PropertyCard extends StatefulWidget {
+// Analytics Import
+import '../../services/analytics_service.dart';
+
+class PropertyCard extends StatelessWidget {
   final Property property;
 
   const PropertyCard({
@@ -15,254 +27,145 @@ class PropertyCard extends StatefulWidget {
   });
 
   @override
-  State<PropertyCard> createState() => _PropertyCardState();
-}
-
-class _PropertyCardState extends State<PropertyCard>
-    with SingleTickerProviderStateMixin {
-  bool _pressed = false;
-
-  @override
   Widget build(BuildContext context) {
-    final property = widget.property;
-
-    final listingText =
-        property.listingPurpose == 'rent' ? 'FOR RENT' : 'FOR SALE';
+    final listingText = property.listingPurpose == 'rent' ? 'FOR RENT' : 'FOR SALE';
 
     final listingColor = property.listingPurpose == 'rent'
         ? Theme.of(context).colorScheme.primary
         : Theme.of(context).colorScheme.secondary;
 
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapUp: (_) => setState(() => _pressed = false),
-      onTapCancel: () => setState(() => _pressed = false),
-      onTap: () {
-        Navigator.push(
-          context,
-          PageRouteBuilder(
-            transitionDuration: const Duration(milliseconds: 250),
-            pageBuilder: (_, __, ___) =>
-                PropertyDetailsScreen(propertyId: property.id),
-            transitionsBuilder: (_, animation, __, child) {
-              return FadeTransition(
-                opacity: animation,
-                child: ScaleTransition(
-                  scale: Tween(begin: 0.95, end: 1.0).animate(
-                    CurvedAnimation(
-                      parent: animation,
-                      curve: Curves.easeOutCubic,
-                    ),
-                  ),
-                  child: child,
-                ),
-              );
-            },
-          ),
-        );
-      },
-      child: AnimatedScale(
-        duration: const Duration(milliseconds: 120),
-        scale: _pressed ? 0.98 : 1.0,
-        child: Container(
-          margin: EdgeInsets.symmetric(
-            horizontal: AppSpacing.sm,
-            vertical: AppSpacing.sm,
-          ),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            color: Theme.of(context).colorScheme.surface,
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(context)
-                    .colorScheme
-                    .onSurface
-                    .withOpacity(0.06),
-                blurRadius: 14,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // ================= IMAGE =================
-              Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(18),
-                    ),
-                    child: AnimatedScale(
-                      duration: const Duration(milliseconds: 250),
-                      scale: _pressed ? 1.08 : 1.0,
-                      child: SizedBox(
-                        height: 170,
-                        width: double.infinity,
-                        child: property.images.isNotEmpty
-                            ? Image.network(
-                                property.images.first.image,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) {
-                                  return Container(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant
-                                        .withOpacity(0.25),
-                                    child: const Icon(
-                                      Icons.home,
-                                      size: 40,
-                                    ),
-                                  );
-                                },
-                              )
-                            : Container(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant
-                                    .withOpacity(0.25),
-                                child: const Icon(
-                                  Icons.home,
-                                  size: 40,
-                                ),
-                              ),
+    final subTextColor = Theme.of(context)
+        .colorScheme
+        .onSurfaceVariant
+        .withOpacity(0.6);
+
+    final AnalyticsService analytics = AnalyticsService();
+
+    return Padding(
+      // UPDATED: Set left and right padding to 2.0
+      padding: const EdgeInsets.only(
+        left: 2.0,
+        right: 2.0,
+        bottom: AppSpacing.sm,
+      ),
+      child: AppCard(
+        padding: EdgeInsets.zero, 
+        onTap: () {
+          // 📊 TRACK EVENT: User tap-selected a specific property listing from a list
+          analytics.logEvent('feed_property_card_click');
+
+          Navigator.push(
+            context,
+            PageRouteBuilder(
+              transitionDuration: const Duration(milliseconds: 250),
+              pageBuilder: (_, __, ___) => PropertyDetailsScreen(propertyId: property.id),
+              transitionsBuilder: (_, animation, __, child) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: ScaleTransition(
+                    scale: Tween(begin: 0.95, end: 1.0).animate(
+                      CurvedAnimation(
+                        parent: animation,
+                        curve: Curves.easeOutCubic,
                       ),
                     ),
+                    child: child,
                   ),
-
-                  // Gradient overlay
-                  Positioned.fill(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withOpacity(0.05),
-                            Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withOpacity(0.35),
-                          ],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                        ),
-                      ),
-                    ),
+                );
+              },
+            ),
+          );
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AspectRatio(
+              aspectRatio: 16 / 9,
+              child: AppImageCard(
+                imageUrl: property.images.isNotEmpty ? property.images.first.image : null,
+                height: double.infinity,
+                borderRadius: 14,
+                placeholderIcon: Icons.home,
+                badges: [
+                  AppBadge(
+                    text: property.propertyType.toLowerCase(),
+                    type: BadgeType.primary,
+                    fontSize: 9,
                   ),
-
-                  // BADGES
-                  Positioned(
-                    top: AppSpacing.sm,
-                    left: AppSpacing.sm,
-                    right: AppSpacing.sm,
-                    child: Row(
-                      children: [
-                        AppBadge(
-                          text: property.propertyType,
-                          type: BadgeType.primary,
-                          fontSize: 9,
-                        ),
-                        const Spacer(),
-                        AppBadge(
-                          text: property.status,
-                          type: BadgeType.warning,
-                          fontSize: 9,
-                        ),
-                      ],
-                    ),
+                  AppBadge(
+                    text: property.status.toLowerCase(),
+                    type: BadgeType.warning,
+                    fontSize: 9,
                   ),
                 ],
               ),
-
-              // ================= INFO =================
-              Padding(
-                padding: EdgeInsets.all(AppSpacing.md),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // PRICE + LISTING TYPE
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            '${property.currency} ${property.price.toStringAsFixed(0)}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(
-                                  color: AppColors.mangoOrange,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.sm),
-                        AppBadge(
-                          text: listingText,
-                          customColor: listingColor,
-                          fontSize: 9,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: AppSpacing.xs),
-
-                    // PROPERTY TITLE
-                    Text(
-                      property.title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium
-                          ?.copyWith(
+            ),
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${property.currency.toUpperCase()} ${property.price.toStringAsFixed(0)}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.titleMedium.copyWith(
+                            color: AppColors.mangoOrange,
                             fontWeight: FontWeight.bold,
                           ),
-                    ),
-
-                    const SizedBox(height: AppSpacing.xs),
-
-                    // LOCATION
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.location_on,
-                          size: 13,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurfaceVariant
-                              .withOpacity(0.6),
                         ),
-                        const SizedBox(width: 3),
-                        Expanded(
-                          child: Text(
-                            '${property.city}, ${property.district}',
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelSmall
-                                ?.copyWith(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant
-                                      .withOpacity(0.6),
-                                ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      AppBadge(
+                        text: listingText.toLowerCase(),
+                        customColor: listingColor,
+                        fontSize: 9,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    capitalizeText(property.title), // UPDATED: Transformed to UPPERCASE
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTypography.titleMedium.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on,
+                        size: 13,
+                        color: subTextColor,
+                      ),
+                      const SizedBox(width: 3),
+                      Expanded(
+                        child: Text(
+                          '${capitalizeText(property.city)}, ${capitalizeText(property.district)}',
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.labelSmall.copyWith(
+                            color: subTextColor,
+                            letterSpacing: 0.5,
                           ),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

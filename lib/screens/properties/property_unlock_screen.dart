@@ -12,6 +12,9 @@ import '../payments/payment_checkout_screen.dart';
 import 'property_details_screen.dart';
 import '../../theme/design_system/app_spacing.dart';
 
+// Analytics Import
+import '../../services/analytics_service.dart';
+
 class PropertyUnlockScreen extends ConsumerStatefulWidget {
   final int propertyId;
   final String propertyTitle;
@@ -32,12 +35,18 @@ class PropertyUnlockScreen extends ConsumerStatefulWidget {
 class _PropertyUnlockScreenState
     extends ConsumerState<PropertyUnlockScreen> {
   bool _isProcessing = false;
+  bool _hasLoggedView = false;
 
   /// default method (backend will still receive from payment screen)
   final String _selectedPaymentMethod = 'airtel_money';
 
   /// ================= CREATE UNLOCK THEN GO TO PAYMENT =================
   Future<void> _processPayment() async {
+    final AnalyticsService analytics = AnalyticsService();
+    
+    // 📊 TRACK EVENT: User triggered transaction validation workflow
+    analytics.logEvent('property_unlock_initiate');
+
     setState(() => _isProcessing = true);
 
     try {
@@ -66,12 +75,13 @@ class _PropertyUnlockScreenState
         MaterialPageRoute(
           builder: (_) => PaymentCheckoutScreen(
             transactionId: unlockId,
-
             amount: widget.unlockFee,
             purpose: "property_unlock",
             referenceType: "property_unlock",
-
             onSuccess: (_) {
+              // 📊 TRACK EVENT: Payment provider completed payment step
+              analytics.logEvent('property_unlock_success');
+
               AppToast.success(
                 context,
                 'Property unlocked successfully',
@@ -98,11 +108,21 @@ class _PropertyUnlockScreenState
       AppToast.error(context, 'Failed: ${e.toString()}');
     }
 
-    setState(() => _isProcessing = false);
+    if (mounted) {
+      setState(() => _isProcessing = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final AnalyticsService analytics = AnalyticsService();
+
+    // 📊 TRACK EVENT: Paywall intent loaded to layout pipeline
+    if (!_hasLoggedView) {
+      analytics.logEvent('property_unlock_view');
+      _hasLoggedView = true;
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: const MainAppBar(title: 'Unlock Property'),
@@ -112,8 +132,8 @@ class _PropertyUnlockScreenState
 
           /// PROPERTY CARD (UNCHANGED)
           Container(
-            margin: EdgeInsets.all(AppSpacing.md),
-            padding: EdgeInsets.all(AppSpacing.md),
+            margin: const EdgeInsets.all(AppSpacing.md),
+            padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
               color: AppColors.mangoOrange.withOpacity(0.08),
               borderRadius: BorderRadius.circular(12),
@@ -141,7 +161,7 @@ class _PropertyUnlockScreenState
                   ],
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                Text('What you\'ll get after unlocking:'),
+                const Text('What you\'ll get after unlocking:'),
                 const SizedBox(height: AppSpacing.xs),
                 _buildFeature('Full property description and details'),
                 _buildFeature('Exact location on map'),
@@ -153,10 +173,10 @@ class _PropertyUnlockScreenState
 
           /// AMOUNT CARD (UNCHANGED)
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
             child: Container(
               width: double.infinity,
-              padding: EdgeInsets.all(AppSpacing.md),
+              padding: const EdgeInsets.all(AppSpacing.md),
               decoration: BoxDecoration(
                 border: Border.all(
                   color: AppColors.darkText.withOpacity(0.2),
@@ -166,10 +186,10 @@ class _PropertyUnlockScreenState
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Unlock Fee:'),
+                  const Text('Unlock Fee:'),
                   Text(
                     'MWK ${widget.unlockFee.toStringAsFixed(2)}',
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: AppColors.mangoOrange,
                       fontWeight: FontWeight.bold,
                     ),
@@ -183,7 +203,7 @@ class _PropertyUnlockScreenState
 
           /// BUTTON
           Padding(
-            padding: EdgeInsets.all(AppSpacing.md),
+            padding: const EdgeInsets.all(AppSpacing.md),
             child: SizedBox(
               width: double.infinity,
               height: 48,
@@ -194,7 +214,7 @@ class _PropertyUnlockScreenState
                 onPressed: _isProcessing ? null : _processPayment,
                 icon: _isProcessing
                     ? CircularProgressIndicator(color: Theme.of(context).colorScheme.surface)
-                    : Icon(Icons.lock_open),
+                    : const Icon(Icons.lock_open),
                 label: Text(
                   _isProcessing
                       ? 'Preparing payment...'
@@ -211,7 +231,7 @@ class _PropertyUnlockScreenState
   Widget _buildFeature(String feature) {
     return Row(
       children: [
-        Icon(Icons.check_circle, color: AppColors.mangoOrange),
+        const Icon(Icons.check_circle, color: AppColors.mangoOrange),
         const SizedBox(width: AppSpacing.xs),
         Expanded(child: Text(feature)),
       ],

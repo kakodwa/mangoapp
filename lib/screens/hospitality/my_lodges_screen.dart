@@ -88,9 +88,7 @@ class _MyLodgesScreenState extends ConsumerState<MyLodgesScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: MainAppBar(
-        title:'My Lodges',
-      ),
+      appBar: AppBar(title: const Text('My Lodge'),),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
 

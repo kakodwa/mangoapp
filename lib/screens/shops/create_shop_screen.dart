@@ -196,7 +196,8 @@ class _CreateShopScreenState extends ConsumerState<CreateShopScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: const MainAppBar(title: "Create Shop"),
+
+      appBar: AppBar(title: const Text('Create Shop'),),
 
       body: Form(
         key: _formKey,

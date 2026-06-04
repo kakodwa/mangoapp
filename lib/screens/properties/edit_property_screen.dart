@@ -248,11 +248,7 @@ class _PropertyFormScreenState
               .onSurfaceVariant
               .withOpacity(0.12),
 
-      appBar: MainAppBar(
-        title: isEdit
-            ? "Edit Property"
-            : "Add Property",
-      ),
+      appBar: AppBar(title: const Text('Edit Property'),),
 
       body: Form(
         key: _formKey,

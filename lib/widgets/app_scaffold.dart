@@ -1,20 +1,14 @@
 import 'package:flutter/material.dart';
-
-import '../screens/home/home_screen.dart';
-import '../screens/shops/feed_shops_list_screen.dart';
-import '../screens/products/feed_products_list_screen.dart';
-import '../screens/properties/feed_properties_list_screen.dart';
-import '../screens/events/feed_event_list_screen.dart';
-import '../screens/hospitality/feed_lodge_list_screen.dart';
+import '../../services/analytics_service.dart'; // Import your analytics service layer
 
 class AppScaffold extends StatelessWidget {
-  final Widget? body; // Made optional since IndexedStack handles the body now
+  final Widget? body; 
   final PreferredSizeWidget? appBar;
   final Widget? drawer;
   final int currentIndex;
   final Color? backgroundColor;
   final Widget? floatingActionButton;
-  final ValueChanged<int>? onTabSelected; // Added callback to pass index back to parent
+  final ValueChanged<int>? onTabSelected; 
 
   const AppScaffold({
     super.key,
@@ -24,48 +18,59 @@ class AppScaffold extends StatelessWidget {
     this.currentIndex = 0,
     this.backgroundColor,
     this.floatingActionButton,
-    this.onTabSelected, // Pass this from your parent stateful widget
+    this.onTabSelected, 
   });
+
+  // Helper method to convert the tab index to a clean analytical tag name
+  String _getTabEventName(int index) {
+    switch (index) {
+      case 0: return 'nav_tab_home';
+      case 1: return 'nav_tab_shops';
+      case 2: return 'nav_tab_products';
+      case 3: return 'nav_tab_properties';
+      case 4: return 'nav_tab_events';
+      case 5: return 'nav_tab_booking';
+      default: return 'nav_tab_unknown';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final AnalyticsService analytics = AnalyticsService(); // Initialize tracking
 
-    // List of screens to keep alive in the background
-    final List<Widget> screens = [
-      HomeScreen(),
-      ShopsListScreen(),
-      ProductsListScreen(),
-      PropertiesListScreen(),
-      EventListScreen(),
-      LodgeListScreen(),
-    ];
+    // SAFEGUARD: If the user selects any hidden screen (Index 6 Profile, Index 7 Search, etc.)
+    // fallback the BottomNavigationBar highlight to index 0 so it doesn't crash out-of-bounds!
+    final int navBarIndex = currentIndex > 5 ? 0 : currentIndex;
 
     return Scaffold(
       appBar: appBar,
       drawer: drawer,
       backgroundColor: backgroundColor,
       floatingActionButton: floatingActionButton,
-
-      // --- IndexedStack preserves screen state and scroll positions ---
       body: SafeArea(
-        child: body ?? IndexedStack(
-          index: currentIndex,
-          children: screens,
-        ),
+        // Receives the IndexedStack containing all 8 elements seamlessly from parent file
+        child: body ?? const SizedBox.shrink(), 
       ),
-
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
-        currentIndex: currentIndex,
-        selectedItemColor: colorScheme.primary,
+        currentIndex: navBarIndex, // Uses the safe layout index
+        // Dim selection focus highlighting completely when viewing a hidden view tab
+        selectedItemColor: currentIndex > 5 
+            ? colorScheme.onSurface.withOpacity(0.6) 
+            : colorScheme.primary,
         unselectedItemColor: colorScheme.onSurface.withOpacity(0.6),
         showSelectedLabels: false,
         showUnselectedLabels: false,
-        
-        // Notify the parent state to update the currentIndex
-        onTap: onTabSelected,
-        
+        onTap: (index) {
+          // 📊 TRACK EVENT: Map index to string label and log to Django backend asynchronously
+          analytics.logEvent(_getTabEventName(index));
+
+          // Trigger your original navigation routing function passed from parent widget
+          if (onTabSelected != null) {
+            onTabSelected!(index);
+          }
+        },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home', tooltip: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.store), label: 'Shops', tooltip: 'Shops'),

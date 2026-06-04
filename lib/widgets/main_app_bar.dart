@@ -5,22 +5,31 @@ import '../providers/auth_provider.dart';
 import '../providers/products_provider.dart';
 import '../theme/design_system/app_spacing.dart';
 import '../screens/cart/cart_screen.dart';
-import '../screens/profile/profile_screen.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/search/unified_search_screen.dart'; 
+// Import your Analytics Service (Adjust this path matching your actual directory structure)
+import '../services/analytics_service.dart';
 
 class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
+  final VoidCallback? onProfileTap; 
+  final VoidCallback? onSearchTap;
+  final VoidCallback? onCartTap;
   final String title;
+
+  // Static final instance allows us to keep the 'const' constructor intact
+  static final AnalyticsService _analyticsService = AnalyticsService();
 
   const MainAppBar({
     super.key,
     required this.title,
+    this.onProfileTap, 
+    this.onSearchTap,
+    this.onCartTap, 
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cartItems = ref.watch(cartProvider);
-
     final authState = ref.watch(authProvider);
     final isLoggedIn = authState.isAuthenticated;
 
@@ -39,12 +48,12 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
           icon: const Icon(Icons.search_rounded),
           tooltip: 'Search Platform',
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const UnifiedSearchScreen(),
-              ),
-            );
+            // Trigger analytics event
+            _analyticsService.logEvent('appbar_search_click');
+
+            if (onSearchTap != null) {
+              onSearchTap!();
+            }
           },
         ),
 
@@ -55,12 +64,12 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
             IconButton(
               icon: const Icon(Icons.shopping_cart_outlined),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const CartScreen(),
-                  ),
-                );
+                // Trigger analytics event
+                _analyticsService.logEvent('appbar_cart_click');
+
+                if (onCartTap != null) {
+                  onCartTap!();
+                }
               },
               tooltip: 'Shopping Cart',
             ),
@@ -87,11 +96,13 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
           ],
         ),
 
-        // 👤 AUTH MENU ONLY
+        // 👤 AUTH MENU
         PopupMenuButton<String>(
           icon: const Icon(Icons.person),
           onSelected: (value) async {
             if (value == 'login') {
+              _analyticsService.logEvent('appbar_login_click');
+
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -101,15 +112,15 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
             }
 
             if (value == 'profile') {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const ProfileScreen(),
-                ),
-              );
+              _analyticsService.logEvent('appbar_profile_click');
+
+              if (onProfileTap != null) {
+                onProfileTap!();
+              }
             }
 
             if (value == 'logout') {
+              _analyticsService.logEvent('appbar_logout_click');
               await ref.read(authProvider.notifier).logout();
 
               if (context.mounted) {
@@ -124,7 +135,6 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
             }
           },
           itemBuilder: (_) {
-            // 🚫 NOT LOGGED IN
             if (!isLoggedIn) {
               return const [
                 PopupMenuItem(
@@ -134,7 +144,6 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
               ];
             }
 
-            // ✅ LOGGED IN
             return const [
               PopupMenuItem(
                 value: 'profile',

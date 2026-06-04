@@ -7,6 +7,8 @@ import '../../core/api/api_client.dart';
 import '../../utils/app_toast.dart';
 import '../../widgets/main_app_bar.dart';
 import '../../theme/design_system/app_spacing.dart';
+// Import your Analytics Service
+import '../../services/analytics_service.dart';
 
 class ScanTicketScreen extends StatefulWidget {
   const ScanTicketScreen({super.key});
@@ -18,10 +20,21 @@ class ScanTicketScreen extends StatefulWidget {
 class _ScanTicketScreenState extends State<ScanTicketScreen> {
   final ApiClient api = ApiClient();
   final AudioPlayer player = AudioPlayer();
+  final AnalyticsService analyticsService = AnalyticsService();
 
   bool isProcessing = false;
   Map<String, dynamic>? ticketData;
   bool isSuccess = false;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Track when the user opens the ticket scanning scanner panel
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      analyticsService.logEvent('view_ticket_scanner');
+    });
+  }
 
   // =========================
   // SOUND HELPERS
@@ -52,6 +65,8 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
     });
 
     try {
+      analyticsService.logEvent('qr_code_detected');
+
       final response = await api.post(
         'tickets/check-in/',
         data: {"qr_code": code.toString()},
@@ -68,39 +83,44 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
         response['message'] ?? "Check-in successful",
       );
 
+      // Track successful check-in
+      final responseData = response['data'];
+      final eventId = responseData?['event_id'] ?? 'unknown';
+      analyticsService.logEvent('ticket_checkin_success_event_id_$eventId');
+
       setState(() {
-        ticketData = response['data'];
+        ticketData = responseData;
         isSuccess = true;
       });
 
-    }  catch (e) {
-  await playError();
+    } catch (e) {
+      await playError();
 
-  String message = "Something went wrong";
+      String message = "Something went wrong";
 
-  if (e is Exception) {
-    message = e.toString().replaceAll("Exception: ", "");
-  }
-
-  // 🔥 TRY TO GET REAL BACKEND MESSAGE (DIO)
-  if (e.toString().contains("DioException")) {
-    try {
-      final dioError = e as dynamic;
-
-      final responseData = dioError.response?.data;
-
-      if (responseData != null &&
-          responseData is Map &&
-          responseData['message'] != null) {
-        message = responseData['message'];
+      if (e is Exception) {
+        message = e.toString().replaceAll("Exception: ", "");
       }
-    } catch (_) {
-      message = "Request failed. Please try again.";
-    }
-  }
 
-  AppToast.error(context, message);
-}
+      // 🔥 TRY TO GET REAL BACKEND MESSAGE (DIO)
+      if (e.toString().contains("DioException")) {
+        try {
+          final dioError = e as dynamic;
+          final responseData = dioError.response?.data;
+
+          if (responseData != null &&
+              responseData is Map &&
+              responseData['message'] != null) {
+            message = responseData['message'];
+          }
+        } catch (_) {
+          message = "Request failed. Please try again.";
+        }
+      }
+
+      analyticsService.logEvent('ticket_checkin_failed');
+      AppToast.error(context, message);
+    }
 
     await Future.delayed(const Duration(seconds: 2));
 
@@ -110,6 +130,7 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
   }
 
   void _resetScanner() {
+    analyticsService.logEvent('click_scan_next_ticket');
     setState(() {
       ticketData = null;
       isProcessing = false;
@@ -145,10 +166,10 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
 
   Widget _infoTile(String title, String value) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 8),
       child: Container(
         width: double.infinity,
-        padding: EdgeInsets.all(AppSpacing.sm),
+        padding: const EdgeInsets.all(AppSpacing.sm),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
           borderRadius: BorderRadius.circular(10),
@@ -160,90 +181,67 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(
-        title: Text("Scan Ticket"),
-        actions: [
-          if (ticketData != null)
-            IconButton(
-              onPressed: _resetScanner,
-              icon: Icon(Icons.refresh),
-            )
-        ],
-      ),
-
-      body: ticketData == null
-          // =========================
-          // CAMERA MODE
-          // =========================
-          ? Stack(
+    return ticketData == null
+        ? Stack(
+            children: [
+              MobileScanner(onDetect: _onDetect),
+              _scannerFrame(),
+            ],
+          )
+        : SingleChildScrollView(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                MobileScanner(onDetect: _onDetect),
-                _scannerFrame(),
+                Center(
+                  child: Text(
+                    "CHECK-IN SUCCESSFUL",
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: AppSpacing.md),
+
+                _infoTile("Event", ticketData!['event_title']),
+                _infoTile("Ticket", ticketData!['ticket_number']),
+                _infoTile("Attendee", ticketData!['attendee_name']),
+
+                const SizedBox(height: AppSpacing.md),
+
+                const Text(
+                  "Ticket Items",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+
+                const SizedBox(height: 10),
+
+                if (ticketData!['ticket_items'] != null)
+                  ...List.generate(
+                    (ticketData!['ticket_items'] as List).length,
+                    (i) {
+                      final item = ticketData!['ticket_items'][i];
+                      return Text(
+                        "• ${item['name']} (${item['type']}) x${item['quantity']}",
+                      );
+                    },
+                  ),
+
+                const SizedBox(height: 30),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: _resetScanner,
+                    icon: const Icon(Icons.qr_code_scanner),
+                    label: const Text("Scan Next Ticket"),
+                  ),
+                ),
               ],
-            )
-
-          // =========================
-          // RESULT MODE
-          // =========================
-          : SingleChildScrollView(
-              padding: EdgeInsets.all(AppSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Text(
-                      "CHECK-IN SUCCESSFUL",
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.secondary,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  _infoTile("Event", ticketData!['event_title']),
-                  _infoTile("Ticket", ticketData!['ticket_number']),
-                  _infoTile("Attendee", ticketData!['attendee_name']),
-                  //_infoTile("Seat", ticketData!['seat'] ?? 'N/A'),
-                  //_infoTile("Type", ticketData!['type'] ?? 'Regular'),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  Text(
-                    "Ticket Items",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  if (ticketData!['ticket_items'] != null)
-                    ...List.generate(
-                      (ticketData!['ticket_items'] as List).length,
-                      (i) {
-                        final item = ticketData!['ticket_items'][i];
-                        return Text(
-                          "• ${item['name']} (${item['type']}) x${item['quantity']}",
-                        );
-                      },
-                    ),
-
-                  const SizedBox(height: 30),
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: _resetScanner,
-                      icon: Icon(Icons.qr_code_scanner),
-                      label: Text("Scan Next Ticket"),
-                    ),
-                  ),
-                ],
-              ),
             ),
-    );
+          );
   }
 }

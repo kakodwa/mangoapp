@@ -3,13 +3,26 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/order_model.dart';
 import '../../providers/api_provider.dart';
-import '../../theme/app_colors.dart';
-import '../../widgets/app_scaffold.dart';
-import '../../widgets/main_app_bar.dart';
-import '../../theme/design_system/app_spacing.dart';
 
-final userOrdersProvider =
-    FutureProvider.autoDispose<List<Order>>(
+// Design System Imports
+import '../../theme/design_system/app_card.dart';
+import '../../theme/design_system/app_badge.dart';
+import '../../theme/design_system/app_loader.dart';
+import '../../theme/design_system/app_info_box.dart';
+import '../../theme/design_system/app_spacing.dart';
+import '../../theme/design_system/app_typography.dart';
+import '../../widgets/app_scaffold.dart';
+
+// First-letter capitalization extension string utility
+extension CapitalizeString on String {
+  String toCapitalized() {
+    if (isEmpty) return this;
+    final lower = toLowerCase();
+    return "${lower[0].toUpperCase()}${lower.substring(1)}";
+  }
+}
+
+final userOrdersProvider = FutureProvider.autoDispose<List<Order>>(
   (ref) async {
     final apiClient = ref.watch(apiClientProvider);
 
@@ -44,11 +57,11 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
 
   Widget _buildItem(OrderItem item) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: AppSpacing.xs),
+      padding: const EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
         color: Colors.grey.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
         children: [
@@ -67,20 +80,21 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item.productName,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
+                  item.productName.toCapitalized(),
+                  style: AppTypography.titleMedium.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: AppSpacing.xxs),
                 Text(
-                  "Qty: ${item.quantity}",
-                  style: TextStyle(
-                    fontSize: 12,
+                  "Qty: ${item.quantity}".toCapitalized(),
+                  style: AppTypography.bodySmall.copyWith(
                     color: Colors.grey,
                   ),
                 ),
@@ -88,8 +102,10 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
             ),
           ),
           Text(
-            "MWK ${item.totalPrice.toStringAsFixed(2)}",
-            style: const TextStyle(fontWeight: FontWeight.w700),
+            "MWK ${item.totalPrice.toStringAsFixed(2)}".toCapitalized(),
+            style: AppTypography.titleMedium.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ],
       ),
@@ -102,11 +118,24 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
 
     return AppScaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: const MainAppBar(title: 'My Orders'),
+      appBar: AppBar(
+        title: Text(
+          'My orders'.toCapitalized(),
+          style: AppTypography.headlineMedium,
+        ),
+      ),
       body: ordersAsync.when(
         data: (orders) {
           if (orders.isEmpty) {
-            return const Center(child: Text("No orders yet"));
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: AppInfoBox(
+                  type: AppInfoType.info,
+                  message: "No orders yet".toCapitalized(),
+                ),
+              ),
+            );
           }
 
           return RefreshIndicator(
@@ -114,31 +143,20 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
               ref.refresh(userOrdersProvider);
             },
             child: ListView.separated(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(AppSpacing.md),
               itemCount: orders.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 14),
+              separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
               itemBuilder: (context, index) {
                 final order = orders[index];
                 final isExpanded = expandedOrders.contains(order.id);
 
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
-                        blurRadius: 12,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
-                  ),
+                return AppCard(
+                  padding: EdgeInsets.zero, // explicit management via internal layout InkWell boundaries
                   child: InkWell(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(14),
                     onTap: () => toggleOrder(order.id),
                     child: Padding(
-                      padding: const EdgeInsets.all(18),
+                      padding: const EdgeInsets.all(AppSpacing.md),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -149,32 +167,30 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                                 width: 52,
                                 height: 52,
                                 decoration: BoxDecoration(
-                                  color: AppColors.mangoLight.withOpacity(0.18),
-                                  borderRadius: BorderRadius.circular(16),
+                                  color: Colors.orange.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(14),
                                 ),
                                 child: const Icon(
                                   Icons.receipt_long,
-                                  color: AppColors.mangoOrange,
+                                  color: Colors.orange,
                                 ),
                               ),
-                              const SizedBox(width: 14),
+                              const SizedBox(width: AppSpacing.sm),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      "Order #${order.orderNumber}",
-                                      style: const TextStyle(
-                                        fontSize: 16,
+                                      "Order #${order.orderNumber}".toCapitalized(),
+                                      style: AppTypography.titleLarge.copyWith(
                                         fontWeight: FontWeight.w700,
                                       ),
                                     ),
-                                    const SizedBox(height: 4),
+                                    const SizedBox(height: AppSpacing.xxs),
                                     Text(
-                                      _formatDate(order.createdAt),
-                                      style: TextStyle(
+                                      _formatDate(order.createdAt).toCapitalized(),
+                                      style: AppTypography.bodySmall.copyWith(
                                         color: Colors.grey,
-                                        fontSize: 12,
                                       ),
                                     ),
                                   ],
@@ -184,81 +200,66 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                                 isExpanded
                                     ? Icons.keyboard_arrow_up
                                     : Icons.keyboard_arrow_down,
-                                color: AppColors.mangoOrange,
+                                color: Colors.orange,
                               ),
                             ],
                           ),
 
-                          const SizedBox(height: 16),
+                          const SizedBox(height: AppSpacing.md),
 
-                          // ================= TOTAL =================
+                          // ================= TOTAL & BADGE =================
                           Row(
-                            mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 14,
-                                  vertical: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.mangoLight.withOpacity(0.18),
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                                child: Text(
-                                  order.status.toUpperCase(),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 12,
-                                  ),
-                                ),
+                              AppBadge(
+                                text: order.status.toCapitalized(),
+                                type: order.status.toLowerCase() == 'completed'
+                                    ? BadgeType.success
+                                    : BadgeType.warning,
                               ),
                               Text(
                                 "MWK ${order.totalAmount.toStringAsFixed(2)}",
-                                style: const TextStyle(
+                                style: AppTypography.titleLarge.copyWith(
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 16,
                                 ),
                               ),
                             ],
                           ),
 
-                          // ================= EXPANDED =================
+                          // ================= EXPANDED ITEMS SECTION =================
                           if (isExpanded) ...[
-                            const SizedBox(height: 18),
+                            const SizedBox(height: AppSpacing.md),
                             Divider(color: Colors.grey.withOpacity(0.25)),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: AppSpacing.sm),
 
-                            const Text(
-                              "Order Items",
-                              style: TextStyle(
-                                fontSize: 15,
+                            Text(
+                              "Order items".toCapitalized(),
+                              style: AppTypography.titleMedium.copyWith(
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
 
-                            const SizedBox(height: 14),
+                            const SizedBox(height: AppSpacing.sm),
 
                             // ================= ITEMS (GLOBAL) =================
                             ...order.items.map(_buildItem).toList(),
 
-                            const SizedBox(height: 20),
+                            const SizedBox(height: AppSpacing.md),
 
                             // ================= SELLER BREAKDOWN =================
-                            const Text(
-                              "Seller Breakdown",
-                              style: TextStyle(
-                                fontSize: 15,
+                            Text(
+                              "Seller breakdown".toCapitalized(),
+                              style: AppTypography.titleMedium.copyWith(
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
 
-                            const SizedBox(height: 12),
+                            const SizedBox(height: AppSpacing.sm),
 
                             ...order.sellerOrders.map((sellerOrder) {
                               return Container(
-                                margin: const EdgeInsets.only(bottom: 12),
-                                padding: const EdgeInsets.all(12),
+                                margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+                                padding: const EdgeInsets.all(AppSpacing.sm),
                                 decoration: BoxDecoration(
                                   color: Colors.grey.withOpacity(0.05),
                                   borderRadius: BorderRadius.circular(14),
@@ -269,43 +270,44 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                                     Row(
                                       children: [
                                         const Icon(Icons.store, size: 18),
-                                        const SizedBox(width: 8),
+                                        const SizedBox(width: AppSpacing.xs),
                                         Expanded(
                                           child: Text(
-                                            "Seller #${sellerOrder.sellerId}",
-                                            style: const TextStyle(
+                                            "Seller #${sellerOrder.sellerId}".toCapitalized(),
+                                            style: AppTypography.titleSmall.copyWith(
                                               fontWeight: FontWeight.w700,
                                             ),
                                           ),
                                         ),
                                         Text(
-                                          sellerOrder.status.toUpperCase(),
-                                          style: const TextStyle(
-                                            fontSize: 12,
+                                          sellerOrder.status.toCapitalized(),
+                                          style: AppTypography.labelSmall.copyWith(
                                             fontWeight: FontWeight.bold,
+                                            color: Colors.orange,
                                           ),
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(height: 8),
+                                    const SizedBox(height: AppSpacing.xs),
 
                                     Text(
                                       "Subtotal: MWK ${sellerOrder.subtotal.toStringAsFixed(2)}",
+                                      style: AppTypography.bodyMedium,
                                     ),
                                     Text(
-                                      "Commission: MWK ${sellerOrder.commission.toStringAsFixed(2)}",
+                                      "Commission: MWK ${sellerOrder.commission.toStringAsFixed(2)}".toCapitalized(),
+                                      style: AppTypography.bodyMedium,
                                     ),
                                     Text(
-                                      "To Seller: MWK ${sellerOrder.sellerAmount.toStringAsFixed(2)}",
-                                      style: const TextStyle(
+                                      "To seller: MWK ${sellerOrder.sellerAmount.toStringAsFixed(2)}".toCapitalized(),
+                                      style: AppTypography.bodyMedium.copyWith(
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    const SizedBox(height: 6),
+                                    const SizedBox(height: AppSpacing.xxs),
                                     Text(
-                                      "Delivery: ${sellerOrder.deliveryStatus ?? 'pending'}",
-                                      style: const TextStyle(
-                                        fontSize: 12,
+                                      "Delivery: ${sellerOrder.deliveryStatus ?? 'pending'}".toCapitalized(),
+                                      style: AppTypography.bodySmall.copyWith(
                                         color: Colors.grey,
                                       ),
                                     ),
@@ -323,9 +325,18 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
             ),
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) =>
-            const Center(child: Text("Failed to load orders")),
+        loading: () => Center(
+          child: AppLoader.inline(),
+        ),
+        error: (e, __) => Center(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: AppInfoBox(
+              type: AppInfoType.error,
+              message: "Failed to load orders: ${e.toString()}".toCapitalized(),
+            ),
+          ),
+        ),
       ),
     );
   }
