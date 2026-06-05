@@ -1,34 +1,39 @@
+// lib/screens/hospitality/lodge_detail_screen.dart
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+
 import '../../models/lodge_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/rooms_provider.dart';
+
 import '../auth/login_screen.dart';
+
 import '../../widgets/main_drawer.dart';
 import '../../widgets/main_app_bar.dart';
 import '../../widgets/app_fab.dart';
+import '../../widgets/shop_map_modal.dart';
+import '../../widgets/hospitality/room_card.dart';
+
+import '../../utils/app_snackbar.dart';
+import '../../utils/app_toast.dart';
+
+// Design System Imports
 import '../../theme/design_system/app_button.dart';
 import '../../theme/design_system/app_card.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_typography.dart';
-import '../../utils/app_snackbar.dart';
-import '../../widgets/shop_map_modal.dart';
 import '../../theme/app_colors.dart';
-import '../../widgets/hospitality/room_card.dart';
-import '../../utils/app_toast.dart';
-import 'availability_calendar_screen.dart';
-// Import your Analytics Service (Adjust path matching your directory layout)
+
+// Analytics Import
 import '../../services/analytics_service.dart';
 
-class LodgeDetailScreen extends ConsumerWidget {
+class LodgeDetailScreen extends ConsumerStatefulWidget {
   final Lodge lodge;
-
-  // Static final analytics instance
-  static final AnalyticsService _analyticsService = AnalyticsService();
 
   const LodgeDetailScreen({
     super.key,
@@ -36,209 +41,248 @@ class LodgeDetailScreen extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Automatically track screen view entry asynchronously
-    _analyticsService.logEvent('view_lodge_detail_${lodge.id}');
+  ConsumerState<LodgeDetailScreen> createState() => _LodgeDetailScreenState();
+}
 
-    final roomsAsync = ref.watch(roomsProvider(lodge.id));
+class _LodgeDetailScreenState extends ConsumerState<LodgeDetailScreen> {
+  final AnalyticsService _analyticsService = AnalyticsService();
+  int _currentIndex = 0;
+  bool _hasLoggedView = false;
+
+  void _openWhatsApp(String phone) async {
+    final uri = Uri.parse("https://wa.me/$phone");
+
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      AppToast.info(context, "Could not open WhatsApp");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // 📊 TRACK EVENT: Safe async trigger on frame registration
+    if (!_hasLoggedView) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _analyticsService.logEvent('view_lodge_detail_${widget.lodge.id}');
+      });
+      _hasLoggedView = true;
+    }
+
+    final roomsAsync = ref.watch(roomsProvider(widget.lodge.id));
     final authState = ref.watch(authProvider);
     final user = authState.user;
     final isLoggedIn = authState.isAuthenticated;
 
-    void _openWhatsApp(String phone) async {
-      final uri = Uri.parse("https://wa.me/$phone");
-
-      if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-        AppToast.info(context, "Could not open WhatsApp");
-      }
-    }
+    // Fixed safeImage error: Use widget.lodge.images directly
+    final images = widget.lodge.images;
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
         title: roomsAsync.when(
-          data: (_) => Text(lodge.name),
+          data: (_) => Text(widget.lodge.name),
           loading: () => const Text('Loading...'),
           error: (_, __) => const Text('Details'),
         ),
       ),
-      backgroundColor: const Color(0xFFF5F7FA),
       body: Stack(
         children: [
           CustomScrollView(
             slivers: [
-              /// ================= HERO APP BAR =================
+              
+              // ================= HERO IMAGE CAROUSEL
               SliverAppBar(
-                expandedHeight: 320,
+                expandedHeight: 340,
                 automaticallyImplyLeading: false,
-                pinned: true,
-                backgroundColor: Theme.of(context).colorScheme.surface,
-                elevation: 0,
-                iconTheme: IconThemeData(color: Theme.of(context).colorScheme.surface),
+                pinned: false,
+                backgroundColor: Colors.transparent,
                 flexibleSpace: FlexibleSpaceBar(
-                  collapseMode: CollapseMode.parallax,
-                  titlePadding: const EdgeInsets.only(
-                    left: 16,
-                    bottom: 16,
-                    right: 16,
-                  ),
-                  title: Text(
-                    lodge.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.surface,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      shadows: const [
-                        Shadow(
-                          blurRadius: 10,
-                          color: Colors.black54,
-                        ),
-                      ],
-                    ),
-                  ),
                   background: Stack(
                     fit: StackFit.expand,
                     children: [
-                      CarouselSlider(
-                        options: CarouselOptions(
-                          height: 320,
-                          viewportFraction: 1,
-                          autoPlay: true,
-                          enlargeCenterPage: false,
-                        ),
-                        items: lodge.images.map((image) {
-                          return Image.network(
-                            image,
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            errorBuilder: (_, __, ___) => Container(
-                              color: Theme.of(context).colorScheme.outline.withOpacity(0.38),
-                              child: Center(
+                      if (images.isEmpty)
+                        // Fallback block if lodge has no images at all
+                        Container(
+                          color: Colors.grey.shade200,
+                          child: Icon(
+                            Icons.image_not_supported_outlined,
+                            size: 48,
+                            color: Colors.grey.shade400,
+                          ),
+                        )
+                      else
+                        CarouselSlider(
+                          options: CarouselOptions(
+                            height: 340,
+                            viewportFraction: 1.0,
+                            autoPlay: images.length > 1,
+                            enlargeCenterPage: false,
+                            onPageChanged: (index, reason) {
+                              setState(() => _currentIndex = index);
+                            },
+                          ),
+                          items: images.map((image) {
+                            return CachedNetworkImage(
+                              imageUrl: image,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              placeholder: (context, url) => Container(
+                                color: Colors.grey.shade200,
+                                child: const Center(child: CircularProgressIndicator()),
+                              ),
+                              errorWidget: (context, url, error) => Container(
+                                color: Colors.grey.shade200,
                                 child: Icon(
-                                  Icons.image_not_supported,
-                                  size: 50,
-                                  color: Theme.of(context).colorScheme.surface,
+                                  Icons.image_not_supported_outlined,
+                                  size: 48,
+                                  color: Colors.grey.shade400,
                                 ),
                               ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
+                            );
+                          }).toList(),
+                        ),
 
-                      /// DARK OVERLAY
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
-                              Theme.of(context).colorScheme.onSurface.withOpacity(0.65),
-                            ],
+                      // Subtle Dark Gradient Overlay
+                      Positioned.fill(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.black.withOpacity(0.1),
+                                Colors.black.withOpacity(0.55),
+                              ],
+                            ),
                           ),
                         ),
                       ),
 
-                      /// LOCATION BADGE
+                      // Location Overlay Badge
                       Positioned(
-                        left: 16,
-                        bottom: 60,
+                        left: AppSpacing.md,
+                        bottom: AppSpacing.xl,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 7,
+                            horizontal: AppSpacing.sm,
+                            vertical: 6,
                           ),
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surface.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(30),
+                            color: Colors.black.withOpacity(0.4),
+                            borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: Theme.of(context).colorScheme.surface.withOpacity(0.3),
+                              color: Colors.white.withOpacity(0.2),
                             ),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.location_on,
-                                color: Theme.of(context).colorScheme.surface,
-                                size: 16,
+                                color: Colors.white,
+                                size: 14,
                               ),
-                              const SizedBox(width: 5),
+                              const SizedBox(width: 4),
                               Text(
-                                '${lodge.city}, ${lodge.district}',
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.surface,
-                                  fontWeight: FontWeight.w500,
+                                '${widget.lodge.city}, ${widget.lodge.district}',
+                                style: AppTypography.labelMedium.copyWith(
+                                  color: Colors.white,
                                 ),
                               ),
                             ],
                           ),
                         ),
                       ),
+
+                      // Slider Modern Dot Indicators Layout
+                      if (images.length > 1)
+                        Positioned(
+                          bottom: AppSpacing.md,
+                          left: 0,
+                          right: 0,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(
+                              images.length,
+                              (index) => AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                margin: const EdgeInsets.symmetric(horizontal: 4),
+                                height: 6,
+                                width: _currentIndex == index ? 16 : 6,
+                                decoration: BoxDecoration(
+                                  color: _currentIndex == index
+                                      ? AppColors.primary(context)
+                                      : Colors.white.withOpacity(0.6),
+                                  borderRadius: BorderRadius.circular(3),
+                                ),
+                               ),
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),
               ),
 
-              /// ================= MAIN CONTENT =================
+              // ================= MAIN CONTENT DESCRIPTION
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.md),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      /// DESCRIPTION
                       AppCard(
-                        padding: const EdgeInsets.all(AppSpacing.lg),
+                        padding: const EdgeInsets.all(AppSpacing.md),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text(
                               "About Lodge",
-                              style: AppTypography.titleMedium,
+                              style: AppTypography.headlineMedium,
                             ),
-                            const SizedBox(height: AppSpacing.sm),
+                            const SizedBox(height: AppSpacing.xs),
                             Text(
-                              lodge.description,
-                              style: AppTypography.bodyMedium,
+                              widget.lodge.description,
+                              style: AppTypography.bodyMedium.copyWith(
+                                color: Colors.grey.shade700,
+                                height: 1.5,
+                              ),
                             ),
                           ],
                         ),
                       ),
 
-                      const SizedBox(height: AppSpacing.xl),
+                      const SizedBox(height: AppSpacing.lg),
 
-                      /// SECTION HEADER
                       const Text(
                         'Available Rooms',
-                        style: AppTypography.headlineLarge,
+                        style: AppTypography.headlineMedium,
                       ),
-
                       const SizedBox(height: AppSpacing.md),
 
-                      /// ================= ROOMS =================
+                      // ================= AVAILABLE ROOMS CARDS HORIZONTAL SCROLL
                       roomsAsync.when(
                         data: (rooms) {
                           if (rooms.isEmpty) {
                             return AppCard(
                               padding: const EdgeInsets.all(AppSpacing.xl),
-                              child: Column(
-                                children: [
-                                  Icon(
-                                    Icons.hotel_outlined,
-                                    size: 60,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4),
-                                  ),
-                                  const SizedBox(height: AppSpacing.sm),
-                                  const Text(
-                                    "No rooms available yet",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 16,
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.hotel_outlined,
+                                      size: 56,
+                                      color: Colors.grey.shade400,
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(height: AppSpacing.sm),
+                                    Text(
+                                      "No rooms available yet",
+                                      style: AppTypography.titleMedium.copyWith(
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             );
                           }
@@ -252,15 +296,13 @@ class LodgeDetailScreen extends ConsumerWidget {
                                   const SizedBox(width: AppSpacing.md),
                               itemBuilder: (context, index) {
                                 final room = rooms[index];
-
-                                final bool isOwner =
-                                    user?.id != null &&
-                                        room.ownerId != null &&
-                                        user!.id == room.ownerId;
+                                final bool isOwner = user?.id != null &&
+                                    room.ownerId != null &&
+                                    user!.id == room.ownerId;
 
                                 return RoomCard(
                                   room: room,
-                                  lodgeImages: lodge.images,
+                                  lodgeImages: widget.lodge.images,
                                   isOwner: isOwner,
                                   onEdit: () {
                                     _analyticsService.logEvent('lodge_room_edit_click_${room.id}');
@@ -280,14 +322,15 @@ class LodgeDetailScreen extends ConsumerWidget {
                           child: Center(child: CircularProgressIndicator()),
                         ),
                         error: (e, _) => Padding(
-                          padding: const EdgeInsets.all(20),
+                          padding: const EdgeInsets.all(AppSpacing.md),
                           child: Text(
-                            e.toString(), style: TextStyle(color: Theme.of(context).colorScheme.error),
+                            e.toString(),
+                            style: TextStyle(color: Theme.of(context).colorScheme.error),
                           ),
                         ),
                       ),
 
-                      const SizedBox(height: 100),
+                      const SizedBox(height: 120), // Padding allowance overlay space depth for FABs
                     ],
                   ),
                 ),
@@ -295,13 +338,15 @@ class LodgeDetailScreen extends ConsumerWidget {
             ],
           ),
 
-          /// ================= FAB BUTTONS =================
-          if (lodge.latitude != null && lodge.longitude != null)
+          // ================= RESTORED FLOATING ACTION UTILITY STACK
+          if (widget.lodge.latitude != null && widget.lodge.longitude != null)
             Positioned(
               bottom: 50,
               right: 16,
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
+                  
                   // 💬 WHATSAPP BUTTON
                   AppFab(
                     heroTag: "whatsapp",
@@ -320,21 +365,19 @@ class LodgeDetailScreen extends ConsumerWidget {
                         return;
                       }
 
-                      final phone = lodge.phoneNumber;
-
+                      final phone = widget.lodge.phoneNumber;
                       if (phone == null || phone.isEmpty) {
-                        AppToast.info(
-                          context,
-                          "No WhatsApp number available",
-                        );
+                        AppToast.info(context, "No WhatsApp number available");
                         return;
                       }
 
-                      _analyticsService.logEvent('lodge_whatsapp_chat_start_${lodge.id}');
+                      _analyticsService.logEvent('lodge_whatsapp_chat_start_${widget.lodge.id}');
                       _openWhatsApp(phone);
                     },
                   ),
+
                   const SizedBox(height: AppSpacing.sm),
+
                   // 🗺 MAP BUTTON
                   AppFab(
                     heroTag: "map_lodge",
@@ -342,14 +385,14 @@ class LodgeDetailScreen extends ConsumerWidget {
                     tooltip: "View Map",
                     toastMessage: "Opening map",
                     onPressed: () {
-                      _analyticsService.logEvent('lodge_map_view_${lodge.id}');
+                      _analyticsService.logEvent('lodge_map_view_${widget.lodge.id}');
                       showModalBottomSheet(
                         context: context,
                         isScrollControlled: true,
                         backgroundColor: Colors.transparent,
                         builder: (_) => ShopMapModal(
-                          shopLat: lodge.latitude!,
-                          shopLng: lodge.longitude!,
+                          shopLat: widget.lodge.latitude!,
+                          shopLng: widget.lodge.longitude!,
                         ),
                       );
                     },

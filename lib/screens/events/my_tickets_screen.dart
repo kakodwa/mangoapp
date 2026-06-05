@@ -138,7 +138,7 @@ Future<void> captureTicket(GlobalKey key) async {
   Widget build(BuildContext context) {
     final ticketsAsync = ref.watch(myTicketsProvider);
 
-    return AppScaffold(
+    return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(title: const Text('My Tickets'),),
       body: ticketsAsync.when(

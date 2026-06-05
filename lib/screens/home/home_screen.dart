@@ -13,6 +13,7 @@ import '../../screens/delivery/delivery_code_entry_screen.dart';
 import '../../screens/events/scan_ticket_screen.dart';
 import '../../screens/shops/shops_list_screen.dart';
 import '../about/how_it_works.dart';
+import '../about/tour.dart';
 
 import '../../services/analytics_service.dart'; 
 
@@ -174,15 +175,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   children: [
                     Expanded(
                       child: _QuickActionButton(
-                        icon: Icons.store,
-                        label: 'Shops',
+                        icon: Icons.map_outlined,
+                        label: 'Guide',
                         onTap: () {
                           // 📊 TRACK EVENT: Shops Clicked
-                          _analytics.logEvent('click_shops');
+                          _analytics.logEvent('click_Guide');
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => const MangoHubSpecScreen(),
+                              builder: (_) => const MangoHubScreen(),
                             ),
                           );
                         },

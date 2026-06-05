@@ -129,10 +129,10 @@ class _PaymentCheckoutScreenState
   // INITIATE PAYMENT
   // ======================
 
+
   Future<void> initiatePayment() async {
     if (isMobile) {
-      if (!_formKey.currentState!
-          .validate()) {
+      if (!_formKey.currentState!.validate()) {
         return;
       }
     }
@@ -145,49 +145,27 @@ class _PaymentCheckoutScreenState
       final request = <String, dynamic>{
         "amount": widget.amount,
         "purpose": widget.purpose,
-        "reference_type":
-            widget.referenceType,
+        "reference_type": widget.referenceType,
         "payment_method": selectedMethod,
       };
 
       if (widget.referenceType == "order") {
-        request["order_id"] =
-            widget.transactionId;
+        request["order_id"] = widget.transactionId;
       }
-
-      if (widget.referenceType ==
-          "booking") {
-        request["booking_id"] =
-            widget.transactionId;
+      if (widget.referenceType == "booking") {
+        request["booking_id"] = widget.transactionId;
       }
-
-      if (widget.referenceType ==
-          "property_unlock") {
-        request["property_unlock_id"] =
-            widget.transactionId;
+      if (widget.referenceType == "property_unlock") {
+        request["property_unlock_id"] = widget.transactionId;
       }
-
       if (widget.referenceType == "ticket") {
-        request["ticket_purchase_id"] =
-            widget.transactionId;
+        request["ticket_purchase_id"] = widget.transactionId;
       }
 
       if (isMobile) {
         request.addAll({
-          "phone_number":
-              phoneController.text,
-          "mobile_name":
-              nameController.text,
-        });
-      }
-
-      if (isVisa) {
-        request.addAll({
-          "card_name": cardName.text,
-          "card_number":
-              cardNumber.text,
-          "expiry": expiry.text,
-          "cvv": cvv.text,
+          "phone_number": phoneController.text,
+          "mobile_name": nameController.text,
         });
       }
 
@@ -197,73 +175,68 @@ class _PaymentCheckoutScreenState
         fromJson: (json) => json,
       );
 
-      final paymentReference =
-          res['payment_reference'];
+      final paymentReference = res['payment_reference'];
 
       // =====================
-// VISA PAYMENT
-// =====================
+      // VISA FLOW (HOSTED OUTSIDE APP)
+      // =====================
+      if (isVisa) {
+        final checkoutUrl = res['checkout_url'];
 
-if (isVisa) {
+        if (checkoutUrl == null || checkoutUrl.isEmpty) {
+          throw Exception("PayChangu did not return a valid checkout session.");
+        }
 
-  final visaData = res['visa_payment'];
+        if (kIsWeb) {
+          await launchUrl(
+            Uri.parse(checkoutUrl),
+            mode: LaunchMode.externalApplication,
+          );
+          return;
+        }
 
-  // =========================
-  // WEB SAFETY CHECK (ADD HERE)
-  // =========================
-  if (kIsWeb) {
-    await launchUrl(
-      Uri.parse("http://127.0.0.1:8000/api/payments/payment/visa/?tx_ref=123&amount=200"),
-      mode: LaunchMode.externalApplication,
-    );
-    return;
-  }
+        if (!mounted) return;
 
-  // =========================
-  // MOBILE → OPEN WEBVIEW
-  // =========================
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => VisaPaymentWebView(
-        paymentData: visaData,
-      ),
-    ),
-  );
+        // Push to your corrected WebView setup
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => VisaPaymentWebView(
+              checkoutUrl: checkoutUrl,
+              onSuccess: () {
+                // Instantly boot local background validation verification checks
+                _startPolling(paymentReference);
+                _showProcessingDialog();
+              },
+            ),
+          ),
+        );
+      } else {
+        // =====================
+        // MOBILE MONEY FLOW
+        // =====================
+        final checkoutUrl = res['paychangu']?['checkout_url'];
 
-  return;
-} else {
+        if (checkoutUrl != null && checkoutUrl.isNotEmpty) {
+          await launchUrl(
+            Uri.parse(checkoutUrl),
+            mode: LaunchMode.externalApplication,
+          );
+        }
 
-  // MOBILE MONEY
-  final checkoutUrl =
-      res['paychangu']
-          ?['checkout_url'];
-
-  if (checkoutUrl != null &&
-      checkoutUrl.isNotEmpty) {
-
-    await launchUrl(
-      Uri.parse(checkoutUrl),
-      mode: LaunchMode.externalApplication,
-    );
-  }
-
-  _startPolling(paymentReference);
-
-  _showProcessingDialog();
-}
-
-      _startPolling(paymentReference);
-
-      _showProcessingDialog();
+        _startPolling(paymentReference);
+        _showProcessingDialog();
+      }
     } catch (e) {
       AppToast.error(
         context,
         "Payment failed: $e",
       );
+    } finally {
+      if (mounted) {
+        setState(() => loading = false);
+      }
     }
-
-    setState(() => loading = false);
   }
 
   // ======================

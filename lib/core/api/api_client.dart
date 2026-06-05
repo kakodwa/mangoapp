@@ -108,6 +108,31 @@ Future<List<Map<String, dynamic>>> fetchBanners() async {
 }
 
 
+Future<Map<String, dynamic>> submitWithdrawalRequest({
+  required double amount,
+  required String payoutMethod, // 'mobile_money' or 'bank_transfer'
+  required String accountHolderName,
+  required String accountNumber, // Phone or Bank Acct string
+  String? bankName,
+  String? bankUuid,
+  String? bankBranch,
+}) async {
+  return await post(
+    'wallet/request_withdrawal/',
+    data: {
+      "amount": amount,
+      "payout_method": payoutMethod,
+      "account_holder_name": accountHolderName,
+      "account_number": accountNumber,
+      if (bankName != null) "bank_name": bankName,
+      if (bankUuid != null) "bank_uuid": bankUuid,
+      if (bankBranch != null) "bank_branch": bankBranch,
+    },
+    fromJson: (json) => json,
+  );
+}
+
+
 Future<Map<String, dynamic>> searchUnified({
   required String query,
   required String type, // 'all', 'event', 'lodge', 'product', 'property', 'shop'

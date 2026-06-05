@@ -25,7 +25,11 @@ import '../../widgets/main_app_bar.dart';
 import '../../utils/app_toast.dart';
 import '../../utils/app_snackbar.dart';
 
+// Design System Imports
 import '../../theme/design_system/app_spacing.dart';
+import '../../theme/design_system/app_typography.dart';
+import '../../theme/design_system/app_card.dart';
+import '../../theme/design_system/app_badge.dart';
 import '../../theme/app_colors.dart';
 
 // Analytics Import
@@ -46,13 +50,12 @@ class ProductDetailsScreen extends ConsumerStatefulWidget {
 
 class _ProductDetailsScreenState
     extends ConsumerState<ProductDetailsScreen> {
-  int _quantity = 1;
+  final int _quantity = 1;
   int _currentIndex = 0;
 
   // related products
   final ScrollController _scrollController = ScrollController();
-  List _related = [];
-  int _page = 1;
+  final List<Product> _related = [];
   bool _loadingMore = false;
   
   // Track viewed state to avoid duplicate triggers during local UI builds
@@ -88,7 +91,7 @@ class _ProductDetailsScreenState
         _loadingMore = false;
       });
     } catch (e) {
-      print("❌ RELATED ERROR: $e");
+      debugPrint("❌ RELATED ERROR: $e");
       setState(() => _loadingMore = false);
     }
   }
@@ -124,7 +127,7 @@ class _ProductDetailsScreenState
     final AnalyticsService analytics = AnalyticsService();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
         title: productAsync.when(
           data: (p) => Text(p.name),
@@ -166,189 +169,204 @@ class _ProductDetailsScreenState
                     expandedHeight: 340,
                     pinned: false,
                     flexibleSpace: FlexibleSpaceBar(
-                      background: PageView.builder(
-                        itemCount: images.length,
-                        onPageChanged: (i) {
-                          setState(() => _currentIndex = i);
-                        },
-                        itemBuilder: (_, i) {
-                          return CachedNetworkImage(
-                            imageUrl: images[i],
-                            fit: BoxFit.cover,
-                          );
-                        },
+                      background: Stack(
+                        alignment: Alignment.bottomCenter,
+                        children: [
+                          PageView.builder(
+                            itemCount: images.length,
+                            onPageChanged: (i) {
+                              setState(() => _currentIndex = i);
+                            },
+                            itemBuilder: (_, i) {
+                              return CachedNetworkImage(
+                                imageUrl: images[i],
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                              );
+                            },
+                          ),
+                          // Slider Modern Dot Indicators Layout
+                          if (images.length > 1)
+                            Positioned(
+                              bottom: AppSpacing.md,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: List.generate(
+                                  images.length,
+                                  (index) => AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                                    height: 6,
+                                    width: _currentIndex == index ? 16 : 6,
+                                    decoration: BoxDecoration(
+                                      color: _currentIndex == index
+                                          ? AppColors.primary(context)
+                                          : Colors.white.withOpacity(0.6),
+                                      borderRadius: BorderRadius.circular(3),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ),
 
-                  // ================= INFO
+                  // ================= INFO BLOCK
                   SliverToBoxAdapter(
                     child: Padding(
-                      padding: EdgeInsets.all(AppSpacing.md),
+                      padding: const EdgeInsets.all(AppSpacing.md),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
 
                           Text(
                             product.name,
-                            style: const TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: AppTypography.displaySmall,
                           ),
 
-                          const SizedBox(height: 6),
+                          const SizedBox(height: AppSpacing.xs),
 
                           Text(
                             "MWK ${product.price}",
-                            style: TextStyle(
-                              fontSize: 18,
+                            style: AppTypography.headlineLarge.copyWith(
                               color: AppColors.mangoOrange,
-                              fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: AppSpacing.sm),
 
-                          // ================= STOCK
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: product.stock > 0
-                                  ? Theme.of(context).colorScheme.secondary.withOpacity(0.1)
-                                  : Theme.of(context).colorScheme.error.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  product.stock > 0
-                                      ? Icons.check_circle
-                                      : Icons.cancel,
-                                  size: 18,
-                                  color: product.stock > 0
-                                      ? Theme.of(context).colorScheme.secondary
-                                      : Theme.of(context).colorScheme.error,
-                                ),
-
-                                const SizedBox(width: 6),
-
-                                Text(
-                                  product.stock > 0
-                                      ? "${product.stock} items in stock"
-                                      : "Out of stock",
-                                  style: TextStyle(
-                                    color: product.stock > 0
-                                        ? Theme.of(context).colorScheme.secondary
-                                        : Theme.of(context).colorScheme.error,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
+                          // ================= INVENTORY STOCK BADGE
+                          Row(
+                            children: [
+                              AppBadge(
+                                text: product.stock > 0
+                                    ? "${product.stock} items in stock"
+                                    : "Out of stock",
+                                type: product.stock > 0
+                                    ? BadgeType.success
+                                    : BadgeType.error,
+                              ),
+                            ],
                           ),
 
-                          const SizedBox(height: 10),
+                          const SizedBox(height: AppSpacing.sm),
 
                           Row(
                             children: [
-                              const Icon(Icons.star, color: Colors.amber),
+                              const Icon(Icons.star_rounded, color: Colors.amber, size: 20),
                               const SizedBox(width: 4),
                               Text(
                                 "${product.rating} (${product.totalReviews})",
+                                style: AppTypography.bodyMedium,
                               ),
                             ],
                           ),
 
                           const SizedBox(height: AppSpacing.md),
 
-                          // ================= SHOP INFO + DISTRICT
-                          Container(
-                            padding: const EdgeInsets.all(14),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.surface,
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                          // ================= SHOP INFO COMPONENT CARD
+                          AppCard(
+                            padding: const EdgeInsets.all(AppSpacing.md),
+                            onTap: () {
+                              analytics.logEvent('product_view_shop_click_${product.shopId}');
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ShopDetailsScreen(shopId: product.shopId),
+                                ),
+                              );
+                            },
+                            child: Row(
                               children: [
-                                Row(
-                                  children: [
-                                    Icon(Icons.store, color: AppColors.mangoOrange),
-                                    const SizedBox(width: AppSpacing.xs),
-                                    Text(
-                                      product.shopName,
-                                      style: const TextStyle(fontWeight: FontWeight.bold),
-                                    ),
-                                  ],
+                                Icon(Icons.storefront, color: AppColors.mangoOrange),
+                                const SizedBox(width: AppSpacing.sm),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        product.shopName,
+                                        style: AppTypography.titleLarge,
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Row(
+                                        children: [
+                                          const Icon(Icons.location_on_outlined, size: 14, color: Colors.grey),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            product.shopDistrict ?? 'Unknown',
+                                            style: AppTypography.bodySmall.copyWith(color: Colors.grey),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
-
-                                const SizedBox(height: AppSpacing.xs),
-
-                                Row(
-                                  children: [
-                                    const Icon(Icons.location_on, size: 18),
-                                    const SizedBox(width: 6),
-                                    Text(
-                                      product.shopDistrict ?? 'Unknown',
-                                      style: TextStyle(color: Theme.of(context).colorScheme.outline),
-                                    ),
-                                  ],
-                                ),
+                                const Icon(Icons.chevron_right, color: Colors.grey),
                               ],
                             ),
                           ),
 
-                          const SizedBox(height: AppSpacing.md),
+                          const SizedBox(height: AppSpacing.lg),
 
-                          Text(product.description),
+                          Text(
+                            "Description",
+                            style: AppTypography.headlineMedium,
+                          ),
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            product.description,
+                            style: AppTypography.bodyMedium.copyWith(
+                              color: Colors.grey.shade700,
+                              height: 1.5,
+                            ),
+                          ),
                         ],
                       ),
                     ),
                   ),
 
-                  // ================= RELATED PRODUCTS
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: EdgeInsets.all(AppSpacing.md),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "Related Products",
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
+                  // ================= RELATED PRODUCTS LIST
+                  if (_related.isNotEmpty)
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Related Products",
+                              style: AppTypography.headlineMedium,
                             ),
-                          ),
-                          const SizedBox(height: 10),
+                            const SizedBox(height: AppSpacing.md),
 
-                          SizedBox(
-                            height: 270,
-                            child: ListView.separated(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: _related.length,
-                              separatorBuilder: (_, __) => const SizedBox(width: 10),
-                              itemBuilder: (context, index) {
-                                final p = _related[index];
-                                return SizedBox(
-                                  width: 170,
-                                  child: ProductCard(product: p),
-                                );
-                              },
+                            SizedBox(
+                              height: 270,
+                              child: ListView.separated(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: _related.length,
+                                separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
+                                itemBuilder: (context, index) {
+                                  final p = _related[index];
+                                  return SizedBox(
+                                    width: 170,
+                                    child: ProductCard(product: p),
+                                  );
+                                },
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: 120), // Padding allowance for Floating buttons overlay space depth
                   ),
                 ],
               ),
 
-              // ================= FLOATING BUTTONS
+              // ================= RESTORED ORIGINAL FLOATING BUTTON UTILITY STACK
               Positioned(
                 bottom: 50,
                 right: 10,
