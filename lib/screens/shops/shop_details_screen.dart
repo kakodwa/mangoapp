@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../providers/shops_provider.dart';
 import '../../providers/auth_provider.dart';
@@ -69,7 +71,6 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
     final isLoggedIn = auth.isAuthenticated;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
       body: shopAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text("Error: $e")),
@@ -443,7 +444,34 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
                     ),
 
                     const SizedBox(height: 12),
+                    // 🔗 SHARE SHOP
+AppFab(
+  heroTag: "share_shop",
+  icon: Icons.share_outlined,
+  tooltip: "Share Shop",
+  // 🔗 SHARE ACTION INSIDE shop_details_screen.dart
+onPressed: () async {
+  // Clean hashless web-path compatibility fallback
+  final String shopUrl = kIsWeb 
+      ? "${Uri.base.origin}/shop/${widget.shopId}"
+      : "https://mangobackend-yayy.onrender.com/shop/${widget.shopId}";
 
+  final String shareMessage = 
+      "🏪 *${shop.name}*\n"
+      "📍 Category: ${shop.category}\n\n"
+      "👉 Visit our digital storefront storefront here:\n$shopUrl";
+
+  _analytics.logEvent('shop_shared_${widget.shopId}');
+
+  final box = context.findRenderObject() as RenderBox?;
+  await Share.share(
+    shareMessage,
+    subject: 'Check out this shop on Mangochi Market!',
+    sharePositionOrigin: box != null ? box.localToGlobal(Offset.zero) & box.size : null,
+  );
+},
+),
+const SizedBox(height: 12),
                     AppFab(
                       heroTag: "map",
                       icon: Icons.map_outlined,

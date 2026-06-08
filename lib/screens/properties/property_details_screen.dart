@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:flutter/foundation.dart';
 import '../auth/login_screen.dart';
 import '../../utils/app_toast.dart';
 import '../../providers/properties_provider.dart';
@@ -564,10 +569,10 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                 ],
               ),
 
-              // ✅ FLOATING MAP BUTTON
+              // ✅ FLOATING BUTTONS GATED BY UNLOCKED STATUS (MAP & WHATSAPP)
               if (property.isUnlocked)
                 Positioned(
-                  bottom: 20,
+                  bottom: 100, // Adjusted layout position offset
                   right: 16,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -579,7 +584,6 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                         tooltip: "View Map",
                         toastMessage: "Opening map",
                         onPressed: () {
-                          // 📊 TRACK EVENT: Map modal revealed
                           analytics.logEvent('property_details_map_click');
 
                           showModalBottomSheet(
@@ -595,7 +599,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
 
                       const SizedBox(height: AppSpacing.sm),
 
-                      // 💬 WHATSAPP FAB (ALSO ONLY CHECK UNLOCKED)
+                      // 💬 WHATSAPP FAB
                       AppFab(
                         heroTag: "whatsapp_property",
                         icon: FontAwesomeIcons.whatsapp,
@@ -622,101 +626,140 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                             return;
                           }
 
-                          // 📊 TRACK EVENT: Communication external redirection triggered
                           analytics.logEvent('property_details_whatsapp_click');
-
                           _openWhatsApp(phone);
                         },
                       ),
                     ],
                   ),
                 ),
+
+              // ✅ ALWAYS VISIBLE SHARE BUTTON (OUTSIDE CONDITION)
+              Positioned(
+                bottom: 20,
+                right: 16,
+                child: AppFab(
+                  heroTag: "share_product",
+                  icon: Icons.share_outlined,
+                  tooltip: "Share Product",
+                  onPressed: () async {
+                    analytics.logEvent('product_shared_${property.id}');
+
+                    // 1. Determine the product URL structure
+                    final String productUrl = kIsWeb
+                        ? "${Uri.base.origin}/property/${property.id}"
+                        : "https://mangobackend-yayy.onrender.com/property/${property.id}";
+
+                    final String shareMessage =
+                        "Check out ${property.title} on Mangochi Marketplace!\nPrice: MWK ${property.price}\n\nView details here: $productUrl";
+
+                    final box = context.findRenderObject() as RenderBox?;
+                    final sharePositionOrigin = box != null ? box.localToGlobal(Offset.zero) & box.size : null;
+
+                    try {
+                      if (property.images.isNotEmpty) {
+                        final imageUrl = property.images.first.image;
+
+                        // 2. Download the network image into bytes
+                        final response = await http.get(Uri.parse(imageUrl));
+
+                        if (response.statusCode == 200) {
+                          // 3. Save bytes into a temporary directory file
+                          final tempDir = await getTemporaryDirectory();
+
+                          // Extract original extension or default to .jpg
+                          final String extension = imageUrl.split('.').last.split('?').first;
+                          final String validExtension = ['jpg', 'jpeg', 'png', 'webp'].contains(extension.toLowerCase()) ? extension : 'jpg';
+
+                          final file = await File('${tempDir.path}/shared_product_${property.id}.$validExtension').create();
+                          await file.writeAsBytes(response.bodyBytes);
+
+                          // 4. Wrap file into an XFile wrapper
+                          final XFile xFile = XFile(file.path);
+
+                          // 5. Share both the image file and text parameters together
+                          await Share.shareXFiles(
+                            [xFile],
+                            text: shareMessage,
+                            sharePositionOrigin: sharePositionOrigin,
+                          );
+                          return;
+                        }
+                      }
+                      
+                      // Fallback text-only sharing if no images exist or image download fails
+                      await Share.share(
+                        shareMessage,
+                        sharePositionOrigin: sharePositionOrigin,
+                      );
+                    } catch (e) {
+                      if (mounted) {
+                        AppToast.info(context, "Could not bundle media for sharing. Sharing text instead.");
+                      }
+                      await Share.share(
+                        shareMessage,
+                        sharePositionOrigin: sharePositionOrigin,
+                      );
+                    }
+                  },
+                ),
+              ),
             ],
           );
         },
-        loading: () => const Center(
-          child: CircularProgressIndicator(
-            color: AppColors.mangoOrange,
-          ),
-        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 48),
-              const SizedBox(height: AppSpacing.md),
-              Text('Error: $error'),
-              const SizedBox(height: AppSpacing.md),
-              ElevatedButton(
-                onPressed: () => ref.refresh(propertyDetailsProvider(widget.propertyId)),
-                child: const Text('Retry'),
-              ),
-            ],
-          ),
+          child: Text('Error rendering view: $error'),
         ),
       ),
     );
   }
 
+  // UI Helpers definitions
   Widget _buildTag(String text, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 12,
-        vertical: 7,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(20),
+        color: color,
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
         text,
-        style: TextStyle(
-          color: color,
-          fontWeight: FontWeight.bold,
-          fontSize: 12,
-        ),
+        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 11),
       ),
     );
   }
 
-  Widget _buildDetail(
-    BuildContext context,
-    IconData icon,
-    String label,
-    String value,
-  ) {
+  Widget _buildDetail(BuildContext context, IconData icon, String label, String value) {
     return Container(
+      padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          )
+        ],
       ),
-      padding: const EdgeInsets.all(AppSpacing.sm),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            color: AppColors.mangoOrange,
+          Row(
+            children: [
+              Icon(icon, size: 16, color: Colors.grey),
+              const SizedBox(width: 4),
+              Text(label, style: const TextStyle(color: Colors.grey, fontSize: 11)),
+            ],
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  label,
-                  style: Theme.of(context).textTheme.labelSmall,
-                ),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),

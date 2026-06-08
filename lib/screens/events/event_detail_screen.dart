@@ -2,6 +2,8 @@
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/event_model.dart';
@@ -135,6 +137,35 @@ class EventDetailScreen extends ConsumerWidget {
                       _openWhatsApp(phone);
                     },
                   ),
+                  const SizedBox(height: AppSpacing.sm),
+                  // 🔗 SHARE EVENT
+AppFab(
+  heroTag: "share_event",
+  icon: Icons.share_outlined,
+  tooltip: "Share Event",
+  // 🔗 SHARE ACTION INSIDE event_detail_screen.dart
+onPressed: () async {
+  // Clean hashless web-path compatibility fallback
+  final String eventUrl = kIsWeb 
+      ? "${Uri.base.origin}/event/${event.id}"
+      : "https://mangobackend-yayy.onrender.com/event/${event.id}";
+
+  final String shareMessage = 
+      "🎉 *${event.title}*\n"
+      "📅 Date: ${event.eventDate}\n"
+      "📍 Venue: ${event.district}\n\n"
+      "👉 Book ticket allocations safely here:\n$eventUrl";
+
+  analyticsService.logEvent('event_shared_${event.id}');
+
+  final box = context.findRenderObject() as RenderBox?;
+  await Share.share(
+    shareMessage,
+    subject: 'Look at this event happening in Mangochi!',
+    sharePositionOrigin: box != null ? box.localToGlobal(Offset.zero) & box.size : null,
+  );
+},
+),
               ],
             )
           : null,

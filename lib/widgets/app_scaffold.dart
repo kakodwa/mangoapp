@@ -37,10 +37,9 @@ class AppScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final AnalyticsService analytics = AnalyticsService(); // Initialize tracking
+    final AnalyticsService analytics = AnalyticsService(); 
 
-    // SAFEGUARD: If the user selects any hidden screen (Index 6 Profile, Index 7 Search, etc.)
-    // fallback the BottomNavigationBar highlight to index 0 so it doesn't crash out-of-bounds!
+    // SAFEGUARD: Fallback the BottomNavigationBar highlight to index 0 if it goes out-of-bounds!
     final int navBarIndex = currentIndex > 5 ? 0 : currentIndex;
 
     return Scaffold(
@@ -49,36 +48,72 @@ class AppScaffold extends StatelessWidget {
       backgroundColor: backgroundColor,
       floatingActionButton: floatingActionButton,
       body: SafeArea(
-        // Receives the IndexedStack containing all 8 elements seamlessly from parent file
         child: body ?? const SizedBox.shrink(), 
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: navBarIndex, // Uses the safe layout index
-        // Dim selection focus highlighting completely when viewing a hidden view tab
-        selectedItemColor: currentIndex > 5 
-            ? colorScheme.onSurface.withOpacity(0.6) 
-            : colorScheme.primary,
-        unselectedItemColor: colorScheme.onSurface.withOpacity(0.6),
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        onTap: (index) {
-          // 📊 TRACK EVENT: Map index to string label and log to Django backend asynchronously
-          analytics.logEvent(_getTabEventName(index));
+      // Wrapped in our scroll-animation listener to hide it dynamically
+      bottomNavigationBar: _ScrollingBottomNavBarWrapper(
+        child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          currentIndex: navBarIndex, 
+          selectedItemColor: currentIndex > 5 
+              ? colorScheme.onSurface.withOpacity(0.6) 
+              : colorScheme.primary,
+          unselectedItemColor: colorScheme.onSurface.withOpacity(0.6),
+          showSelectedLabels: false,
+          showUnselectedLabels: false,
+          onTap: (index) {
+            analytics.logEvent(_getTabEventName(index));
+            if (onTabSelected != null) {
+              onTabSelected!(index);
+            }
+          },
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home', tooltip: 'Home'),
+            BottomNavigationBarItem(icon: Icon(Icons.store), label: 'Shops', tooltip: 'Shops'),
+            BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Products', tooltip: 'Products'),
+            BottomNavigationBarItem(icon: Icon(Icons.home_work), label: 'Properties', tooltip: 'Properties'),
+            BottomNavigationBarItem(icon: Icon(Icons.event), label: 'Events', tooltip: 'Events'),
+            BottomNavigationBarItem(icon: Icon(Icons.hotel), label: 'Booking', tooltip: 'Booking'),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-          // Trigger your original navigation routing function passed from parent widget
-          if (onTabSelected != null) {
-            onTabSelected!(index);
+/// Helper stateful wrapper that catches scroll notifications from the body and hides the bar
+class _ScrollingBottomNavBarWrapper extends StatefulWidget {
+  final Widget child;
+  const _ScrollingBottomNavBarWrapper({required this.child});
+
+  @override
+  State<_ScrollingBottomNavBarWrapper> createState() => _ScrollingBottomNavBarWrapperState();
+}
+
+class _ScrollingBottomNavBarWrapperState extends State<_ScrollingBottomNavBarWrapper> {
+  bool _isVisible = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (notification is ScrollUpdateNotification) {
+          // Detect user scrolling down vs up
+          if (notification.scrollDelta! > 2.0 && _isVisible) {
+            setState(() => _isVisible = false); 
+          } else if (notification.scrollDelta! < -2.0 && !_isVisible) {
+            setState(() => _isVisible = true); 
           }
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home', tooltip: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.store), label: 'Shops', tooltip: 'Shops'),
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Products', tooltip: 'Products'),
-          BottomNavigationBarItem(icon: Icon(Icons.home_work), label: 'Properties', tooltip: 'Properties'),
-          BottomNavigationBarItem(icon: Icon(Icons.event), label: 'Events', tooltip: 'Events'),
-          BottomNavigationBarItem(icon: Icon(Icons.hotel), label: 'Booking', tooltip: 'Booking'),
-        ],
+        }
+        return false; // Don't block the notification from bubble up
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
+        height: _isVisible ? kBottomNavigationBarHeight + MediaQuery.of(context).padding.bottom : 0,
+        child: Wrap( 
+          children: [widget.child],
+        ),
       ),
     );
   }

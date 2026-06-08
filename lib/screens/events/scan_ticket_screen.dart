@@ -181,67 +181,70 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return ticketData == null
-        ? Stack(
-            children: [
-              MobileScanner(onDetect: _onDetect),
-              _scannerFrame(),
-            ],
-          )
-        : SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return Scaffold(
+      appBar: AppBar(title: const Text('Scan Ticket')),
+      body: ticketData == null
+          ? Stack(
               children: [
-                Center(
-                  child: Text(
-                    "CHECK-IN SUCCESSFUL",
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.secondary,
+                MobileScanner(onDetect: _onDetect),
+                _scannerFrame(),
+              ],
+            )
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Text(
+                      "CHECK-IN SUCCESSFUL",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.secondary,
+                      ),
                     ),
                   ),
-                ),
 
-                const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: AppSpacing.md),
 
-                _infoTile("Event", ticketData!['event_title']),
-                _infoTile("Ticket", ticketData!['ticket_number']),
-                _infoTile("Attendee", ticketData!['attendee_name']),
+                  _infoTile("Event", ticketData!['event_title']),
+                  _infoTile("Ticket", ticketData!['ticket_number']),
+                  _infoTile("Attendee", ticketData!['attendee_name']),
 
-                const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: AppSpacing.md),
 
-                const Text(
-                  "Ticket Items",
-                  style: TextStyle(fontWeight: FontWeight.bold),
-                ),
-
-                const SizedBox(height: 10),
-
-                if (ticketData!['ticket_items'] != null)
-                  ...List.generate(
-                    (ticketData!['ticket_items'] as List).length,
-                    (i) {
-                      final item = ticketData!['ticket_items'][i];
-                      return Text(
-                        "• ${item['name']} (${item['type']}) x${item['quantity']}",
-                      );
-                    },
+                  const Text(
+                    "Ticket Items",
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
 
-                const SizedBox(height: 30),
+                  const SizedBox(height: 10),
 
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    onPressed: _resetScanner,
-                    icon: const Icon(Icons.qr_code_scanner),
-                    label: const Text("Scan Next Ticket"),
+                  if (ticketData!['ticket_items'] != null)
+                    ...List.generate(
+                      (ticketData!['ticket_items'] as List).length,
+                      (i) {
+                        final item = ticketData!['ticket_items'][i];
+                        return Text(
+                          "• ${item['name']} (${item['type']}) x${item['quantity']}",
+                        );
+                      },
+                    ),
+
+                  const SizedBox(height: 30),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: _resetScanner,
+                      icon: const Icon(Icons.qr_code_scanner),
+                      label: const Text("Scan Next Ticket"),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          );
+    );
   }
 }

@@ -13,7 +13,9 @@ import '../../theme/design_system/app_spacing.dart';
 
 import '../../widgets/capitalize_text.dart';
 
-import 'property_details_screen.dart';
+// Navigation Shell Import
+import '../../screens/main_tabs_screen.dart'; // Ensure matching directory location
+import '../../screens/properties/property_details_screen.dart';
 
 // Analytics Import
 import '../../services/analytics_service.dart';
@@ -54,27 +56,35 @@ class PropertyCard extends StatelessWidget {
           // 📊 TRACK EVENT: User tap-selected a specific property listing from a list
           analytics.logEvent('feed_property_card_click');
 
-          Navigator.push(
-            context,
-            PageRouteBuilder(
-              transitionDuration: const Duration(milliseconds: 250),
-              pageBuilder: (_, __, ___) => PropertyDetailsScreen(propertyId: property.id),
-              transitionsBuilder: (_, animation, __, child) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: ScaleTransition(
-                    scale: Tween(begin: 0.95, end: 1.0).animate(
-                      CurvedAnimation(
-                        parent: animation,
-                        curve: Curves.easeOutCubic,
+          // INTERCEPT NAVIGATION: Shift active index inside the tab controller 
+          // instead of overlaying an independent, modular screen route stack
+          final tabsScreen = MainTabsScreen.of(context);
+          if (tabsScreen != null) {
+            tabsScreen.navigateToPropertyDetails(property.id);
+          } else {
+            // Safe fallback just in case this card layout context falls outside structural app shells
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                transitionDuration: const Duration(milliseconds: 250),
+                pageBuilder: (_, __, ___) => PropertyDetailsScreen(propertyId: property.id),
+                transitionsBuilder: (_, animation, __, child) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: ScaleTransition(
+                      scale: Tween(begin: 0.95, end: 1.0).animate(
+                        CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOutCubic,
+                        ),
                       ),
+                      child: child,
                     ),
-                    child: child,
-                  ),
-                );
-              },
-            ),
-          );
+                  );
+                },
+              ),
+            );
+          }
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,7 +144,7 @@ class PropertyCard extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    capitalizeText(property.title), // UPDATED: Transformed to UPPERCASE
+                    capitalizeText(property.title), // UPDATED: Transformed to UPPERCASE via template rules
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.titleMedium.copyWith(

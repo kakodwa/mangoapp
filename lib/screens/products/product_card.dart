@@ -15,6 +15,7 @@ import '../products/edit_product_screen.dart';
 import '../../utils/app_toast.dart';
 import '../../utils/price_helper.dart';
 import '../../widgets/capitalize_text.dart';
+import '../main_tabs_screen.dart'; // Adjust the relative path if necessary
 
 // Design System Imports
 import '../../theme/design_system/app_card.dart';
@@ -67,13 +68,22 @@ class ProductCard extends ConsumerWidget {
       child: AppCard(
         padding: EdgeInsets.zero,
         onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ProductDetailsScreen(productId: product.id),
-            ),
-          );
-        },
+    // 1. Define the tabsScreen variable first!
+    final tabsScreen = MainTabsScreen.of(context);
+
+    // 2. Now you can safely use it
+    if (tabsScreen != null) {
+      tabsScreen.navigateToProductDetails(product.id);
+    } else {
+      // Fallback just in case this card is ever rendered outside of MainTabsScreen
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ProductDetailsScreen(productId: product.id),
+        ),
+      );
+    }
+  },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min, 

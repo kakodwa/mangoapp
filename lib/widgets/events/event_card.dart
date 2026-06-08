@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/event_model.dart';
+import '../../screens/main_tabs_screen.dart'; // UPDATED: Direct Core Layout Navigation Target import
 import '../../screens/events/event_detail_screen.dart';
 
 import '../../widgets/capitalize_text.dart';
@@ -51,7 +52,6 @@ class EventCard extends StatelessWidget {
         .withOpacity(0.65);
 
     return Padding(
-      // UPDATED: Set left and right padding to 2.0
       padding: const EdgeInsets.only(
         left: 2.0,
         right: 2.0,
@@ -60,27 +60,34 @@ class EventCard extends StatelessWidget {
       child: AppCard(
         padding: EdgeInsets.zero,
         onTap: () {
-          Navigator.push(
-            context,
-            PageRouteBuilder(
-              transitionDuration: const Duration(milliseconds: 250),
-              pageBuilder: (_, __, ___) => EventDetailScreen(event: event),
-              transitionsBuilder: (_, animation, __, child) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: ScaleTransition(
-                    scale: Tween(begin: 0.95, end: 1.0).animate(
-                      CurvedAnimation(
-                        parent: animation,
-                        curve: Curves.easeOutCubic,
+          // UPDATED: Routes navigation execution directly via internal layout components instead of mounting detached layout wrappers
+          final tabsScreen = MainTabsScreen.of(context);
+          if (tabsScreen != null) {
+            tabsScreen.navigateToEventDetails(event);
+          } else {
+            // Hard fallback layer mapping strategy protecting out-of-context interface compilation
+            Navigator.push(
+              context,
+              PageRouteBuilder(
+                transitionDuration: const Duration(milliseconds: 250),
+                pageBuilder: (_, __, ___) => EventDetailScreen(event: event),
+                transitionsBuilder: (_, animation, __, child) {
+                  return FadeTransition(
+                    opacity: animation,
+                    child: ScaleTransition(
+                      scale: Tween(begin: 0.95, end: 1.0).animate(
+                        CurvedAnimation(
+                          parent: animation,
+                          curve: Curves.easeOutCubic,
+                        ),
                       ),
+                      child: child,
                     ),
-                    child: child,
-                  ),
-                );
-              },
-            ),
-          );
+                  );
+                },
+              ),
+            );
+          }
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -144,7 +151,7 @@ class EventCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    capitalizeText(event.title).toUpperCase(), // UPDATED: Transformed to UPPERCASE
+                    capitalizeText(event.title).toUpperCase(), 
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: AppTypography.titleMedium.copyWith(
@@ -184,7 +191,7 @@ class EventCard extends StatelessWidget {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          "${_formatTime(event.startTime)} - ${_formatTime(event.endTime)}".toUpperCase(), // UPDATED: Transformed to UPPERCASE
+                          "${_formatTime(event.startTime)} - ${_formatTime(event.endTime)}".toUpperCase(), 
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.labelSmall.copyWith(
                             color: subTextColor,

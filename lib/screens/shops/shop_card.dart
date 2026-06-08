@@ -13,6 +13,7 @@ import '../../theme/design_system/app_spacing.dart';
 import '../../widgets/capitalize_text.dart';
 
 import 'shop_details_screen.dart';
+import '../main_tabs_screen.dart';
 
 // Analytics Import
 import '../../services/analytics_service.dart';
@@ -40,27 +41,19 @@ class ShopCard extends StatelessWidget {
       child: AppCard(
         padding: EdgeInsets.zero, 
         onTap: () {
-          // 📊 TRACK EVENT: User tap-selected a specific vendor storefront profile listing
           analytics.logEvent('shop_card_click');
 
-          Navigator.push(
-            context,
-            PageRouteBuilder(
-              transitionDuration: const Duration(milliseconds: 250),
-              pageBuilder: (_, __, ___) => ShopDetailsScreen(shopId: shop.id),
-              transitionsBuilder: (_, animation, __, child) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: ScaleTransition(
-                    scale: Tween(begin: 0.95, end: 1.0).animate(
-                      CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
-                    ),
-                    child: child,
-                  ),
-                );
-              },
-            ),
-          );
+          // ✅ FIX: Use persistent tab state navigation shell logic
+          final tabsScreen = MainTabsScreen.of(context);
+          if (tabsScreen != null) {
+            tabsScreen.navigateToShopDetails(shop.id);
+          } else {
+            // Fallback just in case this card is ever rendered standalone
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => ShopDetailsScreen(shopId: shop.id)),
+            );
+          }
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

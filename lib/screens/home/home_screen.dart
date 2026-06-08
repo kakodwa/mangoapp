@@ -19,12 +19,10 @@ import '../../services/analytics_service.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   final VoidCallback onDeliveryTap;
-  final VoidCallback onTicketScanerTap;
   
   const HomeScreen({
     super.key,
     required this.onDeliveryTap,
-    required this.onTicketScanerTap,
   });
 
   @override
@@ -33,14 +31,14 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final ScrollController controller = ScrollController();
-  final AnalyticsService _analytics = AnalyticsService(); // Analytics instance
+  final PageController bannerController = PageController(); 
+  final AnalyticsService _analytics = AnalyticsService(); 
   int bannerIndex = 0;
 
   @override
   void initState() {
     super.initState();
 
-    // 📊 TRACK EVENT: App / HomeScreen Opened
     _analytics.logEvent('home_screen_open');
 
     controller.addListener(() {
@@ -60,9 +58,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         final banners = ref.read(bannersProvider).valueOrNull;
 
         if (banners != null && banners.isNotEmpty) {
-          setState(() {
-            bannerIndex = (bannerIndex + 1) % banners.length;
-          });
+          final nextIndex = (bannerIndex + 1) % banners.length;
+          
+          if (bannerController.hasClients) {
+            bannerController.animateToPage(
+              nextIndex,
+              duration: const Duration(milliseconds: 350),
+              curve: Curves.easeOutCubic,
+            );
+          }
         }
       }
 
@@ -72,7 +76,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   void dispose() {
-    controller.dispose(); // Clean up controller memory
+    controller.dispose(); 
+    bannerController.dispose(); 
     super.dispose();
   }
 
@@ -100,8 +105,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     return const SizedBox();
                   }
 
-                  final banner = banners[bannerIndex];
-
                   return Container(
                     margin: const EdgeInsets.only(
                       top: 12,
@@ -114,27 +117,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         SizedBox(
                           height: 190,
                           width: double.infinity,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(14),
-                            // 📊 TRACK EVENT: Banner Item Interaction
-                            onTap: () {
-                              _analytics.logEvent('banner_click_${banner.title.replaceAll(' ', '_').toLowerCase()}');
+                          child: PageView.builder(
+                            controller: bannerController,
+                            itemCount: banners.length,
+                            onPageChanged: (index) {
+                              bannerIndex = index;
                             },
-                            child: _buildBanner(
-                              context,
-                              image: banner.imageUrl,
-                              title: banner.title,
-                              subtitle: banner.subtitle,
-                              url: banner.url,
-                              ctaText: banner.ctaText,
-                            ),
+                            itemBuilder: (context, index) {
+                              final banner = banners[index];
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(14),
+                                  onTap: () {
+                                    _analytics.logEvent(
+                                      'banner_click_${banner.title.replaceAll(' ', '_').toLowerCase()}',
+                                    );
+                                  },
+                                  child: _buildBanner(
+                                    context,
+                                    image: banner.imageUrl,
+                                    title: banner.title,
+                                    subtitle: banner.subtitle,
+                                    url: banner.url,
+                                    ctaText: banner.ctaText,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ),
                         const SizedBox(
                           height: 10,
                         ),
-                        AnimatedSmoothIndicator(
-                          activeIndex: bannerIndex,
+                        SmoothPageIndicator(
+                          controller: bannerController,
                           count: banners.length,
                           effect: WormEffect(
                             dotHeight: 8,
@@ -148,9 +165,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   );
                 },
                 loading: () => const Padding(
-                  padding: EdgeInsets.all(
-                    16,
-                  ),
+                  padding: EdgeInsets.all(16),
                   child: Center(
                     child: CircularProgressIndicator(),
                   ),
@@ -178,7 +193,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         icon: Icons.map_outlined,
                         label: 'Guide',
                         onTap: () {
-                          // 📊 TRACK EVENT: Shops Clicked
                           _analytics.logEvent('click_Guide');
                           Navigator.push(
                             context,
@@ -197,7 +211,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         icon: Icons.local_shipping,
                         label: 'Delivery',
                         onTap: () {
-                          // 📊 TRACK EVENT: Delivery Clicked
                           _analytics.logEvent('click_delivery');
                           widget.onDeliveryTap();
                         }, 
@@ -211,9 +224,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         icon: Icons.qr_code_scanner,
                         label: 'Scan Ticket',
                         onTap: () {
-                          // 📊 TRACK EVENT: Scan Ticket Clicked
                           _analytics.logEvent('click_scan_ticket');
-                          widget.onTicketScanerTap();
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const ScanTicketScreen(),
+                            ),
+                          );
                         },
                       ),
                     ),
@@ -257,9 +274,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             color: Colors.black.withOpacity(0.4),
           ),
           Padding(
-            padding: const EdgeInsets.all(
-              16,
-            ),
+            padding: const EdgeInsets.all(16),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -290,6 +305,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
+/// --- QUICK ACTION BUTTON WIDGET ---
 class _QuickActionButton extends StatefulWidget {
   final IconData icon;
   final String label;
@@ -328,9 +344,7 @@ class _QuickActionButtonState extends State<_QuickActionButton> {
         ),
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(
-              16,
-            ),
+            borderRadius: BorderRadius.circular(16),
             color: Theme.of(context).colorScheme.surface,
             boxShadow: [
               BoxShadow(
@@ -344,14 +358,10 @@ class _QuickActionButtonState extends State<_QuickActionButton> {
             ],
           ),
           child: InkWell(
-            borderRadius: BorderRadius.circular(
-              16,
-            ),
+            borderRadius: BorderRadius.circular(16),
             onTap: widget.onTap,
             child: Padding(
-              padding: const EdgeInsets.all(
-                AppSpacing.md,
-              ),
+              padding: const EdgeInsets.all(AppSpacing.md),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../../models/lodge_model.dart';
 import '../../screens/hospitality/add_room_screen.dart';
 import '../../screens/hospitality/edit_lodge_screen.dart';
-import '../../screens/hospitality/lodge_detail_screen.dart';
+import '../../screens/main_tabs_screen.dart'; // Updated to point to main_tabs_screen_2.dart
 
 import '../../widgets/capitalize_text.dart';
 
@@ -40,7 +40,7 @@ class _LodgeCardState extends State<LodgeCard> {
       context: context,
       builder: (_) => AlertDialog(
         title: const Text("DELETE LODGE"),
-        content: const Text("ARE YOU SURE YOU WANT TO DELETE THIS LODGE?"), // UPDATED: Transformed to UPPERCASE
+        content: const Text("ARE YOU SURE YOU WANT TO DELETE THIS LODGE?"), 
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -77,7 +77,6 @@ class _LodgeCardState extends State<LodgeCard> {
     ];
 
     return Padding(
-      // UPDATED: Set left and right padding to 2.0
       padding: const EdgeInsets.only(
         left: 2.0,
         right: 2.0,
@@ -86,27 +85,14 @@ class _LodgeCardState extends State<LodgeCard> {
       child: AppCard(
         padding: EdgeInsets.zero, 
         onTap: () {
-          Navigator.push(
-            context,
-            PageRouteBuilder(
-              transitionDuration: const Duration(milliseconds: 250),
-              pageBuilder: (_, __, ___) => LodgeDetailScreen(lodge: lodge),
-              transitionsBuilder: (_, animation, __, child) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: ScaleTransition(
-                    scale: Tween(begin: 0.95, end: 1.0).animate(
-                      CurvedAnimation(
-                        parent: animation,
-                        curve: Curves.easeOutCubic,
-                      ),
-                    ),
-                    child: child,
-                  ),
-                );
-              },
-            ),
-          );
+          // INTERCEPT NAVIGATION: Route through the persistent Tab Wrapper instead of pushing a modal page
+          final tabsScreen = MainTabsScreen.of(context);
+          if (tabsScreen != null) {
+            tabsScreen.navigateToLodgeDetails(lodge);
+          } else {
+            // Fallback just in case this card is ever rendered outside the Main Tabs Shell context
+            debugPrint("MainTabsScreen ancestor not found. Falling back to default routing.");
+          }
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,7 +181,7 @@ class _LodgeCardState extends State<LodgeCard> {
                     children: [
                       Expanded(
                         child: Text(
-                          capitalizeText(lodge.name).toUpperCase(), // UPDATED: Transformed to UPPERCASE
+                          capitalizeText(lodge.name).toUpperCase(), 
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.titleMedium.copyWith(

@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../models/lodge_model.dart';
 import '../../providers/auth_provider.dart';
@@ -377,6 +379,34 @@ class _LodgeDetailScreenState extends ConsumerState<LodgeDetailScreen> {
                   ),
 
                   const SizedBox(height: AppSpacing.sm),
+                  // 🔗 SHARE LODGE
+AppFab(
+  heroTag: "share_lodge",
+  icon: Icons.share_outlined,
+  tooltip: "Share Lodge",
+  // 🔗 SHARE ACTION INSIDE lodge_detail_screen.dart
+onPressed: () async {
+  // Clean hashless web-path compatibility fallback
+  final String lodgeUrl = kIsWeb 
+      ? "${Uri.base.origin}/lodge/${widget.lodge.id}"
+      : "https://mangobackend-yayy.onrender.com/lodge/${widget.lodge.id}";
+
+  final String shareMessage = 
+      "🏨 *${widget.lodge.name}*\n"
+      "📍 Location: ${widget.lodge.district ?? 'Mangochi'}\n\n"
+      "👉 View rooms and book accommodations on Mangochi Marketplace:\n$lodgeUrl";
+
+  _analyticsService.logEvent('lodge_shared_${widget.lodge.id}');
+
+  final box = context.findRenderObject() as RenderBox?;
+  await Share.share(
+    shareMessage,
+    subject: 'Looking for a place to stay in Mangochi?',
+    sharePositionOrigin: box != null ? box.localToGlobal(Offset.zero) & box.size : null,
+  );
+},
+),
+const SizedBox(height: AppSpacing.sm),
 
                   // 🗺 MAP BUTTON
                   AppFab(
