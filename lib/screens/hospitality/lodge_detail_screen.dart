@@ -16,9 +16,10 @@ import '../../providers/rooms_provider.dart';
 import '../auth/login_screen.dart';
 
 import '../../widgets/main_drawer.dart';
-import '../../widgets/main_app_bar.dart';
+import '../../widgets/main_app_bar.dart'; // Unified Top Bar Architecture
 import '../../widgets/app_fab.dart';
 import '../../widgets/shop_map_modal.dart';
+import '../../widgets/reviews/review_section_widget.dart';
 import '../../widgets/hospitality/room_card.dart';
 
 import '../../utils/app_snackbar.dart';
@@ -50,18 +51,23 @@ class _LodgeDetailScreenState extends ConsumerState<LodgeDetailScreen> {
   final AnalyticsService _analyticsService = AnalyticsService();
   int _currentIndex = 0;
   bool _hasLoggedView = false;
+  final ScrollController _scrollController = ScrollController();
 
   void _openWhatsApp(String phone) async {
     final uri = Uri.parse("https://wa.me/$phone");
-
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       AppToast.info(context, "Could not open WhatsApp");
     }
   }
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // 📊 TRACK EVENT: Safe async trigger on frame registration
     if (!_hasLoggedView) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _analyticsService.logEvent('view_lodge_detail_${widget.lodge.id}');
@@ -73,36 +79,27 @@ class _LodgeDetailScreenState extends ConsumerState<LodgeDetailScreen> {
     final authState = ref.watch(authProvider);
     final user = authState.user;
     final isLoggedIn = authState.isAuthenticated;
-
-    // Fixed safeImage error: Use widget.lodge.images directly
     final images = widget.lodge.images;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
-      appBar: AppBar(
-        title: roomsAsync.when(
-          data: (_) => Text(widget.lodge.name),
-          loading: () => const Text('Loading...'),
-          error: (_, __) => const Text('Details'),
-        ),
+      // System Top Bar integration matching Main Design Specifications
+      appBar: const MainAppBar(
+        title: 'Lodge Details',
       ),
       body: Stack(
         children: [
           CustomScrollView(
+            controller: _scrollController,
             slivers: [
-              
-              // ================= HERO IMAGE CAROUSEL
-              SliverAppBar(
-                expandedHeight: 340,
-                automaticallyImplyLeading: false,
-                pinned: false,
-                backgroundColor: Colors.transparent,
-                flexibleSpace: FlexibleSpaceBar(
-                  background: Stack(
+              // ================= HERO IMAGE CAROUSEL FRAME
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 340,
+                  child: Stack(
                     fit: StackFit.expand,
                     children: [
                       if (images.isEmpty)
-                        // Fallback block if lodge has no images at all
                         Container(
                           color: Colors.grey.shade200,
                           child: Icon(
@@ -143,7 +140,7 @@ class _LodgeDetailScreenState extends ConsumerState<LodgeDetailScreen> {
                           }).toList(),
                         ),
 
-                      // Subtle Dark Gradient Overlay
+                      // Modern linear ambient layout gradient matrix
                       Positioned.fill(
                         child: Container(
                           decoration: BoxDecoration(
@@ -151,7 +148,8 @@ class _LodgeDetailScreenState extends ConsumerState<LodgeDetailScreen> {
                               begin: Alignment.topCenter,
                               end: Alignment.bottomCenter,
                               colors: [
-                                Colors.black.withOpacity(0.1),
+                                Colors.black.withOpacity(0.15),
+                                Colors.transparent,
                                 Colors.black.withOpacity(0.55),
                               ],
                             ),
@@ -159,7 +157,7 @@ class _LodgeDetailScreenState extends ConsumerState<LodgeDetailScreen> {
                         ),
                       ),
 
-                      // Location Overlay Badge
+                      // Location Overlay Badge Element
                       Positioned(
                         left: AppSpacing.md,
                         bottom: AppSpacing.xl,
@@ -172,7 +170,7 @@ class _LodgeDetailScreenState extends ConsumerState<LodgeDetailScreen> {
                             color: Colors.black.withOpacity(0.4),
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white24,
                             ),
                           ),
                           child: Row(
@@ -216,7 +214,7 @@ class _LodgeDetailScreenState extends ConsumerState<LodgeDetailScreen> {
                                       : Colors.white.withOpacity(0.6),
                                   borderRadius: BorderRadius.circular(3),
                                 ),
-                               ),
+                              ),
                             ),
                           ),
                         ),
@@ -225,43 +223,55 @@ class _LodgeDetailScreenState extends ConsumerState<LodgeDetailScreen> {
                 ),
               ),
 
-              // ================= MAIN CONTENT DESCRIPTION
+              // ================= MAIN CONTENT DESCRIPTION CARD
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.md), 
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       AppCard(
                         padding: const EdgeInsets.all(AppSpacing.md),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "About Lodge",
-                              style: AppTypography.headlineMedium,
-                            ),
-                            const SizedBox(height: AppSpacing.xs),
-                            Text(
-                              widget.lodge.description,
-                              style: AppTypography.bodyMedium.copyWith(
-                                color: Colors.grey.shade700,
-                                height: 1.5,
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Named Merchant Partner Header Specification
+                              Text(
+                                widget.lodge.name,
+                                style: AppTypography.titleLarge.copyWith(fontWeight: FontWeight.bold, fontSize: 22),
                               ),
-                            ),
-                          ],
+                              const SizedBox(height: AppSpacing.sm),
+                              const Text(
+                                "About Lodge",
+                                style: AppTypography.headlineMedium,
+                              ),
+                              const SizedBox(height: AppSpacing.xs),
+                              Text(
+                                widget.lodge.description,
+                                style: AppTypography.bodyMedium.copyWith(
+                                  color: Colors.grey.shade700,
+                                  height: 1.5,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
 
                       const SizedBox(height: AppSpacing.lg),
-
-                      const Text(
-                        'Available Rooms',
-                        style: AppTypography.headlineMedium,
+                      
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                        child: const Text(
+                          'Available Rooms',
+                          style: AppTypography.headlineMedium,
+                        ),
                       ),
                       const SizedBox(height: AppSpacing.md),
 
-                      // ================= AVAILABLE ROOMS CARDS HORIZONTAL SCROLL
+                      // ================= AVAILABLE ROOMS CATALOG SLIDER BINDING
                       roomsAsync.when(
                         data: (rooms) {
                           if (rooms.isEmpty) {
@@ -294,13 +304,13 @@ class _LodgeDetailScreenState extends ConsumerState<LodgeDetailScreen> {
                             child: ListView.separated(
                               scrollDirection: Axis.horizontal,
                               itemCount: rooms.length,
-                              separatorBuilder: (_, __) =>
-                                  const SizedBox(width: AppSpacing.md),
+                              separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.md),
                               itemBuilder: (context, index) {
                                 final room = rooms[index];
-                                final bool isOwner = user?.id != null &&
-                                    room.ownerId != null &&
-                                    user!.id == room.ownerId;
+                      
+                                final bool isOwner = isLoggedIn && 
+                                user?.id != null && 
+                                user?.id == room.ownerId;
 
                                 return RoomCard(
                                   room: room,
@@ -331,89 +341,91 @@ class _LodgeDetailScreenState extends ConsumerState<LodgeDetailScreen> {
                           ),
                         ),
                       ),
-
-                      const SizedBox(height: 120), // Padding allowance overlay space depth for FABs
                     ],
                   ),
                 ),
               ),
+
+              // ================= REUSABLE CUSTOMER REVIEWS SECTION
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  child: ReviewSectionWidget(
+                    targetType: 'lodge',
+                    targetId: widget.lodge.id,
+                    isOwner: isLoggedIn && user?.id == widget.lodge.ownerId,
+                  ),
+                ),
+              ),
+
+              // Dynamic structural padding allowance overlay spacing depth for FAB layout actions
+              const SliverToBoxAdapter(child: SizedBox(height: 160)),
             ],
           ),
 
-          // ================= RESTORED FLOATING ACTION UTILITY STACK
-          if (widget.lodge.latitude != null && widget.lodge.longitude != null)
-            Positioned(
-              bottom: 50,
-              right: 16,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  
-                  // 💬 WHATSAPP BUTTON
+          // ================= FLOATING ACTION SIDE NAVIGATION UTILITY PANEL
+          Positioned(
+            bottom: 20,
+            right: 16,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 💬 SOCIAL CONNECT WHATSAPP ACTION FAB BOUND
+                AppFab(
+                  heroTag: "whatsapp_lodge_fab",
+                  icon: FontAwesomeIcons.whatsapp,
+                  tooltip: "Chat on WhatsApp",
+                  onPressed: () {
+                    if (!isLoggedIn) {
+                      _analyticsService.logEvent('lodge_whatsapp_unauthenticated_redirect');
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+                      return;
+                    }
+
+                    final phone = widget.lodge.phoneNumber;
+                    if (phone.isEmpty) {
+                      AppToast.info(context, "No WhatsApp contact channel available");
+                      return;
+                    }
+
+                    _analyticsService.logEvent('lodge_whatsapp_chat_start_${widget.lodge.id}');
+                    _openWhatsApp(phone);
+                  },
+                ),
+                const SizedBox(height: AppSpacing.sm),
+
+                // 🔗 UNIVERSAL LISTING RATIO SHARE PANEL FAB BOUND
+                AppFab(
+                  heroTag: "share_lodge_fab",
+                  icon: Icons.share_outlined,
+                  tooltip: "Share Lodge Listing",
+                  onPressed: () async {
+                    final String lodgeUrl = kIsWeb
+                        ? "${Uri.base.origin}/lodge/${widget.lodge.id}"
+                        : "https://mangobackend-yayy.onrender.com/lodge/${widget.lodge.id}";
+
+                    final String shareMessage = "🏨 *${widget.lodge.name}*\n"
+                        "📍 Location: ${widget.lodge.district ?? 'Mangochi'}\n\n"
+                        "👉 View rooms and book accommodations on Mangochi Marketplace:\n$lodgeUrl";
+
+                    _analyticsService.logEvent('lodge_shared_${widget.lodge.id}');
+
+                    final box = context.findRenderObject() as RenderBox?;
+                    await Share.share(
+                      shareMessage,
+                      subject: 'Looking for a place to stay in Mangochi?',
+                      sharePositionOrigin: box != null ? box.localToGlobal(Offset.zero) & box.size : null,
+                    );
+                  },
+                ),
+                const SizedBox(height: AppSpacing.sm),
+
+                // 🗺 MAP ACCESSIBILITY FAB BOUND WITH COORDINATE VERIFICATION
+                if (widget.lodge.latitude != null && widget.lodge.longitude != null)
                   AppFab(
-                    heroTag: "whatsapp",
-                    icon: FontAwesomeIcons.whatsapp,
-                    tooltip: "Chat on WhatsApp",
-                    toastMessage: "Opening WhatsApp...",
-                    onPressed: () {
-                      if (!isLoggedIn) {
-                        _analyticsService.logEvent('lodge_whatsapp_unauthenticated_redirect');
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const LoginScreen(),
-                          ),
-                        );
-                        return;
-                      }
-
-                      final phone = widget.lodge.phoneNumber;
-                      if (phone == null || phone.isEmpty) {
-                        AppToast.info(context, "No WhatsApp number available");
-                        return;
-                      }
-
-                      _analyticsService.logEvent('lodge_whatsapp_chat_start_${widget.lodge.id}');
-                      _openWhatsApp(phone);
-                    },
-                  ),
-
-                  const SizedBox(height: AppSpacing.sm),
-                  // 🔗 SHARE LODGE
-AppFab(
-  heroTag: "share_lodge",
-  icon: Icons.share_outlined,
-  tooltip: "Share Lodge",
-  // 🔗 SHARE ACTION INSIDE lodge_detail_screen.dart
-onPressed: () async {
-  // Clean hashless web-path compatibility fallback
-  final String lodgeUrl = kIsWeb 
-      ? "${Uri.base.origin}/lodge/${widget.lodge.id}"
-      : "https://mangobackend-yayy.onrender.com/lodge/${widget.lodge.id}";
-
-  final String shareMessage = 
-      "🏨 *${widget.lodge.name}*\n"
-      "📍 Location: ${widget.lodge.district ?? 'Mangochi'}\n\n"
-      "👉 View rooms and book accommodations on Mangochi Marketplace:\n$lodgeUrl";
-
-  _analyticsService.logEvent('lodge_shared_${widget.lodge.id}');
-
-  final box = context.findRenderObject() as RenderBox?;
-  await Share.share(
-    shareMessage,
-    subject: 'Looking for a place to stay in Mangochi?',
-    sharePositionOrigin: box != null ? box.localToGlobal(Offset.zero) & box.size : null,
-  );
-},
-),
-const SizedBox(height: AppSpacing.sm),
-
-                  // 🗺 MAP BUTTON
-                  AppFab(
-                    heroTag: "map_lodge",
-                    icon: Icons.map,
-                    tooltip: "View Map",
-                    toastMessage: "Opening map",
+                    heroTag: "map_lodge_fab",
+                    icon: Icons.map_outlined,
+                    tooltip: "Open Geolocation Tracking",
                     onPressed: () {
                       _analyticsService.logEvent('lodge_map_view_${widget.lodge.id}');
                       showModalBottomSheet(
@@ -427,9 +439,9 @@ const SizedBox(height: AppSpacing.sm),
                       );
                     },
                   ),
-                ],
-              ),
+              ],
             ),
+          ),
         ],
       ),
     );

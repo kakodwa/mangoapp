@@ -68,22 +68,22 @@ class ProductCard extends ConsumerWidget {
       child: AppCard(
         padding: EdgeInsets.zero,
         onTap: () {
-    // 1. Define the tabsScreen variable first!
-    final tabsScreen = MainTabsScreen.of(context);
+          // 1. Define the tabsScreen variable first!
+          final tabsScreen = MainTabsScreen.of(context);
 
-    // 2. Now you can safely use it
-    if (tabsScreen != null) {
-      tabsScreen.navigateToProductDetails(product.id);
-    } else {
-      // Fallback just in case this card is ever rendered outside of MainTabsScreen
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ProductDetailsScreen(productId: product.id),
-        ),
-      );
-    }
-  },
+          // 2. Now you can safely use it
+          if (tabsScreen != null) {
+            tabsScreen.navigateToProductDetails(product.id);
+          } else {
+            // Fallback just in case this card is ever rendered outside of MainTabsScreen
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ProductDetailsScreen(productId: product.id),
+              ),
+            );
+          }
+        },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min, 
@@ -146,7 +146,6 @@ class ProductCard extends ConsumerWidget {
             ),
 
             // ================= INFO CONTENT SECTION =================
-            // ================= INFO CONTENT SECTION =================
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(
@@ -170,6 +169,33 @@ class ProductCard extends ConsumerWidget {
                     
                     const SizedBox(height: 2), 
 
+                    // ================= STAR RATING MINI ROW DISPLAY =================
+                    Row(
+                      children: [
+                        ...List.generate(5, (index) {
+                          final currentStarValue = index + 1;
+                          if (product.rating >= currentStarValue) {
+                            return const Icon(Icons.star_rounded, color: Colors.amber, size: 14);
+                          } else if (product.rating > currentStarValue - 1 && product.rating < currentStarValue) {
+                            return const Icon(Icons.star_half_rounded, color: Colors.amber, size: 14);
+                          } else {
+                            return Icon(Icons.star_border_rounded, color: Colors.grey.shade400, size: 14);
+                          }
+                        }),
+                        const SizedBox(width: 4),
+                        Text(
+                          "(${product.totalReviews})",
+                          style: AppTypography.bodySmall.copyWith(
+                            color: Colors.grey.shade600,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 4),
+
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center, 
                       children: [
@@ -189,7 +215,6 @@ class ProductCard extends ConsumerWidget {
                                     fontSize: 10,
                                   ),
                                 ),
-                              // ✅ FIXED: Removed the invalid WidgetRef() instantiation wrapper completely
                               FittedBox(
                                 fit: BoxFit.scaleDown,
                                 alignment: Alignment.centerLeft,

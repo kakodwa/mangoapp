@@ -5,19 +5,22 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
+import '../../widgets/reviews/review_section_widget.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/event_model.dart';
 import '../../models/event_ticket_type_model.dart';
 import '../../utils/app_toast.dart';
 import '../../theme/app_colors.dart';
-import '../../widgets/main_app_bar.dart';
+import '../../widgets/main_app_bar.dart'; // Unified Top Bar System
 import '../../widgets/shop_map_modal.dart';
 import 'buy_ticket_screen.dart';
 import '../auth/login_screen.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/app_fab.dart';
 import '../../theme/design_system/app_spacing.dart';
-// Import your Analytics Service
+
+// Analytics Import
 import '../../services/analytics_service.dart';
 
 class EventDetailScreen extends ConsumerWidget {
@@ -30,10 +33,8 @@ class EventDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Instantiate or reference the analytics pipeline
     final AnalyticsService analyticsService = AnalyticsService();
 
-    // Track the initial screen mounting state 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       analyticsService.logEvent('view_event_details_id_${event.id}');
     });
@@ -49,16 +50,13 @@ class EventDetailScreen extends ConsumerWidget {
     );
 
     final soldTickets = totalSeats - availableSeats;
-
-    final soldPercentage =
-        totalSeats == 0 ? 0.0 : soldTickets / totalSeats;
+    final soldPercentage = totalSeats == 0 ? 0.0 : soldTickets / totalSeats;
 
     final authState = ref.watch(authProvider);
     final isLoggedIn = authState.isAuthenticated;
 
     void _openWhatsApp(String phone) async {
       final uri = Uri.parse("https://wa.me/$phone");
-
       if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
         AppToast.info(context, "Could not open WhatsApp");
       }
@@ -66,389 +64,347 @@ class EventDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(title: const Text('Event Details')),
+      // System Bar Integration matching Unified App Design Architecture
+      appBar: const MainAppBar(
+        title: 'Event Details',
+      ),
+      body: Stack(
+        children: [
+          CustomScrollView(
+            slivers: [
+              // ======================
+              // EVENT HERO BANNER
+              // ======================
+              SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 280,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.network(
+                        event.banner,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
+                            alignment: Alignment.center,
+                            child: const Icon(Icons.image, size: 50),
+                          );
+                        },
+                      ),
+                      // Modern ambient layout gradient overlay
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.black.withOpacity(0.15),
+                              Colors.transparent,
+                              Colors.black.withOpacity(0.45),
+                            ],
+                          ),
+                        ),
+                      ),
+                      // Featured status badge anchor framework
+                      if (event.isFeatured)
+                        Positioned(
+                          top: AppSpacing.sm,
+                          left: AppSpacing.md,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary,
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            child: Text(
+                              "FEATURED",
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.surface,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
 
-      // =========================
-      // FLOATING NAVIGATION BUTTON
-      // =========================
-      floatingActionButton: (event.latitude != null && event.longitude != null) ||
-              (event.organizerPhoneNumber != null && event.organizerPhoneNumber!.isNotEmpty)
-          ? Column(
+              // ======================
+              // MAIN SUMMARY ELEMENT
+              // ======================
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(.04),
+                          blurRadius: 12,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          event.title,
+                          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 14),
+                        // Location Specifications
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.location_on_outlined,
+                              size: 20,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                            ),
+                            const SizedBox(width: AppSpacing.xs),
+                            Expanded(
+                              child: Text(
+                                "${event.venue}, ${event.city}",
+                                style: TextStyle(color: Colors.grey.withOpacity(0.8), fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        // Date Specifications
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.calendar_month,
+                              size: 20,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                            ),
+                            const SizedBox(width: AppSpacing.xs),
+                            Text(
+                              event.eventDate,
+                              style: TextStyle(color: Colors.grey.withOpacity(0.8), fontWeight: FontWeight.w500),
+                            ),
+                            const Spacer(),
+                            Text(
+                              "${event.startTime} - ${event.endTime}",
+                              style: TextStyle(color: Colors.grey.withOpacity(0.8), fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 22),
+                        // Grid Metric Specifications Matrix Row
+                        Row(
+                          children: [
+                            Expanded(
+                              child: statCard(
+                                title: "Tickets",
+                                value: totalSeats.toString(),
+                                icon: Icons.confirmation_num,
+                                context: context,
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.sm),
+                            Expanded(
+                              child: statCard(
+                                title: "Available",
+                                value: availableSeats.toString(),
+                                icon: Icons.event_available,
+                                context: context,
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.sm),
+                            Expanded(
+                              child: statCard(
+                                title: "Sold",
+                                value: soldTickets.toString(),
+                                icon: Icons.people,
+                                context: context,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        // Live Ticket Allocation Linear Progress Vector Indicator
+                        LinearProgressIndicator(
+                          value: soldPercentage,
+                          minHeight: 8,
+                          borderRadius: BorderRadius.circular(30),
+                          backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
+                          color: AppColors.primary(context),
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          "${(soldPercentage * 100).toStringAsFixed(0)}% tickets sold",
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(height: 26),
+                        // Ticket Categorizations Section Header
+                        const Text(
+                          "Available Tickets",
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 14),
+                        ...event.ticketTypes.map((ticket) => ticketCard(context, ticket)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              // ======================
+              // DESCRIPTION DOCUMENT FRAME
+              // ======================
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  child: Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(.04),
+                          blurRadius: 12,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Description",
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 14),
+                        Text(
+                          event.description,
+                          style: TextStyle(
+                            height: 1.6,
+                            color: Theme.of(context).colorScheme.outline.withOpacity(0.9),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              // ===================================
+              // CUSTOMER REVIEWS SLIVER ADAPTER
+              // ===================================
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: ReviewSectionWidget(
+                    targetType: 'event',
+                    targetId: event.id,
+                    isOwner: false, // EventModel doesn't hold an organizer ID tracker property yet
+                  ),
+                ),
+              ),
+
+              // Breathing buffer spacing for bottom sheet clearance over floating layout tiers
+              const SliverToBoxAdapter(child: SizedBox(height: 160)),
+            ],
+          ),
+
+          // ===================================
+          // UNIFIED RIGHT ACCESSIBILITY PANEL FAB SYSTEM
+          // ===================================
+          Positioned(
+            bottom: 20,
+            right: 16,
+            child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // 🗺 MAP BUTTON
-                if (event.latitude != null && event.longitude != null)
+                // 🗺 MAP ACTIONS FAB BOUND
+                if (event.latitude != null && event.longitude != null) ...[
                   AppFab(
-                    heroTag: "map_event",
-                    icon: Icons.map,
-                    tooltip: "Open Map",
-                    toastMessage: "Opening location",
+                    heroTag: "map_event_fab",
+                    icon: Icons.map_outlined,
+                    tooltip: "Open Map Tracking",
                     onPressed: () {
                       analyticsService.logEvent('click_event_map_id_${event.id}');
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => ShopMapModal(
-                            shopLat: event.latitude!,
-                            shopLng: event.longitude!,
-                          ),
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (_) => ShopMapModal(
+                          shopLat: event.latitude!,
+                          shopLng: event.longitude!,
                         ),
                       );
                     },
                   ),
-
-                if (event.latitude != null &&
-                    event.longitude != null &&
-                    event.organizerPhoneNumber != null &&
-                    event.organizerPhoneNumber!.isNotEmpty)
                   const SizedBox(height: AppSpacing.sm),
+                ],
 
-                // 💬 WHATSAPP BUTTON
-                if (event.organizerPhoneNumber != null &&
-                    event.organizerPhoneNumber!.isNotEmpty)
+                // 💬 SOCIAL CONNECT WHATSAPP FAB BOUND
+                if (event.organizerPhoneNumber != null && event.organizerPhoneNumber!.isNotEmpty) ...[
                   AppFab(
-                    heroTag: "whatsapp_event",
+                    heroTag: "whatsapp_event_fab",
                     icon: FontAwesomeIcons.whatsapp,
-                    tooltip: "Chat on WhatsApp",
-                    toastMessage: "Opening WhatsApp...",
+                    tooltip: "Chat with Organizer",
                     onPressed: () {
                       analyticsService.logEvent('click_event_whatsapp_id_${event.id}');
-                      
                       if (!isLoggedIn) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const LoginScreen(),
-                          ),
-                        );
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
                         return;
                       }
-
                       final phone = event.organizerPhoneNumber;
-
                       if (phone == null || phone.isEmpty) {
-                        AppToast.info(
-                          context,
-                          "No WhatsApp number available",
-                        );
+                        AppToast.info(context, "No WhatsApp coordinate setup available");
                         return;
                       }
-
                       _openWhatsApp(phone);
                     },
                   ),
                   const SizedBox(height: AppSpacing.sm),
-                  // 🔗 SHARE EVENT
-AppFab(
-  heroTag: "share_event",
-  icon: Icons.share_outlined,
-  tooltip: "Share Event",
-  // 🔗 SHARE ACTION INSIDE event_detail_screen.dart
-onPressed: () async {
-  // Clean hashless web-path compatibility fallback
-  final String eventUrl = kIsWeb 
-      ? "${Uri.base.origin}/event/${event.id}"
-      : "https://mangobackend-yayy.onrender.com/event/${event.id}";
+                ],
 
-  final String shareMessage = 
-      "🎉 *${event.title}*\n"
-      "📅 Date: ${event.eventDate}\n"
-      "📍 Venue: ${event.district}\n\n"
-      "👉 Book ticket allocations safely here:\n$eventUrl";
+                // 🔗 UNIVERSAL MEDIA EXTENSION PROFILE DISTRIBUTION FLOW
+                AppFab(
+                  heroTag: "share_event_fab",
+                  icon: Icons.share_outlined,
+                  tooltip: "Share Event",
+                  onPressed: () async {
+                    final String eventUrl = kIsWeb
+                        ? "${Uri.base.origin}/event/${event.id}"
+                        : "https://mangobackend-yayy.onrender.com/event/${event.id}";
 
-  analyticsService.logEvent('event_shared_${event.id}');
+                    final String shareMessage = "🎉 *${event.title}*\n"
+                        "📅 Date: ${event.eventDate}\n"
+                        "📍 Venue: ${event.district}\n\n"
+                        "👉 Book ticket allocations safely here:\n$eventUrl";
 
-  final box = context.findRenderObject() as RenderBox?;
-  await Share.share(
-    shareMessage,
-    subject: 'Look at this event happening in Mangochi!',
-    sharePositionOrigin: box != null ? box.localToGlobal(Offset.zero) & box.size : null,
-  );
-},
-),
-              ],
-            )
-          : null,
+                    analyticsService.logEvent('event_shared_${event.id}');
 
-      body: ListView(
-        padding: EdgeInsets.all(AppSpacing.md),
-        children: [
-          // ======================
-          // EVENT CARD
-          // ======================
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(.04),
-                  blurRadius: 12,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ======================
-                // IMAGE
-                // ======================
-                Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(20),
-                      ),
-                      child: Image.network(
-                        event.banner,
-                        width: double.infinity,
-                        height: 260,
-                        fit: BoxFit.cover,
-                        errorBuilder: (
-                          context,
-                          error,
-                          stackTrace,
-                        ) {
-                          return Container(
-                            height: 260,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
-                            alignment: Alignment.center,
-                            child: const Icon(
-                              Icons.image,
-                              size: 50,
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    if (event.isFeatured)
-                      Positioned(
-                        top: 14,
-                        left: 14,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 7,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: Text(
-                            "FEATURED",
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.surface,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 11,
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-
-                // ======================
-                // CONTENT
-                // ======================
-                Padding(
-                  padding: const EdgeInsets.all(18),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // TITLE
-                      Text(
-                        event.title,
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-
-                      const SizedBox(height: 14),
-
-                      // LOCATION
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.location_on_outlined,
-                            size: 20,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
-                          ),
-                          const SizedBox(width: AppSpacing.xs),
-                          Expanded(
-                            child: Text(
-                              "${event.venue}, ${event.city}",
-                              style: TextStyle(
-                                color: Colors.grey.withOpacity(0.8),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 10),
-
-                      // DATE + TIME
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.calendar_month,
-                            size: 20,
-                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
-                          ),
-                          const SizedBox(width: AppSpacing.xs),
-                          Text(
-                            event.eventDate,
-                            style: TextStyle(
-                              color: Colors.grey.withOpacity(0.8),
-                            ),
-                          ),
-                          const Spacer(),
-                          Text(
-                            "${event.startTime} - ${event.endTime}",
-                            style: TextStyle(
-                              color: Colors.grey.withOpacity(0.8),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 22),
-
-                      // ======================
-                      // STATS
-                      // ======================
-                      Row(
-                        children: [
-                          // TOTAL TICKETS
-                          Expanded(
-                            child: statCard(
-                              title: "Tickets",
-                              value: totalSeats.toString(),
-                              icon: Icons.confirmation_num,
-                              context: context,
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-
-                          // AVAILABLE
-                          Expanded(
-                            child: statCard(
-                              title: "Available",
-                              value: availableSeats.toString(),
-                              icon: Icons.event_available,
-                              context: context,
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-
-                          // SOLD
-                          Expanded(
-                            child: statCard(
-                              title: "Sold",
-                              value: soldTickets.toString(),
-                              icon: Icons.people,
-                              context: context,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: AppSpacing.md),
-
-                      // ======================
-                      // PROGRESS
-                      // ======================
-                      LinearProgressIndicator(
-                        value: soldPercentage,
-                        minHeight: 8,
-                        borderRadius: BorderRadius.circular(30),
-                        backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
-                        color: AppColors.primary(context),
-                      ),
-
-                      const SizedBox(height: AppSpacing.xs),
-
-                      Text(
-                        "${(soldPercentage * 100).toStringAsFixed(0)}% tickets sold",
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
-                          fontSize: 13,
-                        ),
-                      ),
-
-                      const SizedBox(height: 26),
-
-                      // ======================
-                      // TICKET TYPES
-                      // ======================
-                      const Text(
-                        "Available Tickets",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-
-                      const SizedBox(height: 14),
-
-                      ...event.ticketTypes.map(
-                        (ticket) => ticketCard(context, ticket),
-                      ),
-                    ],
-                  ),
+                    final box = context.findRenderObject() as RenderBox?;
+                    await Share.share(
+                      shareMessage,
+                      subject: 'Look at this event happening in Mangochi!',
+                      sharePositionOrigin: box != null ? box.localToGlobal(Offset.zero) & box.size : null,
+                    );
+                  },
                 ),
               ],
             ),
           ),
-
-          const SizedBox(height: 18),
-
-          // ======================
-          // DESCRIPTION CARD
-          // ======================
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(.04),
-                  blurRadius: 12,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Description",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 14),
-                Text(
-                  event.description,
-                  style: TextStyle(
-                    height: 1.6,
-                    color: Theme.of(context).colorScheme.outline.withOpacity(0.9),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 120),
         ],
       ),
 
       // =========================
-      // BUY TICKET BUTTON
+      // BUY TRANSACTION SYSTEM NAVIGATION RAIL
       // =========================
       bottomNavigationBar: Container(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
@@ -467,29 +423,24 @@ onPressed: () async {
           child: SizedBox(
             height: 56,
             child: ElevatedButton.icon(
-              icon: const Icon(Icons.confirmation_num),
+              icon: const Icon(Icons.confirmation_num, color: Colors.white),
               label: const Text(
                 "Buy Ticket",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary(context),
-                foregroundColor: Theme.of(context).colorScheme.surface,
+                elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
               ),
               onPressed: () {
                 analyticsService.logEvent('click_buy_ticket_button_event_id_${event.id}');
-                
+
                 if (event.ticketTypes.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("No tickets available"),
-                    ),
+                    const SnackBar(content: Text("No ticket inventory allotments published yet")),
                   );
                   return;
                 }
@@ -497,9 +448,7 @@ onPressed: () async {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => BuyTicketScreen(
-                      event: event,
-                    ),
+                    builder: (_) => BuyTicketScreen(event: event),
                   ),
                 );
               },
@@ -510,9 +459,6 @@ onPressed: () async {
     );
   }
 
-  // ======================
-  // STAT CARD
-  // ======================
   Widget statCard({
     required String title,
     required String value,
@@ -520,29 +466,19 @@ onPressed: () async {
     required BuildContext context,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        vertical: 14,
-        horizontal: 10,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 10),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
         borderRadius: BorderRadius.circular(14),
       ),
       child: Column(
         children: [
-          Icon(
-            icon,
-            size: 20,
-            color: AppColors.primary(context),
-          ),
+          Icon(icon, size: 20, color: AppColors.primary(context)),
           const SizedBox(height: AppSpacing.xs),
           Text(
             value,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
           ),
           const SizedBox(height: AppSpacing.xxs),
           Text(
@@ -557,18 +493,8 @@ onPressed: () async {
     );
   }
 
-  // ======================
-  // TICKET CARD
-  // ======================
-  // ======================
-  // TICKET CARD
-  // ======================
-  Widget ticketCard(
-    BuildContext context,
-    EventTicketTypeModel ticket,
-  ) {
+  Widget ticketCard(BuildContext context, EventTicketTypeModel ticket) {
     return Container(
-      // FIXED: Changed EdgeInsets.offset to EdgeInsets.only
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -583,10 +509,7 @@ onPressed: () async {
               color: AppColors.primary(context).withOpacity(.12),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              Icons.confirmation_num,
-              color: AppColors.primary(context),
-            ),
+            child: Icon(Icons.confirmation_num, color: AppColors.primary(context)),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -595,10 +518,7 @@ onPressed: () async {
               children: [
                 Text(
                   ticket.name.toUpperCase(),
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 const SizedBox(height: AppSpacing.xxs),
                 Text(

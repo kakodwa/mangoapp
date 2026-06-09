@@ -23,6 +23,7 @@ import '../auth/login_screen.dart';
 
 import '../../widgets/app_fab.dart';
 import '../../widgets/main_app_bar.dart';
+import '../../widgets/reviews/review_section_widget.dart';
 
 import '../../utils/app_toast.dart';
 import '../../utils/app_snackbar.dart';
@@ -129,7 +130,10 @@ class _ProductDetailsScreenState
     final AnalyticsService analytics = AnalyticsService();
 
     return Scaffold(
-     
+      // 🥭 Unified Top App Bar explicitly bound here matching shop standard setup
+      appBar: const MainAppBar(
+        title: "Product Details",
+      ),
       body: productAsync.when(
         loading: () => const Center(
           child: CircularProgressIndicator(),
@@ -157,13 +161,11 @@ class _ProductDetailsScreenState
                 controller: _scrollController,
                 slivers: [
 
-                  // ================= IMAGE CAROUSEL
-                  SliverAppBar(
-                    automaticallyImplyLeading: false,
-                    expandedHeight: 340,
-                    pinned: false,
-                    flexibleSpace: FlexibleSpaceBar(
-                      background: Stack(
+                  // ================= IMAGE CAROUSEL FRAME (Converted to standard list block framework)
+                  SliverToBoxAdapter(
+                    child: SizedBox(
+                      height: 340,
+                      child: Stack(
                         alignment: Alignment.bottomCenter,
                         children: [
                           PageView.builder(
@@ -246,13 +248,28 @@ class _ProductDetailsScreenState
 
                           const SizedBox(height: AppSpacing.sm),
 
+                          // ================= STAR RATING AND REVIEW ROW DISPLAY
+                          // ================= STAR RATING AND REVIEW ROW DISPLAY
                           Row(
                             children: [
-                              const Icon(Icons.star_rounded, color: Colors.amber, size: 20),
-                              const SizedBox(width: 4),
+                              ...List.generate(5, (index) {
+                                final currentStarValue = index + 1;
+                                // 🥭 Fixed: Corrected comment syntax to double slashes
+                                if (product.rating >= currentStarValue) {
+                                  return const Icon(Icons.star_rounded, color: Colors.amber, size: 22);
+                                } else if (product.rating > currentStarValue - 1 && product.rating < currentStarValue) {
+                                  return const Icon(Icons.star_half_rounded, color: Colors.amber, size: 22);
+                                } else {
+                                  return Icon(Icons.star_border_rounded, color: Colors.grey.shade400, size: 22);
+                                }
+                              }),
+                              const SizedBox(width: 6),
                               Text(
-                                "${product.rating} (${product.totalReviews})",
-                                style: AppTypography.bodyMedium,
+                                "(${product.totalReviews} ${product.totalReviews == 1 ? 'review' : 'reviews'})",
+                                style: AppTypography.bodyMedium.copyWith(
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ],
                           ),
@@ -316,6 +333,15 @@ class _ProductDetailsScreenState
                               height: 1.5,
                             ),
                           ),
+
+                          const SizedBox(height: AppSpacing.lg),
+                          
+                          // 🥭 CLEAN PLUG & PLAY REUSABLE REVIEWS SECTION
+                          ReviewSectionWidget(
+                            targetType: 'product',
+                            targetId: product.id,
+                            isOwner: isOwner,
+                          ),
                         ],
                       ),
                     ),
@@ -361,90 +387,87 @@ class _ProductDetailsScreenState
               ),
 
               // ================= RESTORED ORIGINAL FLOATING BUTTON UTILITY STACK
-              // ================= RESTORED ORIGINAL FLOATING BUTTON UTILITY STACK
-Positioned(
-  bottom: 50,
-  right: 10,
-  child: Column(
-    children: [
-      // 🛒 CART
-      if (product.isInStock && !isOwner) ...[
-        AppFab(
-          heroTag: "cart",
-          icon: Icons.shopping_cart,
-          tooltip: "Add to Cart",
-          onPressed: () { /* Your Cart Logic */ },
-        ),
-        const SizedBox(height: AppSpacing.sm),
-      ],
+              Positioned(
+                bottom: 50,
+                right: 10,
+                child: Column(
+                  children: [
+                    // 🛒 CART
+                    if (product.isInStock && !isOwner) ...[
+                      AppFab(
+                        heroTag: "cart",
+                        icon: Icons.shopping_cart,
+                        tooltip: "Add to Cart",
+                        onPressed: () { /* Your Cart Logic */ },
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                    ],
 
-      // ❤️ FAVORITE
-      if (!isOwner) ...[
-        AppFab(
-          heroTag: "fav",
-          icon: Icons.favorite_border,
-          tooltip: "Favorite",
-          onPressed: () { /* Your Fav Logic */ },
-        ),
-        const SizedBox(height: AppSpacing.sm),
-      ],
+                    // ❤️ FAVORITE
+                    if (!isOwner) ...[
+                      AppFab(
+                        heroTag: "fav",
+                        icon: Icons.favorite_border,
+                        tooltip: "Favorite",
+                        onPressed: () { /* Your Fav Logic */ },
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                    ],
 
-      // 💬 WHATSAPP
-      AppFab(
-        heroTag: "whatsapp",
-        icon: FontAwesomeIcons.whatsapp,
-        tooltip: "Chat on WhatsApp",
-        onPressed: () { /* Your WhatsApp Logic */ },
-      ),
-      const SizedBox(height: AppSpacing.sm),
+                    // 💬 WHATSAPP
+                    AppFab(
+                      heroTag: "whatsapp",
+                      icon: FontAwesomeIcons.whatsapp,
+                      tooltip: "Chat on WhatsApp",
+                      onPressed: () { /* Your WhatsApp Logic */ },
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
 
-      // 🔗 SHARE BUTTON (NEW)
-      // 🔗 SHARE BUTTON INSIDE product_details_screen.dart
-AppFab(
-  heroTag: "share_product",
-  icon: Icons.share_outlined,
-  tooltip: "Share Product",
-  onPressed: () async {
-    // Clean, hashless clean URL architecture match
-    final String productUrl = kIsWeb 
-        ? "${Uri.base.origin}/product/${product.id}"
-        : "https://mangobackend-yayy.onrender.com/product/${product.id}";
+                    // 🔗 SHARE BUTTON
+                    AppFab(
+                      heroTag: "share_product",
+                      icon: Icons.share_outlined,
+                      tooltip: "Share Product",
+                      onPressed: () async {
+                        final String productUrl = kIsWeb 
+                            ? "${Uri.base.origin}/product/${product.id}"
+                            : "https://mangobackend-yayy.onrender.com/product/${product.id}";
 
-    final String shareMessage = "Check out ${product.name} on Mangochi Marketplace!\nPrice: MWK ${product.price}\n\nView details here: $productUrl";
-    
-    analytics.logEvent('product_shared_${product.id}');
+                        final String shareMessage = "Check out ${product.name} on Mangochi Marketplace!\nPrice: MWK ${product.price}\n\nView details here: $productUrl";
+                        
+                        analytics.logEvent('product_shared_${product.id}');
 
-    final box = context.findRenderObject() as RenderBox?;
-    await Share.share(
-      shareMessage,
-      subject: 'Look what I found on Mangochi!',
-      sharePositionOrigin: box != null ? box.localToGlobal(Offset.zero) & box.size : null,
-    );
-  },
-),
-      const SizedBox(height: AppSpacing.sm),
+                        final box = context.findRenderObject() as RenderBox?;
+                        await Share.share(
+                          shareMessage,
+                          subject: 'Look what I found on Mangochi!',
+                          sharePositionOrigin: box != null ? box.localToGlobal(Offset.zero) & box.size : null,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
 
-      // 🏪 SHOP
-      AppFab(
-        heroTag: "shop",
-        icon: Icons.storefront,
-        tooltip: "View Shop",
-        onPressed: () { /* Your Shop Logic */ },
-      ),
+                    // 🏪 SHOP
+                    AppFab(
+                      heroTag: "shop",
+                      icon: Icons.storefront,
+                      tooltip: "View Shop",
+                      onPressed: () { /* Your Shop Logic */ },
+                    ),
 
-      // ✏️ EDIT (OWNER ONLY)
-      if (isOwner) ...[
-        const SizedBox(height: AppSpacing.sm),
-        AppFab(
-          heroTag: "edit",
-          icon: Icons.edit,
-          tooltip: "Edit Product",
-          onPressed: () { /* Your Edit Logic */ },
-        ),
-      ],
-    ],
-  ),
-),
+                    // ✏️ EDIT (OWNER ONLY)
+                    if (isOwner) ...[
+                      const SizedBox(height: AppSpacing.sm),
+                      AppFab(
+                        heroTag: "edit",
+                        icon: Icons.edit,
+                        tooltip: "Edit Product",
+                        onPressed: () { /* Your Edit Logic */ },
+                      ),
+                    ],
+                  ],
+                ),
+              ),
             ],
           );
         },

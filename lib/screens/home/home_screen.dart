@@ -12,6 +12,7 @@ import '../../widgets/feed/feed_list_widget.dart';
 import '../../screens/delivery/delivery_code_entry_screen.dart';
 import '../../screens/events/scan_ticket_screen.dart';
 import '../../screens/shops/shops_list_screen.dart';
+import '../../screens/auth/register_screen.dart'; // Imported for RegisterScreen navigation
 import '../about/how_it_works.dart';
 import '../about/tour.dart';
 
@@ -55,10 +56,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       );
 
       if (mounted) {
-        final banners = ref.read(bannersProvider).valueOrNull;
+        final dbBanners = ref.read(bannersProvider).valueOrNull ?? [];
+        final totalBannersCount = dbBanners.length + 1; // DB count + your custom default banner
 
-        if (banners != null && banners.isNotEmpty) {
-          final nextIndex = (bannerIndex + 1) % banners.length;
+        if (totalBannersCount > 0) {
+          final nextIndex = (bannerIndex + 1) % totalBannersCount;
           
           if (bannerController.hasClients) {
             bannerController.animateToPage(
@@ -101,9 +103,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             SliverToBoxAdapter(
               child: bannersAsync.when(
                 data: (banners) {
-                  if (banners.isEmpty) {
-                    return const SizedBox();
-                  }
+                  // Total display count is database length + your permanent default asset banner
+                  final displayLength = banners.length + 1;
 
                   return Container(
                     margin: const EdgeInsets.only(
@@ -119,11 +120,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           width: double.infinity,
                           child: PageView.builder(
                             controller: bannerController,
-                            itemCount: banners.length,
+                            itemCount: displayLength,
                             onPageChanged: (index) {
                               bannerIndex = index;
                             },
                             itemBuilder: (context, index) {
+                              // Inserts your custom design banner at the end of the carousel array
+                              if (index == banners.length) {
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                  child: _buildBanner(
+                                    context,
+                                    image: 'assets/images/banner.png',
+                                    title: 'CREATE YOUR SHOP ON MANGOHUB',
+                                    subtitle: 'START LISTING YOUR PRODUCTS FOR FREE',
+                                    isAssetImage: true,
+                                    showJoinButton: true,
+                                  ),
+                                );
+                              }
+
                               final banner = banners[index];
                               return Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 2.0),
@@ -152,7 +168,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                         SmoothPageIndicator(
                           controller: bannerController,
-                          count: banners.length,
+                          count: displayLength,
                           effect: WormEffect(
                             dotHeight: 8,
                             dotWidth: 8,
@@ -239,7 +255,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
 
-            /// Feed
+            /// Feed Content List
             FeedListWidget(
               items: items,
             ),
@@ -260,42 +276,90 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required String subtitle,
     String? url,
     String? ctaText,
+    bool isAssetImage = false,
+    bool showJoinButton = false,
   }) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(14),
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Image.network(
-            image,
-            fit: BoxFit.cover,
-          ),
+          // Adaptive asset/network renderer logic
+          isAssetImage
+              ? Image.asset(
+                  image,
+                  fit: BoxFit.cover,
+                )
+              : Image.network(
+                  image,
+                  fit: BoxFit.cover,
+                ),
           Container(
-            color: Colors.black.withOpacity(0.4),
+            color: Colors.black.withOpacity(0.5), // Tint overlay to protect legibility
           ),
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                // Text elements and Buttons pinned explicitly on the left side
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 4,
+                      ),
+                      Text(
+                        subtitle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
+                      ),
+                      if (showJoinButton) ...[
+                        const SizedBox(height: 12),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          onPressed: () {
+                            _analytics.logEvent('default_banner_join_click');
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const RegisterScreen(),
+                              ),
+                            );
+                          },
+                          child: const Text(
+                            "JOIN",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
-                const SizedBox(
-                  height: 6,
-                ),
-                Text(
-                  subtitle,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                  ),
-                ),
+                // Leaves visual open breathing room towards the right side of the banner asset layout
+                const Spacer(),
               ],
             ),
           ),

@@ -1,379 +1,296 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-import '../../providers/products_provider.dart';
-import '../../providers/shops_provider.dart';
-import '../../providers/events_provider.dart';
-import '../../providers/lodges_provider.dart';
-import '../../providers/properties_provider.dart';
-import '../../providers/products_provider.dart';
+import '../../providers/feed/main_feed_providers.dart';
+import '../../providers/products_provider.dart'; // contains bannersProvider
 
 import '../../theme/design_system/app_spacing.dart';
 
-import '../shops/shop_card.dart';
-import '../products/product_card.dart';
-import '../properties/property_card.dart';
+import '../../widgets/feed/feed_list_widget.dart';
 
 import '../../screens/delivery/delivery_code_entry_screen.dart';
 import '../../screens/events/scan_ticket_screen.dart';
-import '../../screens/events/event_list_screen.dart';
-import '../../screens/hospitality/lodge_list_screen.dart';
-import '../../screens/properties/properties_list_screen.dart';
 import '../../screens/shops/shops_list_screen.dart';
-import '../../screens/products/products_list_screen.dart';
+// Assuming RegisterScreen is located here, update import path accordingly:
+// import '../../screens/auth/register_screen.dart'; 
+import '../about/how_it_works.dart';
+import '../about/tour.dart';
 
-import '../../widgets/main_drawer.dart';
-import '../../widgets/main_app_bar.dart';
-import '../../widgets/app_scaffold.dart';
-import '../../widgets/events/event_card.dart';
-import '../../widgets/hospitality/lodge_card.dart';
+import '../../services/analytics_service.dart'; 
+
+// A simple mock class structure mirroring your banner model if it doesn't match exactly
+class BannerModel {
+  final String imageUrl;
+  final String title;
+  final String subtitle;
+  final String? url;
+  final String? ctaText;
+
+  const BannerModel({
+    required this.imageUrl,
+    required this.title,
+    required this.subtitle,
+    this.url,
+    this.ctaText,
+  });
+}
 
 class HomeScreen extends ConsumerStatefulWidget {
-  const HomeScreen({super.key});
+  final VoidCallback onDeliveryTap;
+  
+  const HomeScreen({
+    super.key,
+    required this.onDeliveryTap,
+  });
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  final ScrollController controller = ScrollController();
+  final PageController bannerController = PageController(); 
+  final AnalyticsService _analytics = AnalyticsService(); 
   int bannerIndex = 0;
 
   @override
   void initState() {
     super.initState();
 
+    _analytics.logEvent('home_screen_open');
+
+    controller.addListener(() {
+      if (controller.position.pixels >
+          controller.position.maxScrollExtent - 500) {
+        ref.read(homeFeedProvider.notifier).loadMore();
+      }
+    });
+
+    /// Auto rotate banners
     Future.doWhile(() async {
-      await Future.delayed(const Duration(seconds: 4));
+      await Future.delayed(
+        const Duration(seconds: 4),
+      );
 
       if (mounted) {
-        final banners = ref.read(bannersProvider).valueOrNull;
-        if (banners != null && banners.isNotEmpty) {
-          setState(() {
-            bannerIndex = (bannerIndex + 1) % banners.length;
-          });
+        // Updated to account for the default asset banner we inject in UI
+        final bannersData = ref.read(bannersProvider).valueOrNull ?? [];
+        final totalCount = bannersData.length + 1; // +1 for the default banner
+
+        if (totalCount > 0) {
+          final nextIndex = (bannerIndex + 1) % totalCount;
+          
+          if (bannerController.hasClients) {
+            bannerController.animateToPage(
+              nextIndex,
+              duration: const Duration(milliseconds: 350),
+              curve: Curves.easeOutCubic,
+            );
+          }
         }
       }
+
       return mounted;
     });
   }
 
-  /// ================= SMART FEED CONFIG =================
-  List<String> feedPattern = [
-    "products",
-    "properties",
-    "products",
-    "shops",
-    "products",
-    "events",
-    "products",
-    "lodges",
-    "products",
-  ];
+  @override
+  void dispose() {
+    controller.dispose(); 
+    bannerController.dispose(); 
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final productsAsync = ref.watch(productsProvider);
-    final shopsAsync = ref.watch(shopsProvider);
-    final propertiesAsync = ref.watch(propertiesProvider);
-    final eventsAsync = ref.watch(eventsProvider);
-    final lodgesAsync = ref.watch(lodgesProvider);
+    final feed = ref.watch(homeFeedProvider);
     final bannersAsync = ref.watch(bannersProvider);
 
-    return AppScaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-      appBar: const MainAppBar(title: 'MangoHub'),
-      drawer: const MainDrawer(),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-          /// ================= BANNER (TOP ONLY) =================
-bannersAsync.when(
-  data: (banners) {
-    if (banners.isEmpty) return const SizedBox();
-
-    final banner = banners[bannerIndex];
-
-    return Container(
-      margin: const EdgeInsets.only(
-        top: 12,
-        left: 12,
-        right: 12,
-        bottom: 8,
+    return feed.when(
+      loading: () => const Center(
+        child: CircularProgressIndicator(),
       ),
-      child: Column(
-        children: [
-          SizedBox(
-            height: 190,
-            width: double.infinity,
-            child: _buildBanner(
-              context,
-              image: banner.imageUrl,
-              title: banner.title,
-              subtitle: banner.subtitle,
-              url: banner.url,
-              ctaText: banner.ctaText,
-            ),
-          ),
-
-          const SizedBox(height: 10),
-
-          AnimatedSmoothIndicator(
-            activeIndex: bannerIndex,
-            count: banners.length,
-            effect: WormEffect(
-              dotHeight: 8,
-              dotWidth: 8,
-              activeDotColor: Theme.of(context).colorScheme.primary,
-            ),
-          ),
-        ],
+      error: (e, _) => Center(
+        child: Text(e.toString()),
       ),
-    );
-  },
-  loading: () => const Padding(
-    padding: EdgeInsets.all(16),
-    child: CircularProgressIndicator(),
-  ),
-  error: (_, __) => const SizedBox(),
-),
+      data: (items) {
+        return CustomScrollView(
+          controller: controller,
+          slivers: [
+            /// Banner
+            SliverToBoxAdapter(
+              child: bannersAsync.when(
+                data: (fetchedBanners) {
+                  // 1. Create your default onboarding banner instance
+                  final defaultBanner = BannerModel(
+                    imageUrl: 'assets/images/banner.png',
+                    title: 'Open Your Shop on MangoHub and Start Selling Your Products Today',
+                    subtitle: '', // Kept empty as the title holds the instructions
+                    ctaText: 'Join now',
+                  );
 
+                  // 2. Prepend the default banner into the list
+                  final List<dynamic> combinedBanners = [defaultBanner, ...fetchedBanners];
 
-            const SizedBox(height: AppSpacing.sm),
-
-            Padding(
-  padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
-  child: Row(
-    children: [
-
-      Expanded(
-                    child: _QuickActionButton(
-                      icon: Icons.store,
-                      label: 'Shops',
-                      onTap: () {
-                        // TODO: navigate to shops screen
-                      },
+                  return Container(
+                    margin: const EdgeInsets.only(
+                      top: 12,
+                      left: 12,
+                      right: 12,
+                      bottom: 8,
                     ),
-                  ),
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: 190,
+                          width: double.infinity,
+                          child: PageView.builder(
+                            controller: bannerController,
+                            itemCount: combinedBanners.length,
+                            onPageChanged: (index) {
+                              bannerIndex = index;
+                            },
+                            itemBuilder: (context, index) {
+                              final banner = combinedBanners[index];
+                              
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(14),
+                                  onTap: () {
+                                    _analytics.logEvent(
+                                      'banner_click_${banner.title.replaceAll(' ', '_').toLowerCase()}',
+                                    );
 
-      const SizedBox(width: AppSpacing.sm),
-
-      /// EVENTS
-      Expanded(
-                    child: _QuickActionButton(
-                      icon: Icons.local_shipping,
-                      label: 'Delivery',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const DeliveryCodeScreen(),
+                                    // Check if this is the first (default) banner targeted to Register Screen
+                                    if (index == 0) {
+                                      // Replace 'RegisterScreen()' with your actual targeted register widget name
+                                      // Navigator.push(
+                                      //   context,
+                                      //   MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                                      // );
+                                    }
+                                  },
+                                  child: _buildBanner(
+                                    context,
+                                    image: banner.imageUrl,
+                                    title: banner.title,
+                                    subtitle: banner.subtitle,
+                                    url: banner.url,
+                                    ctaText: banner.ctaText,
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        SmoothPageIndicator(
+                          controller: bannerController,
+                          count: combinedBanners.length,
+                          effect: WormEffect(
+                            dotHeight: 8,
+                            dotWidth: 8,
+                            activeDotColor:
+                                Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      ],
                     ),
+                  );
+                },
+                loading: () => const Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Center(
+                    child: CircularProgressIndicator(),
                   ),
-
-      const SizedBox(width: AppSpacing.sm),
-
-      /// MORE
-      Expanded(
-        child:  _QuickActionButton(
-        icon: Icons.qr_code_scanner,
-        label: 'Scan Ticket',
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const ScanTicketScreen(),
-            ),
-          );
-        },
-      ),
-      ),
-    ],
-  ),
-),
-       
-
-            const SizedBox(height: 10),
-
-            /// ================= SMART FEED =================
-            productsAsync.when(
-              data: (products) {
-                return shopsAsync.when(
-                  data: (shops) {
-                    return propertiesAsync.when(
-                      data: (properties) {
-                        return eventsAsync.when(
-                          data: (events) {
-                            return lodgesAsync.when(
-                              data: (lodges) {
-                                return _buildSmartFeed(
-                                  products: products,
-                                  shops: shops,
-                                  properties: properties,
-                                  events: events,
-                                  lodges: lodges,
-                                );
-                              },
-                              loading: () => const CircularProgressIndicator(),
-                              error: (_, __) => const SizedBox(),
-                            );
-                          },
-                          loading: () => const CircularProgressIndicator(),
-                          error: (_, __) => const SizedBox(),
-                        );
-                      },
-                      loading: () => const CircularProgressIndicator(),
-                      error: (_, __) => const SizedBox(),
-                    );
-                  },
-                  loading: () => const CircularProgressIndicator(),
-                  error: (_, __) => const SizedBox(),
-                );
-              },
-              loading: () => const CircularProgressIndicator(),
-              error: (_, __) => const SizedBox(),
-            ),
-
-            const SizedBox(height: 30),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// ================= SMART FEED BUILDER =================
-  Widget _buildSmartFeed({
-    required List products,
-    required List shops,
-    required List properties,
-    required List events,
-    required List lodges,
-  }) {
-    int productIndex = 0;
-
-    return Column(
-      children: List.generate(feedPattern.length, (i) {
-        final type = feedPattern[i];
-
-        switch (type) {
-          case "products":
-            if (productIndex >= products.length) {
-              return const SizedBox();
-            }
-
-            final chunk = products.skip(productIndex).take(4).toList();
-            productIndex += chunk.length;
-
-            return _productGrid(chunk);
-
-          case "shops":
-            return _horizontalBlock(
-              "Popular Shops",
-              shops,
-              (item) => ShopCard(shop: item),
-              itemWidth: 340,
-              height: 270,
-            );
-
-          case "properties":
-            return _horizontalBlock(
-              "Suggested Properties",
-              properties,
-              (item) =>PropertyCard(property: item),
-              itemWidth: 340,
-              height:310,
-            );
-          case "events":
-            return _horizontalBlock(
-            "Upcoming Events",
-            events,
-            (item) => EventCard(event: item),
-            itemWidth: 340,
-            height:360,
-            );
-
-case "lodges":
-  return _horizontalBlock(
-    "Recommended Lodges",
-    lodges,
-    (item) => LodgeCard(lodge: item),
-    itemWidth: 340,
-    height:290,
-  );
-
-          default:
-            return const SizedBox();
-        }
-      }),
-    );
-  }
-
-  /// ================= PRODUCT GRID =================
-  Widget _productGrid(List products) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      child: GridView.count(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        crossAxisCount: 2,
-        childAspectRatio: 0.72,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        children: products
-            .map((p) => ProductCard(product: p))
-            .toList(),
-      ),
-    );
-  }
-
-  /// ================= HORIZONTAL BLOCK =================
-Widget _horizontalBlock(
-  String title,
-  List items,
-  Widget Function(dynamic) builder, {
-  double itemWidth = 200,
-  double height = 220,
-}) {
-  if (items.isEmpty) return const SizedBox();
-
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: Text(
-          title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-      const SizedBox(height: 8),
-      SizedBox(
-        height: height,
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount:items.length,
-          itemBuilder: (_, i) {
-            return SizedBox(
-              width: itemWidth,
-              child: Padding(
-                padding: const EdgeInsets.only(left: 10),
-                child: builder(items[i]),
+                ),
+                error: (_, __) => const SizedBox(),
               ),
-            );
-          },
-        ),
-      ),
-    ],
-  );
-}
-  /// ================= BANNER =================
+            ),
+
+            const SliverToBoxAdapter(
+              child: SizedBox(
+                height: AppSpacing.sm,
+              ),
+            ),
+
+            /// Quick Actions
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.md,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: _QuickActionButton(
+                        icon: Icons.map_outlined,
+                        label: 'Guide',
+                        onTap: () {
+                          _analytics.logEvent('click_Guide');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const MangoHubScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(
+                      width: AppSpacing.sm,
+                    ),
+                    Expanded(
+                      child: _QuickActionButton(
+                        icon: Icons.local_shipping,
+                        label: 'Delivery',
+                        onTap: () {
+                          _analytics.logEvent('click_delivery');
+                          widget.onDeliveryTap();
+                        }, 
+                      ),
+                    ),
+                    const SizedBox(
+                      width: AppSpacing.sm,
+                    ),
+                    Expanded(
+                      child: _QuickActionButton(
+                        icon: Icons.qr_code_scanner,
+                        label: 'Scan Ticket',
+                        onTap: () {
+                          _analytics.logEvent('click_scan_ticket');
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const ScanTicketScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            /// Feed
+            FeedListWidget(
+              items: items,
+            ),
+
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 40),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildBanner(
     BuildContext context, {
     required String image,
@@ -382,40 +299,94 @@ Widget _horizontalBlock(
     String? url,
     String? ctaText,
   }) {
+    // Determine whether to parse as local asset path or an image web URL
+    final bool isAsset = image.startsWith('assets/');
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(14),
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Image.network(image, fit: BoxFit.cover),
+          // Background Color Fallback if the asset or network image has transparency
+          Container(color: Colors.orange),
+          
+          isAsset
+              ? Image.asset(
+                  image,
+                  fit: BoxFit.cover,
+                )
+              : Image.network(
+                  image,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(color: Colors.orange),
+                ),
           Container(
-            color: Colors.black.withOpacity(0.4),
+            color: Colors.black.withOpacity(0.35), // Shaded blend overlay for readability
           ),
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                Text(title,
-                    style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold)),
-                const SizedBox(height: 6),
-                Text(subtitle,
-                    style: const TextStyle(color: Colors.white70)),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      if (subtitle.isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        Text(
+                          subtitle,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (ctaText != null && ctaText.isNotEmpty) ...[
+                  const SizedBox(width: 12),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.orange.shade800,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    ),
+                    onPressed: () {
+                      // Trigger fallback execution or same logic as banner container click
+                      _analytics.logEvent('banner_cta_click');
+                      // Implement navigation here if needed, or rely on parent InkWell
+                    },
+                    child: Text(
+                      ctaText,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ]
               ],
             ),
-          )
+          ),
         ],
       ),
     );
   }
 }
 
-
-// QUICK ACTION BUTTON
+/// --- QUICK ACTION BUTTON WIDGET ---
 class _QuickActionButton extends StatefulWidget {
   final IconData icon;
   final String label;
@@ -437,30 +408,41 @@ class _QuickActionButtonState extends State<_QuickActionButton> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTapDown: (_) => setState(() => _isPressed = true),
-      onTapUp: (_) => setState(() => _isPressed = false),
-      onTapCancel: () => setState(() => _isPressed = false),
+      onTapDown: (_) => setState(() {
+        _isPressed = true;
+      }),
+      onTapUp: (_) => setState(() {
+        _isPressed = false;
+      }),
+      onTapCancel: () => setState(() {
+        _isPressed = false;
+      }),
       onTap: widget.onTap,
       child: AnimatedScale(
         scale: _isPressed ? 0.95 : 1.0,
-        duration: const Duration(milliseconds: 100),
+        duration: const Duration(
+          milliseconds: 100,
+        ),
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             color: Theme.of(context).colorScheme.surface,
             boxShadow: [
               BoxShadow(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.06),
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withOpacity(0.06),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
-              )
+              ),
             ],
           ),
           child: InkWell(
             borderRadius: BorderRadius.circular(16),
             onTap: widget.onTap,
             child: Padding(
-              padding: EdgeInsets.all(AppSpacing.md),
+              padding: const EdgeInsets.all(AppSpacing.md),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -469,7 +451,9 @@ class _QuickActionButtonState extends State<_QuickActionButton> {
                     size: 28,
                     color: Theme.of(context).colorScheme.primary,
                   ),
-                  const SizedBox(height: AppSpacing.xs),
+                  const SizedBox(
+                    height: AppSpacing.xs,
+                  ),
                   Text(
                     widget.label,
                     textAlign: TextAlign.center,

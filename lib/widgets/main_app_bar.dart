@@ -6,6 +6,8 @@ import '../providers/products_provider.dart';
 import '../theme/design_system/app_spacing.dart';
 import '../screens/cart/cart_screen.dart';
 import '../screens/auth/login_screen.dart';
+// Imported RegisterScreen (Adjust path to match your exact directory structure)
+import '../screens/auth/register_screen.dart'; 
 import '../screens/search/unified_search_screen.dart'; 
 // Import your Analytics Service (Adjust this path matching your actual directory structure)
 import '../services/analytics_service.dart';
@@ -36,11 +38,25 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
     return AppBar(
       centerTitle: false,
       titleSpacing: AppSpacing.md,
-      title: Text(
-        title,
-        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+      title: ShaderMask(
+        blendMode: BlendMode.srcIn,
+        shaderCallback: (bounds) => const LinearGradient(
+          colors: [
+            Colors.orange,       // Orange dominates
+            Colors.deepOrange,   // Smooth transition
+            Colors.green,        // Ends in green
+          ],
+          stops: [0.0, 0.6, 1.0], // 70% of the text stays orange/deepOrange before switching to green
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ).createShader(bounds),
+        child: Text(
+          title,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Colors.white, // Required placeholder color for ShaderMask to overlay on
+              ),
+        ),
       ),
       actions: [
         // 🔍 GLOBAL UNIFIED SEARCH BUTTON
@@ -48,7 +64,6 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
           icon: const Icon(Icons.search_rounded),
           tooltip: 'Search Platform',
           onPressed: () {
-            // Trigger analytics event
             _analyticsService.logEvent('appbar_search_click');
 
             if (onSearchTap != null) {
@@ -64,7 +79,6 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
             IconButton(
               icon: const Icon(Icons.shopping_cart_outlined),
               onPressed: () {
-                // Trigger analytics event
                 _analyticsService.logEvent('appbar_cart_click');
 
                 if (onCartTap != null) {
@@ -96,9 +110,12 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
           ],
         ),
 
-        // 👤 AUTH MENU
+        // 🔘 DYNAMIC AUTH MENU 
         PopupMenuButton<String>(
-          icon: const Icon(Icons.person),
+          icon: Icon(
+            isLoggedIn ? Icons.account_circle : Icons.more_vert,
+            size: isLoggedIn ? 28.0 : null,
+          ),
           onSelected: (value) async {
             if (value == 'login') {
               _analyticsService.logEvent('appbar_login_click');
@@ -107,6 +124,17 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
                 context,
                 MaterialPageRoute(
                   builder: (_) => const LoginScreen(),
+                ),
+              );
+            }
+
+            if (value == 'register') {
+              _analyticsService.logEvent('appbar_register_click');
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const RegisterScreen(),
                 ),
               );
             }
@@ -140,6 +168,10 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
                 PopupMenuItem(
                   value: 'login',
                   child: Text('Login'),
+                ),
+                PopupMenuItem(
+                  value: 'register',
+                  child: Text('Register'),
                 ),
               ];
             }

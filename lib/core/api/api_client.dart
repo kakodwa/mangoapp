@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logger/logger.dart';
 import '../../models/payment_model.dart';
+import '../../models/review_model.dart';
 import '../errors/api_exception.dart';
 
 class ApiClient {
@@ -161,6 +162,53 @@ Future<Map<String, dynamic>> searchUnified({
   );
 }
 
+// 1. GET (Read): Fetch filtered reviews for a specific item
+Future<List<Review>> fetchReviews({
+  required String targetType, // 'product', 'event', 'property', 'lodge', or 'shop'
+  required int targetId,
+}) async {
+  try {
+    return await getList<Review>(
+      'reviews/',
+      queryParameters: {
+        'content_type': targetType, // 👈 Django backend reads this to filter content type
+        'object_id': targetId,     // 👈 Django backend reads this to filter specific ID
+      },
+      fromJson: (json) => Review.fromJson(json),
+    );
+  } on ApiException {
+    rethrow;
+  } catch (e) {
+    throw ApiException("Failed to fetch reviews");
+  }
+}
+
+// 2. POST (Write): Your original payload method (Already perfect!)
+Future<Review> submitReview({
+  required String targetType, 
+  required int targetId,
+  required int rating,
+  required String title,
+  required String comment,
+}) async {
+  try {
+    return await post<Review>(
+      'reviews/',
+      data: {
+        "resource_type": targetType, // 👈 Matches write_only deserializer rules
+        "resource_id": targetId,
+        "rating": rating,
+        "title": title,
+        "comment": comment,
+      },
+      fromJson: (json) => Review.fromJson(json),
+    );
+  } on ApiException {
+    rethrow;
+  } catch (e) {
+    throw ApiException("Failed to submit review");
+  }
+}
 
 Future<Map<String, dynamic>> getAppVersion() async {
   try {
