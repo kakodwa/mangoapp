@@ -7,12 +7,13 @@ plugins {
 }
 
 dependencies {
+    // Kept up-to-date with Firebase BoM
     implementation(platform("com.google.firebase:firebase-bom:34.14.0"))
     implementation("com.google.firebase:firebase-analytics")
 }
 
 android {
-    // Updated to match your production Firebase package identity
+    // Production Firebase package identity for R.java generation
     namespace = "com.mangohub.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
@@ -27,7 +28,7 @@ android {
     }
 
     defaultConfig {
-        // Match this exactly with the package name registered in your Firebase console
+        // Matches your registered package name in the Firebase console
         applicationId = "com.mangohub.app"
         
         minSdk = flutter.minSdkVersion
@@ -38,7 +39,7 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build later.
+            // TODO: Add your own signing config for the production release build later.
             signingConfig = signingConfigs.getByName("debug")
             isMinifyEnabled = false
             isShrinkResources = false
