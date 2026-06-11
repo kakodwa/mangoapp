@@ -13,8 +13,8 @@ dependencies {
 }
 
 android {
-    // Production Firebase package identity for R.java generation
-    namespace = "com.mangohub.app"
+    // Updated to match your JSON configuration package identity
+    namespace = "com.example.mangohub"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -28,8 +28,8 @@ android {
     }
 
     defaultConfig {
-        // Matches your registered package name in the Firebase console
-        applicationId = "com.mangohub.app"
+        // Matches your package name in the Firebase JSON file exactly
+        applicationId = "com.example.mangohub"
         
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
