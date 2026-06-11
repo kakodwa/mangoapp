@@ -1,3 +1,5 @@
+// lib/widgets/main_app_bar.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -6,10 +8,8 @@ import '../providers/products_provider.dart';
 import '../theme/design_system/app_spacing.dart';
 import '../screens/cart/cart_screen.dart';
 import '../screens/auth/login_screen.dart';
-// Imported RegisterScreen (Adjust path to match your exact directory structure)
 import '../screens/auth/register_screen.dart'; 
 import '../screens/search/unified_search_screen.dart'; 
-// Import your Analytics Service (Adjust this path matching your actual directory structure)
 import '../services/analytics_service.dart';
 
 class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
@@ -52,8 +52,10 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
         ).createShader(bounds),
         child: Text(
           title,
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+          // 🥭 titleLarge is the perfect sweet spot—crisp, visible, but not overwhelming!
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
                 color: Colors.white, // Required placeholder color for ShaderMask to overlay on
               ),
         ),

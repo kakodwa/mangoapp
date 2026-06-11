@@ -38,7 +38,7 @@ class HorizontalProducts extends StatelessWidget {
           Padding(
   padding: const EdgeInsets.only(bottom: 16), // 👈 bottom space here
   child: SizedBox(
-    height:270,
+    height:280,
     child: ListView.separated(
       scrollDirection: Axis.horizontal,
       itemCount: products.length,

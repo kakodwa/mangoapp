@@ -15,8 +15,6 @@ import '../../providers/rooms_provider.dart';
 
 import '../auth/login_screen.dart';
 
-import '../../widgets/main_drawer.dart';
-import '../../widgets/main_app_bar.dart'; // Unified Top Bar Architecture
 import '../../widgets/app_fab.dart';
 import '../../widgets/shop_map_modal.dart';
 import '../../widgets/reviews/review_section_widget.dart';
@@ -81,13 +79,9 @@ class _LodgeDetailScreenState extends ConsumerState<LodgeDetailScreen> {
     final isLoggedIn = authState.isAuthenticated;
     final images = widget.lodge.images;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
-      // System Top Bar integration matching Main Design Specifications
-      appBar: const MainAppBar(
-        title: 'Lodge Details',
-      ),
-      body: Stack(
+    return Material(
+      color: const Color(0xFFF8F9FA),
+      child: Stack(
         children: [
           CustomScrollView(
             controller: _scrollController,
@@ -307,7 +301,7 @@ class _LodgeDetailScreenState extends ConsumerState<LodgeDetailScreen> {
                               separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.md),
                               itemBuilder: (context, index) {
                                 final room = rooms[index];
-                      
+                              
                                 final bool isOwner = isLoggedIn && 
                                 user?.id != null && 
                                 user?.id == room.ownerId;

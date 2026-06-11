@@ -1,4 +1,8 @@
+// lib/theme/design_system/app_image_card.dart
+
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shimmer/shimmer.dart';
 
 class AppImageCard extends StatelessWidget {
   final String? imageUrl;
@@ -28,22 +32,32 @@ class AppImageCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius),
         child: Stack(
           children: [
-            // Image
+            // ================= SHIMMER OPTIMIZED NETWORK IMAGE MIGRATION =================
             SizedBox(
               height: height,
               width: double.infinity,
               child: imageUrl != null && imageUrl!.isNotEmpty
-                  ? Image.network(
-                      imageUrl!,
+                  ? CachedNetworkImage(
+                      imageUrl: imageUrl!,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) {
+                      // Smoothly render a glowing placeholder box during initial server payload download
+                      placeholder: (context, url) => Shimmer.fromColors(
+                        baseColor: Colors.grey.shade300,
+                        highlightColor: Colors.grey.shade100,
+                        child: Container(
+                          color: Colors.white,
+                          width: double.infinity,
+                          height: double.infinity,
+                        ),
+                      ),
+                      errorWidget: (_, __, ___) {
                         return _buildPlaceholder();
                       },
                     )
                   : _buildPlaceholder(),
             ),
 
-            // Gradient Overlay (subtle)
+            // Gradient Overlay (subtle ambient drop text protection layer)
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
@@ -62,7 +76,7 @@ class AppImageCard extends StatelessWidget {
             // Custom Overlay
             if (overlay != null) Positioned.fill(child: overlay!),
 
-            // Badges Container
+            // Badges Container (Pins favorite heart buttons and category text cleanly)
             if (badges != null && badges!.isNotEmpty)
               Positioned(
                 top: 10,

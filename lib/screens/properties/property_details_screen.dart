@@ -14,7 +14,6 @@ import '../auth/login_screen.dart';
 import '../../utils/app_toast.dart';
 import '../../providers/properties_provider.dart';
 import '../../providers/api_provider.dart';
-import '../../widgets/main_app_bar.dart'; // Unified Layout Top Bar
 import '../../widgets/shop_map_modal.dart';
 import '../../widgets/reviews/review_section_widget.dart';
 import '../../theme/app_colors.dart';
@@ -70,13 +69,9 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
     final isLoggedIn = authState.isAuthenticated;
     final AnalyticsService analytics = AnalyticsService();
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-      // System Bar integration matching Main Architecture Standards
-      appBar: const MainAppBar(
-        title: 'Property Details',
-      ),
-      body: propertyAsync.when(
+    return Material(
+      color: const Color(0xFFF5F7FA),
+      child: propertyAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Error rendering view: $error')),
         data: (property) {

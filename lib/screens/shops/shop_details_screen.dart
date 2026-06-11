@@ -14,7 +14,6 @@ import '../../providers/products_provider.dart';
 import '../../widgets/shop_map_modal.dart';
 import '../../widgets/app_fab.dart';
 import '../../widgets/reviews/review_section_widget.dart';
-import '../../widgets/main_app_bar.dart'; // Imported MainAppBar
 
 import '../auth/login_screen.dart';
 import '../products/product_card.dart';
@@ -82,11 +81,9 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
 
     return DefaultTabController(
       length: 4,
-      child: Scaffold(
-        appBar: const MainAppBar(
-          title: "Shop Details",
-        ),
-        body: shopAsync.when(
+      child: Material(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        child: shopAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => Center(child: Text("Error: $e")),
           data: (shop) {
@@ -213,7 +210,7 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
                       ),
                     ),
 
-                    // =================... STICKY TAB BAR
+                    // ================= STICKY TAB BAR
                     SliverPersistentHeader(
                       pinned: true,
                       delegate: _SliverAppBarDelegate(
@@ -264,7 +261,7 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
                                 childAspectRatio: 0.62,
                                 crossAxisSpacing: 12,
                                 mainAxisSpacing: 12,
-                                              ),
+                              ),
                             ),
                           );
                         },
@@ -492,7 +489,6 @@ class _StatItem extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // 🥭 Dynamically checks if this is the rating column to insert stars safely
         if (isRating)
           Row(
             mainAxisSize: MainAxisSize.min,

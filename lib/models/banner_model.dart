@@ -17,12 +17,26 @@ class BannerModel {
 
   factory BannerModel.fromJson(Map<String, dynamic> json) {
     return BannerModel(
-      id: json['id'],
-      title: json['title'],
+      // Safeguard ID parsing
+      id: json['id'] ?? 0,
+      
+      // Safeguard Title (fallback to empty string if null)
+      title: json['title'] ?? '',
+      
+      // Safeguard Subtitle
       subtitle: json['subtitle'] ?? '',
-      imageUrl: json['image_url'],
+      
+      // Safeguard Image URL (fallback to empty string or a placeholder path)
+      imageUrl: json['image_url'] ?? '',
+      
+      // Explicitly allow null for url since it's defined as String?
       url: json['url'],
+      
+      // Clean safety cast for CTA text
       ctaText: (json['cta_text'] ?? 'Learn more').toString(),
     );
   }
+
+  // Helper getter to cleanly check if an image path exists before loading it in the UI
+  bool get hasValidImage => imageUrl.isNotEmpty && imageUrl.startsWith('http');
 }

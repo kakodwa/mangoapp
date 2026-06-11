@@ -22,9 +22,9 @@ import 'products/product_details_screen.dart';
 import 'properties/property_details_screen.dart';
 import 'shops/shop_details_screen.dart'; 
 import 'hospitality/lodge_detail_screen.dart'; 
-import 'events/event_detail_screen.dart'; // IMPORTED: Add target child screen reference
+import 'events/event_detail_screen.dart'; 
 import '../models/lodge_model.dart';           
-import '../models/event_model.dart'; // IMPORTED: Add core model definition
+import '../models/event_model.dart'; 
 
 class MainTabsScreen extends StatefulWidget {
   const MainTabsScreen({super.key});
@@ -43,7 +43,7 @@ class _MainTabsScreenState extends State<MainTabsScreen> {
   int? _activeShopId; 
   Lodge? _activeLodge;
   int? _activePropertyId; 
-  EventModel? _activeEvent; // UPDATED: Persistent local container tracking selected event view data
+  EventModel? _activeEvent; 
 
   late final List<Widget> _screens;
 
@@ -95,11 +95,10 @@ class _MainTabsScreenState extends State<MainTabsScreen> {
     });
   }
 
-  // UPDATED: Dynamic transition mechanism routing details view content inside structural shell
   void navigateToEventDetails(EventModel event) {
     setState(() {
       _activeEvent = event;
-      _currentIndex = 16; // Assigned explicitly to Slot index 16
+      _currentIndex = 16; 
     });
   }
 
@@ -119,6 +118,11 @@ class _MainTabsScreenState extends State<MainTabsScreen> {
       case 9: return "Delivery Rider";
       case 10: return "About App";
       case 11: return "Help";
+      case 12: return "Product Details";
+      case 13: return "Shop Details";
+      case 14: return "Lodge Details";
+      case 15: return "Property Details";
+      case 16: return "Event Details";
       default: return "MangoHub";
     }
   }
@@ -132,20 +136,17 @@ class _MainTabsScreenState extends State<MainTabsScreen> {
     if (_currentIndex == 13) displayIndex = 1; // Shop details -> Shops tab
     if (_currentIndex == 14) displayIndex = 5; // Lodge details -> Lodges tab
     if (_currentIndex == 15) displayIndex = 3; // Property details -> Properties tab
-    if (_currentIndex == 16) displayIndex = 4; // UPDATED: Maps internal details slot back to base Events navigation option tab
+    if (_currentIndex == 16) displayIndex = 4; // Event details -> Events tab
 
     return AppScaffold(
       currentIndex: displayIndex,
       onTabSelected: _changeTab,
-      // UPDATED: Included structural Index boundary check verification rule for index 16
-      appBar: (_currentIndex == 12 || _currentIndex == 13 || _currentIndex == 14 || _currentIndex == 15 || _currentIndex == 16)
-          ? null 
-          : MainAppBar(
-              title: _getAppBarTitle(),
-              onProfileTap: () => _changeTab(6),
-              onSearchTap: () => _changeTab(7),
-              onCartTap: () => _changeTab(8),
-            ),
+      appBar: MainAppBar(
+        title: _getAppBarTitle(),
+        onProfileTap: () => _changeTab(6),
+        onSearchTap: () => _changeTab(7),
+        onCartTap: () => _changeTab(8),
+      ),
       drawer: MainDrawer(
         onAboutTap: () => _changeTab(10),
         onHelpTap: () => _changeTab(11),
@@ -153,29 +154,70 @@ class _MainTabsScreenState extends State<MainTabsScreen> {
       body: IndexedStack(
         index: _currentIndex,
         children: [
-          ..._screens,
+          // 🥭 Lazily load tabs 0-11 so they don't hit the database/network all at once
+          ...List.generate(_screens.length, (index) {
+            return LazyLoadTab(
+              isSelected: _currentIndex == index,
+              child: _screens[index],
+            );
+          }),
+
           // Index 12: Persistent Product View
           _activeProductId != null 
               ? ProductDetailsScreen(key: ValueKey('p_$_activeProductId'), productId: _activeProductId!)
               : const Center(child: Text("No product selected")),
+
           // Index 13: Persistent Shop View
           _activeShopId != null 
               ? ShopDetailsScreen(key: ValueKey('s_$_activeShopId'), shopId: _activeShopId!)
               : const Center(child: Text("No shop selected")),
+
           // Index 14: Persistent Lodge View
           _activeLodge != null 
               ? LodgeDetailScreen(key: ValueKey('l_${_activeLodge!.id}'), lodge: _activeLodge!)
               : const Center(child: Text("No lodge selected")),
+
           // Index 15: Persistent Property View
           _activePropertyId != null 
               ? PropertyDetailsScreen(key: ValueKey('prop_$_activePropertyId'), propertyId: _activePropertyId!)
               : const Center(child: Text("No property selected")),
-          // Index 16: UPDATED: Added structural allocation destination component target slot matching core application shells
+
+          // Index 16: Persistent Event View
           _activeEvent != null
               ? EventDetailScreen(key: ValueKey('event__${_activeEvent!.id}'), event: _activeEvent!)
               : const Center(child: Text("No event selected")),
         ],
       ),
     );
+  }
+}
+
+// ====================================================================
+// LAZY LOAD WRAPPER COMPONENT
+// ====================================================================
+class LazyLoadTab extends StatefulWidget {
+  final bool isSelected;
+  final Widget child;
+
+  const LazyLoadTab({
+    super.key,
+    required this.isSelected,
+    required this.child,
+  });
+
+  @override
+  State<LazyLoadTab> createState() => _LazyLoadTabState();
+}
+
+class _LazyLoadTabState extends State<LazyLoadTab> {
+  bool _initialized = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.isSelected && !_initialized) {
+      _initialized = true;
+    }
+
+    return _initialized ? widget.child : const SizedBox.shrink();
   }
 }
