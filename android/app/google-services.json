@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "138498324914",
+    "project_id": "mamgohub",
+    "storage_bucket": "mamgohub.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:138498324914:android:62d64937327c9bae9e0cab",
+        "android_client_info": {
+          "package_name": "com.example.mangochi_marketplace"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAE1poAFPUF-PqI-ikHe6d9qJ4I1JSfcLw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

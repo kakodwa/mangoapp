@@ -63,7 +63,7 @@ class _MainAppState extends ConsumerState<MainApp> {
         navigatorKey: globalNavigatorKey, 
         scaffoldMessengerKey: scaffoldMessengerKey,
         debugShowCheckedModeBanner: false,
-        title: 'MangoMart',
+        title: 'MangoHub',
 
         theme: ThemeData(
           useMaterial3: true,

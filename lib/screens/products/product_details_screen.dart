@@ -449,7 +449,7 @@ class _ProductDetailsScreenState
                             // 💬 WHATSAPP
                             AppFab(
                               heroTag: "whatsapp",
-                              icon: FontAwesomeIcons.whatsapp,
+                              icon:FontAwesomeIcons.whatsapp,
                               tooltip: "Chat on WhatsApp",
                               onPressed: () {
                                 if (product.phoneNumber.isNotEmpty) {

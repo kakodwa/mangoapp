@@ -61,6 +61,43 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     });
   }
 
+  // Reusable restriction popup dialog builder
+  void _showFeatureUnderDevelopmentDialog(String featureName) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Row(
+            children: [
+              const Icon(Icons.construction, color: AppColors.mangoOrange),
+              const SizedBox(width: 10),
+              Text(
+                featureName,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          content: const Text(
+            "This feature is currently still under development and is strictly limited to special users who apply for it.",
+            style: TextStyle(fontSize: 14, height: 1.4),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text(
+                "Got it",
+                style: TextStyle(color: AppColors.leafGreen, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
@@ -214,7 +251,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   children: [
                     _gridCard(Icons.dashboard, "Lodge", () {
                       analytics.logEvent('profile_click_lodge_dashboard');
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const LodgeOwnerDashboard()));
+                      
+                      // Shows popup first:
+                      _showFeatureUnderDevelopmentDialog("Lodge Management");
+                      
+                      // SCREEN LOGIC OPENER IS HERE BUT COMMENTED OUT:
+                      // Navigator.push(context, MaterialPageRoute(builder: (_) => const LodgeOwnerDashboard()));
                     }),
                     _gridCard(Icons.home_work, "Properties", () {
                       analytics.logEvent('profile_click_properties');
@@ -222,7 +264,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     }),
                     _gridCard(Icons.event, "Events", () {
                       analytics.logEvent('profile_click_manage_events');
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const ManageEventsScreen()));
+                      
+                      // Shows popup first:
+                      _showFeatureUnderDevelopmentDialog("Event Management");
+                      
+                      // SCREEN LOGIC OPENER IS HERE BUT COMMENTED OUT:
+                      // Navigator.push(context, MaterialPageRoute(builder: (_) => const ManageEventsScreen()));
                     }),
                   ],
                 ),

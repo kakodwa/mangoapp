@@ -70,10 +70,10 @@ class AppScaffold extends StatelessWidget {
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home', tooltip: 'Home'),
             BottomNavigationBarItem(icon: Icon(Icons.store), label: 'Shops', tooltip: 'Shops'),
-            BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Products', tooltip: 'Products'),
+            //BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Products', tooltip: 'Products'),
             BottomNavigationBarItem(icon: Icon(Icons.home_work), label: 'Properties', tooltip: 'Properties'),
-            BottomNavigationBarItem(icon: Icon(Icons.event), label: 'Events', tooltip: 'Events'),
-            BottomNavigationBarItem(icon: Icon(Icons.hotel), label: 'Booking', tooltip: 'Booking'),
+            //BottomNavigationBarItem(icon: Icon(Icons.event), label: 'Events', tooltip: 'Events'),
+            //BottomNavigationBarItem(icon: Icon(Icons.hotel), label: 'Booking', tooltip: 'Booking'),
           ],
         ),
       ),

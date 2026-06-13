@@ -354,7 +354,7 @@ class EventDetailScreen extends ConsumerWidget {
             if (event.organizerPhoneNumber != null && event.organizerPhoneNumber!.isNotEmpty) ...[
               AppFab(
                 heroTag: "whatsapp_event_fab",
-                icon: FontAwesomeIcons.whatsapp,
+                icon:FontAwesomeIcons.whatsapp,
                 tooltip: "Chat with Organizer",
                 onPressed: () {
                   analyticsService.logEvent('click_event_whatsapp_id_${event.id}');
