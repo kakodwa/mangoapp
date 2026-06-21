@@ -23,6 +23,7 @@ import '../../screens/shops/shop_card.dart';
 import '../../screens/properties/property_card.dart';
 import '../../widgets/hospitality/lodge_card.dart';
 import '../../widgets/events/event_card.dart';
+import '../../widgets/web_footer.dart';
 
 class UnifiedSearchScreen extends StatefulWidget {
   const UnifiedSearchScreen({Key? key}) : super(key: key);
@@ -119,129 +120,132 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setSheetState) {
-            final typeWithSubFilters = _provider.selectedType == 'product' || 
-                                       _provider.selectedType == 'property' || 
-                                       _provider.selectedType == 'lodge';
+        return Container(
+          // Logic omitted for sizing brevity
+          child: StatefulBuilder(
+            builder: (context, setSheetState) {
+              final typeWithSubFilters = _provider.selectedType == 'product' || 
+                                         _provider.selectedType == 'property' || 
+                                         _provider.selectedType == 'lodge';
 
-            return AnimatedBuilder(
-              animation: _provider,
-              builder: (context, child) {
-                return Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    AppSpacing.md,
-                    AppSpacing.md,
-                    AppSpacing.md,
-                    AppSpacing.md + MediaQuery.of(context).viewInsets.bottom,
-                  ),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Center(
-                          child: Container(
-                            width: 40,
-                            height: 4,
-                            margin: const EdgeInsets.only(bottom: 12),
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade300,
-                              borderRadius: BorderRadius.circular(2),
+              return AnimatedBuilder(
+                animation: _provider,
+                builder: (context, child) {
+                  return Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      AppSpacing.md,
+                      AppSpacing.md,
+                      AppSpacing.md,
+                      AppSpacing.md + MediaQuery.of(context).viewInsets.bottom,
+                    ),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Center(
+                            child: Container(
+                              width: 40,
+                              height: 4,
+                              margin: const EdgeInsets.only(bottom: 12),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade300,
+                                borderRadius: BorderRadius.circular(2),
+                              ),
                             ),
                           ),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'Filter Search Results',
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.darkText),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.close),
-                              onPressed: () => Navigator.pop(context),
-                            ),
-                          ],
-                        ),
-                        const Divider(),
-                        const SizedBox(height: AppSpacing.sm),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Filter Search Results',
+                                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.darkText),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.close),
+                                onPressed: () => Navigator.pop(context),
+                              ),
+                            ],
+                          ),
+                          const Divider(),
+                          const SizedBox(height: AppSpacing.sm),
 
-                        AppDropdown<String>(
-                          label: 'Location District',
-                          value: _provider.selectedDistrict,
-                          items: [
-                            const DropdownMenuItem(value: null, child: Text('All Districts')),
-                            ..._malawiDistricts.map((d) => DropdownMenuItem(value: d, child: Text(d))),
-                          ],
-                          onChanged: (val) {
-                            _provider.updateFilters(
-                              district: val,
-                              category: SearchProvider.isUnchanged,
-                              listingPurpose: SearchProvider.isUnchanged,
-                            );
-                          },
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-
-                        if (typeWithSubFilters) ...[
                           AppDropdown<String>(
-                            label: 'Sub-Category Group',
-                            value: _provider.selectedCategory,
+                            label: 'Location District',
+                            value: _provider.selectedDistrict,
                             items: [
-                              const DropdownMenuItem(value: null, child: Text('All Categories')),
-                              if (_provider.selectedType == 'product')
-                                ..._productCategories.map((c) => DropdownMenuItem(value: c['key'], child: Text(c['label']!))),
-                              if (_provider.selectedType == 'property')
-                                ..._propertyCategories.map((c) => DropdownMenuItem(value: c['key'], child: Text(c['label']!))),
-                              if (_provider.selectedType == 'lodge')
-                                ..._lodgeCategories.map((c) => DropdownMenuItem(value: c['key'], child: Text(c['label']!))),
+                              const DropdownMenuItem(value: null, child: Text('All Districts')),
+                              ..._malawiDistricts.map((d) => DropdownMenuItem(value: d, child: Text(d))),
                             ],
                             onChanged: (val) {
                               _provider.updateFilters(
-                                category: val,
-                                district: SearchProvider.isUnchanged,
+                                district: val,
+                                category: SearchProvider.isUnchanged,
                                 listingPurpose: SearchProvider.isUnchanged,
                               );
                             },
                           ),
                           const SizedBox(height: AppSpacing.md),
-                        ],
 
-                        if (_provider.selectedType == 'property') ...[
-                          AppDropdown<String>(
-                            label: 'Listing Purpose',
-                            value: _provider.selectedListingPurpose,
-                            items: const [
-                              DropdownMenuItem(value: null, child: Text('Any Purpose (Rent/Sale)')),
-                              DropdownMenuItem(value: 'sale', child: Text('For Sale')),
-                              DropdownMenuItem(value: 'rent', child: Text('For Rent')),
-                            ],
-                            onChanged: (val) {
-                              _provider.updateFilters(
-                                listingPurpose: val,
-                                district: SearchProvider.isUnchanged,
-                                category: SearchProvider.isUnchanged,
-                              );
-                            },
-                          ),
+                          if (typeWithSubFilters) ...[
+                            AppDropdown<String>(
+                              label: 'Sub-Category Group',
+                              value: _provider.selectedCategory,
+                              items: [
+                                const DropdownMenuItem(value: null, child: Text('All Categories')),
+                                if (_provider.selectedType == 'product')
+                                  ..._productCategories.map((c) => DropdownMenuItem(value: c['key'], child: Text(c['label']!))),
+                                if (_provider.selectedType == 'property')
+                                  ..._propertyCategories.map((c) => DropdownMenuItem(value: c['key'], child: Text(c['label']!))),
+                                if (_provider.selectedType == 'lodge')
+                                  ..._lodgeCategories.map((c) => DropdownMenuItem(value: c['key'], child: Text(c['label']!))),
+                              ],
+                              onChanged: (val) {
+                                _provider.updateFilters(
+                                  category: val,
+                                  district: SearchProvider.isUnchanged,
+                                  listingPurpose: SearchProvider.isUnchanged,
+                                );
+                              },
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+                          ],
+
+                          if (_provider.selectedType == 'property') ...[
+                            AppDropdown<String>(
+                              label: 'Listing Purpose',
+                              value: _provider.selectedListingPurpose,
+                              items: const [
+                                DropdownMenuItem(value: null, child: Text('Any Purpose (Rent/Sale)')),
+                                DropdownMenuItem(value: 'sale', child: Text('For Sale')),
+                                DropdownMenuItem(value: 'rent', child: Text('For Rent')),
+                              ],
+                              onChanged: (val) {
+                                _provider.updateFilters(
+                                  listingPurpose: val,
+                                  district: SearchProvider.isUnchanged,
+                                  category: SearchProvider.isUnchanged,
+                                );
+                              },
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+                          ],
+
                           const SizedBox(height: AppSpacing.md),
+                          AppButton(
+                            text: "Apply Active Filters",
+                            fullWidth: true,
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
                         ],
-
-                        const SizedBox(height: AppSpacing.md),
-                        AppButton(
-                          text: "Apply Active Filters",
-                          fullWidth: true,
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                      ],
+                      ),
                     ),
-                  ),
-                );
-              },
-            );
-          },
+                  );
+                },
+              );
+            },
+          ),
         );
       },
     );
@@ -257,9 +261,6 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // FIX: Removed the nested Scaffold and appBar initialization completely.
-    // This widget now outputs its body content seamlessly, allowing MainTabsScreen 
-    // and AppScaffold to manage the unified global layout structure cleanly.
     return AnimatedBuilder(
       animation: _provider,
       builder: (context, child) {
@@ -269,9 +270,25 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
 
         final bool isProductTabOnly = _provider.selectedType == 'product';
 
-        // --- SPLIT THE DATA TO SOLVE THE MIXED LAYOUT BUG NATIVELY ---
         final List<SearchResultItem> productItems = _provider.results.where((e) => e.resultType == 'product').toList();
         final List<SearchResultItem> bannerItems = _provider.results.where((e) => e.resultType != 'product').toList();
+
+        // ---------------------------------------------------------
+        // CALCULATE DYNAMIC BREAKPOINTS FOR GRIDS BASED ON DISPLAY WIDTH
+        // ---------------------------------------------------------
+        final double screenWidth = MediaQuery.of(context).size.width;
+
+        // Product Grid Columns (Starts at 2, scales up to 6)
+        int productColumns = 2;
+        if (screenWidth >= 1200) productColumns = 6;
+        else if (screenWidth >= 800) productColumns = 4;
+        else if (screenWidth >= 600) productColumns = 3;
+
+        // Other Items Grid Columns (Shops, Lodges, Events, Properties - Starts at 1, scales up to 4)
+        int bannerColumns = 1;
+        if (screenWidth >= 1200) bannerColumns = 4;
+        else if (screenWidth >= 800) bannerColumns = 3;
+        else if (screenWidth >= 600) bannerColumns = 2;
 
         return Column(
           children: [
@@ -337,7 +354,6 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
             ),
 
             // 2. HORIZONTAL SCROLL CHIP TABS
-           // 2. HORIZONTAL SCROLL CHIP TABS
             SizedBox(
               height: 40,
               child: ListView.builder(
@@ -390,14 +406,14 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
                                 slivers: [
                                   
                                   // =========================================================
-                                  // SECTION A: IF THERE ARE PRODUCTS, RENDER THEM IN A 2-COLUMN GRID
+                                  // SECTION A: PRODUCT ITEMS (Starts from 2 columns on Mobile)
                                   // =========================================================
                                   if (isProductTabOnly || productItems.isNotEmpty)
                                     SliverPadding(
                                       padding: const EdgeInsets.all(12.0),
                                       sliver: SliverGrid(
-                                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                          crossAxisCount: 2,
+                                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: productColumns, // Dynamic column logic applied
                                           childAspectRatio: 0.62,
                                           crossAxisSpacing: 12,
                                           mainAxisSpacing: 12,
@@ -413,12 +429,18 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
                                     ),
 
                                   // =========================================================
-                                  // SECTION B: RENDER PROPERTIES, EVENT BANNERS, SHOPS FULL-WIDTH
+                                  // SECTION B: OTHER DOMAINS (Starts from 1 column on Mobile)
                                   // =========================================================
                                   if (!isProductTabOnly && bannerItems.isNotEmpty)
                                     SliverPadding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                      sliver: SliverList(
+                                      padding: const EdgeInsets.all(12.0),
+                                      sliver: SliverGrid(
+                                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: bannerColumns, // Dynamic column logic applied
+                                          childAspectRatio: bannerColumns == 1 ? 1.3 : 1.1, // Adapts aspect ratio gracefully if grid scales out
+                                          crossAxisSpacing: 12,
+                                          mainAxisSpacing: 12,
+                                        ),
                                         delegate: SliverChildBuilderDelegate(
                                           (context, index) => _buildDynamicFeedCard(bannerItems[index]),
                                           childCount: bannerItems.length,
@@ -434,6 +456,9 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
                                         child: Center(child: CircularProgressIndicator(color: AppColors.mangoOrange)),
                                       ),
                                     ),
+                                    const SliverToBoxAdapter(
+                                      child: WebFooter(),
+                                      ),
                                 ],
                               ),
                             ),

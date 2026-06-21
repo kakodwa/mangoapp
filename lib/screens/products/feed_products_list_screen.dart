@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/feed/main_feed_providers.dart';
 import '../../widgets/feed/feed_list_widget.dart';
+import '../../widgets/web_footer.dart';
 
 // Analytics Import
 import '../../services/analytics_service.dart';
@@ -93,6 +94,9 @@ class _ProductsListScreenState extends ConsumerState<ProductsListScreen> {
                   ),
                 ),
               ),
+              const SliverToBoxAdapter(
+                child: WebFooter(),
+                ),
             ],
           ),
         );

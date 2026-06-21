@@ -38,45 +38,89 @@ class AppScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final AnalyticsService analytics = AnalyticsService(); 
+    final double screenWidth = MediaQuery.of(context).size.width;
+    
+    // Web Responsive Breakpoint Flag
+    final bool isDesktop = screenWidth >= 900;
 
-    // SAFEGUARD: Fallback the BottomNavigationBar highlight to index 0 if it goes out-of-bounds!
+    // SAFEGUARD: Fallback the Navigation highlight to index 0 if it goes out-of-bounds!
     final int navBarIndex = currentIndex > 5 ? 0 : currentIndex;
 
     return Scaffold(
       appBar: appBar,
-      drawer: drawer,
+      drawer: isDesktop ? null : drawer, // Disable side drawer if nav rail is actively displayed
       backgroundColor: backgroundColor,
       floatingActionButton: floatingActionButton,
       body: SafeArea(
-        child: body ?? const SizedBox.shrink(), 
-      ),
-      // Wrapped in our scroll-animation listener to hide it dynamically
-      bottomNavigationBar: _ScrollingBottomNavBarWrapper(
-        child: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          currentIndex: navBarIndex, 
-          selectedItemColor: currentIndex > 5 
-              ? colorScheme.onSurface.withOpacity(0.6) 
-              : colorScheme.primary,
-          unselectedItemColor: colorScheme.onSurface.withOpacity(0.6),
-          showSelectedLabels: false,
-          showUnselectedLabels: false,
-          onTap: (index) {
-            analytics.logEvent(_getTabEventName(index));
-            if (onTabSelected != null) {
-              onTabSelected!(index);
-            }
-          },
-          items: const [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home', tooltip: 'Home'),
-            BottomNavigationBarItem(icon: Icon(Icons.store), label: 'Shops', tooltip: 'Shops'),
-            //BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Products', tooltip: 'Products'),
-            BottomNavigationBarItem(icon: Icon(Icons.home_work), label: 'Properties', tooltip: 'Properties'),
-            //BottomNavigationBarItem(icon: Icon(Icons.event), label: 'Events', tooltip: 'Events'),
-            //BottomNavigationBarItem(icon: Icon(Icons.hotel), label: 'Booking', tooltip: 'Booking'),
+        child: Row(
+          children: [
+            // --- WEB RESPONSIVE SIDE NAVIGATION RAIL ---
+            if (isDesktop) ...[
+              NavigationRail(
+                selectedIndex: navBarIndex,
+                elevation: 1,
+                backgroundColor: colorScheme.surface,
+                selectedIconTheme: IconThemeData(color: colorScheme.primary),
+                unselectedIconTheme: IconThemeData(color: colorScheme.onSurface.withOpacity(0.6)),
+                // Dynamic expansion if ultra-wide viewport
+                extended: screenWidth >= 1200,
+                // Removed the MangoHub text header block here and replaced with clean top padding spacing
+                leading: const SizedBox(height: 16.0),
+                onDestinationSelected: (index) {
+                  analytics.logEvent(_getTabEventName(index));
+                  if (onTabSelected != null) {
+                    onTabSelected!(index);
+                  }
+                },
+                destinations: const [
+                  NavigationRailDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: Text('Home')),
+                  NavigationRailDestination(icon: Icon(Icons.store_outlined), selectedIcon: Icon(Icons.store), label: Text('Shops')),
+                  NavigationRailDestination(icon: Icon(Icons.shopping_cart_outlined), selectedIcon: Icon(Icons.shopping_cart), label: Text('Products')),
+                  NavigationRailDestination(icon: Icon(Icons.home_work_outlined), selectedIcon: Icon(Icons.home_work), label: Text('Properties')),
+                  NavigationRailDestination(icon: Icon(Icons.event_outlined), selectedIcon: Icon(Icons.event), label: Text('Events')),
+                  NavigationRailDestination(icon: Icon(Icons.hotel_outlined), selectedIcon: Icon(Icons.hotel), label: Text('Booking')),
+                ],
+              ),
+              const VerticalDivider(thickness: 1, width: 1),
+            ],
+
+            // Content Panel area housing viewport page components
+            Expanded(
+              child: body ?? const SizedBox.shrink(),
+            ),
           ],
         ),
       ),
+      
+      // --- MOBILE BOTTOM NAVIGATION BAR ---
+      bottomNavigationBar: isDesktop
+          ? null
+          : _ScrollingBottomNavBarWrapper(
+              child: BottomNavigationBar(
+                type: BottomNavigationBarType.fixed,
+                currentIndex: navBarIndex, 
+                selectedItemColor: currentIndex > 5 
+                    ? colorScheme.onSurface.withOpacity(0.6) 
+                    : colorScheme.primary,
+                unselectedItemColor: colorScheme.onSurface.withOpacity(0.6),
+                showSelectedLabels: false,
+                showUnselectedLabels: false,
+                onTap: (index) {
+                  analytics.logEvent(_getTabEventName(index));
+                  if (onTabSelected != null) {
+                    onTabSelected!(index);
+                  }
+                },
+                items: const [
+                  BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home', tooltip: 'Home'),
+                  BottomNavigationBarItem(icon: Icon(Icons.store), label: 'Shops', tooltip: 'Shops'),
+                  BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Products', tooltip: 'Products'),
+                  BottomNavigationBarItem(icon: Icon(Icons.home_work), label: 'Properties', tooltip: 'Properties'),
+                  BottomNavigationBarItem(icon: Icon(Icons.event), label: 'Events', tooltip: 'Events'),
+                  BottomNavigationBarItem(icon: Icon(Icons.hotel), label: 'Booking', tooltip: 'Booking'),
+                ],
+              ),
+            ),
     );
   }
 }
@@ -105,7 +149,7 @@ class _ScrollingBottomNavBarWrapperState extends State<_ScrollingBottomNavBarWra
             setState(() => _isVisible = true); 
           }
         }
-        return false; // Don't block the notification from bubble up
+        return false; // Don't block the notification from bubbling up
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),

@@ -1,11 +1,14 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http_parser/http_parser.dart'; // 👈 CRITICAL: Added for cross-platform MIME mapping
 
 import '../core/api/api_client.dart';
 import '../models/product_model.dart';
 import '../models/banner_model.dart';
+import '../models/product_variant_model.dart';
 import 'api_provider.dart';
 
 /// ======================
@@ -85,20 +88,34 @@ class ProductActions {
 
   ProductActions(this.apiClient);
 
-  /// ✅ FIXED: works on WEB + MOBILE
-  Future<Product> createProduct(Product product, XFile image) async {
+  /// ✅ FIXED: works perfectly on both WEB and MOBILE with Django Validation
+  Future<Product> createProduct(
+    Product product, 
+    XFile image, 
+    List<LocalProductVariant> variants,
+  ) async {
     MultipartFile file;
 
     if (kIsWeb) {
       final bytes = await image.readAsBytes();
+      
+      // Determine image extension to set exact content type headers dynamically
+      String ext = image.name.split('.').last.toLowerCase();
+      String mimeSubType = (ext == 'png') ? 'png' : 'jpeg';
 
       file = MultipartFile.fromBytes(
         bytes,
         filename: image.name,
+        contentType: MediaType('image', mimeSubType), // 👈 CRITICAL: Enforces Multipart structure on Web
       );
     } else {
       file = await MultipartFile.fromFile(image.path);
     }
+
+    // Convert variants array objects list into a raw JSON text string
+    final String variantsJsonString = jsonEncode(
+      variants.map((v) => v.toJson()).toList(),
+    );
 
     final formData = FormData.fromMap({
       "name": product.name,
@@ -108,6 +125,7 @@ class ProductActions {
       "shop": product.shopId,
       "category": product.category,
       "image": file,
+      "variants": variantsJsonString,
     });
 
     final response = await apiClient.postMultipart(
@@ -119,52 +137,55 @@ class ProductActions {
     return Product.fromJson(response);
   }
 
-
-
-
   Future<Product> updateProduct(int id, Map<String, dynamic> data) async {
-  final response = await apiClient.patch(
-    'products/$id/',
-    data: data,
-    fromJson: (json) => Product.fromJson(json),
-  );
-
-  return response;
-}
-
-  Future<void> uploadProductImages(
-  int productId,
-  List<XFile> images,
-) async {
-  final formData = FormData();
-
-  print("🔥 Uploading ${images.length} images");
-
-  for (final image in images) {
-    final bytes = await image.readAsBytes();
-
-    formData.files.add(
-      MapEntry(
-        "images",
-        MultipartFile.fromBytes(
-          bytes,
-          filename: image.name,
-        ),
-      ),
+    final response = await apiClient.patch(
+      'products/$id/',
+      data: data,
+      fromJson: (json) => Product.fromJson(json),
     );
+
+    return response;
   }
 
-  final response = await apiClient.postMultipart(
-    "products/$productId/add_images/",
-    formData,
-  );
+  /// ✅ FIXED: Multi-image gallery upload web compatibility patch
+  Future<void> uploadProductImages(
+    int productId,
+    List<XFile> images,
+  ) async {
+    final formData = FormData();
 
+    print("🔥 Uploading ${images.length} images");
 
-  print("🔥 Upload response: $response");
+    for (final image in images) {
+      final bytes = await image.readAsBytes();
+
+      String ext = image.name.split('.').last.toLowerCase();
+      String mimeSubType = (ext == 'png') ? 'png' : 'jpeg';
+
+      formData.files.add(
+        MapEntry(
+          "images",
+          MultipartFile.fromBytes(
+            bytes,
+            filename: image.name,
+            contentType: MediaType('image', mimeSubType), // 👈 CRITICAL: Web support boundary for sub-gallery
+          ),
+        ),
+      );
+    }
+
+    final response = await apiClient.postMultipart(
+      "products/$productId/add_images/",
+      formData,
+    );
+
+    print("🔥 Upload response: $response");
+  }
 }
-}
 
-
+/// ======================
+/// FAVORITES
+/// ======================
 
 final favoriteProvider =
     StateNotifierProvider<FavoriteNotifier, Set<int>>(
@@ -181,34 +202,34 @@ class FavoriteNotifier extends StateNotifier<Set<int>> {
   }
 
   Future<bool> toggle(int productId) async {
-  final api = ref.read(apiClientProvider);
+    final api = ref.read(apiClientProvider);
+    final wasFavorite = state.contains(productId);
 
-  final wasFavorite = state.contains(productId);
-
-  // optimistic update
-  state = wasFavorite
-      ? (state.where((id) => id != productId).toSet())
-      : {...state, productId};
-
-  try {
-    await api.post(
-      'products/$productId/toggle_favorite/',
-      data: {},
-      fromJson: (json) => json,
-    );
-
-    // return NEW state result
-    return !wasFavorite;
-  } catch (e) {
-    // rollback
+    // optimistic update
     state = wasFavorite
-        ? {...state, productId}
-        : (state.where((id) => id != productId).toSet());
+        ? (state.where((id) => id != productId).toSet())
+        : {...state, productId};
 
-    // return original state
-    return wasFavorite;
+    try {
+      await api.post(
+        'products/$productId/toggle_favorite/',
+        data: {},
+        fromJson: (json) => json,
+      );
+
+      // return NEW state result
+      return !wasFavorite;
+    } catch (e) {
+      // rollback
+      state = wasFavorite
+          ? {...state, productId}
+          : (state.where((id) => id != productId).toSet());
+
+      // return original state
+      return wasFavorite;
+    }
   }
-}
+
   void setFavorites(List<int> productIds) {
     state = productIds.toSet();
   }
@@ -217,7 +238,6 @@ class FavoriteNotifier extends StateNotifier<Set<int>> {
     state = {};
   }
 }
-
 
 final bannersProvider = FutureProvider.autoDispose<List<BannerModel>>((ref) async {
   final apiClient = ref.watch(apiClientProvider);
@@ -254,7 +274,6 @@ final cartTotalProvider = Provider<double>((ref) {
 final addToCartProvider = Provider((ref) {
   return (Product product, int qty) {
     final cart = ref.read(cartProvider);
-
     final index = cart.indexWhere((e) => e.product.id == product.id);
 
     if (index != -1) {

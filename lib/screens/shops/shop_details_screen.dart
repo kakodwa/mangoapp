@@ -66,6 +66,14 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
     await launchUrl(uri);
   }
 
+  // Responsive Grid Count Helper 
+  int _getResponsiveCrossAxisCount(double width) {
+    if (width < 600) return 2;     // Mobile phones
+    if (width < 900) return 3;     // Tablets / Small Screens
+    if (width < 1200) return 4;    // Medium Desktop / Large Tablets
+    return 5;                      // Wide Desktop monitors
+  }
+
   @override
   void dispose() {
     _scrollController.dispose();
@@ -78,6 +86,9 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
     final productsAsync = ref.watch(productsByShopProvider(widget.shopId));
     final auth = ref.watch(authProvider);
     final isLoggedIn = auth.isAuthenticated;
+    
+    // Get the device width for building adaptive views
+    final double screenWidth = MediaQuery.of(context).size.width;
 
     return DefaultTabController(
       length: 4,
@@ -256,8 +267,9 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
                                 (context, i) => ProductCard(product: products[i]),
                                 childCount: products.length,
                               ),
-                              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                // FIXED: Calculating cross-axis item capacity continuously on layout widths
+                                crossAxisCount: _getResponsiveCrossAxisCount(screenWidth),
                                 childAspectRatio: 0.62,
                                 crossAxisSpacing: 12,
                                 mainAxisSpacing: 12,

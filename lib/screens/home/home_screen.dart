@@ -8,6 +8,7 @@ import '../../providers/products_provider.dart'; // contains bannersProvider
 import '../../theme/design_system/app_spacing.dart';
 
 import '../../widgets/feed/feed_list_widget.dart';
+import '../../widgets/web_footer.dart';
 
 import '../../screens/delivery/delivery_code_entry_screen.dart';
 import '../../screens/events/scan_ticket_screen.dart';
@@ -87,6 +88,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final feed = ref.watch(homeFeedProvider);
     final bannersAsync = ref.watch(bannersProvider);
+    final double screenWidth = MediaQuery.of(context).size.width;
+
+    // Responsive Carousel Heights
+    double bannerCarouselHeight = 190.0;
+    if (screenWidth >= 1200) {
+      bannerCarouselHeight = 340.0; // Desktop
+    } else if (screenWidth >= 800) {
+      bannerCarouselHeight = 260.0; // Tablet
+    } else if (screenWidth >= 600) {
+      bannerCarouselHeight = 220.0; // Large Foldables / Mini Tablets
+    }
 
     return feed.when(
       loading: () => const Center(
@@ -103,80 +115,84 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             SliverToBoxAdapter(
               child: bannersAsync.when(
                 data: (banners) {
-                  // Total display count is database length + your permanent default asset banner
                   final displayLength = banners.length + 1;
 
-                  return Container(
-                    margin: const EdgeInsets.only(
-                      top: 12,
-                      left: 12,
-                      right: 12,
-                      bottom: 8,
-                    ),
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: 190,
-                          width: double.infinity,
-                          child: PageView.builder(
-                            controller: bannerController,
-                            itemCount: displayLength,
-                            onPageChanged: (index) {
-                              bannerIndex = index;
-                            },
-                            itemBuilder: (context, index) {
-                              // Inserts your custom design banner at the end of the carousel array
-                              if (index == banners.length) {
+                  return Align(
+                    alignment: Alignment.topCenter,
+                    child: Container(
+                      constraints: const BoxConstraints(maxWidth: 1200),
+                      margin: const EdgeInsets.only(
+                        top: 12,
+                        left: 12,
+                        right: 12,
+                        bottom: 8,
+                      ),
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: bannerCarouselHeight,
+                            width: double.infinity,
+                            child: PageView.builder(
+                              controller: bannerController,
+                              itemCount: displayLength,
+                              onPageChanged: (index) {
+                                bannerIndex = index;
+                              },
+                              itemBuilder: (context, index) {
+                                if (index == banners.length) {
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                    child: _buildBanner(
+                                      context,
+                                      image: 'assets/images/banner.png',
+                                      title: 'CREATE YOUR SHOP ON MANGOHUB',
+                                      subtitle: 'START LISTING YOUR PRODUCTS FOR FREE',
+                                      isAssetImage: true,
+                                      showJoinButton: true,
+                                      screenWidth: screenWidth,
+                                    ),
+                                  );
+                                }
+
+                                final banner = banners[index];
                                 return Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                                  child: _buildBanner(
-                                    context,
-                                    image: 'assets/images/banner.png',
-                                    title: 'CREATE YOUR SHOP ON MANGOHUB',
-                                    subtitle: 'START LISTING YOUR PRODUCTS FOR FREE',
-                                    isAssetImage: true,
-                                    showJoinButton: true,
+                                  child: InkWell(
+                                    borderRadius: BorderRadius.circular(14),
+                                    onTap: () {
+                                      _analytics.logEvent(
+                                        'banner_click_${banner.title.replaceAll(' ', '_').toLowerCase()}',
+                                      );
+                                    },
+                                    child: _buildBanner(
+                                      context,
+                                      image: banner.imageUrl,
+                                      title: banner.title,
+                                      subtitle: banner.subtitle,
+                                      url: banner.url,
+                                      ctaText: banner.ctaText,
+                                      screenWidth: screenWidth,
+                                    ),
                                   ),
                                 );
-                              }
-
-                              final banner = banners[index];
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                                child: InkWell(
-                                  borderRadius: BorderRadius.circular(14),
-                                  onTap: () {
-                                    _analytics.logEvent(
-                                      'banner_click_${banner.title.replaceAll(' ', '_').toLowerCase()}',
-                                    );
-                                  },
-                                  child: _buildBanner(
-                                    context,
-                                    image: banner.imageUrl,
-                                    title: banner.title,
-                                    subtitle: banner.subtitle,
-                                    url: banner.url,
-                                    ctaText: banner.ctaText,
-                                  ),
-                                ),
-                              );
-                            },
+                              },
+                            ),
                           ),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        SmoothPageIndicator(
-                          controller: bannerController,
-                          count: displayLength,
-                          effect: WormEffect(
-                            dotHeight: 8,
-                            dotWidth: 8,
-                            activeDotColor:
-                                Theme.of(context).colorScheme.primary,
+                          const SizedBox(
+                            height: 10,
                           ),
-                        ),
-                      ],
+                          SmoothPageIndicator(
+                            controller: bannerController,
+                            count: displayLength,
+                            effect: WormEffect(
+                              dotHeight: 8,
+                              dotWidth: 8,
+                              activeDotColor:
+                                  Theme.of(context).colorScheme.primary,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -198,59 +214,63 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
             /// Quick Actions
             SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _QuickActionButton(
-                        icon: Icons.map_outlined,
-                        label: 'Guide',
-                        onTap: () {
-                          _analytics.logEvent('click_Guide');
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const MangoHubScreen(),
-                            ),
-                          );
-                        },
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 1200),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _QuickActionButton(
+                          icon: Icons.map_outlined,
+                          label: 'Guide',
+                          onTap: () {
+                            _analytics.logEvent('click_Guide');
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const MangoHubScreen(),
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                    ),
-                    const SizedBox(
-                      width: AppSpacing.sm,
-                    ),
-                    Expanded(
-                      child: _QuickActionButton(
-                        icon: Icons.local_shipping,
-                        label: 'Delivery',
-                        onTap: () {
-                          _analytics.logEvent('click_delivery');
-                          widget.onDeliveryTap();
-                        }, 
+                      const SizedBox(
+                        width: AppSpacing.sm,
                       ),
-                    ),
-                    const SizedBox(
-                      width: AppSpacing.sm,
-                    ),
-                    Expanded(
-                      child: _QuickActionButton(
-                        icon: Icons.qr_code_scanner,
-                        label: 'Scan Ticket',
-                        onTap: () {
-                          _analytics.logEvent('click_scan_ticket');
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const ScanTicketScreen(),
-                            ),
-                          );
-                        },
+                      Expanded(
+                        child: _QuickActionButton(
+                          icon: Icons.local_shipping,
+                          label: 'Delivery',
+                          onTap: () {
+                            _analytics.logEvent('click_delivery');
+                            widget.onDeliveryTap();
+                          }, 
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(
+                        width: AppSpacing.sm,
+                      ),
+                      Expanded(
+                        child: _QuickActionButton(
+                          icon: Icons.qr_code_scanner,
+                          label: 'Scan Ticket',
+                          onTap: () {
+                            _analytics.logEvent('click_scan_ticket');
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const ScanTicketScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -263,6 +283,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             const SliverToBoxAdapter(
               child: SizedBox(height: 40),
             ),
+            const SliverToBoxAdapter(
+      child: WebFooter(),
+    ),
           ],
         );
       },
@@ -274,34 +297,56 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required String image,
     required String title,
     required String subtitle,
+    required double screenWidth,
     String? url,
     String? ctaText,
     bool isAssetImage = false,
     bool showJoinButton = false,
   }) {
+    // Dynamic Inner Text & Padding Layout Calculations
+    double titleSize = 16.0;
+    double subtitleSize = 12.0;
+    double innerPadding = 16.0;
+    double buttonPaddingHorizontal = 20.0;
+    double buttonPaddingVertical = 8.0;
+
+    if (screenWidth >= 1200) {
+      titleSize = 26.0;
+      subtitleSize = 16.0;
+      innerPadding = 32.0;
+      buttonPaddingHorizontal = 32.0;
+      buttonPaddingVertical = 16.0;
+    } else if (screenWidth >= 800) {
+      titleSize = 22.0;
+      subtitleSize = 14.0;
+      innerPadding = 24.0;
+      buttonPaddingHorizontal = 26.0;
+      buttonPaddingVertical = 12.0;
+    }
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(14),
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // Adaptive asset/network renderer logic
           isAssetImage
               ? Image.asset(
                   image,
                   fit: BoxFit.cover,
+                  alignment: Alignment.center,
                 )
               : Image.network(
                   image,
                   fit: BoxFit.cover,
+                  alignment: Alignment.center,
                 ),
           Container(
-            color: Colors.black.withOpacity(0.5), // Tint overlay to protect legibility
+            color: Colors.black.withOpacity(0.55),
           ),
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(innerPadding),
             child: Row(
               children: [
-                // Text elements and Buttons pinned explicitly on the left side
                 Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -311,9 +356,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         title,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
-                          fontSize: 16,
+                          fontSize: titleSize,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -324,18 +369,21 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         subtitle,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white70,
-                          fontSize: 12,
+                          fontSize: subtitleSize,
                         ),
                       ),
                       if (showJoinButton) ...[
-                        const SizedBox(height: 12),
+                        SizedBox(height: screenWidth >= 800 ? 16 : 12),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Theme.of(context).colorScheme.primary,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: buttonPaddingHorizontal, 
+                              vertical: buttonPaddingVertical,
+                            ),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -349,16 +397,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               ),
                             );
                           },
-                          child: const Text(
+                          child: Text(
                             "JOIN",
-                            style: TextStyle(fontWeight: FontWeight.bold),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: subtitleSize,
+                            ),
                           ),
                         ),
                       ],
                     ],
                   ),
                 ),
-                // Leaves visual open breathing room towards the right side of the banner asset layout
                 const Spacer(),
               ],
             ),

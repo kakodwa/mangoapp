@@ -36,29 +36,24 @@ class FeedListWidget extends ConsumerWidget {
     BuildContext context,
     String? type,
   ) {
-    // Look up the ancestor state tree for MainTabsScreen
     final tabsState = MainTabsScreen.of(context);
     if (tabsState == null) return;
 
     switch (type) {
       case 'product':
-        tabsState.setSelectedIndex(2); // Index 2 is ProductsListScreen
+        tabsState.setSelectedIndex(2);
         break;
-
       case 'shop':
-        tabsState.setSelectedIndex(1); // Index 1 is ShopsListScreen
+        tabsState.setSelectedIndex(1);
         break;
-
       case 'event':
-        tabsState.setSelectedIndex(4); // Index 4 is EventListScreen
+        tabsState.setSelectedIndex(4);
         break;
-
       case 'property':
-        tabsState.setSelectedIndex(3); // Index 3 is PropertiesListScreen
+        tabsState.setSelectedIndex(3);
         break;
-
       case 'lodge':
-        tabsState.setSelectedIndex(5); // Index 5 is LodgeListScreen
+        tabsState.setSelectedIndex(5);
         break;
     }
   }
@@ -92,6 +87,61 @@ class FeedListWidget extends ConsumerWidget {
     return Lodge.fromJson(Map<String, dynamic>.from(data));
   }
 
+  // ========================================================
+  // RESPONSIVE GRID HELPER BUILDER
+  // ========================================================
+  Widget _buildResponsiveGrid({
+    required BuildContext context,
+    required int itemCount,
+    required double childAspectRatio,
+    required Widget Function(BuildContext, int) cardBuilder,
+    bool isProductGrid = false,
+  }) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    int crossAxisCount;
+
+    if (isProductGrid) {
+      // Products: Mobile = 2, Desktop scales up to 6
+      if (screenWidth >= 1200) {
+        crossAxisCount = 6;
+      } else if (screenWidth >= 800) {
+        crossAxisCount = 4;
+      } else if (screenWidth >= 600) {
+        crossAxisCount = 3;
+      } else {
+        crossAxisCount = 2; 
+      }
+    } else {
+      // Shops, Lodges, Properties, Events: Mobile = 1, Desktop scales up
+      if (screenWidth >= 1200) {
+        crossAxisCount = 4; // Looks cleaner on large displays for wider item layouts
+      } else if (screenWidth >= 800) {
+        crossAxisCount = 3;
+      } else if (screenWidth >= 600) {
+        crossAxisCount = 2;
+      } else {
+        crossAxisCount = 1; // 1 per row on standard mobile displays
+      }
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: itemCount,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+          childAspectRatio: childAspectRatio,
+        ),
+        itemBuilder: cardBuilder,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return SliverList(
@@ -106,39 +156,59 @@ class FeedListWidget extends ConsumerWidget {
               // =========================
               case 'product_grid':
                 final products = (item.data as List).map<Product>(_product).toList();
-                return Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: products.length,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 8,
-                      mainAxisSpacing: 8,
-                      childAspectRatio: 0.62,
-                    ),
-                    itemBuilder: (_, i) => ProductCard(product: products[i]),
-                  ),
+                return _buildResponsiveGrid(
+                  context: context,
+                  itemCount: products.length,
+                  childAspectRatio: 0.62,
+                  isProductGrid: true,
+                  cardBuilder: (_, i) => ProductCard(product: products[i]),
+                );
+
+              // ========================================================
+              // DYNAMIC GRIDS (Now adapting safely from 1 on Mobile)
+              // ========================================================
+              case 'shop':
+                final rawData = item.data is List ? item.data as List : [item.data];
+                final shops = rawData.map<Shop>(_shop).toList();
+                return _buildResponsiveGrid(
+                  context: context,
+                  itemCount: shops.length,
+                  childAspectRatio: 1.3, // Adjusted for wide desktop rows
+                  cardBuilder: (_, i) => ShopCard(shop: shops[i]),
+                );
+
+              case 'event':
+                final rawData = item.data is List ? item.data as List : [item.data];
+                final events = rawData.map<EventModel>(_event).toList();
+                return _buildResponsiveGrid(
+                  context: context,
+                  itemCount: events.length,
+                  childAspectRatio: 1.2,
+                  cardBuilder: (_, i) => EventCard(event: events[i]),
+                );
+
+              case 'property':
+                final rawData = item.data is List ? item.data as List : [item.data];
+                final properties = rawData.map<Property>(_property).toList();
+                return _buildResponsiveGrid(
+                  context: context,
+                  itemCount: properties.length,
+                  childAspectRatio: 1.1,
+                  cardBuilder: (_, i) => PropertyCard(property: properties[i]),
+                );
+
+              case 'lodge':
+                final rawData = item.data is List ? item.data as List : [item.data];
+                final lodges = rawData.map<Lodge>(_lodge).toList();
+                return _buildResponsiveGrid(
+                  context: context,
+                  itemCount: lodges.length,
+                  childAspectRatio: 1.1,
+                  cardBuilder: (_, i) => LodgeCard(lodge: lodges[i]),
                 );
 
               // =========================
-              // SINGLE ITEMS
-              // =========================
-              case 'shop':
-                return ShopCard(shop: _shop(item.data));
-
-              case 'event':
-                return EventCard(event: _event(item.data));
-
-              case 'property':
-                return PropertyCard(property: _property(item.data));
-
-              case 'lodge':
-                return LodgeCard(lodge: _lodge(item.data));
-
-              // =========================
-              // HORIZONTAL PRODUCTS
+              // HORIZONTAL FEEDS
               // =========================
               case 'horizontal_products':
                 return SectionWrapper(
@@ -150,9 +220,6 @@ class FeedListWidget extends ConsumerWidget {
                   ),
                 );
 
-              // =========================
-              // HORIZONTAL SHOPS
-              // =========================
               case 'horizontal_shops':
                 return SectionWrapper(
                   title: item.title ?? 'Shops',
@@ -163,9 +230,6 @@ class FeedListWidget extends ConsumerWidget {
                   ),
                 );
 
-              // =========================
-              // HORIZONTAL EVENTS
-              // =========================
               case 'horizontal_events':
                 return SectionWrapper(
                   title: item.title ?? 'Events',
@@ -176,9 +240,6 @@ class FeedListWidget extends ConsumerWidget {
                   ),
                 );
 
-              // =========================
-              // HORIZONTAL PROPERTIES
-              // =========================
               case 'horizontal_properties':
                 return SectionWrapper(
                   title: item.title ?? 'Properties',
@@ -189,9 +250,6 @@ class FeedListWidget extends ConsumerWidget {
                   ),
                 );
 
-              // =========================
-              // HORIZONTAL LODGES
-              // =========================
               case 'horizontal_lodges':
                 return SectionWrapper(
                   title: item.title ?? 'Lodges',
