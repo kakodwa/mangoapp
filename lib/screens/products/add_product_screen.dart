@@ -16,8 +16,7 @@ class AddProductScreen extends ConsumerStatefulWidget {
   const AddProductScreen({super.key});
 
   @override
-  ConsumerState<AddProductScreen> createState() =>
-      _AddProductScreenState();
+  ConsumerState<AddProductScreen> createState() => _AddProductScreenState();
 }
 
 class _AddProductScreenState extends ConsumerState<AddProductScreen> {
@@ -84,6 +83,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
     variantWeightController.clear();
     variantStockController.clear();
 
+    // Clean up older references
     for (var controller in dynamicAttributeControllers.values) {
       controller.dispose();
     }
@@ -179,7 +179,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                 setState(() {
                   variants.add(
                     LocalProductVariant(
-                      sku: variantSkuController.text.trim(),
+                      sku: variantSkuController.text.trim().isEmpty ? null : variantSkuController.text.trim(),
                       stock: int.tryParse(variantStockController.text) ?? 0,
                       wholesalePrice: double.tryParse(variantWholesalePriceController.text) ?? 0.0,
                       weightG: int.tryParse(variantWeightController.text) ?? 0,
@@ -206,7 +206,6 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
       return;
     }
 
-    // Enforce that the user must upload an image explicitly
     if (images.isEmpty) {
       AppToast.error(context, 'Please upload at least one image for this product.');
       return;
@@ -238,13 +237,11 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
         createdAt: DateTime.now(),
       );
 
-      // CRITICAL FOR WEB: Ensure that inside productActionsProvider, your API layer 
-      // processes files using `await image.readAsBytes()` instead of `fromPath(image.path)`.
       final created = await ref
           .read(productActionsProvider)
           .createProduct(
             product,
-            images.first, // Primary Image payload object
+            images.first, 
             variants, 
           );
 
@@ -272,7 +269,9 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
         );
       }
     } finally {
-      setState(() => isLoading = false);
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
     }
   }
 
@@ -454,6 +453,9 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
               ),
               const SizedBox(height: 8),
 
+              // ==========================================
+              // FIX: REPLACED LISTVIEW WITH DECLARATIVE COLUMN
+              // ==========================================
               if (selectedCategory == null)
                 const Text(
                   "Choose a product category above to manage variations.", 
@@ -470,11 +472,9 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                   style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
                 )
               else
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: variants.length,
-                  itemBuilder: (context, index) {
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(variants.length, (index) {
                     final variant = variants[index];
                     final attrsText = variant.attributes.entries
                         .map((e) => '${e.key}: ${e.value}')
@@ -490,7 +490,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                         ),
                       ),
                     );
-                  },
+                  }),
                 ),
               const SizedBox(height: AppSpacing.md),
               Card(

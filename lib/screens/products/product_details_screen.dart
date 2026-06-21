@@ -14,6 +14,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/api_provider.dart' as api;
 
 import '../../models/product_model.dart';
+import '../../models/product_variant_model.dart'; // ✅ Imported your variant model
 
 import '../products/product_card.dart';
 
@@ -67,6 +68,10 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
   // State variable to manage the dynamic FAB expansion menu
   bool _isMenuOpen = false;
 
+  // ✅ 1. Added state properties to track selected variant across product loads
+  LocalProductVariant? _selectedVariant;
+  int? _lastInitializedProductId;
+
   void _openWhatsApp(String phone) async {
     final uri = Uri.parse("https://wa.me/$phone");
 
@@ -98,7 +103,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
     }
   }
 
-  // Method to open the interactive full-screen image gallery with Zoom / Magnification capabilities
   void _openFullScreenGallery(List<String> images, int initialIndex) {
     Navigator.push(
       context,
@@ -140,7 +144,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
     final auth = ref.watch(authProvider);
     final AnalyticsService analytics = AnalyticsService();
     
-    // Determine screen sizing rules
     final double screenWidth = MediaQuery.of(context).size.width;
     final bool isDesktop = screenWidth >= 900;
 
@@ -163,7 +166,12 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
         final isOwner = auth.user?.id == product.ownerId;
         final isLoggedIn = auth.isAuthenticated;
 
-        // 📊 TRACK EVENT: Screen viewed by user
+        // ✅ 2. Reset or initialize the active variant when product changes
+        if (_lastInitializedProductId != product.id) {
+          _lastInitializedProductId = product.id;
+          _selectedVariant = product.variants.isNotEmpty ? product.variants.first : null;
+        }
+
         if (!_hasLoggedView) {
           analytics.logEvent('product_view_${product.id}');
           _hasLoggedView = true;
@@ -173,7 +181,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
             ? product.images
             : [product.safeImage];
 
-        // Layout variant providing scrollable selection arrays on desktop environments
         Widget buildImageCarousel(double carouselHeight) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -276,6 +283,73 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
           );
         }
 
+        // ✅ 3. Helper to format dynamic attributes map cleanly to display strings
+        String formatAttributes(Map<String, dynamic> attributes) {
+          if (attributes.isEmpty) return "Standard Option";
+          return attributes.entries.map((e) => "${e.key}: ${e.value}").join(", ");
+        }
+
+        // ✅ 4. New Widget to render option chips horizontally with stock validation
+        Widget buildVariantSelector(List<LocalProductVariant> variants) {
+          if (variants.isEmpty) return const SizedBox.shrink();
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Available Options",
+                style: AppTypography.titleMedium.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              SizedBox(
+                height: 46,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: variants.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
+                  itemBuilder: (context, index) {
+                    final variant = variants[index];
+                    final isSelected = _selectedVariant == variant;
+
+                    return ChoiceChip(
+                      label: Text(
+                        formatAttributes(variant.attributes),
+                        style: TextStyle(
+                          color: isSelected ? Colors.white : Colors.black87,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                      selected: isSelected,
+                      selectedColor: AppColors.mangoOrange,
+                      backgroundColor: Colors.grey.shade100,
+                      checkmarkColor: Colors.white,
+                      onSelected: (bool selected) {
+                        setState(() {
+                          _selectedVariant = selected ? variant : null;
+                        });
+                      },
+                    );
+                  },
+                ),
+              ),
+              if (_selectedVariant != null) ...[
+                const SizedBox(height: AppSpacing.xs),
+                Row(
+                  children: [
+                    Icon(Icons.inventory_2_outlined, size: 14, color: Colors.grey.shade600),
+                    const SizedBox(width: 4),
+                    Text(
+                      "Stock for this option: ${_selectedVariant!.stock} items left",
+                      style: AppTypography.bodySmall.copyWith(color: Colors.grey.shade600),
+                    ),
+                  ],
+                ),
+              ],
+              const SizedBox(height: AppSpacing.md),
+            ],
+          );
+        }
+
         Widget buildProductInfo() {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -294,7 +368,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
               ),
               const SizedBox(height: AppSpacing.sm),
 
-              // ================= INVENTORY STOCK BADGE
               Row(
                 children: [
                   AppBadge(
@@ -309,7 +382,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
               ),
               const SizedBox(height: AppSpacing.sm),
 
-              // ================= STAR RATING AND REVIEW ROW DISPLAY
               Row(
                 children: [
                   ...List.generate(5, (index) {
@@ -334,7 +406,9 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
               ),
               const SizedBox(height: AppSpacing.md),
 
-              // ================= SHOP INFO COMPONENT CARD
+              // ✅ 5. Injected Variant selector into layout flow here
+              buildVariantSelector(product.variants),
+
               AppCard(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 onTap: () {
@@ -378,7 +452,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              // ================= TAB BAR SECTION
               DefaultTabController(
                 length: 2,
                 child: Column(
@@ -478,13 +551,11 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                             ? Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // Left Column: Visual Carousel Panel with thumbnails
                                   Expanded(
                                     flex: 5,
                                     child: buildImageCarousel(500),
                                   ),
                                   const SizedBox(width: 40),
-                                  // Right Column: Informative Panel
                                   Expanded(
                                     flex: 6,
                                     child: buildProductInfo(),
@@ -503,7 +574,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                               ),
                       ),
                     ),
-                    // Related products horizontal lane built below layout blocks
                     Center(
                       child: Container(
                         constraints: const BoxConstraints(maxWidth: 1200),
@@ -518,15 +588,12 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
               ),
             ),
 
-            // ================= EXPANDABLE SPEED DIAL FAB SYSTEM =================
-            // Pinned layout position logic adapting to content margins on ultra-wide viewports
             Positioned(
               bottom: 50,
               right: isDesktop ? (screenWidth - 1200 > 0 ? (screenWidth - 1200) / 2 + 24 : 24) : 10,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // 🛒 PERMANENT CART BUTTON
                   if (product.isInStock && !isOwner) ...[
                     AppFab(
                       heroTag: "cart",
@@ -538,8 +605,9 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                             context,
                             MaterialPageRoute(builder: (_) => const LoginScreen()),
                           );
-                            return;
+                          return;
                         }
+                        
                         analytics.logEvent('product_add_to_cart_click_${product.id}');
                         ref.read(addToCartProvider).call(product, 1);
                         AppToast.success(context, "ADDED TO CART");
@@ -554,7 +622,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                     child: Column(
                       children: [
                         if (_isMenuOpen) ...[
-                          // ❤️ FAVORITE
                           if (!isOwner) ...[
                             AppFab(
                               heroTag: "fav",
@@ -568,7 +635,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                             const SizedBox(height: AppSpacing.sm),
                           ],
 
-                          // 💬 WHATSAPP
                           AppFab(
                             heroTag: "whatsapp",
                             icon: FontAwesomeIcons.whatsapp,
@@ -584,7 +650,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                           ),
                           const SizedBox(height: AppSpacing.sm),
 
-                          // 🔗 SHARE BUTTON
                           AppFab(
                             heroTag: "share_product",
                             icon: Icons.share_outlined,
@@ -608,7 +673,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                           ),
                           const SizedBox(height: AppSpacing.sm),
 
-                          // 🏪 SHOP
                           AppFab(
                             heroTag: "shop",
                             icon: Icons.storefront,
@@ -627,7 +691,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                             },
                           ),
 
-                          // ✏️ EDIT (OWNER ONLY)
                           if (isOwner) ...[
                             const SizedBox(height: AppSpacing.sm),
                             AppFab(
@@ -651,7 +714,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                     ),
                   ),
 
-                  // 🔘 PRIMARY TOGGLE BUTTON (Dotted Menu)
                   AppFab(
                     heroTag: "menu_toggle",
                     icon: _isMenuOpen ? Icons.close : Icons.more_vert,
@@ -672,7 +734,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
   }
 }
 
-// ================= FULL SCREEN MULTI-IMAGE ZOOM OVERLAY DISPLAY =================
 class FullScreenImageGallery extends StatefulWidget {
   final List<String> images;
   final int initialIndex;
@@ -732,7 +793,7 @@ class _FullScreenImageGalleryState extends State<FullScreenImageGallery> {
             itemBuilder: (context, index) {
               return InteractiveViewer(
                 minScale: 1.0,
-                maxScale: 4.0, // Maximum magnification constraints limit
+                maxScale: 4.0,
                 child: Center(
                   child: CachedNetworkImage(
                     imageUrl: widget.images[index],
@@ -746,7 +807,6 @@ class _FullScreenImageGalleryState extends State<FullScreenImageGallery> {
             },
           ),
           if (widget.images.length > 1) ...[
-            // Left Chevron Control Arrow
             if (_galleryIndex > 0)
               Positioned(
                 left: 16,
@@ -767,7 +827,6 @@ class _FullScreenImageGalleryState extends State<FullScreenImageGallery> {
                   ),
                 ),
               ),
-            // Right Chevron Control Arrow
             if (_galleryIndex < widget.images.length - 1)
               Positioned(
                 right: 16,

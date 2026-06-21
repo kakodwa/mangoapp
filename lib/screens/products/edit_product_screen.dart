@@ -1,3 +1,4 @@
+import 'dart:convert'; // 👈 Added for jsonEncode mapping conversion
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -91,6 +92,11 @@ class _EditProductScreenState extends ConsumerState<EditProductScreen> {
     stockController = TextEditingController(text: widget.product.stock.toString());
     selectedCategory = widget.product.category;
     isActive = widget.product.isActive;
+
+    // 👈 Load existing variants safely into the widget list state
+    if (widget.product.variants != null) {
+      variants = List<LocalProductVariant>.from(widget.product.variants!);
+    }
   }
 
   void _showAddVariantDialog(List<String> fields) {
@@ -224,6 +230,11 @@ class _EditProductScreenState extends ConsumerState<EditProductScreen> {
     setState(() => isLoading = true);
 
     try {
+      // 👈 Convert the list of configurations into a structured JSON string for backend processing
+      final String variantsJsonString = jsonEncode(
+        variants.map((v) => v.toJson()).toList(),
+      );
+
       final updatedData = {
         "name": nameController.text,
         "description": descriptionController.text,
@@ -231,6 +242,7 @@ class _EditProductScreenState extends ConsumerState<EditProductScreen> {
         "price": double.parse(priceController.text),
         "stock": int.parse(stockController.text),
         "is_active": isActive,
+        "variants": variantsJsonString, // 👈 Attached variants list string data payload here
       };
 
       final updatedProduct = await ref
@@ -240,8 +252,6 @@ class _EditProductScreenState extends ConsumerState<EditProductScreen> {
             updatedData,
           );
 
-      // Default image asset code removed here. 
-      // It only uploads images now if the user explicitly picked new ones.
       if (updatedProduct.id > 0 && images.isNotEmpty) {
         await ref
             .read(productActionsProvider)

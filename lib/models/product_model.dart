@@ -1,3 +1,5 @@
+import 'product_variant_model.dart'; // Make sure to import your variant model file
+
 class Product {
   final int id;
   final int? ownerId;
@@ -23,6 +25,9 @@ class Product {
   // ✅ MULTIPLE IMAGES
   final List<String> images;
 
+  // 1. Declare the variants list property
+  final List<LocalProductVariant> variants;
+
   Product({
     required this.id,
     this.ownerId,
@@ -45,6 +50,7 @@ class Product {
     required this.totalReviews,
     required this.createdAt,
     this.images = const [],
+    this.variants = const [], // 2. Default to an empty list
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -80,6 +86,12 @@ class Product {
               ?.map((e) => e.toString())
               .toList() ??
           [],
+
+      // 3. Map the JSON variants list into your variant model array
+      variants: (json['variants'] as List<dynamic>?)
+              ?.map((e) => LocalProductVariant.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
     );
   }
 
@@ -105,6 +117,9 @@ class Product {
 
       // ✅ IMAGES
       'images': images,
+
+      // 4. Map variant entities back to JSON structures
+      'variants': variants.map((v) => v.toJson()).toList(),
     };
   }
 
