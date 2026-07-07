@@ -21,26 +21,38 @@ mixin AppRouterMixin<T extends StatefulWidget> on State<T> {
     
     if (kIsWeb) {
       debugPrint('[AppRouter] Web platform detected');
-      // 🌟 FIX: Access Dart's Storage object using Map operator syntax
-      final String? deferredLink = html.window.localStorage['deferred_deep_link'];
-      html.window.localStorage.remove('deferred_deep_link'); // Clean up immediately
-
-      final String currentUrl = deferredLink ?? html.window.location.href;
-      debugPrint('[AppRouter] Current URL: $currentUrl');
       
-      if (currentUrl.contains('/#/')) {
-        // Handle hash routing fallback safely
-        final String extractedPath = currentUrl.split('/#/').last;
-        debugPrint('[AppRouter] Hash routing detected, extracted path: /$extractedPath');
-        parseAndNavigate('/$extractedPath');
-      } else {
-        // Handle standard path routing fallback
-        final String webPath = html.window.location.pathname ?? '';
-        if (webPath.isNotEmpty && webPath != '/') {
-          debugPrint('[AppRouter] Path routing detected: $webPath');
-          parseAndNavigate(webPath);
+      // Check multiple sources for the deep link
+      String? deferredLink = html.window.localStorage['deferred_deep_link'];
+      
+      if (deferredLink != null && deferredLink.isNotEmpty) {
+        // Clean up localStorage after retrieval
+        html.window.localStorage.remove('deferred_deep_link');
+        debugPrint('[AppRouter] Web - Found deferred link in localStorage: $deferredLink');
+        parseAndNavigate(deferredLink);
+        return;
+      }
+
+      // Check current pathname (e.g., /product/2)
+      final String pathName = html.window.location.pathname ?? '';
+      if (pathName.isNotEmpty && pathName != '/' && !pathName.contains('flutter')) {
+        debugPrint('[AppRouter] Web - Found path in pathname: $pathName');
+        parseAndNavigate(pathName);
+        return;
+      }
+
+      // Check hash-based routing (e.g., /#/product/2)
+      final String hashName = html.window.location.hash ?? '';
+      if (hashName.isNotEmpty && hashName.contains('/')) {
+        final String hashPath = hashName.replaceFirst('#', '').replaceFirst('/', '');
+        if (hashPath.isNotEmpty) {
+          debugPrint('[AppRouter] Web - Found hash-based route: /$hashPath');
+          parseAndNavigate('/$hashPath');
+          return;
         }
       }
+      
+      debugPrint('[AppRouter] Web - No deep link found');
     } else {
       // Handle Mobile Deep Links (Both when app is closed, and running in background)
       debugPrint('[AppRouter] Mobile platform detected, initializing app_links');
