@@ -10,6 +10,20 @@
     <key>NSPhotoLibraryUsageDescription</key>
     <string>This app requires access to your photo library to let you select and upload store banners and item images.</string>
 
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>CFBundleURLName</key>
+            <string>com.mangochi.marketplace</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>https</string>
+            </array>
+        </dict>
+    </array>
+
     <key>LSApplicationQueriesSchemes</key>
     <array>
         <string>whatsapp</string>
