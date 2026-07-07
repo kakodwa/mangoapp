@@ -9,6 +9,8 @@ import '../../providers/api_provider.dart';
 import '../../widgets/main_drawer.dart';
 import '../../widgets/main_app_bar.dart';
 
+import '../../widgets/web_footer.dart';
+
 import '../payments/payment_checkout_screen.dart';
 import '../../theme/design_system/app_spacing.dart';
 // Import your Analytics Service (Adjust path matching your directory layout)

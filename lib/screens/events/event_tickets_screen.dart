@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import '../../widgets/web_footer.dart';
 import '../../models/event_model.dart';
 import '../../models/ticket_model.dart';
 import '../../providers/tickets_provider.dart';

@@ -1,3 +1,5 @@
+// lib/screens/hospitality/add_room_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -5,12 +7,8 @@ import '../../providers/api_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_text_field.dart';
 import '../../theme/design_system/app_spacing.dart';
-
-
-import '../../theme/app_colors.dart';
-import '../../widgets/main_app_bar.dart';
-import '../../widgets/main_drawer.dart';
-import '../../widgets/app_scaffold.dart';
+import '../main_tabs_screen.dart';
+import '../../widgets/web_footer.dart';
 
 class AddRoomScreen extends ConsumerStatefulWidget {
   final int lodgeId;
@@ -76,7 +74,9 @@ class _AddRoomScreenState extends ConsumerState<AddRoomScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Room added successfully")),
         );
-        Navigator.pop(context);
+        
+        // Return context frame focus index cleanly back to Lodge Dashboard
+        MainTabsScreen.of(context)?.setSelectedIndex(30);
       }
     } catch (e) {
       debugPrint("ADD ROOM ERROR: $e");
@@ -85,128 +85,160 @@ class _AddRoomScreenState extends ConsumerState<AddRoomScreen> {
         const SnackBar(content: Text("Failed to add room")),
       );
     } finally {
-      setState(() => loading = false);
+      if (mounted) {
+        setState(() => loading = false);
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(title: const Text('Add Room'),),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: EdgeInsets.all(AppSpacing.md),
-          children: [
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool isLargeScreen = screenWidth > 900;
 
-            AppTextField(
-              label: "Room Number",
-              controller: roomNumber,
-              isRequired: true,
+    // Standalone Scaffold root elements and internal redundant AppBars are extracted 
+    // to allow native layout continuity underneath your master tab layout system.
+    return Form(
+      key: _formKey,
+      child: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: EdgeInsets.symmetric(
+              vertical: AppSpacing.md,
+              horizontal: isLargeScreen ? (screenWidth - 800) / 2 : AppSpacing.md,
             ),
+            sliver: SliverToBoxAdapter(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 800),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      AppTextField(
+                        label: "Room Number",
+                        controller: roomNumber,
+                        isRequired: true,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
 
-            const SizedBox(height: AppSpacing.md),
+                      AppTextField(
+                        label: "Title / Room Identifier Name",
+                        controller: title,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
 
-            AppTextField(
-              label: "Title",
-              controller: title,
-            ),
+                      AppTextField(
+                        label: "Description",
+                        controller: description,
+                        type: TextFieldType.multiline,
+                        maxLines: 3,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
 
-            const SizedBox(height: AppSpacing.md),
+                      AppTextField(
+                        label: "Price Per Night (MWK)",
+                        controller: price,
+                        type: TextFieldType.number,
+                        isRequired: true,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
 
-            AppTextField(
-              label: "Description",
-              controller: description,
-              type: TextFieldType.multiline,
-              maxLines: 3,
-            ),
+                      AppTextField(
+                        label: "Guest Capacity Count",
+                        controller: capacity,
+                        type: TextFieldType.number,
+                        isRequired: true,
+                      ),
+                      const SizedBox(height: AppSpacing.md),
 
-            const SizedBox(height: AppSpacing.md),
+                      AppTextField(
+                        label: "Total Allocated Units Available",
+                        controller: totalRooms,
+                        type: TextFieldType.number,
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
 
-            AppTextField(
-              label: "Price Per Night",
-              controller: price,
-              type: TextFieldType.number,
-              isRequired: true,
-            ),
+                      DropdownButtonFormField<String>(
+                        value: roomType,
+                        decoration: InputDecoration(
+                          labelText: "Room Class Configuration",
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        items: const [
+                          DropdownMenuItem(value: "single", child: Text("Single")),
+                          DropdownMenuItem(value: "double", child: Text("Double")),
+                          DropdownMenuItem(value: "suite", child: Text("Suite")),
+                          DropdownMenuItem(value: "family", child: Text("Family")),
+                          DropdownMenuItem(value: "deluxe", child: Text("Deluxe")),
+                        ],
+                        onChanged: (v) => setState(() => roomType = v!),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
 
-            const SizedBox(height: AppSpacing.md),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                        child: Text(
+                          "Room Utilities & Amenities",
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.grey),
+                        ),
+                      ),
+                      
+                      SwitchListTile(
+                        title: const Text("Wireless WiFi Connectivity"),
+                        value: hasWifi,
+                        activeColor: AppColors.mangoOrange,
+                        onChanged: (v) => setState(() => hasWifi = v),
+                      ),
+                      SwitchListTile(
+                        title: const Text("Television Unit (TV)"),
+                        value: hasTv,
+                        activeColor: AppColors.mangoOrange,
+                        onChanged: (v) => setState(() => hasTv = v),
+                      ),
+                      SwitchListTile(
+                        title: const Text("Air Conditioning (AC)"),
+                        value: hasAc,
+                        activeColor: AppColors.mangoOrange,
+                        onChanged: (v) => setState(() => hasAc = v),
+                      ),
+                      SwitchListTile(
+                        title: const Text("Complimentary Breakfast Staging Included"),
+                        value: hasBreakfast,
+                        activeColor: AppColors.mangoOrange,
+                        onChanged: (v) => setState(() => hasBreakfast = v),
+                      ),
+                      SwitchListTile(
+                        title: const Text("Active Listing Room Status (Available)"),
+                        value: isAvailable,
+                        activeColor: AppColors.mangoOrange,
+                        onChanged: (v) => setState(() => isAvailable = v),
+                      ),
 
-            AppTextField(
-              label: "Capacity",
-              controller: capacity,
-              type: TextFieldType.number,
-              isRequired: true,
-            ),
+                      const SizedBox(height: AppSpacing.xl),
 
-            const SizedBox(height: AppSpacing.md),
-
-            AppTextField(
-              label: "Total Rooms",
-              controller: totalRooms,
-              type: TextFieldType.number,
-            ),
-
-            const SizedBox(height: AppSpacing.lg),
-
-            DropdownButtonFormField<String>(
-              value: roomType,
-              decoration: const InputDecoration(labelText: "Room Type"),
-              items: const [
-                DropdownMenuItem(value: "single", child: Text("Single")),
-                DropdownMenuItem(value: "double", child: Text("Double")),
-                DropdownMenuItem(value: "suite", child: Text("Suite")),
-                DropdownMenuItem(value: "family", child: Text("Family")),
-                DropdownMenuItem(value: "deluxe", child: Text("Deluxe")),
-              ],
-              onChanged: (v) => setState(() => roomType = v!),
-            ),
-
-            const SizedBox(height: AppSpacing.lg),
-
-            SwitchListTile(
-              title: Text("WiFi"),
-              value: hasWifi,
-              onChanged: (v) => setState(() => hasWifi = v),
-            ),
-            SwitchListTile(
-              title: Text("TV"),
-              value: hasTv,
-              onChanged: (v) => setState(() => hasTv = v),
-            ),
-            SwitchListTile(
-              title: Text("AC"),
-              value: hasAc,
-              onChanged: (v) => setState(() => hasAc = v),
-            ),
-            SwitchListTile(
-              title: Text("Breakfast"),
-              value: hasBreakfast,
-              onChanged: (v) => setState(() => hasBreakfast = v),
-            ),
-            SwitchListTile(
-              title: Text("Available"),
-              value: isAvailable,
-              onChanged: (v) => setState(() => isAvailable = v),
-            ),
-
-            const SizedBox(height: AppSpacing.xl),
-
-            SizedBox(
-              height: 50,
-              child: ElevatedButton(
-                onPressed: loading ? null : submit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.mangoOrange,
+                      SizedBox(
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: loading ? null : submit,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.leafGreen,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: loading
+                              ? const CircularProgressIndicator(color: Colors.white)
+                              : const Text("Add Room Unit", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                child: loading
-                    ? CircularProgressIndicator(color: Theme.of(context).colorScheme.surface)
-                    : Text("Add Room"),
               ),
             ),
-          ],
-        ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 40)),
+          const SliverToBoxAdapter(child: WebFooter()),
+        ],
       ),
     );
   }

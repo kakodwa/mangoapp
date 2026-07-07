@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/room_model.dart';
 import '../../providers/api_provider.dart';
 
-
+import '../../widgets/web_footer.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_text_field.dart';
 import '../../theme/app_colors.dart';

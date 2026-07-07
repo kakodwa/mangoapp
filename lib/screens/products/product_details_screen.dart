@@ -1,44 +1,50 @@
-// lib/screens/products/product_details_screen.dart
-
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:share_plus/share_plus.dart';
+// 1. Dart & Flutter Core Packages
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
+// 2. Third-Party Packages
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+// 3. Project Imports
+
+// Providers
+import '../../providers/api_provider.dart' as api;
+import '../../providers/auth_provider.dart';
 import '../../providers/products_provider.dart';
 import '../../providers/shops_provider.dart';
-import '../../providers/auth_provider.dart';
-import '../../providers/api_provider.dart' as api;
 
+// Models
 import '../../models/product_model.dart';
-import '../../models/product_variant_model.dart'; // ✅ Imported your variant model
+import '../../models/product_variant_model.dart'; 
 
-import '../products/product_card.dart';
-
-import '../shops/shop_details_screen.dart';
+// Screens & Components
+import '../auth/login_screen.dart';
 import '../main_tabs_screen.dart';
 import '../products/edit_product_screen.dart';
-import '../auth/login_screen.dart';
+import '../products/product_card.dart';
+import '../shops/shop_details_screen.dart';
 
+// Widgets
 import '../../widgets/app_fab.dart';
 import '../../widgets/reviews/review_section_widget.dart';
 import '../../widgets/web_footer.dart';
+import '../../widgets/update.dart';
 
-import '../../utils/app_toast.dart';
+// Utils & Services
+import '../../services/analytics_service.dart';
 import '../../utils/app_snackbar.dart';
+import '../../utils/app_toast.dart';
 
-// Design System Imports
+// Design System & Theme
+import '../../theme/app_colors.dart';
+import '../../theme/design_system/app_badge.dart';
+import '../../theme/design_system/app_card.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_typography.dart';
-import '../../theme/design_system/app_card.dart';
-import '../../theme/design_system/app_badge.dart';
-import '../../theme/app_colors.dart';
-
-// Analytics Import
-import '../../services/analytics_service.dart';
 
 class ProductDetailsScreen extends ConsumerStatefulWidget {
   final int productId;
@@ -68,7 +74,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
   // State variable to manage the dynamic FAB expansion menu
   bool _isMenuOpen = false;
 
-  // ✅ 1. Added state properties to track selected variant across product loads
+  // Track selected variant across product loads
   LocalProductVariant? _selectedVariant;
   int? _lastInitializedProductId;
 
@@ -166,7 +172,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
         final isOwner = auth.user?.id == product.ownerId;
         final isLoggedIn = auth.isAuthenticated;
 
-        // ✅ 2. Reset or initialize the active variant when product changes
+        // Reset or initialize the active variant when product changes
         if (_lastInitializedProductId != product.id) {
           _lastInitializedProductId = product.id;
           _selectedVariant = product.variants.isNotEmpty ? product.variants.first : null;
@@ -185,6 +191,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              
               SizedBox(
                 height: carouselHeight,
                 child: Stack(
@@ -283,72 +290,73 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
           );
         }
 
-        // ✅ 3. Helper to format dynamic attributes map cleanly to display strings
         String formatAttributes(Map<String, dynamic> attributes) {
           if (attributes.isEmpty) return "Standard Option";
           return attributes.entries.map((e) => "${e.key}: ${e.value}").join(", ");
         }
 
-        // ✅ 4. New Widget to render option chips horizontally with stock validation
-        Widget buildVariantSelector(List<LocalProductVariant> variants) {
-          if (variants.isEmpty) return const SizedBox.shrink();
+        // Wrap layout component to ensure all multi-line selections stack nicely
+        // lib/screens/products/product_details_screen.dart
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Available Options",
-                style: AppTypography.titleMedium.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              SizedBox(
-                height: 46,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: variants.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: AppSpacing.sm),
-                  itemBuilder: (context, index) {
-                    final variant = variants[index];
-                    final isSelected = _selectedVariant == variant;
+Widget buildVariantSelector(List<LocalProductVariant> variants) {
+  if (variants.isEmpty) return const SizedBox.shrink(); //
 
-                    return ChoiceChip(
-                      label: Text(
-                        formatAttributes(variant.attributes),
-                        style: TextStyle(
-                          color: isSelected ? Colors.white : Colors.black87,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        ),
-                      ),
-                      selected: isSelected,
-                      selectedColor: AppColors.mangoOrange,
-                      backgroundColor: Colors.grey.shade100,
-                      checkmarkColor: Colors.white,
-                      onSelected: (bool selected) {
-                        setState(() {
-                          _selectedVariant = selected ? variant : null;
-                        });
-                      },
-                    );
-                  },
-                ),
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start, //
+    children: [
+      Text(
+        "Available Options",
+        style: AppTypography.titleMedium.copyWith(fontWeight: FontWeight.bold), //
+      ),
+      const SizedBox(height: AppSpacing.xs), //
+      Wrap(
+        spacing: AppSpacing.sm, //
+        runSpacing: AppSpacing.xs, //
+        children: variants.map((variant) {
+          final isSelected = _selectedVariant == variant; //
+          final bool isOutOfStock = variant.stock <= 0; // 🛑 Check if this specific option is out of stock
+
+          return ChoiceChip(
+            label: Text(
+              formatAttributes(variant.attributes) + (isOutOfStock ? " (Out of Stock)" : ""), //
+              style: TextStyle(
+                color: isSelected 
+                    ? Colors.white 
+                    : (isOutOfStock ? Colors.grey.shade400 : Colors.black87), //
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal, //
+                decoration: isOutOfStock ? TextDecoration.lineThrough : null, // Put a line through out-of-stock items
               ),
-              if (_selectedVariant != null) ...[
-                const SizedBox(height: AppSpacing.xs),
-                Row(
-                  children: [
-                    Icon(Icons.inventory_2_outlined, size: 14, color: Colors.grey.shade600),
-                    const SizedBox(width: 4),
-                    Text(
-                      "Stock for this option: ${_selectedVariant!.stock} items left",
-                      style: AppTypography.bodySmall.copyWith(color: Colors.grey.shade600),
-                    ),
-                  ],
-                ),
-              ],
-              const SizedBox(height: AppSpacing.md),
-            ],
+            ),
+            selected: isSelected, //
+            selectedColor: AppColors.mangoOrange, //
+            backgroundColor: Colors.grey.shade100, //
+            checkmarkColor: Colors.white, //
+            // 🛑 Disable selection tap events if the variant has no stock remaining
+            onSelected: isOutOfStock ? null : (bool selected) {
+              setState(() {
+                _selectedVariant = selected ? variant : null; //
+              });
+            },
           );
-        }
+        }).toList(),
+      ),
+      if (_selectedVariant != null) ...[ //
+        const SizedBox(height: AppSpacing.sm), //
+        Row(
+          children: [
+            Icon(Icons.inventory_2_outlined, size: 14, color: Colors.grey.shade600), //
+            const SizedBox(width: 4), //
+            Text(
+              "Stock for this option: ${_selectedVariant!.stock} items left", //
+              style: AppTypography.bodySmall.copyWith(color: Colors.grey.shade600), //
+            ),
+          ],
+        ),
+      ],
+      const SizedBox(height: AppSpacing.md), //
+    ],
+  );
+}
 
         Widget buildProductInfo() {
           return Column(
@@ -406,7 +414,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
               ),
               const SizedBox(height: AppSpacing.md),
 
-              // ✅ 5. Injected Variant selector into layout flow here
               buildVariantSelector(product.variants),
 
               AppCard(
@@ -607,9 +614,15 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                           );
                           return;
                         }
+
+                        // Guard constraint logic: option select fallback verification check
+                        if (product.variants.isNotEmpty && _selectedVariant == null) {
+                          AppToast.info(context, "Please select an option first");
+                          return;
+                        }
                         
                         analytics.logEvent('product_add_to_cart_click_${product.id}');
-                        ref.read(addToCartProvider).call(product, 1);
+                        ref.read(addToCartProvider).call(product, 1, _selectedVariant);
                         AppToast.success(context, "ADDED TO CART");
                       },
                     ),
@@ -655,9 +668,8 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                             icon: Icons.share_outlined,
                             tooltip: "Share Product",
                             onPressed: () async {
-                              final String productUrl = kIsWeb 
-                                  ? "${Uri.base.origin}/product/${product.id}"
-                                  : "https://mangobackend-yayy.onrender.com/product/${product.id}";
+                              const String baseUrl = "https://mangobackend-yayy.onrender.com";
+                              final String productUrl ="$baseUrl/product/${product.id}";
 
                               final String shareMessage = "Check out ${product.name} on Mangochi Marketplace!\nPrice: MWK ${product.price}\n\nView details here: $productUrl";
                               

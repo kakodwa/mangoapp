@@ -1,3 +1,4 @@
+import 'dart:async'; // ⚡ Required for Completer
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../core/api/api_client.dart';
@@ -41,6 +42,9 @@ class AuthState {
 class AuthNotifier extends StateNotifier<AuthState> {
   final ApiClient _apiClient;
   final _secureStorage = const FlutterSecureStorage();
+  
+  // ⚡ Blocks actions until initialization finishes completely to prevent racing
+  final Completer<void> _initCompleter = Completer<void>();
 
   AuthNotifier(this._apiClient) : super(AuthState()) {
     _checkAuthStatus();
@@ -72,10 +76,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> _checkAuthStatus() async {
-    final token = await _secureStorage.read(key: 'access_token');
+    try {
+      final token = await _secureStorage.read(key: 'access_token');
 
-    if (token != null) {
-      try {
+      if (token != null) {
         final userData = await _apiClient.get(
           'users/me/',
           fromJson: (json) => json,
@@ -85,11 +89,20 @@ class AuthNotifier extends StateNotifier<AuthState> {
           isAuthenticated: true,
           user: User.fromJson(userData),
         );
-      } catch (_) {
-        await _secureStorage.delete(key: 'access_token');
-        await _secureStorage.delete(key: 'refresh_token');
+      }
+    } catch (_) {
+      await _clearTokens();
+    } finally {
+      // Signaling that initial state check is finished
+      if (!_initCompleter.isCompleted) {
+        _initCompleter.complete();
       }
     }
+  }
+
+  Future<void> _clearTokens() async {
+    await _secureStorage.delete(key: 'access_token');
+    await _secureStorage.delete(key: 'refresh_token');
   }
 
   // ============================
@@ -107,6 +120,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     String? gender,
     String? dateOfBirth,
   }) async {
+    await _initCompleter.future;
     state = state.copyWith(isLoading: true, error: null);
 
     try {
@@ -134,7 +148,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         user: User.fromJson(response['user']),
       );
     } catch (e) {
-      // 🔥 CHANGED HERE
+      await _clearTokens();
       state = state.copyWith(
         isLoading: false,
         error: formatDioError(e),
@@ -149,6 +163,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required String username,
     required String password,
   }) async {
+    await _initCompleter.future;
     state = state.copyWith(isLoading: true, error: null);
 
     try {
@@ -173,7 +188,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         user: User.fromJson(userData),
       );
     } catch (e) {
-      // 🔥 CHANGED HERE
+      await _clearTokens();
       state = state.copyWith(
         isLoading: false,
         error: formatDioError(e),
@@ -185,13 +200,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
   // ✅ LOGOUT
   // ============================
   Future<void> logout() async {
+    await _initCompleter.future;
     state = state.copyWith(isLoading: true);
 
     try {
       await _apiClient.logout();
+      await _clearTokens();
       state = AuthState();
     } catch (e) {
-      // 🔥 CHANGED HERE
       state = state.copyWith(
         isLoading: false,
         error: formatDioError(e),
@@ -203,6 +219,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   // ✅ UPDATE PROFILE
   // ============================
   Future<void> updateProfile(Map<String, dynamic> data) async {
+    await _initCompleter.future;
     state = state.copyWith(isLoading: true, error: null);
 
     try {
@@ -217,7 +234,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
         user: User.fromJson(response),
       );
     } catch (e) {
-      // 🔥 CHANGED HERE
       state = state.copyWith(
         isLoading: false,
         error: formatDioError(e),

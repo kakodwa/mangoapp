@@ -1,7 +1,6 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_web_plugins/url_strategy.dart'; // 🌟 Enables hashless clean URLs
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -10,6 +9,7 @@ import 'router/app_router.dart';
 import 'screens/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
+import 'screens/main_tabs_screen.dart';
 import 'screens/products/product_details_screen.dart';
 import 'screens/hospitality/lodge_detail_screen.dart';
 import 'screens/events/event_detail_screen.dart';
@@ -18,10 +18,11 @@ import 'screens/properties/property_details_screen.dart';
 import 'theme/app_colors.dart';
 import 'widgets/no_internet_listener.dart';
 
-// Import Your API Client and Data Models directly
+// Import Providers and API Client Architecture
 import 'core/api/api_client.dart'; 
 import 'models/lodge_model.dart';
 import 'models/event_model.dart';
+import 'providers/auth_provider.dart';
 
 // 🌟 GLOBAL NAVIGATION KEY DEFINITION FOR DEEP-LINK OVERLAYS
 final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>();
@@ -29,9 +30,6 @@ final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // 🌟 Turn on clean web paths (Removes the requirement for /#/)
-  usePathUrlStrategy(); 
 
   if (WebViewPlatform.instance == null) {
     WebViewPlatform.instance = AndroidWebViewPlatform();
@@ -52,12 +50,15 @@ class MainApp extends ConsumerStatefulWidget {
   ConsumerState<MainApp> createState() => _MainAppState();
 }
 
-class _MainAppState extends ConsumerState<MainApp> {
-  // 🛡️ State tracker holding incoming links until the Splash frame finishes executing
-  String? _initialDeepLinkPath;
+// 🌟 FIX: Inject the AppRouterMixin to handle the web browser parsing on startup natively!
+class _MainAppState extends ConsumerState<MainApp>  {
+
 
   @override
   Widget build(BuildContext context) {
+    // 🔄 Listen directly to the active Auth State at the app application root
+    final authState = ref.watch(authProvider);
+
     return NoInternetListener(
       child: MaterialApp(
         navigatorKey: globalNavigatorKey, 
@@ -83,35 +84,16 @@ class _MainAppState extends ConsumerState<MainApp> {
           ),
         ),
 
-        home: const SplashScreen(),
-
-        // 🛡️ Intercept deep links, save the route target, and defer navigation to MyApp
-        onGenerateRoute: (RouteSettings settings) {
-          final String pathName = settings.name ?? '';
-
-          if (pathName.startsWith('/product/') || 
-              pathName.startsWith('/property/') || 
-              pathName.startsWith('/shop/') || 
-              pathName.startsWith('/lodge/') || 
-              pathName.startsWith('/event/')) {
-            
-            // Hold path string in state variables so it transfers cleanly downstream
-            _initialDeepLinkPath = pathName;
-
-            // Return a safe placeholder route keeping the frame running seamlessly 
-            return MaterialPageRoute(
-              settings: settings,
-              builder: (context) => const SplashScreen(),
-            );
-          }
-          return null;
-        },
+        // 🚀 Dynamic Entry Point: Open tabs view by default. 
+        // The AppRouterMixin will automatically overlay the deep-linked screen on top!
+        home: authState.isLoading
+            ? const SplashScreen()
+            : const MainTabsScreen(),
 
         routes: {
           '/login': (context) => const LoginScreen(),
           '/register': (context) => const RegisterScreen(),
-          // 🛡️ Pass downstream target variables parameter directly into your shell router app core
-          '/home': (context) => MyApp(initialRoutePath: _initialDeepLinkPath),
+          '/home': (context) => const MainTabsScreen(), 
         },
       ),
     );

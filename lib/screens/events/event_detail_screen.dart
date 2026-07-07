@@ -6,7 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
+import '../../widgets/web_footer.dart';
 import '../../widgets/reviews/review_section_widget.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/event_model.dart';
@@ -315,6 +315,9 @@ class EventDetailScreen extends ConsumerWidget {
               ),
 
               const SliverToBoxAdapter(child: SizedBox(height: 160)),
+              const SliverToBoxAdapter(
+                child: WebFooter(),
+                ),
             ],
           ),
         ),

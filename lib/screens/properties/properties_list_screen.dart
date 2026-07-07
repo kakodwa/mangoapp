@@ -10,6 +10,7 @@ import '../../widgets/app_scaffold.dart';
 import 'property_card.dart';
 import '../../widgets/search_filter_widgets.dart';
 import '../../theme/design_system/app_spacing.dart';
+import '../../widgets/web_footer.dart';
 
 class PropertiesListScreen extends ConsumerStatefulWidget {
   const PropertiesListScreen({Key? key}) : super(key: key);

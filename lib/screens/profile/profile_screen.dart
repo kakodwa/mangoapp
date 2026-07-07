@@ -16,6 +16,8 @@ import '../wallet/payout_history_screen.dart';
 import '../delivery/seller_delivery_screen.dart';
 import '../events/manage_events_screen.dart';
 
+import '../main_tabs_screen.dart';
+
 import '../orders/orders_screen.dart';
 import '../auth/login_screen.dart';
 
@@ -29,6 +31,7 @@ import '../hospitality/my_bookings_screen.dart';
 
 import '../../theme/design_system/app_spacing.dart';
 import '../../services/analytics_service.dart';
+import '../../widgets/web_footer.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -48,20 +51,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   
   bool _hasLoggedView = false;
 
-  // Modified toggle method to close other panels when one opens
   void _toggle(String key) {
     setState(() {
       final isCurrentlyOpen = _expanded[key] ?? false;
-      
-      // Close all panels
       _expanded.updateAll((k, v) => false);
-      
-      // Toggle the targeted panel based on its previous state
       _expanded[key] = !isCurrentlyOpen;
     });
   }
 
-  // Reusable restriction popup dialog builder
   void _showFeatureUnderDevelopmentDialog(String featureName) {
     showDialog(
       context: context,
@@ -107,7 +104,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final hasShop = ref.watch(hasShopProvider);
 
     final width = MediaQuery.of(context).size.width;
-    final crossAxisCount = width < 360 ? 1 : 2;
+    
+    // Responsive grid distribution based on platform width
+    int crossAxisCount = 2;
+    if (width >= 1024) {
+      crossAxisCount = 4; 
+    } else if (width >= 600) {
+      crossAxisCount = 3; 
+    } else if (width < 340) {
+      crossAxisCount = 1; 
+    }
     
     final AnalyticsService analytics = AnalyticsService();
 
@@ -119,214 +125,242 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          const SizedBox(height: 45),
+          // ================= CENTERED & CONSTRAINED MAIN CONTENT =================
+          Center(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 850),
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Column(
+                children: [
+                  const SizedBox(height: 30),
 
-          // ================= HEADER =================
-          Stack(
-            alignment: Alignment.center,
-            clipBehavior: Clip.none,
-            children: [
-              Container(
-                margin: EdgeInsets.all(AppSpacing.md),
-                padding: const EdgeInsets.fromLTRB(20, 70, 20, 20),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [AppColors.mangoOrange, AppColors.leafGreen],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+                  // ================= HEADER =================
+                  Stack(
+                    alignment: Alignment.center,
+                    clipBehavior: Clip.none,
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        margin: EdgeInsets.all(AppSpacing.md),
+                        padding: const EdgeInsets.fromLTRB(24, 65, 24, 24),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [AppColors.mangoOrange, AppColors.leafGreen],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.06),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              "${user?.firstName ?? ""} ${user?.lastName ?? ""}".trim().isEmpty 
+                                  ? "User Account" 
+                                  : "${user?.firstName ?? ""} ${user?.lastName ?? ""}",
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: -0.5,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              user?.email ?? "",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.85),
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                            
+                            walletAsync.when(
+                              data: (wallet) => Wrap(
+                                spacing: 24,
+                                runSpacing: 16,
+                                alignment: WrapAlignment.center,
+                                children: [
+                                  _miniStat("Balance", "${wallet.currency} ${wallet.balance}"),
+                                  _miniStat("Earnings", "${wallet.currency} ${wallet.totalEarnings}"),
+                                  _miniStat("Withdrawn", "${wallet.currency} ${wallet.totalWithdrawn}"),
+                                ],
+                              ),
+                              loading: () => const SizedBox(
+                                height: 30,
+                                width: 30,
+                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                              ),
+                              error: (_, __) => const Text(
+                                "Wallet data error",
+                                style: TextStyle(color: Colors.white70, fontSize: 12),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Positioned(
+                        top: -35,
+                        child: CircleAvatar(
+                          radius: 45,
+                          backgroundColor: Colors.white,
+                          child: CircleAvatar(
+                            radius: 41,
+                            backgroundColor: AppColors.mangoOrange,
+                            child: Icon(Icons.person, size: 45, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  borderRadius: BorderRadius.circular(22),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 14,
-                      offset: const Offset(0, 6),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      "${user?.firstName ?? ""} ${user?.lastName ?? ""}",
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      user?.email ?? "",
-                      style: const TextStyle(
-                        color: Colors.white70,
-                        fontSize: 13,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    walletAsync.when(
-                      data: (wallet) => Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          _miniStat("Balance", "${wallet.currency} ${wallet.balance}"),
-                          _miniStat("Earnings", "${wallet.currency} ${wallet.totalEarnings}"),
-                          _miniStat("Withdrawn", "${wallet.currency} ${wallet.totalWithdrawn}"),
-                        ],
-                      ),
-                      loading: () => const CircularProgressIndicator(color: Colors.white),
-                      error: (_, __) => const Text("Wallet error"),
-                    ),
-                  ],
-                ),
-              ),
-              const Positioned(
-                top: -35,
-                child: CircleAvatar(
-                  radius: 40,
-                  backgroundColor: AppColors.mangoOrange,
-                  child: Icon(Icons.person, size: 40, color: Colors.white),
-                ),
-              ),
-            ],
-          ),
 
-          const SizedBox(height: 5),
+                  const SizedBox(height: 12),
 
-          // ================= MENU =================
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14),
-            child: Column(
-              children: [
-                _sectionCard(
-                  key: "payments",
-                  title: "Payments & Wallet",
-                  crossAxisCount: crossAxisCount,
-                  children: [
-                    _gridCard(Icons.account_balance_wallet, "Wallet", () {
-                      analytics.logEvent('profile_click_wallet');
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const WalletTransactionsScreen()));
-                    }),
-                    _gridCard(Icons.payment, "Payments", () {
-                      analytics.logEvent('profile_click_payment_history');
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const PaymentHistoryScreen()));
-                    }),
-                    _gridCard(Icons.outbox, "Withdraw Money", () {
-                      analytics.logEvent('profile_click_withdraw_request');
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const WithdrawalScreen()));
-                    }),
-                    _gridCard(Icons.history, "Cashout History", () {
-                      analytics.logEvent('profile_click_payout_history');
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const PayoutHistoryScreen()));
-                    }),
-                  ],
-                ),
-
-                _sectionCard(
-                  key: "activity",
-                  title: "My Activity",
-                  crossAxisCount: crossAxisCount,
-                  children: [
-                    _gridCard(Icons.shopping_bag, "Orders", () {
-                      analytics.logEvent('profile_click_orders');
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const OrdersScreen()));
-                    }),
-                    _gridCard(Icons.hotel, "Bookings", () {
-                      analytics.logEvent('profile_click_bookings');
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const MyBookingsScreen()));
-                    }),
-                    _gridCard(Icons.confirmation_number, "Tickets", () {
-                      analytics.logEvent('profile_click_tickets');
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const MyTicketsScreen()));
-                    }),
-                    _gridCard(Icons.no_encryption, "Unlocked Properties", () {
-                      analytics.logEvent('profile_click_unlocked_properties');
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const MyUnlockedPropertiesScreen()));
-                    }),
-                  ],
-                ),
-
-                _sectionCard(
-                  key: "management",
-                  title: "Management",
-                  crossAxisCount: crossAxisCount,
-                  children: [
-                    _gridCard(Icons.dashboard, "Lodge", () {
-                      analytics.logEvent('profile_click_lodge_dashboard');
-                      
-                      // Shows popup first:
-                      _showFeatureUnderDevelopmentDialog("Lodge Management");
-                      
-                      // SCREEN LOGIC OPENER IS HERE BUT COMMENTED OUT:
-                      // Navigator.push(context, MaterialPageRoute(builder: (_) => const LodgeOwnerDashboard()));
-                    }),
-                    _gridCard(Icons.home_work, "Properties", () {
-                      analytics.logEvent('profile_click_properties');
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const MyPropertiesScreen()));
-                    }),
-                    _gridCard(Icons.event, "Events", () {
-                      analytics.logEvent('profile_click_manage_events');
-                      
-                      // Shows popup first:
-                      _showFeatureUnderDevelopmentDialog("Event Management");
-                      
-                      // SCREEN LOGIC OPENER IS HERE BUT COMMENTED OUT:
-                      // Navigator.push(context, MaterialPageRoute(builder: (_) => const ManageEventsScreen()));
-                    }),
-                  ],
-                ),
-
-                if (isLoggedIn)
-                  _sectionCard(
-                    key: "shop",
-                    title: "Shop Management",
-                    crossAxisCount: crossAxisCount,
-                    children: !hasShop
-                        ? [
-                            _gridCard(Icons.add_business, "Create Shop", () {
-                              analytics.logEvent('profile_click_create_shop');
-                              Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateShopScreen()));
+                  // ================= MENU =================
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      children: [
+                        _sectionCard(
+                          key: "payments",
+                          title: "Payments & Wallet",
+                          crossAxisCount: crossAxisCount,
+                          children: [
+                            _gridCard(Icons.account_balance_wallet_outlined, "Wallet", () {
+                              analytics.logEvent('profile_click_wallet');
+                              MainTabsScreen.of(context)?.navigateToWalletTransactions();
                             }),
-                          ]
-                        : [
-                            _gridCard(Icons.store, "My Shop", () {
-                              analytics.logEvent('profile_click_my_shop');
-                              Navigator.push(context, MaterialPageRoute(builder: (_) => const MyShopScreen()));
+                            _gridCard(Icons.payment_outlined, "Payments", () {
+                              analytics.logEvent('profile_click_payment_history');
+                              MainTabsScreen.of(context)?.navigateToPaymentHistory();
                             }),
-                            _gridCard(Icons.add_box, "Add Product", () {
-                              analytics.logEvent('profile_click_add_product');
-                              Navigator.push(context, MaterialPageRoute(builder: (_) => const AddProductScreen()));
+                            _gridCard(Icons.outbox_outlined, "Withdraw Money", () {
+                              analytics.logEvent('profile_click_withdraw_request');
+                              MainTabsScreen.of(context)?.navigateToWithdrawal();
                             }),
-                            _gridCard(Icons.local_shipping, "Deliveries", () {
-                              analytics.logEvent('profile_click_deliveries');
-                              Navigator.push(context, MaterialPageRoute(builder: (_) => const SellerDeliveryScreen()));
+                            _gridCard(Icons.history_outlined, "Cashout History", () {
+                              analytics.logEvent('profile_click_payout_history');
+                              MainTabsScreen.of(context)?.navigateToPayoutHistory();
                             }),
                           ],
-                  ),
+                        ),
 
-                _sectionCard(
-                  key: "account",
-                  title: "Account",
-                  crossAxisCount: crossAxisCount,
-                  children: [
-                    _gridCard(Icons.settings, "Settings", () {
-                      analytics.logEvent('profile_click_settings');
-                    }),
-                    _gridCard(Icons.logout, "Logout", () async {
-                      analytics.logEvent('profile_explicit_logout');
-                      await ref.read(authProvider.notifier).logout();
-                      if (context.mounted) {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (_) => const LoginScreen()),
-                          (route) => false,
-                        );
-                      }
-                    }),
-                  ],
-                ),
-              ],
+                        _sectionCard(
+                          key: "activity",
+                          title: "My Activity",
+                          crossAxisCount: crossAxisCount,
+                          children: [
+                            _gridCard(Icons.shopping_bag_outlined, "Orders", () {
+                              analytics.logEvent('profile_click_orders');
+                              MainTabsScreen.of(context)?.navigateToOrders();
+                            }),
+                            _gridCard(Icons.hotel_outlined, "Bookings", () {
+                              analytics.logEvent('profile_click_bookings');
+                              MainTabsScreen.of(context)?.navigateToMyBookings();
+                            }),
+                            _gridCard(Icons.confirmation_number_outlined, "Tickets", () {
+                              analytics.logEvent('profile_click_tickets');
+                              MainTabsScreen.of(context)?.navigateToMyTickets();
+                            }),
+                            _gridCard(Icons.lock_open_outlined, "Unlocked Properties", () {
+                              analytics.logEvent('profile_click_unlocked_properties');
+                              MainTabsScreen.of(context)?.navigateToMyUnlockedProperties();
+                            }),
+                          ],
+                        ),
+
+                        _sectionCard(
+                          key: "management",
+                          title: "Management",
+                          crossAxisCount: crossAxisCount,
+                          children: [
+                            _gridCard(Icons.dashboard_outlined, "Lodge", () {
+                              analytics.logEvent('profile_click_lodge_dashboard');
+                              MainTabsScreen.of(context)?.navigateToLodgeDashboard();
+                            }),
+                            _gridCard(Icons.home_work_outlined, "Properties", () {
+                              analytics.logEvent('profile_click_properties');
+                              MainTabsScreen.of(context)?.navigateToMyProperties();
+                            }),
+                            _gridCard(Icons.event_outlined, "Events", () {
+                              analytics.logEvent('profile_click_manage_events');
+                              MainTabsScreen.of(context)?.navigateToManageEvents();
+                            }),
+                          ],
+                        ),
+
+                        if (isLoggedIn)
+                          _sectionCard(
+                            key: "shop",
+                            title: "Shop Management",
+                            crossAxisCount: crossAxisCount,
+                            children: !hasShop
+                                ? [
+                                    _gridCard(Icons.add_business_outlined, "Create Shop", () {
+                                      analytics.logEvent('profile_click_create_shop');
+                                      MainTabsScreen.of(context)?.navigateToCreateShop();
+                                    }),
+                                  ]
+                                : [
+                                    _gridCard(Icons.store_outlined, "My Shop", () {
+                                      analytics.logEvent('profile_click_my_shop');
+                                      MainTabsScreen.of(context)?.navigateToMyShop();
+                                    }),
+                                    _gridCard(Icons.add_box_outlined, "Add Product", () {
+                                      analytics.logEvent('profile_click_add_product');
+                                      MainTabsScreen.of(context)?.navigateToAddProduct();
+                                    }),
+                                    _gridCard(Icons.local_shipping_outlined, "Deliveries", () {
+                                      analytics.logEvent('profile_click_deliveries');
+                                      MainTabsScreen.of(context)?.navigateToSellerDeliveries();
+                                    }),
+                                  ],
+                          ),
+
+                        _sectionCard(
+                          key: "account",
+                          title: "Account",
+                          crossAxisCount: crossAxisCount,
+                          children: [
+                            _gridCard(Icons.settings_outlined, "Settings", () {
+                              analytics.logEvent('profile_click_settings');
+                            }),
+                            _gridCard(Icons.logout_rounded, "Logout", () async {
+                              analytics.logEvent('profile_explicit_logout');
+                              await ref.read(authProvider.notifier).logout();
+                              if (context.mounted) {
+                                Navigator.pushAndRemoveUntil(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                                  (route) => false,
+                                );
+                              }
+                            }),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
-          const SizedBox(height: 30),
+          
+          const SizedBox(height: 40),
+          
+          // ================= FULL WIDTH EDGE-TO-EDGE FOOTER =================
+          const SizedBox(
+            width: double.infinity,
+            child: WebFooter(),
+          ),
         ],
       ),
     );
@@ -341,14 +375,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final isOpen = _expanded[key] ?? false;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
+      margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.withOpacity(0.15)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],
@@ -364,19 +399,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           AnimatedCrossFade(
             duration: const Duration(milliseconds: 200),
             crossFadeState: isOpen ? CrossFadeState.showFirst : CrossFadeState.showSecond,
-            firstChild: Padding(
-              padding: const EdgeInsets.all(8),
+            firstChild: Container(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
               child: GridView.count(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 crossAxisCount: crossAxisCount,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-                childAspectRatio: 1.6,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 1.4,
                 children: children,
               ),
             ),
-            secondChild: const SizedBox(),
+            secondChild: const SizedBox(width: double.infinity),
           ),
         ],
       ),
@@ -389,22 +424,26 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       borderRadius: BorderRadius.circular(12),
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFFF7F8FA),
+          color: const Color(0xFFF8F9FA),
           borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFE9ECEF)),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 22, color: AppColors.mangoOrange),
-              const SizedBox(height: 6),
+              Icon(icon, size: 24, color: AppColors.mangoOrange),
+              const SizedBox(height: 8),
               Text(
                 title,
                 textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF343A40),
                 ),
               ),
             ],
@@ -415,17 +454,27 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _miniStat(String label, String value) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12),
-        ),
-        Text(
-          label,
-          style: const TextStyle(color: Colors.white70, fontSize: 10),
-        ),
-      ],
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white, 
+              fontWeight: FontWeight.bold, 
+              fontSize: 15,
+              letterSpacing: -0.2,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: TextStyle(color: Colors.white.withOpacity(0.75), fontSize: 11),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -448,16 +497,27 @@ class MakeActionInkWell extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.vertical(
+        top: const Radius.circular(16),
+        bottom: Radius.circular(isOpen ? 0 : 16),
+      ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
               title,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+              style: const TextStyle(
+                fontSize: 15, 
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF212529),
+              ),
             ),
-            Icon(isOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down),
+            Icon(
+              isOpen ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+              color: Colors.black54,
+            ),
           ],
         ),
       ),

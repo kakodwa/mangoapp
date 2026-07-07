@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-// Ensure correct paths according to your project structure
+
 import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_card.dart';
 import '../../theme/design_system/app_badge.dart';
 import '../../theme/design_system/app_info_box.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_typography.dart';
+import '../../widgets/web_footer.dart';
 
 class MangoHubScreen extends StatefulWidget {
   const MangoHubScreen({super.key});

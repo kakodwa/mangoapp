@@ -1,3 +1,5 @@
+// lib/screens/payments/payment_checkout_screen.dart
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -7,26 +9,21 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../../models/payment_status_model.dart';
 import '../../providers/api_provider.dart';
-import '../../screens/events/my_tickets_screen.dart';
-import '../../screens/hospitality/my_bookings_screen.dart';
-import '../../screens/orders/orders_screen.dart';
-import '../../screens/properties/unlocked_properties_screen.dart';
+import '../../screens/main_tabs_screen.dart'; 
 import '../../theme/design_system/app_info_box.dart';
 import 'paychangu_visa_webview.dart';
 import '../../theme/design_system/app_text_field.dart';
 import '../../utils/app_toast.dart';
-import '../../widgets/main_app_bar.dart';
 import '../../theme/design_system/app_spacing.dart';
+import '../../widgets/web_footer.dart';
 
-class PaymentCheckoutScreen
-    extends ConsumerStatefulWidget {
+class PaymentCheckoutScreen extends ConsumerStatefulWidget {
   final int transactionId;
   final double amount;
   final String purpose;
   final String? referenceType;
 
-  final Function(PaymentStatusModel payment)?
-      onSuccess;
+  final Function(PaymentStatusModel payment)? onSuccess;
 
   const PaymentCheckoutScreen({
     super.key,
@@ -38,9 +35,8 @@ class PaymentCheckoutScreen
   });
 
   @override
-  ConsumerState<PaymentCheckoutScreen>
-      createState() =>
-          _PaymentCheckoutScreenState();
+  ConsumerState<PaymentCheckoutScreen> createState() =>
+      _PaymentCheckoutScreenState();
 }
 
 class _PaymentCheckoutScreenState
@@ -68,8 +64,7 @@ class _PaymentCheckoutScreenState
   bool get isVisa =>
       selectedMethod == 'visa_card';
 
-  final List<Map<String, dynamic>>
-      paymentMethods = [
+  final List<Map<String, dynamic>> paymentMethods = [
     {
       "value": "airtel_money",
       "name": "Airtel Money",
@@ -98,16 +93,13 @@ class _PaymentCheckoutScreenState
       builder: (_) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
-            borderRadius:
-                BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(16),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircularProgressIndicator(),
-
+              const CircularProgressIndicator(),
               const SizedBox(height: AppSpacing.md),
-
               Text(
                 isMobile
                     ? "Please enter PIN on your phone to complete payment"
@@ -128,7 +120,6 @@ class _PaymentCheckoutScreenState
   // ======================
   // INITIATE PAYMENT
   // ======================
-
 
   Future<void> initiatePayment() async {
     if (isMobile) {
@@ -178,7 +169,7 @@ class _PaymentCheckoutScreenState
       final paymentReference = res['payment_reference'];
 
       // =====================
-      // VISA FLOW (HOSTED OUTSIDE APP)
+      // VISA FLOW
       // =====================
       if (isVisa) {
         final checkoutUrl = res['checkout_url'];
@@ -197,14 +188,12 @@ class _PaymentCheckoutScreenState
 
         if (!mounted) return;
 
-        // Push to your corrected WebView setup
         await Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => VisaPaymentWebView(
               checkoutUrl: checkoutUrl,
               onSuccess: () {
-                // Instantly boot local background validation verification checks
                 _startPolling(paymentReference);
                 _showProcessingDialog();
               },
@@ -242,7 +231,6 @@ class _PaymentCheckoutScreenState
   // ======================
   // POLLING
   // ======================
-
   void _startPolling(String reference) {
     _timer?.cancel();
 
@@ -250,22 +238,21 @@ class _PaymentCheckoutScreenState
       const Duration(seconds: 5),
       (timer) async {
         try {
-          final api =
-              ref.read(apiClientProvider);
+          final api = ref.read(apiClientProvider);
 
           final res = await api.get(
             "payments/status/$reference/",
-            fromJson: (json) =>
-                PaymentStatusModel
-                    .fromJson(json),
+            fromJson: (json) => PaymentStatusModel.fromJson(json),
           );
 
           if (res.status == "completed") {
+            timer.cancel();
+
+            final tabsShell = MainTabsScreen.of(context);
+
             if (Navigator.canPop(context)) {
               Navigator.pop(context);
             }
-
-            timer.cancel();
 
             AppToast.success(
               context,
@@ -276,51 +263,16 @@ class _PaymentCheckoutScreenState
 
             if (!mounted) return;
 
-            if (widget.referenceType ==
-                "booking") {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      const MyBookingsScreen(),
-                ),
-                (route) => false,
-              );
-            } else if (widget
-                    .referenceType ==
-                "order") {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      const OrdersScreen(),
-                ),
-                (route) => false,
-              );
-            } else if (widget
-                    .referenceType ==
-                "property_unlock") {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      const UnlockedPropertiesScreen(),
-                ),
-                (route) => false,
-              );
-            } else if (widget
-                    .referenceType ==
-                "ticket") {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      const MyTicketsScreen(),
-                ),
-                (route) => false,
-              );
-            } else {
-              Navigator.pop(context, res);
+            Navigator.of(context).popUntil((route) => route.isFirst);
+
+            if (widget.referenceType == "booking") {
+              tabsShell?.navigateToMyBookings();
+            } else if (widget.referenceType == "order") {
+              tabsShell?.navigateToOrders();
+            } else if (widget.referenceType == "property_unlock") {
+              tabsShell?.navigateToMyUnlockedProperties();
+            } else if (widget.referenceType == "ticket") {
+              tabsShell?.navigateToMyTickets();
             }
           }
 
@@ -347,41 +299,30 @@ class _PaymentCheckoutScreenState
   // PAYMENT METHOD CARD
   // ======================
 
-  Widget paymentMethodCard(
-    Map<String, dynamic> method,
-  ) {
-    final isSelected =
-        selectedMethod ==
-        method['value'];
+  Widget paymentMethodCard(Map<String, dynamic> method) {
+    final isSelected = selectedMethod == method['value'];
 
     return GestureDetector(
       onTap: () {
         setState(() {
-          selectedMethod =
-              method['value'];
+          selectedMethod = method['value'];
         });
       },
       child: AnimatedContainer(
-        duration:
-            const Duration(milliseconds: 200),
-        padding: EdgeInsets.all(14),
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surface,
-          borderRadius:
-              BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
-                ? Theme.of(context)
-                    .primaryColor
+                ? Theme.of(context).primaryColor
                 : Theme.of(context).colorScheme.outline.withOpacity(0.38),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: [
             BoxShadow(
-              color:
-                  Theme.of(context).colorScheme.onSurface.withOpacity(
-                0.03,
-              ),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.03),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -392,43 +333,30 @@ class _PaymentCheckoutScreenState
             Container(
               width: 55,
               height: 55,
-              padding:
-                  EdgeInsets.all(AppSpacing.xs),
+              padding: const EdgeInsets.all(AppSpacing.xs),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
-                borderRadius:
-                    BorderRadius.circular(
-                  14,
-                ),
+                borderRadius: BorderRadius.circular(14),
               ),
               child: Image.asset(
                 method['image'],
                 fit: BoxFit.contain,
               ),
             ),
-
             const SizedBox(width: 14),
-
             Expanded(
               child: Text(
                 method['name'],
                 style: const TextStyle(
                   fontSize: 15,
-                  fontWeight:
-                      FontWeight.w600,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
-
             Icon(
-              isSelected
-                  ? Icons
-                      .radio_button_checked
-                  : Icons
-                      .radio_button_off,
+              isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
               color: isSelected
-                  ? Theme.of(context)
-                      .primaryColor
+                  ? Theme.of(context).primaryColor
                   : Theme.of(context).colorScheme.outline,
             ),
           ],
@@ -438,322 +366,175 @@ class _PaymentCheckoutScreenState
   }
 
   @override
-  void dispose() {
-    _timer?.cancel();
-
-    phoneController.dispose();
-    nameController.dispose();
-
-    cardName.dispose();
-    cardNumber.dispose();
-    expiry.dispose();
-    cvv.dispose();
-
-    super.dispose();
-  }
-
-  // ======================
-  // UI
-  // ======================
-
-  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-
-      appBar: AppBar(title: const Text('Secure Payment'),),
-
-      body: SafeArea(
-        child: Form(
-          key: _formKey,
-          child: ListView(
-            padding:
-                EdgeInsets.all(AppSpacing.md),
-            children: [
-              // ======================
-              // HEADER
-              // ======================
-
-              Container(
-                padding:
-                    EdgeInsets.all(
-                  18,
+    // ✅ Scaffold, AppBar, and SafeArea removed to allow smooth rendering within MainTabsScreen
+    return Form(
+      key: _formKey,
+      child: ListView(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        children: [
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).primaryColor,
+                  Theme.of(context).primaryColor.withOpacity(0.8),
+                ],
+              ),
+            ),
+            child: Column(
+              children: [
+                Icon(
+                  Icons.lock_outline,
+                  color: Theme.of(context).colorScheme.surface,
+                  size: 38,
                 ),
-                decoration: BoxDecoration(
-                  borderRadius:
-                      BorderRadius.circular(
-                    20,
+                const SizedBox(height: 10),
+                Text(
+                  "Pay MWK ${widget.amount}",
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.surface,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
                   ),
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context)
-                          .primaryColor,
-                      Theme.of(context)
-                          .primaryColor
-                          .withOpacity(0.8),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  widget.purpose,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.9),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          const Text(
+            "Select Payment Method",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 14),
+          ...paymentMethods.map(
+            (method) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: paymentMethodCard(method),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          if (isMobile) ...[
+            AppTextField(
+              label: 'Full Name',
+              hint: 'Enter full name',
+              controller: nameController,
+              type: TextFieldType.text,
+              isRequired: true,
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Full name required';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+            AppTextField(
+              label: 'Phone Number',
+              hint: 'e.g 0881234567',
+              controller: phoneController,
+              type: TextFieldType.phone,
+              isRequired: true,
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Phone number required';
+                }
+                return null;
+              },
+            ),
+          ],
+          if (isVisa)
+            const AppInfoBox(
+              type: AppInfoType.info,
+              icon: Icons.info_outline,
+              message: "You will be redirected to secure PayChangu checkout.",
+            ),
+          const SizedBox(height: 30),
+          SizedBox(
+            height: 56,
+            child: ElevatedButton(
+              onPressed: loading ? null : initiatePayment,
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              child: loading
+                  ? const SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2.5,
+                      ),
+                    )
+                  : const Text(
+                      "Pay Now",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Center(
+            child: Column(
+              children: [
+                Text(
+                  "Powered by",
+                  style: TextStyle(
+                    color: Colors.grey.withOpacity(0.7),
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: Colors.grey.withOpacity(0.25),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        'assets/images/changu.png',
+                        height: 30,
+                      ),
+                      const SizedBox(width: 10),
                     ],
                   ),
                 ),
-                child: Column(
-                  children: [
-                    Icon(
-                      Icons.lock_outline,
-                      color: Theme.of(context).colorScheme.surface,
-                      size: 38,
-                    ),
-
-                    const SizedBox(
-                      height: 10,
-                    ),
-
-                    Text(
-                      "Pay MWK ${widget.amount}",
-                      style:
-                          TextStyle(
-                        color:
-                            Theme.of(context).colorScheme.surface,
-                        fontSize: 22,
-                        fontWeight:
-                            FontWeight
-                                .w700,
-                      ),
-                    ),
-
-                    const SizedBox(
-                      height: 6,
-                    ),
-
-                    Text(
-                      widget.purpose,
-                      textAlign:
-                          TextAlign.center,
-                      style: TextStyle(
-                        color: Colors
-                            .white
-                            .withOpacity(
-                          0.9,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: AppSpacing.lg),
-
-              // ======================
-              // PAYMENT METHODS
-              // ======================
-
-              Text(
-                "Select Payment Method",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight:
-                      FontWeight.w700,
-                ),
-              ),
-
-              const SizedBox(height: 14),
-
-              ...paymentMethods.map(
-                (method) => Padding(
-                  padding:
-                      EdgeInsets.only(
-                    bottom: 12,
-                  ),
-                  child:
-                      paymentMethodCard(
-                    method,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: AppSpacing.lg),
-
-              // ======================
-              // MOBILE MONEY
-              // ======================
-
-              if (isMobile) ...[
-                AppTextField(
-                  label: 'Full Name',
-                  hint:
-                      'Enter full name',
-                  controller:
-                      nameController,
-                  type:
-                      TextFieldType.text,
-                  isRequired: true,
-                  validator: (value) {
-                    if (value ==
-                            null ||
-                        value
-                            .trim()
-                            .isEmpty) {
-                      return 'Full name required';
-                    }
-
-                    return null;
-                  },
-                ),
-
-                const SizedBox(
-                  height: 16,
-                ),
-
-                AppTextField(
-                  label:
-                      'Phone Number',
-                  hint:
-                      'e.g 0881234567',
-                  controller:
-                      phoneController,
-                  type:
-                      TextFieldType.phone,
-                  isRequired: true,
-                  validator: (value) {
-                    if (value ==
-                            null ||
-                        value
-                            .trim()
-                            .isEmpty) {
-                      return 'Phone number required';
-                    }
-
-                    return null;
-                  },
-                ),
               ],
-
-              // ======================
-              // VISA
-              // ======================
-
-              if (isVisa)
-                AppInfoBox(
-                  type: AppInfoType.info,
-                  icon: Icons.info_outline,
-                  message: "You will be redirected to secure PayChangu checkout.",
-              ),
-
-              const SizedBox(height: 30),
-
-              // ======================
-              // BUTTON
-              // ======================
-
-              SizedBox(
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: loading
-                      ? null
-                      : initiatePayment,
-                  style:
-                      ElevatedButton
-                          .styleFrom(
-                    shape:
-                        RoundedRectangleBorder(
-                      borderRadius:
-                          BorderRadius.circular(
-                        16,
-                      ),
-                    ),
-                  ),
-                  child: loading
-                      ? const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child:
-                              CircularProgressIndicator(
-                            color:
-                                Colors
-                                    .white,
-                            strokeWidth:
-                                2.5,
-                          ),
-                        )
-                      : Text(
-                          "Pay Now",
-                          style:
-                              TextStyle(
-                            fontSize:
-                                16,
-                            fontWeight:
-                                FontWeight
-                                    .w700,
-                          ),
-                        ),
-                ),
-              ),
-
-              const SizedBox(height: AppSpacing.lg),
-
-              // ======================
-              // POWERED BY
-              // ======================
-
-              Center(
-                child: Column(
-                  children: [
-                    Text(
-                      "Powered by",
-                      style: TextStyle(
-                        color: Colors
-                            .grey
-                            .withOpacity(0.7),
-                        fontSize: 13,
-                      ),
-                    ),
-
-                    const SizedBox(
-                      height: 8,
-                    ),
-
-                    Container(
-                      padding:
-                          EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                      decoration:
-                          BoxDecoration(
-                        color:
-                            Theme.of(context).colorScheme.surface,
-                        borderRadius:
-                            BorderRadius.circular(
-                          14,
-                        ),
-                        border: Border.all(
-                          color: Colors
-                              .grey
-                              .withOpacity(0.25),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize:
-                            MainAxisSize
-                                .min,
-                        children: [
-                          Image.asset(
-                            'assets/images/changu.png',
-                            height: 30,
-                          ),
-
-                          const SizedBox(
-                            width: 10,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 30),
-            ],
+            ),
           ),
-        ),
+          
+          // ✅ WebFooter appended seamlessly to the bottom of the checkout content scroll view
+          const Padding(
+            padding: EdgeInsets.only(top: 40.0),
+            child: WebFooter(),
+          ),
+        ],
       ),
     );
   }

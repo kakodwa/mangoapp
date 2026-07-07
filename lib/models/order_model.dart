@@ -141,12 +141,12 @@ class SellerOrder {
   }
 }
 
-
 class OrderItem {
   final int id;
   final int productId;
   final String productName;
   final String productImage;
+  final Map<String, dynamic>? variantAttributes; // ✅ Added to capture variant properties mappings
   final int quantity;
   final double unitPrice;
   final double totalPrice;
@@ -156,6 +156,7 @@ class OrderItem {
     required this.productId,
     required this.productName,
     required this.productImage,
+    this.variantAttributes, // ✅ Make choice context option properties optional
     required this.quantity,
     required this.unitPrice,
     required this.totalPrice,
@@ -167,8 +168,10 @@ class OrderItem {
     return OrderItem(
       id: json['id'] ?? 0,
       productId: product['id'] ?? 0,
-      productName: product['name'] ?? '',
-      productImage: product['image'] ?? '',
+      productName: json['product_name'] ?? product['name'] ?? '',
+      productImage: json['product_image'] ?? product['image'] ?? '',
+      // ✅ Dynamically check for attributes sent directly on item object root or under sub-variant keys
+      variantAttributes: json['product_variant'] ?? json['variant_attributes'],
       quantity: json['quantity'] ?? 0,
       unitPrice: double.tryParse(json['unit_price'].toString()) ?? 0,
       totalPrice: double.tryParse(json['total_price'].toString()) ?? 0,

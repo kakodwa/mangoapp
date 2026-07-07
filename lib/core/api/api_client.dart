@@ -16,9 +16,7 @@ class ApiClient {
   }
 
 
-  static const String host =
-    'https://mangobackend-yayy.onrender.com/api/';
-  
+  static const String host = 'https://mangobackend-yayy.onrender.com/api/';
   
   late Dio _dio;
   final _secureStorage = const FlutterSecureStorage();

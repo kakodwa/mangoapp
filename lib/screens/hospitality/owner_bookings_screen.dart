@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/owner_bookings_provider.dart';
 import '../../widgets/hospitality/owner_booking_card.dart';
 import '../../widgets/main_app_bar.dart';
+import '../../widgets/web_footer.dart';
 
 class OwnerBookingsScreen extends ConsumerWidget {
   const OwnerBookingsScreen({super.key});

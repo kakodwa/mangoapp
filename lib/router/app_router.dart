@@ -1,84 +1,114 @@
 // lib/router/app_router.dart
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:universal_html/html.dart' as html;
+import 'package:app_links/app_links.dart'; 
 
 // Import Main explicitly for global navigation controller targets
-import '../main.dart' show globalNavigatorKey;
+import '../main.dart' show globalNavigatorKey, EventDeepLinkBridge, LodgeDeepLinkBridge;
 
-// 📦 Feature Screen Imports (Double check spelling matching your exact widget classes!)
-import 'package:mangochi_marketplace/screens/products/product_details_screen.dart';
-import 'package:mangochi_marketplace/screens/properties/property_details_screen.dart';
-import 'package:mangochi_marketplace/screens/shops/shop_details_screen.dart';
-import 'package:mangochi_marketplace/screens/events/event_detail_screen.dart';
-import 'package:mangochi_marketplace/screens/hospitality/lodge_detail_screen.dart';
+// 📦 Feature Screen Imports
+import 'package:mangochi_marketplace/screens/main_tabs_screen.dart';
 
-// 📦 Data Infrastructure Models
-import '../models/event_model.dart';
-import '../models/lodge_model.dart';
+mixin AppRouterMixin<T extends StatefulWidget> on State<T> {
+  late final AppLinks _appLinks;
+  StreamSubscription<Uri>? _linkSubscription;
 
-mixin WebRouterMixin<T extends StatefulWidget> on State<T> {
-  
-  void handleIncomingWebLink() {
-    if (!kIsWeb) return;
+  /// Call this method in your Main Screen's initState() to listen to QR and shared links everywhere!
+  void initializeRouting() {
+    if (kIsWeb) {
+      // 🌟 FIX: Access Dart's Storage object using Map operator syntax
+      final String? deferredLink = html.window.localStorage['deferred_deep_link'];
+      html.window.localStorage.remove('deferred_deep_link'); // Clean up immediately
 
-    // 🌟 Read the absolute browser pathname (e.g. '/shop/2') instead of the old hash fragment
-    final String path = html.window.location.pathname ?? ''; 
-    if (path.isEmpty || path == '/') return;
-
-    final uri = Uri.parse(path);
-    final segments = uri.pathSegments;
-    
-    if (segments.length < 2) return;
-    
-    final String type = segments[0]; // matches 'shop', 'product', 'property', etc.
-    final int? itemId = int.tryParse(segments[1]);
-    if (itemId == null) return;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
+      final String currentUrl = deferredLink ?? html.window.location.href;
       
-      Widget? destinationScreen;
-
-      switch (type) {
-        case 'shop':
-          destinationScreen = ShopDetailsScreen(shopId: itemId);
-          break;
-        case 'product':
-          destinationScreen = ProductDetailsScreen(productId: itemId);
-          break;
-        case 'property':
-          destinationScreen = PropertyDetailsScreen(propertyId: itemId);
-          break;
-        case 'event':
-          destinationScreen = EventDetailScreen(
-            event: EventModel(
-              id: itemId, title: "Loading Event...", description: "",
-              venue: "", district: "", city: "", eventDate: "",
-              startTime: "", endTime: "", banner: "", ticketPrice: 0.0,
-              totalTickets: 0, availableTickets: 0, isFeatured: false, ticketTypes: const [],
-            ),
-          );
-          break;
-        case 'lodge':
-          destinationScreen = LodgeDetailScreen(
-            lodge: Lodge(
-              id: itemId, name: "Loading Lodge...", description: "",
-              lodgeType: "Lodge", city: "", district: "", address: "",
-              phoneNumber: "", email: "", isVerified: false, images: const [], 
-            ),
-          );
-          break;
-        default:
-          return;
+      if (currentUrl.contains('/#/')) {
+        // Handle hash routing fallback safely
+        final String extractedPath = currentUrl.split('/#/').last;
+        parseAndNavigate('/$extractedPath');
+      } else {
+        // Handle standard path routing fallback
+        final String webPath = html.window.location.pathname ?? '';
+        if (webPath.isNotEmpty && webPath != '/') {
+          parseAndNavigate(webPath);
+        }
       }
+    } else {
+      // Handle Mobile Deep Links (Both when app is closed, and running in background)
+      _appLinks = AppLinks();
+      
+      // 1. Check if the app was cold-started/opened directly by a QR code scan or shared link
+      _appLinks.getInitialLink().then((uri) {
+        if (uri != null) parseAndNavigate(uri.path);
+      });
 
-      // 🌟 Clean mount placement over active app framework
-      if (destinationScreen != null && globalNavigatorKey.currentState != null) {
+      // 2. Listen to incoming deep links while the app is already open in memory
+      _linkSubscription = _appLinks.uriLinkStream.listen((uri) {
+        parseAndNavigate(uri.path);
+      }, onError: (err) {
+        debugPrint('Failed to receive deep link: $err');
+      });
+    }
+  }
+
+  /// Centralized Parsing Engine for incoming path formats (e.g., "/shop/2")
+void parseAndNavigate(String path) {
+  if (path.isEmpty || path == "/") return;
+
+  final cleanPath =
+      path.endsWith("/") ? path.substring(0, path.length - 1) : path;
+
+  final uri = Uri.parse(cleanPath);
+  final segments = uri.pathSegments;
+
+  if (segments.length < 2) return;
+
+  final type = segments[0];
+  final id = int.tryParse(segments[1]);
+
+  if (id == null) return;
+
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    final tabs = MainTabsScreen.of(globalNavigatorKey.currentContext!);
+
+    if (tabs == null) return;
+
+    switch (type) {
+      case "product":
+        tabs.navigateToProductDetails(id);
+        break;
+
+      case "shop":
+        tabs.navigateToShopDetails(id);
+        break;
+
+      case "property":
+        tabs.navigateToPropertyDetails(id);
+        break;
+
+      case "event":
         globalNavigatorKey.currentState!.push(
-          MaterialPageRoute(builder: (_) => destinationScreen!),
+          MaterialPageRoute(
+            builder: (_) => EventDeepLinkBridge(eventId: id),
+          ),
         );
-      }
-    });
+        break;
+
+      case "lodge":
+        globalNavigatorKey.currentState!.push(
+          MaterialPageRoute(
+            builder: (_) => LodgeDeepLinkBridge(lodgeId: id),
+          ),
+        );
+        break;
+    }
+  });
+}
+
+  /// Always clean up native streams on state destruction
+  void disposeRouting() {
+    _linkSubscription?.cancel();
   }
 }

@@ -5,10 +5,9 @@ import '../../models/event_model.dart';
 import '../../utils/app_toast.dart';
 import '../payments/payment_checkout_screen.dart';
 import '../../theme/design_system/app_spacing.dart';
-
+import '../../widgets/web_footer.dart';
 import '../../widgets/main_drawer.dart';
 import '../../widgets/main_app_bar.dart';
-// Import your Analytics Service
 import '../../services/analytics_service.dart';
 
 class SelectedTicket {

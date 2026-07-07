@@ -12,6 +12,7 @@ import '../../theme/design_system/app_button.dart';
 
 // --- NATIVE DOMAIN MODELS ---
 import '../../models/product_model.dart';
+import '../../models/product_variant_model.dart';
 import '../../models/property_model.dart';
 import '../../models/shop_model.dart';
 import '../../models/event_model.dart';
@@ -121,7 +122,6 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
       ),
       builder: (context) {
         return Container(
-          // Logic omitted for sizing brevity
           child: StatefulBuilder(
             builder: (context, setSheetState) {
               final typeWithSubFilters = _provider.selectedType == 'product' || 
@@ -273,18 +273,13 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
         final List<SearchResultItem> productItems = _provider.results.where((e) => e.resultType == 'product').toList();
         final List<SearchResultItem> bannerItems = _provider.results.where((e) => e.resultType != 'product').toList();
 
-        // ---------------------------------------------------------
-        // CALCULATE DYNAMIC BREAKPOINTS FOR GRIDS BASED ON DISPLAY WIDTH
-        // ---------------------------------------------------------
         final double screenWidth = MediaQuery.of(context).size.width;
 
-        // Product Grid Columns (Starts at 2, scales up to 6)
         int productColumns = 2;
         if (screenWidth >= 1200) productColumns = 6;
         else if (screenWidth >= 800) productColumns = 4;
         else if (screenWidth >= 600) productColumns = 3;
 
-        // Other Items Grid Columns (Shops, Lodges, Events, Properties - Starts at 1, scales up to 4)
         int bannerColumns = 1;
         if (screenWidth >= 1200) bannerColumns = 4;
         else if (screenWidth >= 800) bannerColumns = 3;
@@ -404,16 +399,15 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
                               child: CustomScrollView(
                                 controller: _scrollController,
                                 slivers: [
-                                  
                                   // =========================================================
-                                  // SECTION A: PRODUCT ITEMS (Starts from 2 columns on Mobile)
+                                  // SECTION A: PRODUCT ITEMS
                                   // =========================================================
                                   if (isProductTabOnly || productItems.isNotEmpty)
                                     SliverPadding(
                                       padding: const EdgeInsets.all(12.0),
                                       sliver: SliverGrid(
                                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                          crossAxisCount: productColumns, // Dynamic column logic applied
+                                          crossAxisCount: productColumns,
                                           childAspectRatio: 0.62,
                                           crossAxisSpacing: 12,
                                           mainAxisSpacing: 12,
@@ -429,15 +423,15 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
                                     ),
 
                                   // =========================================================
-                                  // SECTION B: OTHER DOMAINS (Starts from 1 column on Mobile)
+                                  // SECTION B: OTHER DOMAINS
                                   // =========================================================
                                   if (!isProductTabOnly && bannerItems.isNotEmpty)
                                     SliverPadding(
                                       padding: const EdgeInsets.all(12.0),
                                       sliver: SliverGrid(
                                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                          crossAxisCount: bannerColumns, // Dynamic column logic applied
-                                          childAspectRatio: bannerColumns == 1 ? 1.3 : 1.1, // Adapts aspect ratio gracefully if grid scales out
+                                          crossAxisCount: bannerColumns,
+                                          childAspectRatio: bannerColumns == 1 ? 1.3 : 1.1,
                                           crossAxisSpacing: 12,
                                           mainAxisSpacing: 12,
                                         ),
@@ -448,7 +442,6 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
                                       ),
                                     ),
 
-                                  // Infinite scrolling pagination item loading indicators
                                   if (_provider.isLoadingMore)
                                     const SliverToBoxAdapter(
                                       child: Padding(
@@ -456,9 +449,9 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
                                         child: Center(child: CircularProgressIndicator(color: AppColors.mangoOrange)),
                                       ),
                                     ),
-                                    const SliverToBoxAdapter(
-                                      child: WebFooter(),
-                                      ),
+                                  const SliverToBoxAdapter(
+                                    child: WebFooter(),
+                                  ),
                                 ],
                               ),
                             ),
@@ -468,87 +461,100 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
       },
     );
   }
+Widget _buildDynamicFeedCard(SearchResultItem item) {
+    final String type = item.resultType ?? ''; 
 
-  Widget _buildDynamicFeedCard(SearchResultItem item) {
-    switch (item.resultType) {
+    switch (type) {
       case 'product':
+        final String fallbackImage = item.imageUrl ?? item.details['image'] ?? '';
         final product = Product(
           id: item.id,
-          name: item.title,
-          slug: '', 
-          description: item.subtitle,
-          category: item.details['category'] ?? 'Electronics',
-          price: item.price ?? 0.0,
-          originalPrice: null,
-          discountPercentage: 0,
-          stock: item.details['stock'] ?? 1,
-          sku: item.details['sku'] ?? '',
-          isActive: true,
-          rating: double.tryParse(item.details['rating']?.toString() ?? '0.0') ?? 0.0,
-          totalReviews: 0,
-          images: item.imageUrl != null ? [item.imageUrl!] : [],
-          shopId: 0,
-          shopName: '',
-          ownerId: null,
-          shopPhoneNumber: null,
+          ownerId: item.details['owner'],
+          shopId: item.details['shop'] ?? 0,
+          shopName: item.details['shop_name'] ?? 'Market Shop', // Required by model
           shopDistrict: item.district,
-          createdAt: DateTime.now(),
+          shopPhoneNumber: item.details['shop_phone_number']?.toString(),
+          name: item.title,
+          slug: item.details['slug'] ?? '',
+          description: item.subtitle,
+          image: fallbackImage.isNotEmpty ? fallbackImage : null,
+          category: item.details['category'] ?? '',
+          price: double.tryParse(item.price?.toString() ?? '0') ?? 0.0,
+          originalPrice: item.details['original_price'] != null 
+              ? double.tryParse(item.details['original_price'].toString()) 
+              : null,
+          discountPercentage: item.details['discount_percentage'] ?? 0,
+          stock: item.details['stock'] ?? 0,
+          sku: item.details['sku'] ?? '',
+          isActive: item.details['is_active'] ?? true,
+          rating: double.tryParse(item.details['rating']?.toString() ?? '0') ?? 0.0,
+          totalReviews: item.details['total_reviews'] ?? 0,
+          createdAt: DateTime.tryParse(item.details['created_at'] ?? '') ?? DateTime.now(),
+          images: fallbackImage.isNotEmpty ? [fallbackImage] : const [],
+          variants: const [],
         );
         return ProductCard(product: product);
-
-      case 'property':
-        final property = Property(
-          id: item.id,
-          title: item.title,
-          slug: '', 
-          description: item.subtitle,
-          listingPurpose: item.details['purpose'] ?? 'sale',
-          propertyType: item.details['type'] ?? 'house',
-          status: 'available',
-          city: item.city ?? '',
-          district: item.district ?? '',
-          address: '',
-          sizeSqm: 0.0,
-          price: item.price ?? 0.0,
-          currency: 'MWK',
-          isPubliclyVisible: true,
-          unlockFee: 50.0,
-          viewCount: 0,
-          images: [], 
-          ownerId: 0,
-          ownerName: '',
-          ownerPhoneNumber: null,
-          isUnlocked: false,
-          createdAt: DateTime.now(),
-          latitude: 0.0,
-          longitude: 0.0,
-        );
-        return PropertyCard(property: property);
 
       case 'shop':
         final shop = Shop(
           id: item.id,
           name: item.title,
-          slug: '', 
+          slug: item.details['slug'] ?? '',
           description: item.subtitle,
-          logo: item.imageUrl ?? '',
-          banner: null,
+          logo: item.details['logo'] ?? '',
+          banner: item.imageUrl ?? item.details['banner'],
           category: item.details['category'] ?? '',
+          latitude: double.tryParse(item.details['latitude']?.toString() ?? '0') ?? 0.0,
+          longitude: double.tryParse(item.details['longitude']?.toString() ?? '0') ?? 0.0,
+          address: item.details['address'] ?? '',
           city: item.city ?? '',
           district: item.district ?? '',
-          address: item.details['address'] ?? '',
-          phoneNumber: '',
-          email: '',
-          isActive: true,
-          rating: double.tryParse(item.details['rating']?.toString() ?? '0.0') ?? 0.0,
-          totalReviews: 0,
-          productCount: 0,
-          latitude: 0.0,
-          longitude: 0.0,
-          status: item.details['status'] ?? 'approved',
-          createdAt: DateTime.now(),
+          phoneNumber: item.details['phone_number'] ?? '',
+          email: item.details['email'] ?? '',
+          status: item.details['status'] ?? 'pending',
+          isActive: item.details['is_active'] ?? false,
+          rating: double.tryParse(item.details['rating']?.toString() ?? '0') ?? 0.0,
+          totalReviews: item.details['total_reviews'] ?? 0,
+          createdAt: DateTime.tryParse(item.details['created_at'] ?? '') ?? DateTime.now(),
+          productCount: item.details['product_count'], // Replaced ownerId with productCount
         );
         return ShopCard(shop: shop);
+
+      case 'property':
+        final String mainImage = item.imageUrl ?? item.details['image'] ?? '';
+        final propertyImages = mainImage.isNotEmpty 
+            ? [PropertyImage(id: 0, image: mainImage, isPrimary: true)] 
+            : <PropertyImage>[];
+
+        final property = Property(
+          id: item.id,
+          ownerId: item.details['owner'] ?? 0,
+          title: item.title,
+          slug: item.details['slug'] ?? '',
+          description: item.subtitle,
+          listingPurpose: item.details['listing_purpose'] ?? 'sale',
+          propertyType: item.details['property_type'] ?? 'house',
+          status: item.details['status'] ?? 'available',
+          latitude: double.tryParse(item.details['latitude']?.toString() ?? '0') ?? 0.0,
+          longitude: double.tryParse(item.details['longitude']?.toString() ?? '0') ?? 0.0,
+          address: item.details['address'] ?? '',
+          city: item.city ?? '',
+          district: item.district ?? '',
+          bedrooms: item.details['bedrooms'],
+          bathrooms: item.details['bathrooms'],
+          sizeSqm: double.tryParse(item.details['size_sqm']?.toString() ?? '0') ?? 0.0,
+          price: double.tryParse(item.price?.toString() ?? '0') ?? 0.0,
+          currency: item.details['currency'] ?? 'MWK',
+          isPubliclyVisible: item.details['is_publicly_visible'] ?? true,
+          unlockFee: double.tryParse(item.details['unlock_fee']?.toString() ?? '0') ?? 50.0,
+          viewCount: item.details['view_count'] ?? 0,
+          images: propertyImages,
+          ownerName: item.details['owner_name'] ?? '',
+          ownerPhoneNumber: item.details['owner_phone_number']?.toString(),
+          isUnlocked: item.details['is_unlocked'] ?? false,
+          createdAt: DateTime.tryParse(item.details['created_at'] ?? '') ?? DateTime.now(),
+        );
+        return PropertyCard(property: property);
 
       case 'event':
         final event = EventModel(
@@ -556,22 +562,31 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
           title: item.title,
           description: item.subtitle,
           venue: item.details['venue'] ?? '',
-          city: item.city ?? '',
           district: item.district ?? '',
+          city: item.city ?? '',
+          latitude: double.tryParse(item.details['latitude']?.toString() ?? ''),
+          longitude: double.tryParse(item.details['longitude']?.toString() ?? ''),
           eventDate: item.details['event_date'] ?? '',
           startTime: item.details['start_time'] ?? '00:00:00',
           endTime: item.details['end_time'] ?? '00:00:00',
-          banner: item.imageUrl ?? '',
-          ticketPrice: item.details['regular_ticket_price'] ?? '0.00',
-          totalTickets: item.details['total_tickets'] ?? '0',
-          availableTickets: item.details['tickets_remaining'] ?? '0',
+          banner: item.imageUrl ?? item.details['banner'] ?? '',
+          ticketPrice: double.tryParse(item.details['regular_ticket_price']?.toString() ?? '0') ?? 0.0,
+          totalTickets: int.tryParse(item.details['total_tickets']?.toString() ?? '0') ?? 0,
+          availableTickets: int.tryParse(item.details['tickets_remaining']?.toString() ?? '0') ?? 0,
           isFeatured: item.details['is_featured'] ?? false,
-          ticketTypes: [],
-          organizerPhoneNumber: null,
+          organizerPhoneNumber: item.details['organizer_phone_number']?.toString(),
+          ticketTypes: const [],
         );
         return EventCard(event: event);
 
       case 'lodge':
+        final List<String> lodgeImages = [];
+        if (item.imageUrl != null) {
+          lodgeImages.add(item.imageUrl!);
+        } else if (item.details['banner'] != null) {
+          lodgeImages.add(item.details['banner']);
+        }
+
         final lodge = Lodge(
           id: item.id,
           name: item.title,
@@ -579,11 +594,15 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
           lodgeType: item.details['lodge_type'] ?? 'Lodge',
           city: item.city ?? '',
           district: item.district ?? '',
-          address: item.city ?? '',
-          phoneNumber: item.details['phone'] ?? '',
-          email: '',
-          isVerified: false,
-          images: item.imageUrl != null ? [item.imageUrl!] : [],
+          address: item.details['address'] ?? item.city ?? '',
+          phoneNumber: item.details['phone_number'] ?? '',
+          email: item.details['email'] ?? '',
+          isVerified: item.details['is_verified'] ?? false,
+          images: lodgeImages,
+          latitude: double.tryParse(item.details['latitude']?.toString() ?? ''),
+          longitude: double.tryParse(item.details['longitude']?.toString() ?? ''),
+          ownerId: item.details['owner_id'] ?? item.details['owner'],
+          ownerPhoneNumber: item.details['owner_phone_number']?.toString(),
         );
         return LodgeCard(lodge: lodge);
 

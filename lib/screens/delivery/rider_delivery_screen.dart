@@ -6,8 +6,8 @@ import '../../core/api/api_client.dart';
 import '../../providers/api_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_spacing.dart';
-// Import your Analytics Service
 import '../../services/analytics_service.dart';
+import '../../widgets/web_footer.dart';
 
 class RiderDeliveryScreen extends ConsumerStatefulWidget {
   final dynamic delivery;
@@ -39,6 +39,12 @@ class _RiderDeliveryScreenState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       analyticsService.logEvent('view_rider_delivery_id_${widget.delivery.id}');
     });
+  }
+
+  // Helper inside class to format variant option map definitions beautifully into strings
+  String _formatAttributes(Map<String, dynamic>? attributes) {
+    if (attributes == null || attributes.isEmpty) return "";
+    return attributes.entries.map((e) => "${e.key}: ${e.value}").join(", ");
   }
 
   Future<void> _verifyDelivery() async {
@@ -344,39 +350,61 @@ class _RiderDeliveryScreenState
                     const SizedBox(height: 14),
 
                     ...d.items!.map(
-                      (item) => Container(
-                        margin: const EdgeInsets.only(bottom: 10),
-                        padding: const EdgeInsets.all(AppSpacing.sm),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.outline.withOpacity(0.05),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                      (item) {
+                        // ✅ Safely parse variant mappings out from API payload keys
+                        final variantAttributesMap = item['product_variant'] ?? item['variant_attributes'];
+                        final variantText = _formatAttributes(variantAttributesMap is Map<String, dynamic> ? variantAttributesMap : null);
 
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 8,
-                              height: 8,
-                              decoration: BoxDecoration(
-                                color: AppColors.primary(context),
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-
-                            const SizedBox(width: AppSpacing.sm),
-
-                            Expanded(
-                              child: Text(
-                                "${item['product_name']} x${item['quantity']}",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  color: Theme.of(context).colorScheme.outline.withOpacity(0.9),
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.all(AppSpacing.sm),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.outline.withOpacity(0.05),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary(context),
+                                  shape: BoxShape.circle,
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
+
+                              const SizedBox(width: AppSpacing.sm),
+
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "${item['product_name']} x${item['quantity']}",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        color: Theme.of(context).colorScheme.outline.withOpacity(0.9),
+                                      ),
+                                    ),
+                                    // ✅ If a specific option choice exists, show it clearly below the product name
+                                    if (variantText.isNotEmpty) ...[
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        "Option: $variantText",
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.orange.shade800,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),

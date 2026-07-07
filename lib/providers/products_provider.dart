@@ -61,17 +61,16 @@ final relatedProductsProvider =
     FutureProvider.family<List<Product>, int>((ref, productId) async {
   final apiClient = ref.watch(apiClientProvider);
 
- final res = await apiClient.getList(
-  'products/$productId/related/',
-  fromJson: (json) {
-    print("🔥 RELATED ITEM JSON: $json");
-    return Product.fromJson(json);
-  },
-);
+  final res = await apiClient.getList(
+    'products/$productId/related/',
+    fromJson: (json) {
+      print("🔥 RELATED ITEM JSON: $json");
+      return Product.fromJson(json);
+    },
+  );
 
-print("🔥 RELATED LENGTH: ${res.length}");
-return res;
-
+  print("🔥 RELATED LENGTH: ${res.length}");
+  return res;
 });
 
 /// ======================
@@ -103,11 +102,17 @@ class ProductActions {
       String ext = image.name.split('.').last.toLowerCase();
       String mimeSubType = (ext == 'png') ? 'png' : 'jpeg';
 
-      file = MultipartFile.fromBytes(
-        bytes,
-        filename: image.name,
-        contentType: MediaType('image', mimeSubType), // 👈 CRITICAL: Enforces Multipart structure on Web
-      );
+      final filename = image.name.isEmpty
+    ? "upload.${mimeSubType == "png" ? "png" : "jpg"}"
+    : image.name;
+
+file = MultipartFile.fromBytes(
+  bytes,
+  filename: filename,
+  contentType: MediaType('image', mimeSubType),
+);
+
+print("Multipart filename: ${file.filename}");
     } else {
       file = await MultipartFile.fromFile(image.path);
     }
@@ -155,6 +160,12 @@ class ProductActions {
     final formData = FormData();
 
     print("🔥 Uploading ${images.length} images");
+    print("Files: ${formData.files.length}");
+
+for (final f in formData.files) {
+  print("Field: ${f.key}");
+  print("Filename: '${f.value.filename}'");
+}
 
     for (final image in images) {
       final bytes = await image.readAsBytes();
@@ -167,7 +178,9 @@ class ProductActions {
           "images",
           MultipartFile.fromBytes(
             bytes,
-            filename: image.name,
+            filename: image.name.isEmpty
+            ? "gallery_${DateTime.now().millisecondsSinceEpoch}.jpg"
+            : image.name,
             contentType: MediaType('image', mimeSubType), // 👈 CRITICAL: Web support boundary for sub-gallery
           ),
         ),
@@ -249,17 +262,19 @@ final bannersProvider = FutureProvider.autoDispose<List<BannerModel>>((ref) asyn
 });
 
 /// ======================
-/// CART SYSTEM
+/// CART SYSTEM (FIXED & COMPILING)
 /// ======================
 
 final cartProvider = StateProvider<List<CartItem>>((ref) => []);
 
 class CartItem {
   final Product product;
+  final LocalProductVariant? variant; 
   int quantity;
 
   CartItem({
     required this.product,
+    this.variant,
     required this.quantity,
   });
 
@@ -272,9 +287,19 @@ final cartTotalProvider = Provider<double>((ref) {
 });
 
 final addToCartProvider = Provider((ref) {
-  return (Product product, int qty) {
+  // Uses brackets [] around variant to mark it optional so existing product cards continue working
+  return (Product product, int qty, [LocalProductVariant? variant]) {
     final cart = ref.read(cartProvider);
-    final index = cart.indexWhere((e) => e.product.id == product.id);
+    
+    // Finds matching product using custom attribute property deep comparison check hooks
+    final index = cart.indexWhere((e) {
+      final matchProduct = e.product.id == product.id;
+      if (e.variant == null && variant == null) return matchProduct;
+      if (e.variant != null && variant != null) {
+        return matchProduct && mapEquals(e.variant!.attributes, variant.attributes);
+      }
+      return false;
+    });
 
     if (index != -1) {
       final updated = [...cart];
@@ -283,17 +308,25 @@ final addToCartProvider = Provider((ref) {
     } else {
       ref.read(cartProvider.notifier).state = [
         ...cart,
-        CartItem(product: product, quantity: qty),
+        CartItem(product: product, quantity: qty, variant: variant),
       ];
     }
   };
 });
 
 final removeFromCartProvider = Provider((ref) {
-  return (int productId) {
+  // Identifies lines by looking at matching target properties mapping
+  return (int productId, Map<String, dynamic>? variantAttributes) {
     final cart = ref.read(cartProvider);
-    ref.read(cartProvider.notifier).state =
-        cart.where((e) => e.product.id != productId).toList();
+    
+    ref.read(cartProvider.notifier).state = cart.where((e) {
+      final targetProduct = e.product.id == productId;
+      if (e.variant == null && variantAttributes == null) return !targetProduct;
+      if (e.variant != null && variantAttributes != null) {
+        return !(targetProduct && mapEquals(e.variant!.attributes, variantAttributes));
+      }
+      return true;
+    }).toList();
   };
 });
 

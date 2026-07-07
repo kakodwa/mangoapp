@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/feed/main_feed_providers.dart';
 import '../../widgets/feed/feed_list_widget.dart';
+import '../../widgets/web_footer.dart';
 
 class LodgeListScreen extends ConsumerStatefulWidget {
   const LodgeListScreen({
@@ -75,6 +76,9 @@ class _LodgeListScreenState extends ConsumerState<LodgeListScreen> {
                 ),
               ),
             ),
+            const SliverToBoxAdapter(
+                child: WebFooter(),
+                ),
           ],
         ),
       ),

@@ -5,6 +5,7 @@ import '../../providers/feed/main_feed_providers.dart';
 import '../../providers/feed/feed_notifier.dart';
 
 import '../../widgets/feed/feed_list_widget.dart';
+import '../../widgets/web_footer.dart';
 
 class ShopsListScreen extends ConsumerStatefulWidget {
   const ShopsListScreen({
@@ -79,6 +80,9 @@ class _ShopsListScreenState extends ConsumerState<ShopsListScreen> {
                 ),
               ),
             ),
+            const SliverToBoxAdapter(
+                child: WebFooter(),
+                ),
           ],
         ),
       ),

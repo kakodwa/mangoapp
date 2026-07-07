@@ -9,11 +9,12 @@ import '../../theme/design_system/app_spacing.dart';
 
 import '../../widgets/feed/feed_list_widget.dart';
 import '../../widgets/web_footer.dart';
+import '../../widgets/update.dart';
 
 import '../../screens/delivery/delivery_code_entry_screen.dart';
 import '../../screens/events/scan_ticket_screen.dart';
 import '../../screens/shops/shops_list_screen.dart';
-import '../../screens/auth/register_screen.dart'; // Imported for RegisterScreen navigation
+import '../../screens/auth/register_screen.dart';
 import '../about/how_it_works.dart';
 import '../about/tour.dart';
 
@@ -111,6 +112,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return CustomScrollView(
           controller: controller,
           slivers: [
+            const SliverToBoxAdapter(
+              child: UpdatesTicker(),
+            ),
             /// Banner
             SliverToBoxAdapter(
               child: bannersAsync.when(
@@ -211,6 +215,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 height: AppSpacing.sm,
               ),
             ),
+       
+            
+
+
 
             /// Quick Actions
             SliverToBoxAdapter(

@@ -1,3 +1,5 @@
+// lib/screens/events/create_event_screen.dart
+
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -12,8 +14,7 @@ import '../../theme/design_system/app_text_field.dart';
 import '../../utils/app_toast.dart';
 import '../../widgets/main_app_bar.dart';
 import '../../theme/design_system/app_spacing.dart';
-
-// ✅ NEW IMPORT
+import '../main_tabs_screen.dart'; // Core structural coordinator layout
 import '../../widgets/image_crop_picker.dart';
 
 class AddEventScreen extends ConsumerStatefulWidget {
@@ -55,8 +56,6 @@ class _AddEventScreenState extends ConsumerState<AddEventScreen> {
   bool gettingGps = false;
 
   final ImagePicker picker = ImagePicker();
-
-  // ✅ UPDATED
   List<XFile> banners = [];
 
   final List<String> ticketTypeOptions = ["regular", "vip", "vvip"];
@@ -119,8 +118,7 @@ class _AddEventScreenState extends ConsumerState<AddEventScreen> {
         return;
       }
 
-      LocationPermission permission =
-          await Geolocator.checkPermission();
+      LocationPermission permission = await Geolocator.checkPermission();
 
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
@@ -200,7 +198,6 @@ class _AddEventScreenState extends ConsumerState<AddEventScreen> {
   Future<void> submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // ✅ UPDATED
     if (banners.isEmpty) {
       AppToast.error(context, "Add event banner");
       return;
@@ -211,7 +208,6 @@ class _AddEventScreenState extends ConsumerState<AddEventScreen> {
     for (final ticket in ticketTypes) {
       final seats = int.tryParse(ticket.seats.text) ?? 0;
 
-      // CHECK EMPTY SEATS
       if (seats <= 0) {
         AppToast.error(
           context,
@@ -220,7 +216,6 @@ class _AddEventScreenState extends ConsumerState<AddEventScreen> {
         return;
       }
 
-      // CHECK DUPLICATE TICKET TYPES
       if (usedTypes.contains(ticket.name)) {
         AppToast.error(
           context,
@@ -261,16 +256,14 @@ class _AddEventScreenState extends ConsumerState<AddEventScreen> {
       await api.uploadMultipart(
         endpoint: "events/",
         fields: fields.map((k, v) => MapEntry(k, v.toString())),
-
-        // ✅ UPDATED
         files: [banners.first],
-
         fileFieldName: "banner",
       );
 
       if (mounted) {
         AppToast.success(context, "Event created successfully");
-        Navigator.pop(context);
+        // FIXED: Redirect index state focus back onto the central Manage Events dashboard page
+        MainTabsScreen.of(context)?.setSelectedIndex(29);
       }
     } catch (e) {
       AppToast.error(context, e.toString());
@@ -282,331 +275,311 @@ class _AddEventScreenState extends ConsumerState<AddEventScreen> {
   // ===================== UI =====================
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Create Event'),),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: EdgeInsets.all(AppSpacing.md),
-          children: [
-            AppTextField(
-              label: "Title",
-              controller: title,
-              type: TextFieldType.text,
-            ),
+    // Standalone Scaffold root shell containers and internal duplicate AppBars are removed 
+    // to allow natural layout blending continuity inside your primary IndexedStack layout.
+    return Form(
+      key: _formKey,
+      child: ListView(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        children: [
+          AppTextField(
+            label: "Title",
+            controller: title,
+            type: TextFieldType.text,
+          ),
 
-            const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.sm),
 
-            AppTextField(
-              label: "Description",
-              controller: description,
-              type: TextFieldType.multiline,
-            ),
+          AppTextField(
+            label: "Description",
+            controller: description,
+            type: TextFieldType.multiline,
+          ),
 
-            const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.sm),
 
-            AppTextField(
-              label: "Venue",
-              controller: venue,
-              type: TextFieldType.text,
-            ),
+          AppTextField(
+            label: "Venue",
+            controller: venue,
+            type: TextFieldType.text,
+          ),
 
-            const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.sm),
 
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value:
-                        district.text.isEmpty ? null : district.text,
-                    items: malawiDistricts.map((d) {
-                      return DropdownMenuItem(
-                        value: d,
-                        child: Text(d),
-                      );
-                    }).toList(),
-                    onChanged: (val) =>
-                        setState(() => district.text = val!),
-                    decoration: const InputDecoration(
-                      labelText: "District",
-                    ),
+          Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: district.text.isEmpty ? null : district.text,
+                  items: malawiDistricts.map((d) {
+                    return DropdownMenuItem(
+                      value: d,
+                      child: Text(d),
+                    );
+                  }).toList(),
+                  onChanged: (val) =>
+                      setState(() => district.text = val!),
+                  decoration: const InputDecoration(
+                    labelText: "District",
                   ),
                 ),
+              ),
 
-                const SizedBox(width: 10),
+              const SizedBox(width: 10),
 
-                Expanded(
-                  child: AppTextField(
-                    label: "City",
-                    controller: city,
-                    type: TextFieldType.text,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: AppSpacing.sm),
-
-            Row(
-              children: [
-                Expanded(
-                  child: AppTextField(
-                    label: "Latitude",
-                    controller: latitude,
-                    type: TextFieldType.text,
-                  ),
-                ),
-
-                const SizedBox(width: 10),
-
-                Expanded(
-                  child: AppTextField(
-                    label: "Longitude",
-                    controller: longitude,
-                    type: TextFieldType.text,
-                  ),
-                ),
-
-                const SizedBox(width: 10),
-
-                SizedBox(
-                  height: 56,
-                  width: 56,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color:
-                          Theme.of(context).colorScheme.primary,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: gettingGps
-                        ? const Padding(
-                            padding: EdgeInsets.all(14),
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                            ),
-                          )
-                        : IconButton(
-                            onPressed: getGPS,
-                            icon: Icon(
-                              Icons.my_location,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .surface,
-                            ),
-                          ),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: AppSpacing.sm),
-
-            GestureDetector(
-              onTap: pickDate,
-              child: AbsorbPointer(
+              Expanded(
                 child: AppTextField(
-                  label: "Event Date",
-                  controller: date,
+                  label: "City",
+                  controller: city,
                   type: TextFieldType.text,
                 ),
               ),
-            ),
+            ],
+          ),
 
-            const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.sm),
 
-            Row(
-              children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => pickTime(startTime),
-                    child: AbsorbPointer(
-                      child: AppTextField(
-                        label: "Start Time",
-                        controller: startTime,
-                        type: TextFieldType.text,
-                      ),
-                    ),
+          Row(
+            children: [
+              Expanded(
+                child: AppTextField(
+                  label: "Latitude",
+                  controller: latitude,
+                  type: TextFieldType.text,
+                ),
+              ),
+
+              const SizedBox(width: 10),
+
+              Expanded(
+                child: AppTextField(
+                  label: "Longitude",
+                  controller: longitude,
+                  type: TextFieldType.text,
+                ),
+              ),
+
+              const SizedBox(width: 10),
+
+              SizedBox(
+                height: 56,
+                width: 56,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                ),
-
-                const SizedBox(width: 10),
-
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => pickTime(endTime),
-                    child: AbsorbPointer(
-                      child: AppTextField(
-                        label: "End Time",
-                        controller: endTime,
-                        type: TextFieldType.text,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: AppSpacing.md),
-
-            // ===================== TICKET TYPES =====================
-            Row(
-              mainAxisAlignment:
-                  MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  "Ticket Types",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-
-                TextButton.icon(
-                  onPressed: addTicketType,
-                  icon: const Icon(Icons.add),
-                  label: const Text("Add"),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 10),
-
-            ...ticketTypes.asMap().entries.map((entry) {
-              final i = entry.key;
-              final item = entry.value;
-
-              return Container(
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: EdgeInsets.all(AppSpacing.sm),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .outline
-                        .withOpacity(0.38),
-                  ),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
-                  children: [
-                    // TYPE
-                    DropdownButtonFormField<String>(
-                      value: item.name,
-                      items: ticketTypeOptions.map((t) {
-                        return DropdownMenuItem(
-                          value: t,
-                          child: Text(t.toUpperCase()),
-                        );
-                      }).toList(),
-                      onChanged: (val) {
-                        setState(() => item.name = val!);
-                      },
-                      decoration: const InputDecoration(
-                        labelText: "Ticket Type",
-                      ),
-                    ),
-
-                    const SizedBox(height: AppSpacing.sm),
-
-                    // PRICE + SEATS
-                    Row(
-                      children: [
-                        Expanded(
-                          child: TextFormField(
-                            controller: item.price,
-                            keyboardType:
-                                TextInputType.number,
-                            decoration:
-                                const InputDecoration(
-                              labelText: "Price",
-                            ),
+                  child: gettingGps
+                      ? const Padding(
+                          padding: EdgeInsets.all(14),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
                           ),
-                        ),
-
-                        const SizedBox(width: 10),
-
-                        Expanded(
-                          child: TextFormField(
-                            controller: item.seats,
-                            keyboardType:
-                                TextInputType.number,
-                            decoration:
-                                const InputDecoration(
-                              labelText: "Seats",
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    // DELETE
-                    if (ticketTypes.length > 1)
-                      Align(
-                        alignment:
-                            Alignment.centerRight,
-                        child: IconButton(
+                        )
+                      : IconButton(
+                          onPressed: getGPS,
                           icon: Icon(
-                            Icons.delete,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .error,
+                            Icons.my_location,
+                            color: Theme.of(context).colorScheme.surface,
                           ),
-                          onPressed: () =>
-                              removeTicketType(i),
                         ),
-                      ),
-                  ],
                 ),
-              );
-            }),
+              ),
+            ],
+          ),
 
-            const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.sm),
 
-            // ===================== BANNER =====================
-            Text(
-              "Event Banner",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
+          GestureDetector(
+            onTap: pickDate,
+            child: AbsorbPointer(
+              child: AppTextField(
+                label: "Event Date",
+                controller: date,
+                type: TextFieldType.text,
               ),
             ),
+          ),
 
-            const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.sm),
 
-            ImageCropPicker(
-              maxImages: 1,
-              cropType: CropShapeType.rectangle,
-              initialImages: banners,
-              onChanged: (imgs) {
-                setState(() {
-                  banners = imgs;
-                });
-              },
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => pickTime(startTime),
+                  child: AbsorbPointer(
+                    child: AppTextField(
+                      label: "Start Time",
+                      controller: startTime,
+                      type: TextFieldType.text,
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(width: 10),
+
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => pickTime(endTime),
+                  child: AbsorbPointer(
+                    child: AppTextField(
+                      label: "End Time",
+                      controller: endTime,
+                      type: TextFieldType.text,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: AppSpacing.md),
+
+          // ===================== TICKET TYPES =====================
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "Ticket Types",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+
+              TextButton.icon(
+                onPressed: addTicketType,
+                icon: const Icon(Icons.add),
+                label: const Text("Add"),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          ...ticketTypes.asMap().entries.map((entry) {
+            final i = entry.key;
+            final item = entry.value;
+
+            return Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .outline
+                      .withOpacity(0.38),
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: [
+                  DropdownButtonFormField<String>(
+                    value: item.name,
+                    items: ticketTypeOptions.map((t) {
+                      return DropdownMenuItem(
+                        value: t,
+                        child: Text(t.toUpperCase()),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      setState(() => item.name = val!);
+                    },
+                    decoration: const InputDecoration(
+                      labelText: "Ticket Type",
+                    ),
+                  ),
+
+                  const SizedBox(height: AppSpacing.sm),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: item.price,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            labelText: "Price",
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(width: 10),
+
+                      Expanded(
+                        child: TextFormField(
+                          controller: item.seats,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            labelText: "Seats",
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  if (ticketTypes.length > 1)
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.delete,
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                        onPressed: () => removeTicketType(i),
+                      ),
+                    ),
+                ],
+              ),
+            );
+          }),
+
+          const SizedBox(height: AppSpacing.md),
+
+          // ===================== BANNER =====================
+          const Text(
+            "Event Banner",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
             ),
+          ),
 
-            const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: 10),
 
-            SwitchListTile(
-              value: isFeatured,
-              onChanged: (v) =>
-                  setState(() => isFeatured = v),
-              title: const Text("Featured Event"),
-            ),
+          ImageCropPicker(
+            maxImages: 1,
+            cropType: CropShapeType.rectangle,
+            initialImages: banners,
+            onChanged: (imgs) {
+              setState(() {
+                banners = imgs;
+              });
+            },
+          ),
 
-            const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.md),
 
-            ElevatedButton(
-              onPressed: loading ? null : submit,
-              child: loading
-                  ? CircularProgressIndicator(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .surface,
-                    )
-                  : const Text("Create Event"),
-            ),
-          ],
-        ),
+          SwitchListTile(
+            value: isFeatured,
+            onChanged: (v) => setState(() => isFeatured = v),
+            title: const Text("Featured Event"),
+          ),
+
+          const SizedBox(height: AppSpacing.md),
+
+          ElevatedButton(
+            onPressed: loading ? null : submit,
+            child: loading
+                ? CircularProgressIndicator(
+                    color: Theme.of(context).colorScheme.surface,
+                  )
+                : const Text("Create Event"),
+          ),
+        ],
       ),
     );
   }

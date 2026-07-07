@@ -22,6 +22,7 @@ import 'property_card.dart';
 import '../../widgets/app_fab.dart';
 import '../../providers/auth_provider.dart';
 import '../../theme/design_system/app_spacing.dart';
+import '../../widgets/web_footer.dart';
 
 // Analytics Import
 import '../../services/analytics_service.dart';
@@ -73,513 +74,508 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
     final bool isDesktop = screenWidth >= 900;
     final bool isTablet = screenWidth >= 600 && screenWidth < 900;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-      // Clean modern AppBar layout context for large screens
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: const Text('Property Details', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 18)),
-        iconTheme: const IconThemeData(color: Colors.black),
-      ),
-      body: propertyAsync.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(child: Text('Error rendering view: $error')),
-        data: (property) {
-          final currentUserId = authState.user?.id;
-          final relatedAsync = ref.watch(relatedPropertiesProvider(property.id));
-          final isOwner = currentUserId == property.ownerId;
-          final isLand = _isLandProperty(property.propertyType);
+    // The standalone Scaffold shell has been completely removed to prevent rendering conflict artifacts.
+    // The view tree now returns directly inside the master coordinate sub-viewport frame layer.
+    return propertyAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, _) => Center(child: Text('Error rendering view: $error')),
+      data: (property) {
+        final currentUserId = authState.user?.id;
+        final relatedAsync = ref.watch(relatedPropertiesProvider(property.id));
+        final isOwner = currentUserId == property.ownerId;
+        final isLand = _isLandProperty(property.propertyType);
 
-          if (!_hasLoggedView) {
-            analytics.logEvent('property_details_view');
-            _hasLoggedView = true;
-          }
+        if (!_hasLoggedView) {
+          analytics.logEvent('property_details_view');
+          _hasLoggedView = true;
+        }
 
-          // Dynamic Column Configuration based on view matrix breakpoint references
-          final int detailGridColumns = isDesktop ? 4 : (isTablet ? 3 : 2);
+        // Dynamic Column Configuration based on view matrix breakpoint references
+        final int detailGridColumns = isDesktop ? 4 : (isTablet ? 3 : 2);
 
-          // Shared Widget Components to avoid duplicate code branches
-          Widget mediaGallery = SizedBox(
-            height: isDesktop ? 450 : 300,
-            child: property.images.isNotEmpty
-                ? Stack(
-                    children: [
-                      PageView.builder(
-                        itemCount: property.images.length,
-                        itemBuilder: (context, index) {
-                          final image = property.images[index];
-                          return Stack(
-                            fit: StackFit.expand,
-                            children: [
-                              Image.network(
-                                image.image,
-                                fit: BoxFit.cover,
-                              ),
-                              Container(
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    begin: Alignment.topCenter,
-                                    end: Alignment.bottomCenter,
-                                    colors: [
-                                      Colors.black.withOpacity(0.15),
-                                      Colors.transparent,
-                                      Colors.black.withOpacity(0.35),
-                                    ],
-                                  ),
+        // Shared Widget Components to avoid duplicate code branches
+        Widget mediaGallery = SizedBox(
+          height: isDesktop ? 450 : 300,
+          child: property.images.isNotEmpty
+              ? Stack(
+                  children: [
+                    PageView.builder(
+                      itemCount: property.images.length,
+                      itemBuilder: (context, index) {
+                        final image = property.images[index];
+                        return Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Image.network(
+                              image.image,
+                              fit: BoxFit.cover,
+                            ),
+                            Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.black.withOpacity(0.15),
+                                    Colors.transparent,
+                                    Colors.black.withOpacity(0.35),
+                                  ],
                                 ),
                               ),
-                              if (image.isPrimary)
-                                Positioned(
-                                  top: AppSpacing.sm,
-                                  right: AppSpacing.md,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.mangoOrange,
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: const Text(
-                                      'Primary',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12,
-                                      ),
+                            ),
+                            if (image.isPrimary)
+                              Positioned(
+                                top: AppSpacing.sm,
+                                right: AppSpacing.md,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.mangoOrange,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: const Text(
+                                    'Primary',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
                                     ),
                                   ),
                                 ),
-                              if (image.altText != null && image.altText!.isNotEmpty)
-                                Positioned(
-                                  left: AppSpacing.md,
-                                  bottom: AppSpacing.lg,
-                                  right: AppSpacing.md,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black54,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Text(
-                                      image.altText!,
-                                      style: const TextStyle(color: Colors.white, fontSize: 12),
-                                    ),
+                              ),
+                            if (image.altText != null && image.altText!.isNotEmpty)
+                              Positioned(
+                                left: AppSpacing.md,
+                                bottom: AppSpacing.lg,
+                                right: AppSpacing.md,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black54,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Text(
+                                    image.altText!,
+                                    style: const TextStyle(color: Colors.white, fontSize: 12),
                                   ),
                                 ),
-                            ],
-                          );
-                        },
-                      ),
-                      if (property.images.length > 1)
-                        Positioned(
-                          right: AppSpacing.md,
-                          bottom: AppSpacing.md,
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.64),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              '${property.images.length} Photos',
-                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-                            ),
+                              ),
+                          ],
+                        );
+                      },
+                    ),
+                    if (property.images.length > 1)
+                      Positioned(
+                        right: AppSpacing.md,
+                        bottom: AppSpacing.md,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.64),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            '${property.images.length} Photos',
+                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                           ),
                         ),
-                    ],
-                  )
-                : Container(
-                    color: Colors.grey.shade300,
-                    child: const Center(
-                      child: Icon(Icons.home_work_outlined, size: 80, color: Colors.grey),
-                    ),
-                  ),
-          );
-
-          Widget coreSpecificationSheet = Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                property.title,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  _buildTag(property.listingPurpose.toUpperCase(), AppColors.mangoOrange),
-                  _buildTag(property.propertyType.toUpperCase(), Theme.of(context).colorScheme.primary),
-                  _buildTag(property.status.toUpperCase(), Theme.of(context).colorScheme.secondary),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                '${property.currency} ${property.price.toStringAsFixed(0)}',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.mangoOrange,
-                    ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Row(
-                children: [
-                  const Icon(Icons.location_on, color: AppColors.mangoOrange),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      property.isUnlocked || isOwner
-                          ? '${property.address}, ${property.city}, ${property.district}, Malawi'
-                          : '${property.city}, ${property.district}, Malawi',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.md),
-              GridView.count(
-                crossAxisCount: detailGridColumns,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                childAspectRatio: isDesktop ? 1.9 : 1.65,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                children: [
-                  _buildDetail(context, Icons.category, 'Type', property.propertyType),
-                  _buildDetail(context, Icons.sell, 'Purpose', property.listingPurpose),
-                  _buildDetail(context, Icons.check_circle, 'Status', property.status),
-                  if (!isLand && property.bedrooms != null)
-                    _buildDetail(context, Icons.bed, 'Bedrooms', '${property.bedrooms}'),
-                  if (!isLand && property.bathrooms != null)
-                    _buildDetail(context, Icons.bathroom, 'Bathrooms', '${property.bathrooms}'),
-                  _buildDetail(context, Icons.square_foot, 'Size', '${property.sizeSqm} sqm'),
-                  _buildDetail(context, Icons.visibility, 'Views', '${property.viewCount}'),
-                  _buildDetail(context, Icons.calendar_today, 'Listed', '${property.createdAt.day}/${property.createdAt.month}/${property.createdAt.year}'),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                'Description',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                property.description,
-                style: TextStyle(color: Colors.grey.shade800, height: 1.4),
-              ),
-              if (!property.isUnlocked && !isOwner)
-                Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.symmetric(vertical: AppSpacing.md),
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  decoration: BoxDecoration(
-                    color: AppColors.mangoOrange.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: AppColors.mangoOrange.withOpacity(0.3)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Row(
-                        children: [
-                          Icon(Icons.lock, color: AppColors.mangoOrange),
-                          SizedBox(width: AppSpacing.xs),
-                          Text(
-                            'Full Details Locked',
-                            style: TextStyle(color: AppColors.mangoOrange, fontWeight: FontWeight.bold, fontSize: 16),
-                          ),
-                        ],
                       ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        'Unlock this property to view full description, exact location map tracking coordinates, and contact business phone lines directly.',
-                        style: TextStyle(fontSize: 13),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text('Unlock Premium Fee', style: TextStyle(fontWeight: FontWeight.w500)),
-                          Text(
-                            'MWK ${property.unlockFee.toStringAsFixed(0)}',
-                            style: const TextStyle(color: AppColors.mangoOrange, fontWeight: FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 46,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.mangoOrange,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                          onPressed: () {
-                            if (!isLoggedIn) {
-                              Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
-                              return;
-                            }
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => PropertyUnlockScreen(
-                                  propertyId: property.id,
-                                  propertyTitle: property.title,
-                                  unlockFee: property.unlockFee,
-                                ),
-                              ),
-                            );
-                          },
-                          child: Text('Unlock for MWK ${property.unlockFee.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-                        ),
-                      ),
-                    ],
+                  ],
+                )
+              : Container(
+                  color: Colors.grey.shade300,
+                  child: const Center(
+                    child: Icon(Icons.home_work_outlined, size: 80, color: Colors.grey),
                   ),
                 ),
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                'Property Owner',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: AppSpacing.xs),
+        );
+
+        Widget coreSpecificationSheet = Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              property.title,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _buildTag(property.listingPurpose.toUpperCase(), AppColors.mangoOrange),
+                _buildTag(property.propertyType.toUpperCase(), Theme.of(context).colorScheme.primary),
+                _buildTag(property.status.toUpperCase(), Theme.of(context).colorScheme.secondary),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              '${property.currency} ${property.price.toStringAsFixed(0)}',
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.mangoOrange,
+                  ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Row(
+              children: [
+                const Icon(Icons.location_on, color: AppColors.mangoOrange),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    property.isUnlocked || isOwner
+                        ? '${property.address}, ${property.city}, ${property.district}, Malawi'
+                        : '${property.city}, ${property.district}, Malawi',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            GridView.count(
+              crossAxisCount: detailGridColumns,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              childAspectRatio: isDesktop ? 1.9 : 1.65,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              children: [
+                _buildDetail(context, Icons.category, 'Type', property.propertyType),
+                _buildDetail(context, Icons.sell, 'Purpose', property.listingPurpose),
+                _buildDetail(context, Icons.check_circle, 'Status', property.status),
+                if (!isLand && property.bedrooms != null)
+                  _buildDetail(context, Icons.bed, 'Bedrooms', '${property.bedrooms}'),
+                if (!isLand && property.bathrooms != null)
+                  _buildDetail(context, Icons.bathroom, 'Bathrooms', '${property.bathrooms}'),
+                _buildDetail(context, Icons.square_foot, 'Size', '${property.sizeSqm} sqm'),
+                _buildDetail(context, Icons.visibility, 'Views', '${property.viewCount}'),
+                _buildDetail(context, Icons.calendar_today, 'Listed', '${property.createdAt.day}/${property.createdAt.month}/${property.createdAt.year}'),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              'Description',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              property.description,
+              style: TextStyle(color: Colors.grey.shade800, height: 1.4),
+            ),
+            if (!property.isUnlocked && !isOwner)
               Container(
                 width: double.infinity,
+                margin: const EdgeInsets.symmetric(vertical: AppSpacing.md),
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 4)),
-                  ],
+                  color: AppColors.mangoOrange.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: AppColors.mangoOrange.withOpacity(0.3)),
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    CircleAvatar(
-                      radius: 22,
-                      backgroundColor: AppColors.mangoOrange.withOpacity(0.1),
-                      child: const Icon(Icons.person, color: AppColors.mangoOrange, size: 24),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            property.ownerName,
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 2),
-                          Row(
-                            children: [
-                              Icon(Icons.verified, color: Theme.of(context).colorScheme.primary, size: 14),
-                              const SizedBox(width: 4),
-                              const Text('Verified Merchant Partner', style: TextStyle(color: Colors.grey, fontSize: 12)),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          );
-
-          return Stack(
-            children: [
-              Center(
-                child: Container(
-                  constraints: const BoxConstraints(maxWidth: 1200),
-                  child: CustomScrollView(
-                    controller: _scrollController,
-                    slivers: [
-                      if (!isDesktop) ...[
-                        // Mobile/Tablet: Standard Linear Stack layout
-                        SliverToBoxAdapter(child: mediaGallery),
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.all(AppSpacing.md),
-                            child: coreSpecificationSheet,
-                          ),
-                        ),
-                      ] else ...[
-                        // Desktop Multi-Column adaptive Split Frame
-                        SliverToBoxAdapter(
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: AppSpacing.lg, left: AppSpacing.md, right: AppSpacing.md),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(flex: 6, child: mediaGallery),
-                                const SizedBox(width: 24),
-                                Expanded(flex: 5, child: coreSpecificationSheet),
-                              ],
-                            ),
-                          ),
+                    const Row(
+                      children: [
+                        Icon(Icons.lock, color: AppColors.mangoOrange),
+                        SizedBox(width: AppSpacing.xs),
+                        Text(
+                          'Full Details Locked',
+                          style: TextStyle(color: AppColors.mangoOrange, fontWeight: FontWeight.bold, fontSize: 16),
                         ),
                       ],
-
-                      // Bottom Content Tracks Layout Structure
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.md),
-                          child: ReviewSectionWidget(
-                            targetType: 'property',
-                            targetId: property.id,
-                            isOwner: isOwner,
-                          ),
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      'Unlock this property to view full description, exact location map tracking coordinates, and contact business phone lines directly.',
+                      style: TextStyle(fontSize: 13),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Unlock Premium Fee', style: TextStyle(fontWeight: FontWeight.w500)),
+                        Text(
+                          'MWK ${property.unlockFee.toStringAsFixed(0)}',
+                          style: const TextStyle(color: AppColors.mangoOrange, fontWeight: FontWeight.bold),
                         ),
-                      ),
-
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.all(AppSpacing.md),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: AppSpacing.lg),
-                              Text(
-                                "Related Properties",
-                                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(height: AppSpacing.sm),
-                              SizedBox(
-                                height: 260,
-                                child: relatedAsync.when(
-                                  loading: () => const Center(child: CircularProgressIndicator()),
-                                  error: (e, _) => Center(child: Text("Failed to load catalog feeds: $e")),
-                                  data: (items) {
-                                    if (items.isEmpty) {
-                                      return const Center(child: Text("No immediate matching listings found nearby."));
-                                    }
-                                    return ListView.separated(
-                                      scrollDirection: Axis.horizontal,
-                                      itemCount: items.length,
-                                      separatorBuilder: (_, __) => const SizedBox(width: 12),
-                                      itemBuilder: (context, index) {
-                                        return SizedBox(
-                                          width: 200,
-                                          child: PropertyCard(property: items[index]),
-                                        );
-                                      },
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 46,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.mangoOrange,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
-                      ),
-                      const SliverToBoxAdapter(child: SizedBox(height: 160)),
-                    ],
-                  ),
-                ),
-              ),
-
-              // Floating Controls Context Alignment Layers
-              if (property.isUnlocked || isOwner)
-                Positioned(
-                  bottom: 90,
-                  right: isDesktop ? (screenWidth - 1200) / 2 + 16 : 16,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      AppFab(
-                        heroTag: "map_coord_fab",
-                        icon: Icons.map_outlined,
-                        tooltip: "View Geolocation Map",
-                        onPressed: () {
-                          analytics.logEvent('property_details_map_click');
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-                            builder: (_) => ShopMapModal(
-                              shopLat: property.latitude,
-                              shopLng: property.longitude,
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      AppFab(
-                        heroTag: "whatsapp_prop_fab",
-                        icon: FontAwesomeIcons.whatsapp,
-                        tooltip: "Chat on WhatsApp",
                         onPressed: () {
                           if (!isLoggedIn) {
                             Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
                             return;
                           }
-                          final phone = property.ownerPhoneNumber;
-                          if (phone == null || phone.isEmpty) {
-                            AppToast.info(context, "Owner profile contact configurations missing");
-                            return;
-                          }
-                          analytics.logEvent('property_details_whatsapp_click');
-                          _openWhatsApp(phone);
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-
-              Positioned(
-                bottom: 20,
-                right: isDesktop ? (screenWidth - 1200) / 2 + 16 : 16,
-                child: AppFab(
-                  heroTag: "share_property_fab",
-                  icon: Icons.share_outlined,
-                  tooltip: "Share Listing Profile",
-                  onPressed: () async {
-                    analytics.logEvent('product_shared_${property.id}');
-
-                    final String productUrl = kIsWeb
-                        ? "${Uri.base.origin}/property/${property.id}"
-                        : "https://mangobackend-yayy.onrender.com/property/${property.id}";
-
-                    final String shareMessage =
-                        "Check out ${property.title} on Mangochi Marketplace!\nPrice: MWK ${property.price}\n\nView details here: $productUrl";
-
-                    final box = context.findRenderObject() as RenderBox?;
-                    final sharePositionOrigin = box != null ? box.localToGlobal(Offset.zero) & box.size : null;
-
-                    try {
-                      if (property.images.isNotEmpty) {
-                        final imageUrl = property.images.first.image;
-                        final response = await http.get(Uri.parse(imageUrl));
-
-                        if (response.statusCode == 200) {
-                          final tempDir = await getTemporaryDirectory();
-                          final String extension = imageUrl.split('.').last.split('?').first;
-                          final String validExtension = ['jpg', 'jpeg', 'png', 'webp'].contains(extension.toLowerCase()) ? extension : 'jpg';
-
-                          final file = await File('${tempDir.path}/shared_prop_${property.id}.$validExtension').create();
-                          await file.writeAsBytes(response.bodyBytes);
-
-                          await Share.shareXFiles(
-                            [XFile(file.path)],
-                            text: shareMessage,
-                            sharePositionOrigin: sharePositionOrigin,
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => PropertyUnlockScreen(
+                                propertyId: property.id,
+                                propertyTitle: property.title,
+                                unlockFee: property.unlockFee,
+                              ),
+                            ),
                           );
-                          return;
-                        }
-                      }
-                      await Share.share(shareMessage, sharePositionOrigin: sharePositionOrigin);
-                    } catch (e) {
-                      await Share.share(shareMessage, sharePositionOrigin: sharePositionOrigin);
-                    }
-                  },
+                        },
+                        child: Text('Unlock for MWK ${property.unlockFee.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          );
-        },
-      ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              'Property Owner',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 8, offset: const Offset(0, 4)),
+                ],
+              ),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 22,
+                    backgroundColor: AppColors.mangoOrange.withOpacity(0.1),
+                    child: const Icon(Icons.person, color: AppColors.mangoOrange, size: 24),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          property.ownerName,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Row(
+                          children: [
+                            Icon(Icons.verified, color: Theme.of(context).colorScheme.primary, size: 14),
+                            const SizedBox(width: 4),
+                            const Text('Verified Merchant Partner', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+
+        return Stack(
+          children: [
+            Center(
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                child: CustomScrollView(
+                  controller: _scrollController,
+                  slivers: [
+                    if (!isDesktop) ...[
+                      // Mobile/Tablet: Standard Linear Stack layout
+                      SliverToBoxAdapter(child: mediaGallery),
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.all(AppSpacing.md),
+                          child: coreSpecificationSheet,
+                        ),
+                      ),
+                    ] else ...[
+                      // Desktop Multi-Column adaptive Split Frame
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: AppSpacing.lg, left: AppSpacing.md, right: AppSpacing.md),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(flex: 6, child: mediaGallery),
+                              const SizedBox(width: 24),
+                              Expanded(flex: 5, child: coreSpecificationSheet),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+
+                    // Bottom Content Tracks Layout Structure
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.md),
+                        child: ReviewSectionWidget(
+                          targetType: 'property',
+                          targetId: property.id,
+                          isOwner: isOwner,
+                        ),
+                      ),
+                    ),
+
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: AppSpacing.lg),
+                            Text(
+                              "Related Properties",
+                              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            SizedBox(
+                              height: 260,
+                              child: relatedAsync.when(
+                                loading: () => const Center(child: CircularProgressIndicator()),
+                                error: (e, _) => Center(child: Text("Failed to load catalog feeds: $e")),
+                                data: (items) {
+                                  if (items.isEmpty) {
+                                    return const Center(child: Text("No immediate matching listings found nearby."));
+                                  }
+                                  return ListView.separated(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: items.length,
+                                    separatorBuilder: (_, __) => const SizedBox(width: 12),
+                                    itemBuilder: (context, index) {
+                                      return SizedBox(
+                                        width: 200,
+                                        child: PropertyCard(property: items[index]),
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SliverToBoxAdapter(child: SizedBox(height: 160)),
+                    const SliverToBoxAdapter(
+                      child: WebFooter(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Floating Controls Context Alignment Layers
+            if (property.isUnlocked || isOwner)
+              Positioned(
+                bottom: 90,
+                right: isDesktop ? (screenWidth - 1200) / 2 + 16 : 16,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AppFab(
+                      heroTag: "map_coord_fab",
+                      icon: Icons.map_outlined,
+                      tooltip: "View Geolocation Map",
+                      onPressed: () {
+                        analytics.logEvent('property_details_map_click');
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (_) => ShopMapModal(
+                            shopLat: property.latitude,
+                            shopLng: property.longitude,
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    AppFab(
+                      heroTag: "whatsapp_prop_fab",
+                      icon: FontAwesomeIcons.whatsapp,
+                      tooltip: "Chat on WhatsApp",
+                      onPressed: () {
+                        if (!isLoggedIn) {
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+                          return;
+                        }
+                        final phone = property.ownerPhoneNumber;
+                        if (phone == null || phone.isEmpty) {
+                          AppToast.info(context, "Owner profile contact configurations missing");
+                          return;
+                        }
+                        analytics.logEvent('property_details_whatsapp_click');
+                        _openWhatsApp(phone);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+
+            Positioned(
+              bottom: 20,
+              right: isDesktop ? (screenWidth - 1200) / 2 + 16 : 16,
+              child: AppFab(
+                heroTag: "share_property_fab",
+                icon: Icons.share_outlined,
+                tooltip: "Share Listing Profile",
+                onPressed: () async {
+                  analytics.logEvent('product_shared_${property.id}');
+
+                  final String productUrl = kIsWeb
+                      ? "${Uri.base.origin}/property/${property.id}"
+                      : "https://mangobackend-yayy.onrender.com/property/${property.id}";
+
+                  final String shareMessage =
+                      "Check out ${property.title} on Mangochi Marketplace!\nPrice: MWK ${property.price}\n\nView details here: $productUrl";
+
+                  final box = context.findRenderObject() as RenderBox?;
+                  final sharePositionOrigin = box != null ? box.localToGlobal(Offset.zero) & box.size : null;
+
+                  try {
+                    if (property.images.isNotEmpty) {
+                      final imageUrl = property.images.first.image;
+                      final response = await http.get(Uri.parse(imageUrl));
+
+                      if (response.statusCode == 200) {
+                        final tempDir = await getTemporaryDirectory();
+                        final String extension = imageUrl.split('.').last.split('?').first;
+                        final String validExtension = ['jpg', 'jpeg', 'png', 'webp'].contains(extension.toLowerCase()) ? extension : 'jpg';
+
+                        final file = await File('${tempDir.path}/shared_prop_${property.id}.$validExtension').create();
+                        await file.writeAsBytes(response.bodyBytes);
+
+                        await Share.shareXFiles(
+                          [XFile(file.path)],
+                          text: shareMessage,
+                          sharePositionOrigin: sharePositionOrigin,
+                        );
+                        return;
+                      }
+                    }
+                    await Share.share(shareMessage, sharePositionOrigin: sharePositionOrigin);
+                  } catch (e) {
+                    await Share.share(shareMessage, sharePositionOrigin: sharePositionOrigin);
+                  }
+                },
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

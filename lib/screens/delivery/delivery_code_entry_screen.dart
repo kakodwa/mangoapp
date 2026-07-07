@@ -7,7 +7,7 @@ import '../../providers/delivery_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../models/delivery.dart';
 import 'rider_delivery_screen.dart';
-
+import '../../widgets/web_footer.dart';
 import '../../theme/design_system/app_info_box.dart';
 import '../../theme/design_system/app_text_field.dart';
 import '../../theme/design_system/app_spacing.dart';

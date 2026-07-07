@@ -8,6 +8,7 @@ import '../../screens/hospitality/edit_lodge_screen.dart';
 import '../../screens/main_tabs_screen.dart'; // Updated to point to main_tabs_screen_2.dart
 
 import '../../widgets/capitalize_text.dart';
+import '../../screens/main_tabs_screen.dart';
 
 // Design System Imports
 import '../../theme/design_system/app_icon_button.dart';
@@ -132,12 +133,7 @@ class _LodgeCardState extends State<LodgeCard> {
                           backgroundColor: Colors.white,
                           color: AppColors.leafGreen,
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => AddRoomScreen(lodgeId: lodge.id),
-                              ),
-                            );
+                            MainTabsScreen.of(context)?.navigateToAddRoom(lodge.id);
                           },
                         ),
                         const SizedBox(height: AppSpacing.xs),
@@ -147,15 +143,7 @@ class _LodgeCardState extends State<LodgeCard> {
                           backgroundColor: Colors.white,
                           color: Colors.blue,
                           onTap: () async {
-                            final result = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => EditLodgeScreen(lodge: lodge),
-                              ),
-                            );
-                            if (result == true && mounted) {
-                              setState(() {});
-                            }
+                            MainTabsScreen.of(context)?.navigateToEditLodge(lodge);
                           },
                         ),
                         const SizedBox(height: AppSpacing.xs),

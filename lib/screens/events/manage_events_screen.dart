@@ -2,14 +2,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import '../../widgets/web_footer.dart';
 import '../../models/event_model.dart';
 import '../../models/event_ticket_type_model.dart';
 import '../../providers/events_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/app_snackbar.dart';
-import '../../widgets/main_app_bar.dart';
 import '../../widgets/app_fab.dart';
+import '../main_tabs_screen.dart'; // Core structural coordinator layout
 import 'event_tickets_screen.dart';
 import 'create_event_screen.dart';
 import '../../theme/design_system/app_spacing.dart';
@@ -99,7 +99,7 @@ class _ManageEventsScreenState
             : soldTickets / totalTickets;
 
     return Container(
-      margin: EdgeInsets.only(bottom: 18),
+      margin: const EdgeInsets.only(bottom: 18),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(22),
@@ -213,7 +213,7 @@ class _ManageEventsScreenState
                   right: 14,
                   child: Container(
                     padding:
-                        EdgeInsets.symmetric(
+                        const EdgeInsets.symmetric(
                       horizontal: 14,
                       vertical: 7,
                     ),
@@ -236,7 +236,7 @@ class _ManageEventsScreenState
           ),
 
           Padding(
-            padding: EdgeInsets.all(18),
+            padding: const EdgeInsets.all(18),
             child: Column(
               crossAxisAlignment:
                   CrossAxisAlignment.start,
@@ -247,7 +247,7 @@ class _ManageEventsScreenState
 
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.calendar_month,
                       size: 18,
                       color: AppColors.mangoOrange,
@@ -280,7 +280,7 @@ class _ManageEventsScreenState
                 // TICKET TYPES
                 // ======================
 
-                Text(
+                const Text(
                   "Ticket Types",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -355,7 +355,7 @@ class _ManageEventsScreenState
                     backgroundColor:
                         Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
                     valueColor:
-                        AlwaysStoppedAnimation(
+                        const AlwaysStoppedAnimation(
                       AppColors.leafGreen,
                     ),
                   ),
@@ -378,10 +378,10 @@ class _ManageEventsScreenState
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () {},
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.qr_code_scanner,
                         ),
-                        label: Text(
+                        label: const Text(
                           "Check-ins",
                         ),
                         style:
@@ -390,7 +390,7 @@ class _ManageEventsScreenState
                               const Size(0, 52),
                           foregroundColor:
                               AppColors.mangoOrange,
-                          side: BorderSide(
+                          side: const BorderSide(
                             color:
                                 AppColors.mangoOrange,
                           ),
@@ -417,11 +417,11 @@ class _ManageEventsScreenState
                               ),
                             );
                           },
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.settings,
                         ),
                         label:
-                            Text("Manage"),
+                            const Text("Manage"),
                         style:
                             ElevatedButton.styleFrom(
                           backgroundColor:
@@ -461,7 +461,7 @@ class _ManageEventsScreenState
         type.totalSeats - type.availableSeats;
 
     return Container(
-      padding: EdgeInsets.all(AppSpacing.sm),
+      padding: const EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
         color: AppColors.mangoOrange.withOpacity(.08),
         borderRadius: BorderRadius.circular(14),
@@ -477,7 +477,7 @@ class _ManageEventsScreenState
         children: [
           Text(
             type.name,
-            style: TextStyle(
+            style: const TextStyle(
               color: AppColors.mangoOrange,
               fontWeight: FontWeight.bold,
             ),
@@ -516,7 +516,7 @@ class _ManageEventsScreenState
     required IconData icon,
   }) {
     return Container(
-      padding: EdgeInsets.all(14),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
         borderRadius:
@@ -561,56 +561,53 @@ class _ManageEventsScreenState
       myEventsProvider,
     );
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(title: const Text('Manage Event'),),
+    // Standalone root Scaffold framework modules and top explicit AppBar rendering sections are 
+    // cleanly lifted out to allow native continuous layout embedding in MainTabsScreen.
+    return Stack(
+      children: [
+        eventsAsync.when(
+          loading: () => const Center(
+            child: CircularProgressIndicator(),
+          ),
 
+          error: (e, _) => Center(
+            child: Text(e.toString()),
+          ),
 
-      floatingActionButton: Padding(
-  padding: const EdgeInsets.only(bottom: 50),
-  child: AppFab(
-    heroTag: "add_event",
-    icon: Icons.add,
-    tooltip: "Add Event",
-    toastMessage: "Create event",
-    onPressed: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => AddEventScreen(),
-        ),
-      );
-    },
-  ),
-),
-
-      body: eventsAsync.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
-
-        error: (e, _) => Center(
-          child: Text(e.toString()),
-        ),
-
-        data: (events) {
-          if (events.isEmpty) {
-            return const Center(
-              child: Text("No events found"),
-            );
-          }
-
-          return ListView.builder(
-            padding: EdgeInsets.all(AppSpacing.md),
-            itemCount: events.length,
-            itemBuilder: (context, index) {
-              return buildEventCard(
-                events[index],
+          data: (events) {
+            if (events.isEmpty) {
+              return const Center(
+                child: Text("No events found"),
               );
+            }
+
+            return ListView.builder(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              itemCount: events.length,
+              itemBuilder: (context, index) {
+                return buildEventCard(
+                  events[index],
+                );
+              },
+            );
+          },
+        ),
+
+        // ================= FLOATING ACTION LAYOUT OVERLAY =================
+        Positioned(
+          bottom: 16,
+          right: 16,
+          child: AppFab(
+            heroTag: "add_event",
+            icon: Icons.add,
+            tooltip: "Add Event",
+            toastMessage: "Create event",
+            onPressed: () {
+              MainTabsScreen.of(context)?.navigateToCreateEvent();
             },
-          );
-        },
-      ),
+          ),
+        ),
+      ],
     );
   }
 }

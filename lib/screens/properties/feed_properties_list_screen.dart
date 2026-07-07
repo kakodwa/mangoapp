@@ -6,6 +6,7 @@ import '../../widgets/feed/feed_list_widget.dart';
 
 // Analytics Import
 import '../../services/analytics_service.dart';
+import '../../widgets/web_footer.dart';
 
 class PropertiesListScreen extends ConsumerStatefulWidget {
   const PropertiesListScreen({
@@ -93,6 +94,9 @@ class _PropertiesListScreenState extends ConsumerState<PropertiesListScreen> {
                   ),
                 ),
               ),
+              const SliverToBoxAdapter(
+                child: WebFooter(),
+                ),
             ],
           ),
         );

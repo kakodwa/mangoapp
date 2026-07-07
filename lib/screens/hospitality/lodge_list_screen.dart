@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../widgets/main_drawer.dart';
 import '../../widgets/main_app_bar.dart';
-
+import '../../widgets/web_footer.dart';
 import '../../providers/lodges_provider.dart';
 import '../../widgets/hospitality/lodge_card.dart';
 import '../../widgets/app_scaffold.dart';

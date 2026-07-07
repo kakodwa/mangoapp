@@ -1,11 +1,20 @@
+// 1. Flutter Core Packages
 import 'package:flutter/material.dart';
+
+// 2. Third-Party Packages
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+// 3. Project Imports
+
+// Providers
 import '../../providers/feed/main_feed_providers.dart';
+
+// Widgets
 import '../../widgets/feed/feed_list_widget.dart';
 import '../../widgets/web_footer.dart';
+import '../../widgets/update.dart';
 
-// Analytics Import
+// Analytics & Services
 import '../../services/analytics_service.dart';
 
 class ProductsListScreen extends ConsumerStatefulWidget {
@@ -81,6 +90,9 @@ class _ProductsListScreenState extends ConsumerState<ProductsListScreen> {
           child: CustomScrollView(
             controller: _controller,
             slivers: [
+               const SliverToBoxAdapter(
+              child: UpdatesTicker(),
+            ),
               FeedListWidget(
                 items: items,
               ),

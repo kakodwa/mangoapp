@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:vibration/vibration.dart';
-
+import '../../widgets/web_footer.dart';
 import '../../core/api/api_client.dart';
 import '../../utils/app_toast.dart';
 import '../../widgets/main_app_bar.dart';

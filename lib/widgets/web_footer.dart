@@ -20,7 +20,7 @@ class WebFooter extends StatelessWidget {
 
   // Helper method to safely launch external URLs for the admin portal
   Future<void> _launchAdminUrl() async {
-    final Uri url = Uri.parse('https://mangobackend-yayy.onrender.com/admin_appadmin_login/'); // Replace with your actual admin web URL
+    final Uri url = Uri.parse('https://mangobackend-yayy.onrender.com/admin_appconsole/dashboard/'); // Replace with your actual admin web URL
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw Exception('Could not launch $url');
     }
@@ -179,16 +179,14 @@ class WebFooter extends StatelessWidget {
           children: [
             TextButton(
               onPressed: () {
-                _analyticsService.logEvent('footer_about_click');
-                if (onAboutTap != null) {
-                  onAboutTap!();
-                } else {
-                  Navigator.push(
-                    context, 
-                    MaterialPageRoute(builder: (_) => AboutScreen()),
-                  );
-                }
-              },
+              // Trigger analytics event safely in the background
+              _analyticsService.logEvent('footer_about_click');
+              
+              Navigator.pop(context);
+              if (onAboutTap != null) {
+                onAboutTap!();
+              }
+            },
               child: const Text('About App', style: linkStyle),
             ),
             TextButton(

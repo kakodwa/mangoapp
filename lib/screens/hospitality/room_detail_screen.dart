@@ -13,6 +13,7 @@ import '../../widgets/hospitality/room_card.dart';
 import 'availability_calendar_screen.dart';
 import 'booking_checkout_screen.dart';
 import '../../providers/rooms_provider.dart';
+import '../../widgets/web_footer.dart';
 
 class RoomDetailScreen extends ConsumerWidget {
   final Room room;

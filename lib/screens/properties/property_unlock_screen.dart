@@ -14,6 +14,7 @@ import '../../theme/design_system/app_spacing.dart';
 
 // Analytics Import
 import '../../services/analytics_service.dart';
+import '../../widgets/web_footer.dart';
 
 class PropertyUnlockScreen extends ConsumerStatefulWidget {
   final int propertyId;

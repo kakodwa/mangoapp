@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../../widgets/web_footer.dart';
 class MangoHubSpecScreen extends StatefulWidget {
   const MangoHubSpecScreen({Key? key}) : super(key: key);
 

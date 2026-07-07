@@ -19,6 +19,8 @@ class Shop {
   final int totalReviews;
   final DateTime createdAt;
   final int? productCount;
+  final String? qrCode;       
+  final int? qrScanCount; 
 
   Shop({
     required this.id,
@@ -41,6 +43,8 @@ class Shop {
     required this.totalReviews,
     required this.createdAt,
     this.productCount,
+    this.qrCode,
+    this.qrScanCount,
   });
 
   factory Shop.fromJson(Map<String, dynamic> json) {
@@ -65,6 +69,10 @@ class Shop {
       totalReviews: json['total_reviews'] ?? 0,
       createdAt: DateTime.parse(json['created_at'] ?? DateTime.now().toIso8601String()),
       productCount: json['product_count'],
+      qrCode: json['qr_code'],                              
+      qrScanCount: json['qr_scan_count'] != null 
+          ? int.tryParse(json['qr_scan_count'].toString()) 
+          : 0,
     );
   }
 

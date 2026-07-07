@@ -1,3 +1,5 @@
+// lib/screens/hospitality/edit_lodge_screen.dart
+
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -8,13 +10,15 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../models/lodge_model.dart';
 import '../../models/amenity_model.dart';
-
+import '../../widgets/web_footer.dart';
 import '../../providers/api_provider.dart';
 import '../../providers/amenities_provider.dart';
+import '../main_tabs_screen.dart'; // Core structural coordinator layout
 import '../../utils/app_toast.dart';
+import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_text_field.dart';
-import '../../widgets/main_app_bar.dart';
+import '../../theme/design_system/app_typography.dart';
 
 class EditLodgeScreen extends ConsumerStatefulWidget {
   final Lodge lodge;
@@ -89,9 +93,6 @@ class _EditLodgeScreenState extends ConsumerState<EditLodgeScreen> {
     longitude = lodge.longitude;
 
     existingImages = List<String>.from(lodge.images ?? []);
-
-    // ⚠️ IMPORTANT: DO NOT depend on lodge.amenities object
-    // We initialize empty like Create screen
     selectedAmenities = [];
   }
 
@@ -121,8 +122,8 @@ class _EditLodgeScreenState extends ConsumerState<EditLodgeScreen> {
       );
 
       setState(() {
-        latitude = pos.latitude;
-        longitude = pos.longitude;
+        latitude = double.parse(pos.latitude.toStringAsFixed(6));
+        longitude = double.parse(pos.longitude.toStringAsFixed(6));
       });
 
       AppToast.success(context, "Location updated");
@@ -187,7 +188,6 @@ class _EditLodgeScreenState extends ConsumerState<EditLodgeScreen> {
 
     try {
       final api = ref.read(apiClientProvider);
-
       final formData = FormData();
 
       // TEXT FIELDS
@@ -204,9 +204,14 @@ class _EditLodgeScreenState extends ConsumerState<EditLodgeScreen> {
         MapEntry("longitude", longitude?.toStringAsFixed(6) ?? ""),
       ]);
 
-      // AMENITIES (SAME AS CREATE SCREEN)
+      // AMENITIES
       for (final id in selectedAmenities) {
         formData.fields.add(MapEntry("amenities", id.toString()));
+      }
+
+      // EXISTING IMAGES PRESERVATION SYNCHRONIZATION
+      for (final url in existingImages) {
+        formData.fields.add(MapEntry("existing_images", url));
       }
 
       // NEW IMAGES ONLY
@@ -231,7 +236,9 @@ class _EditLodgeScreenState extends ConsumerState<EditLodgeScreen> {
 
       if (mounted) {
         AppToast.success(context, "Lodge updated successfully");
-        Navigator.pop(context, true);
+        
+        // Return focus index cleanly to the master dashboard panel screen inside the parent tabs view
+        MainTabsScreen.of(context)?.setSelectedIndex(30);
       }
     } catch (e) {
       AppToast.error(context, e.toString());
@@ -243,175 +250,290 @@ class _EditLodgeScreenState extends ConsumerState<EditLodgeScreen> {
   @override
   Widget build(BuildContext context) {
     final amenitiesAsync = ref.watch(amenitiesProvider);
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool isLargeScreen = screenWidth > 900;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Edit Lodge'),),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          children: [
-
-            AppTextField(label: "Name", controller: nameController),
-            const SizedBox(height: 12),
-
-            AppTextField(
-              label: "Description",
-              controller: descriptionController,
-              type: TextFieldType.multiline,
-              maxLines: 4,
+    // Standalone Scaffold structures and explicit top AppBar elements are removed 
+    // to match the uniform embedding layout configuration bounds of the parent wrapper.
+    return Form(
+      key: _formKey,
+      child: CustomScrollView(
+        slivers: [
+          SliverPadding(
+            padding: EdgeInsets.symmetric(
+              vertical: AppSpacing.md,
+              horizontal: isLargeScreen ? (screenWidth - 800) / 2 : AppSpacing.md,
             ),
-
-            const SizedBox(height: 12),
-
-            AppTextField(label: "City", controller: cityController),
-            const SizedBox(height: 12),
-
-            AppTextField(label: "Address", controller: addressController),
-            const SizedBox(height: 12),
-
-            AppTextField(label: "Phone", controller: phoneController),
-            const SizedBox(height: 12),
-
-            AppTextField(label: "Email", controller: emailController),
-
-            const SizedBox(height: 20),
-
-            DropdownButtonFormField(
-              value: selectedType,
-              items: types
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                  .toList(),
-              onChanged: (v) => setState(() => selectedType = v.toString()),
-              decoration: const InputDecoration(labelText: "Type"),
-            ),
-
-            const SizedBox(height: 12),
-
-            DropdownButtonFormField(
-              value: selectedDistrict,
-              items: malawiDistricts
-                  .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                  .toList(),
-              onChanged: (v) => setState(() => selectedDistrict = v.toString()),
-              decoration: const InputDecoration(labelText: "District"),
-            ),
-
-            const SizedBox(height: 20),
-
-            ElevatedButton.icon(
-              onPressed: getLocation,
-              icon: const Icon(Icons.my_location),
-              label: const Text("Update Location"),
-            ),
-
-            const SizedBox(height: 20),
-
-            // ================= AMENITIES =================
-            amenitiesAsync.when(
-              data: (amenities) => Wrap(
-                spacing: 8,
-                children: amenities.map((Amenity a) {
-                  final selected = selectedAmenities.contains(a.id);
-
-                  return FilterChip(
-                    label: Text(a.name),
-                    selected: selected,
-                    onSelected: (v) {
-                      setState(() {
-                        if (v) {
-                          selectedAmenities.add(a.id);
-                        } else {
-                          selectedAmenities.remove(a.id);
-                        }
-                      });
-                    },
-                  );
-                }).toList(),
-              ),
-              loading: () => const CircularProgressIndicator(),
-              error: (_, __) => const Text("Failed to load amenities"),
-            ),
-
-            const SizedBox(height: 20),
-
-            const Text("Images",
-                style: TextStyle(fontWeight: FontWeight.bold)),
-
-            const SizedBox(height: 10),
-
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: [
-
-                // EXISTING IMAGES
-                ...existingImages.asMap().entries.map((e) {
-                  return Stack(
+            sliver: SliverToBoxAdapter(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 800),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Image.network(
-                        e.value,
-                        width: 90,
-                        height: 90,
-                        fit: BoxFit.cover,
-                      ),
-                      Positioned(
-                        right: 0,
-                        child: IconButton(
-                          icon: const Icon(Icons.close),
-                          onPressed: () => removeExisting(e.key),
-                        ),
-                      )
-                    ],
-                  );
-                }),
+                      AppTextField(label: "Lodge Name", controller: nameController, isRequired: true),
+                      const SizedBox(height: AppSpacing.md),
 
-                // NEW IMAGES
-                ...newImages.asMap().entries.map((e) {
-                  return Stack(
-                    children: [
-                      Image.file(
-                        File(e.value.path),
-                        width: 90,
-                        height: 90,
-                        fit: BoxFit.cover,
+                      AppTextField(
+                        label: "Description",
+                        controller: descriptionController,
+                        type: TextFieldType.multiline,
+                        maxLines: 4,
                       ),
-                      Positioned(
-                        right: 0,
-                        child: IconButton(
-                          icon: const Icon(Icons.close),
-                          onPressed: () => removeNew(e.key),
-                        ),
-                      )
-                    ],
-                  );
-                }),
+                      const SizedBox(height: AppSpacing.md),
 
-                GestureDetector(
-                  onTap: pickImages,
-                  child: Container(
-                    width: 90,
-                    height: 90,
-                    color: Colors.grey.shade300,
-                    child: const Icon(Icons.add),
+                      AppTextField(label: "City", controller: cityController),
+                      const SizedBox(height: AppSpacing.md),
+
+                      AppTextField(label: "Address", controller: addressController, isRequired: true),
+                      const SizedBox(height: AppSpacing.md),
+
+                      AppTextField(label: "Phone", controller: phoneController, isRequired: true, type: TextFieldType.phone),
+                      const SizedBox(height: AppSpacing.md),
+
+                      AppTextField(label: "Email", controller: emailController, type: TextFieldType.email),
+                      const SizedBox(height: AppSpacing.lg),
+
+                      DropdownButtonFormField<String>(
+                        value: selectedType,
+                        items: types
+                            .map((e) => DropdownMenuItem(value: e, child: Text(e.toUpperCase())))
+                            .toList(),
+                        onChanged: (v) => setState(() => selectedType = v!),
+                        decoration: InputDecoration(
+                          labelText: "Property Category Type",
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+
+                      DropdownButtonFormField<String>(
+                        value: selectedDistrict,
+                        items: malawiDistricts
+                            .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                            .toList(),
+                        onChanged: (v) => setState(() => selectedDistrict = v!),
+                        decoration: InputDecoration(
+                          labelText: "Malawi Location District",
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+
+                      ElevatedButton.icon(
+                        onPressed: isGettingLocation ? null : getLocation,
+                        icon: isGettingLocation 
+                            ? const SizedBox(
+                                width: 16, 
+                                height: 16, 
+                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
+                              )
+                            : const Icon(Icons.my_location),
+                        label: Text(isGettingLocation ? "Pinpointing Location..." : "Update GPS Coordinates"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.mangoOrange,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
+                      if (latitude != null && longitude != null) ...[
+                        const SizedBox(height: AppSpacing.sm),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.green.shade200),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.gpp_good, color: Colors.green, size: 18),
+                              const SizedBox(width: 8),
+                              Text(
+                                "Coordinates verified: [$latitude, $longitude]",
+                                style: TextStyle(color: Colors.green.shade900, fontWeight: FontWeight.w500, fontSize: 13),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: AppSpacing.xl),
+
+                      const Text(
+                        "Available On-Site Amenities",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+
+                      // Refactored layout casting wrapper fix
+                      amenitiesAsync.when(
+                        data: (amenities) {
+                          if (amenities.isEmpty) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8.0),
+                              child: Text('No parameters registered.', style: AppTypography.bodySmall.copyWith(color: Colors.grey)),
+                            );
+                          }
+                          return Wrap(
+                            spacing: 8,
+                            runSpacing: 4,
+                            children: amenities.map<Widget>((Amenity a) {
+                              final selected = selectedAmenities.contains(a.id);
+                              return FilterChip(
+                                label: Text(a.name),
+                                selected: selected,
+                                selectedColor: AppColors.mangoOrange.withOpacity(0.2),
+                                checkmarkColor: AppColors.mangoOrange,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                onSelected: (v) {
+                                  setState(() {
+                                    if (v) {
+                                      selectedAmenities.add(a.id);
+                                    } else {
+                                      selectedAmenities.remove(a.id);
+                                    }
+                                  });
+                                },
+                              );
+                            }).toList(),
+                          );
+                        },
+                        loading: () => const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16.0),
+                          child: Center(child: CircularProgressIndicator(color: AppColors.mangoOrange)),
+                        ),
+                        error: (err, __) => Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.red.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.signal_wifi_connected_no_internet_4, color: Colors.red, size: 18),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  "Failed to load utilities choices. ($err)",
+                                  style: TextStyle(color: Colors.red.shade900, fontSize: 12),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xl),
+
+                      const Text("Gallery Management", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                      const SizedBox(height: AppSpacing.sm),
+
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: [
+                          // EXISTING IMAGES PROCESSED FROM NETWORK CDN
+                          ...existingImages.asMap().entries.map((e) {
+                            return Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    e.value,
+                                    width: 95,
+                                    height: 95,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                Positioned(
+                                  top: -6,
+                                  right: -6,
+                                  child: CircleAvatar(
+                                    radius: 12,
+                                    backgroundColor: Colors.red,
+                                    child: IconButton(
+                                      padding: EdgeInsets.zero,
+                                      icon: const Icon(Icons.close, size: 14, color: Colors.white),
+                                      onPressed: () => removeExisting(e.key),
+                                    ),
+                                  ),
+                                )
+                              ],
+                            );
+                          }),
+
+                          // NEW LOCAL IMAGES FOR STAGED MULTIPART MULTIPHASE UPLOADS
+                          ...newImages.asMap().entries.map((e) {
+                            return Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.file(
+                                    File(e.value.path),
+                                    width: 95,
+                                    height: 95,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                Positioned(
+                                  top: -6,
+                                  right: -6,
+                                  child: CircleAvatar(
+                                    radius: 12,
+                                    backgroundColor: Colors.red,
+                                    child: IconButton(
+                                      padding: EdgeInsets.zero,
+                                      icon: const Icon(Icons.close, size: 14, color: Colors.white),
+                                      onPressed: () => removeNew(e.key),
+                                    ),
+                                  ),
+                                )
+                              ],
+                            );
+                          }),
+
+                          GestureDetector(
+                            onTap: pickImages,
+                            child: Container(
+                              width: 95,
+                              height: 95,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade200,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.grey.shade300, style: BorderStyle.solid),
+                              ),
+                              child: Icon(Icons.add_photo_alternate, color: Colors.grey.shade600, size: 28),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.xl),
+
+                      SizedBox(
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: isLoading ? null : updateLodge,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.leafGreen,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: isLoading
+                              ? const CircularProgressIndicator(color: Colors.white)
+                              : const Text("Save Modifications", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-
-            const SizedBox(height: 30),
-
-            SizedBox(
-              height: 55,
-              child: ElevatedButton(
-                onPressed: isLoading ? null : updateLodge,
-                child: isLoading
-                    ? const CircularProgressIndicator()
-                    : const Text("Update Lodge"),
               ),
             ),
-          ],
-        ),
+          ),
+          const SliverToBoxAdapter(child: SizedBox(height: 40)),
+          const SliverToBoxAdapter(child: WebFooter()),
+        ],
       ),
     );
   }
