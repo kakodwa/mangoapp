@@ -663,26 +663,30 @@ Widget buildVariantSelector(List<LocalProductVariant> variants) {
                           ),
                           const SizedBox(height: AppSpacing.sm),
 
-                          AppFab(
-                            heroTag: "share_product",
-                            icon: Icons.share_outlined,
-                            tooltip: "Share Product",
-                            onPressed: () async {
-                              const String baseUrl = "https://mangobackend-yayy.onrender.com";
-                              final String productUrl ="$baseUrl/product/${product.id}";
+                         
 
-                              final String shareMessage = "Check out ${product.name} on Mangochi Marketplace!\nPrice: MWK ${product.price}\n\nView details here: $productUrl";
-                              
-                              analytics.logEvent('product_shared_${product.id}');
+AppFab(
+  heroTag: "share_product",
+  icon: Icons.share_outlined,
+  tooltip: "Share Product",
+  onPressed: () async {
 
-                              final box = context.findRenderObject() as RenderBox?;
-                              await Share.share(
-                                shareMessage,
-                                subject: 'Look what I found on Mangochi!',
-                                sharePositionOrigin: box != null ? box.localToGlobal(Offset.zero) & box.size : null,
-                              );
-                            },
-                          ),
+    final String productUrl = "${Uri.base.origin}/product/${product.id}";
+
+    final String shareMessage = "Check out *${product.name}* on Mangochi Marketplace!\n"
+        "Price: MWK ${product.price}\n\n"
+        "👉 View details here:\n$productUrl";
+    
+    analytics.logEvent('product_shared_${product.id}');
+
+    final box = context.findRenderObject() as RenderBox?;
+    await Share.share(
+      shareMessage,
+      subject: 'Look what I found on Mangochi!',
+      sharePositionOrigin: box != null ? box.localToGlobal(Offset.zero) & box.size : null,
+    );
+  },
+),
                           const SizedBox(height: AppSpacing.sm),
 
                           AppFab(

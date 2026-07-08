@@ -391,30 +391,30 @@ class _LodgeDetailScreenState extends ConsumerState<LodgeDetailScreen> {
                 ),
                 const SizedBox(height: AppSpacing.sm),
 
-                // 🔗 UNIVERSAL LISTING RATIO SHARE PANEL FAB BOUND
-                AppFab(
-                  heroTag: "share_lodge_fab",
-                  icon: Icons.share_outlined,
-                  tooltip: "Share Lodge Listing",
-                  onPressed: () async {
-                    final String lodgeUrl = kIsWeb
-                        ? "${Uri.base.origin}/lodge/${widget.lodge.id}"
-                        : "https://mangobackend-yayy.onrender.com/lodge/${widget.lodge.id}";
+             
 
-                    final String shareMessage = "🏨 *${widget.lodge.name}*\n"
-                        "📍 Location: ${widget.lodge.district ?? 'Mangochi'}\n\n"
-                        "👉 View rooms and book accommodations on Mangochi Marketplace:\n$lodgeUrl";
+AppFab(
+  heroTag: "share_lodge_fab",
+  icon: Icons.share_outlined,
+  tooltip: "Share Lodge Listing",
+  onPressed: () async {
+ 
+    final String lodgeUrl = "${Uri.base.origin}/lodge/${widget.lodge.id}";
 
-                    _analyticsService.logEvent('lodge_shared_${widget.lodge.id}');
+    final String shareMessage = "🏨 *${widget.lodge.name}*\n"
+        "📍 Location: ${widget.lodge.district ?? 'Mangochi'}\n\n"
+        "👉 View rooms and book accommodations on Mangochi Marketplace:\n$lodgeUrl";
 
-                    final box = context.findRenderObject() as RenderBox?;
-                    await Share.share(
-                      shareMessage,
-                      subject: 'Looking for a place to stay in Mangochi?',
-                      sharePositionOrigin: box != null ? box.localToGlobal(Offset.zero) & box.size : null,
-                    );
-                  },
-                ),
+    _analyticsService.logEvent('lodge_shared_${widget.lodge.id}');
+
+    final box = context.findRenderObject() as RenderBox?;
+    await Share.share(
+      shareMessage,
+      subject: 'Looking for a place to stay in Mangochi?',
+      sharePositionOrigin: box != null ? box.localToGlobal(Offset.zero) & box.size : null,
+    );
+  },
+),
                 const SizedBox(height: AppSpacing.sm),
 
                 // 🗺 MAP ACCESSIBILITY FAB BOUND WITH COORDINATE VERIFICATION

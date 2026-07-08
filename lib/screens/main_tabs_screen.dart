@@ -72,16 +72,20 @@ import '../router/app_router.dart';
 class MainTabsScreen extends StatefulWidget {
   const MainTabsScreen({super.key});
 
-  static _MainTabsScreenState? of(BuildContext context) {
-    return context.findAncestorStateOfType<_MainTabsScreenState>();
+  static MainTabsScreenState? of(BuildContext context) {
+    return context.findAncestorStateOfType<MainTabsScreenState>();
+  }
+
+  static MainTabsScreenState? getInstance() {
+    return MainTabsScreenState.instance;
   }
 
   @override
-  State<MainTabsScreen> createState() => _MainTabsScreenState();
+  State<MainTabsScreen> createState() => MainTabsScreenState();
 }
 
-// 🌟 FIX: We inject AppRouterMixin directly into the MainTabsState container lifecycle!
-class _MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
+// 🌟 FIX: Made class public (removed underscore) so MainTabsScreenState.instance is accessible globally
+class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
   int _currentIndex = 0;
   int? _activeProductId; 
   int? _activeShopId; 
@@ -99,16 +103,25 @@ class _MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
   void Function(PaymentStatusModel)? _paymentOnSuccess;
 
   late final List<Widget> _screens;
+  static MainTabsScreenState? instance;
 
   @override
   void initState() {
     super.initState();
-    
-    // 🌟 Run your URL routing engine right inside the active Tab Container viewport layout frame
+
+    debugPrint("1. initState");
+
+    instance = this;
+
+    debugPrint("2. Before addPostFrameCallback");
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      debugPrint("3. Inside addPostFrameCallback");
       initializeRouting();
     });
-    
+
+    debugPrint("4. After addPostFrameCallback");
+
     _screens = [
       HomeScreen(onDeliveryTap: () => _changeTab(9)),
       const ShopsListScreen(),        

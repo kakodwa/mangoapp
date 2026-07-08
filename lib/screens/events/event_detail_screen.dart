@@ -376,31 +376,31 @@ class EventDetailScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.sm),
             ],
 
-            // 🔗 UNIVERSAL MEDIA EXTENSION PROFILE DISTRIBUTION FLOW
-            AppFab(
-              heroTag: "share_event_fab",
-              icon: Icons.share_outlined,
-              tooltip: "Share Event",
-              onPressed: () async {
-                final String eventUrl = kIsWeb
-                    ? "${Uri.base.origin}/event/${event.id}"
-                    : "https://mangobackend-yayy.onrender.com/event/${event.id}";
 
-                final String shareMessage = "🎉 *${event.title}*\n"
-                    "📅 Date: ${event.eventDate}\n"
-                    "📍 Venue: ${event.district}\n\n"
-                    "👉 Book ticket allocations safely here:\n$eventUrl";
 
-                analyticsService.logEvent('event_shared_${event.id}');
+AppFab(
+  heroTag: "share_event_fab",
+  icon: Icons.share_outlined,
+  tooltip: "Share Event",
+  onPressed: () async {
 
-                final box = context.findRenderObject() as RenderBox?;
-                await Share.share(
-                  shareMessage,
-                  subject: 'Look what I found on Mangochi!',
-                  sharePositionOrigin: box != null ? box.localToGlobal(Offset.zero) & box.size : null,
-                );
-              },
-            ),
+    final String eventUrl = "${Uri.base.origin}/event/${event.id}";
+
+    final String shareMessage = "🎉 *${event.title}*\n"
+        "📅 Date: ${event.eventDate}\n"
+        "📍 Venue: ${event.venue}, ${event.city}\n\n"
+        "👉 Book ticket allocations safely here:\n$eventUrl";
+
+    analyticsService.logEvent('event_shared_${event.id}');
+
+    final box = context.findRenderObject() as RenderBox?;
+    await Share.share(
+      shareMessage,
+      subject: 'Look what I found on Mangochi!',
+      sharePositionOrigin: box != null ? box.localToGlobal(Offset.zero) & box.size : null,
+    );
+  },
+),
           ],
         ),
       ),

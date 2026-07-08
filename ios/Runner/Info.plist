@@ -19,8 +19,7 @@
             <string>com.mangochi.marketplace</string>
             <key>CFBundleURLSchemes</key>
             <array>
-                <string>https</string>
-            </array>
+                <string>mangohub</string> </array>
         </dict>
     </array>
 

@@ -584,9 +584,9 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
                         tooltip: "Share Shop",
                         onPressed: () async {
                           // 🌟 FIX: Added the hash segment (/慶/) for direct URL sharing security stability
-                          final String shopUrl = kIsWeb
-                              ? "${Uri.base.origin}/#/shop/${widget.shopId}" 
-                              : "https://mangobackend-yayy.onrender.com/shop/${widget.shopId}"; 
+                     
+
+                          final String shopUrl ="${Uri.base.origin}/shop/${widget.shopId}"; 
 
                           final String shareMessage = "🏪 *${shop.name}*\n" 
                               "📍 Category: ${shop.category}\n\n" 

@@ -6,6 +6,7 @@ import '../screens/main_tabs_screen.dart';
 import '../screens/splash_screen.dart'; 
 import '../theme/app_colors.dart';
 import '../providers/auth_provider.dart';
+import '../main.dart' show globalNavigatorKey; // 🌟 IMPORTED GLOBAL KEY
 
 class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
@@ -14,7 +15,6 @@ class MyApp extends ConsumerStatefulWidget {
   ConsumerState<MyApp> createState() => _MyAppState();
 }
 
-// 🌟 FIX: Removed duplicate AppRouterMixin to prevent state lifecycle collision loops!
 class _MyAppState extends ConsumerState<MyApp> {
   @override
   void initState() {
@@ -53,6 +53,7 @@ class _MyAppState extends ConsumerState<MyApp> {
     final authState = ref.watch(authProvider);
 
     return MaterialApp(
+      navigatorKey: globalNavigatorKey, // 🌟 ATTACHED NAVIGATOR KEY HERE
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,

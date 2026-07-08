@@ -87,8 +87,8 @@ class _MainAppState extends ConsumerState<MainApp>  {
         // 🚀 Dynamic Entry Point: Open tabs view by default. 
         // The AppRouterMixin will automatically overlay the deep-linked screen on top!
         home: authState.isLoading
-            ? const SplashScreen()
-            : const MainTabsScreen(),
+    ? const SplashScreen()
+    : const MainTabsScreen(key: ValueKey('main-tabs')),
 
         routes: {
           '/login': (context) => const LoginScreen(),
