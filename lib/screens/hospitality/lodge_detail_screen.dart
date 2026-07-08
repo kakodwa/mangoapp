@@ -1,4 +1,7 @@
 // lib/screens/hospitality/lodge_detail_screen.dart
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
@@ -392,36 +395,75 @@ class _LodgeDetailScreenState extends ConsumerState<LodgeDetailScreen> {
                 const SizedBox(height: AppSpacing.sm),
 
              
-
 AppFab(
   heroTag: "share_lodge_fab",
   icon: Icons.share_outlined,
   tooltip: "Share Lodge Listing",
   onPressed: () async {
-    // 🌟 Capture layout context safely prior to triggering the async share engine
-    final RenderBox? box = context.findRenderObject() as RenderBox?;
- 
-    final String lodgeUrl = "${Uri.base.origin}/lodge/${widget.lodge.id}"; // cite: lodge_detail_screen.dart
+    _analyticsService.logEvent('lodge_shared_${widget.lodge.id}');
 
-    final String shareMessage = "🏨 *${widget.lodge.name}*\n" // cite: lodge_detail_screen.dart
-        "📍 Location: ${widget.lodge.district ?? 'Mangochi'}\n\n" // cite: lodge_detail_screen.dart
-        "🔗 View rooms and book accommodations on MangoHub Marketplace:\n$lodgeUrl"; // cite: lodge_detail_screen.dart
+    final String lodgeUrl = kIsWeb
+        ? "${Uri.base.origin}/lodge/${widget.lodge.id}"
+        : "https://mangobackend-yayy.onrender.com/lodge/${widget.lodge.id}";
 
-    _analyticsService.logEvent('lodge_shared_${widget.lodge.id}'); // cite: lodge_detail_screen.dart
+    final String shareMessage =
+        "🏨 ${widget.lodge.name}\n"
+        "📍 ${widget.lodge.city}, ${widget.lodge.district}\n\n"
+        "Browse rooms and book your stay on MangoHub:\n"
+        "$lodgeUrl";
 
-    // 🌟 Create anchor coordinate bounds fallback to ensure stability on mobile viewports
-    final Rect shareBounds = box != null 
-        ? (box.localToGlobal(Offset.zero) & box.size)
-        : const Rect.fromLTWH(0, 0, 100, 100);
+    final box = context.findRenderObject() as RenderBox?;
+    final sharePositionOrigin =
+        box != null ? box.localToGlobal(Offset.zero) & box.size : null;
 
     try {
+      if (widget.lodge.images.isNotEmpty) {
+        final imageUrl = widget.lodge.images.first;
+
+        final response = await http.get(Uri.parse(imageUrl));
+
+        if (response.statusCode == 200) {
+          final tempDir = await getTemporaryDirectory();
+
+          final extension = imageUrl
+              .split('.')
+              .last
+              .split('?')
+              .first
+              .toLowerCase();
+
+          final validExtension =
+              ['jpg', 'jpeg', 'png', 'webp'].contains(extension)
+                  ? extension
+                  : 'jpg';
+
+          final file = await File(
+            '${tempDir.path}/shared_lodge_${widget.lodge.id}.$validExtension',
+          ).create();
+
+          await file.writeAsBytes(response.bodyBytes);
+
+          await Share.shareXFiles(
+            [XFile(file.path)],
+            text: shareMessage,
+            sharePositionOrigin: sharePositionOrigin,
+          );
+
+          return;
+        }
+      }
+
       await Share.share(
-        shareMessage, // cite: lodge_detail_screen.dart
-        subject: 'Looking for a place to stay in Mangochi?', // cite: lodge_detail_screen.dart
-        sharePositionOrigin: shareBounds,
+        shareMessage,
+        sharePositionOrigin: sharePositionOrigin,
       );
     } catch (e) {
-      debugPrint("Lodge sharing failed: $e");
+      debugPrint("Lodge share failed: $e");
+
+      await Share.share(
+        shareMessage,
+        sharePositionOrigin: sharePositionOrigin,
+      );
     }
   },
 ),

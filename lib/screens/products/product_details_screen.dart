@@ -1,3 +1,7 @@
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+
 // 1. Dart & Flutter Core Packages
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -670,28 +674,71 @@ AppFab(
   icon: Icons.share_outlined,
   tooltip: "Share Product",
   onPressed: () async {
-    // 🌟 Capture the layout frame safely from the current build context
-    final RenderBox? box = context.findRenderObject() as RenderBox?;
+    analytics.logEvent('product_shared_${product.id}');
 
-    final String productUrl = "${Uri.base.origin}/product/${product.id}"; // cite: product_details_screen.dart
+    final String productUrl = kIsWeb
+        ? "${Uri.base.origin}/product/${product.id}"
+        : "https://mangobackend-yayy.onrender.com/product/${product.id}";
 
-    final String shareMessage = "Check out *${product.name}* on Mangohub Marketplace!\n" // cite: product_details_screen.dart
-        "Price: MWK ${product.price}\n\n" // cite: product_details_screen.dart
-        "👉 View details here:\n$productUrl"; // cite: product_details_screen.dart
-    
-    analytics.logEvent('product_shared_${product.id}'); // cite: product_details_screen.dart
+    final String shareMessage =
+        "🛍️ ${product.name}\n"
+        "💰 Price: MWK ${product.price}\n"
+        "🏪 Shop: ${product.shopName}\n\n"
+        "View this product on MangoHub:\n$productUrl";
 
-    // 🌟 Create a safe dimension position fallback if 'box' comes back null on mobile
-    final Rect shareBounds = box != null 
-        ? (box.localToGlobal(Offset.zero) & box.size)
-        : const Rect.fromLTWH(0, 0, 100, 100);
+    final box = context.findRenderObject() as RenderBox?;
+    final sharePositionOrigin =
+        box != null ? box.localToGlobal(Offset.zero) & box.size : null;
 
-    await Share.share( // cite: product_details_screen.dart
-      shareMessage, // cite: product_details_screen.dart
-      subject: 'Look what I found on Mangochi!', // cite: product_details_screen.dart
-      // 🌟 Pass the safe position bounds variable here
-      sharePositionOrigin: shareBounds,
-    );
+    try {
+      if (product.images.isNotEmpty) {
+        final imageUrl = product.images.first;
+
+        final response = await http.get(Uri.parse(imageUrl));
+
+        if (response.statusCode == 200) {
+          final tempDir = await getTemporaryDirectory();
+
+          final extension = imageUrl
+              .split('.')
+              .last
+              .split('?')
+              .first
+              .toLowerCase();
+
+          final validExtension =
+              ['jpg', 'jpeg', 'png', 'webp'].contains(extension)
+                  ? extension
+                  : 'jpg';
+
+          final file = await File(
+            '${tempDir.path}/shared_product_${product.id}.$validExtension',
+          ).create();
+
+          await file.writeAsBytes(response.bodyBytes);
+
+          await Share.shareXFiles(
+            [XFile(file.path)],
+            text: shareMessage,
+            sharePositionOrigin: sharePositionOrigin,
+          );
+
+          return;
+        }
+      }
+
+      await Share.share(
+        shareMessage,
+        sharePositionOrigin: sharePositionOrigin,
+      );
+    } catch (e) {
+      debugPrint("Product share failed: $e");
+
+      await Share.share(
+        shareMessage,
+        sharePositionOrigin: sharePositionOrigin,
+      );
+    }
   },
 ),
                           const SizedBox(height: AppSpacing.sm),

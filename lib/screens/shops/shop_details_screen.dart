@@ -1,4 +1,6 @@
 // lib/screens/shops/shop_details_screen.dart
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -575,33 +577,80 @@ Future<void> _downloadOrSaveQr(BuildContext context, String url, String shopName
                       const SizedBox(height: AppSpacing.sm), 
                      AppFab(
   heroTag: "share_shop_fab",
-  icon: Icons.share_outlined, 
+  icon: Icons.share_outlined,
   tooltip: "Share Shop",
   onPressed: () async {
-    // 🌟 Capture layout context safely prior to triggering the async share engine
-    final RenderBox? box = context.findRenderObject() as RenderBox?; 
+    _analytics.logEvent('shop_shared_${widget.shopId}');
 
-    final String shopUrl = "${Uri.base.origin}/shop/${widget.shopId}"; // cite: shop_details_screen.dart
+    final String shopUrl = kIsWeb
+        ? "${Uri.base.origin}/shop/${widget.shopId}"
+        : "https://mangobackend-yayy.onrender.com/shop/${widget.shopId}";
 
-    final String shareMessage = "🏪 *${shop.name}*\n" // cite: shop_details_screen.dart
-        "📍 Category: ${shop.category}\n\n" // cite: shop_details_screen.dart
-        "👉 Visit our digital storefront here:\n$shopUrl"; // cite: shop_details_screen.dart
+    final String shareMessage =
+        "🏪 ${shop.name}\n"
+        "📍 Category: ${shop.category}\n"
+        "📌 Location: ${shop.district}, Malawi\n\n"
+        "Browse this shop on MangoHub:\n$shopUrl";
 
-    _analytics.logEvent('shop_shared_${widget.shopId}'); // cite: shop_details_screen.dart
-
-    // 🌟 Create anchor coordinate bounds fallback to ensure stability on mobile viewports
-    final Rect shareBounds = box != null 
-        ? (box.localToGlobal(Offset.zero) & box.size)
-        : const Rect.fromLTWH(0, 0, 100, 100);
+    final box = context.findRenderObject() as RenderBox?;
+    final sharePositionOrigin =
+        box != null ? box.localToGlobal(Offset.zero) & box.size : null;
 
     try {
+      // Prefer logo, otherwise banner
+      String? imageUrl;
+
+      if (shop.logo.isNotEmpty) {
+        imageUrl = shop.logo;
+      } else if (shop.banner != null && shop.banner!.isNotEmpty) {
+        imageUrl = shop.banner!;
+      }
+
+      if (imageUrl != null) {
+        final response = await http.get(Uri.parse(imageUrl));
+
+        if (response.statusCode == 200) {
+          final tempDir = await getTemporaryDirectory();
+
+          final extension = imageUrl
+              .split('.')
+              .last
+              .split('?')
+              .first
+              .toLowerCase();
+
+          final validExtension = ['jpg', 'jpeg', 'png', 'webp']
+                  .contains(extension)
+              ? extension
+              : 'jpg';
+
+          final file = await File(
+            '${tempDir.path}/shared_shop_${shop.id}.$validExtension',
+          ).create();
+
+          await file.writeAsBytes(response.bodyBytes);
+
+          await Share.shareXFiles(
+            [XFile(file.path)],
+            text: shareMessage,
+            sharePositionOrigin: sharePositionOrigin,
+          );
+
+          return;
+        }
+      }
+
       await Share.share(
-        shareMessage, // cite: shop_details_screen.dart
-        subject: 'Check out this shop on Mangochi Market!', // cite: shop_details_screen.dart
-        sharePositionOrigin: shareBounds,
+        shareMessage,
+        sharePositionOrigin: sharePositionOrigin,
       );
     } catch (e) {
-      debugPrint("Shop sharing failed: $e");
+      debugPrint("Shop share failed: $e");
+
+      await Share.share(
+        shareMessage,
+        sharePositionOrigin: sharePositionOrigin,
+      );
     }
   },
 ),

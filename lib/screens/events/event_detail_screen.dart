@@ -1,4 +1,7 @@
 // lib/screens/events/event_detail_screen.dart
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -383,31 +386,69 @@ AppFab(
   icon: Icons.share_outlined,
   tooltip: "Share Event",
   onPressed: () async {
-    // 🌟 Capture layout context safely prior to triggering the async share engine
-    final RenderBox? box = context.findRenderObject() as RenderBox?;
+    analyticsService.logEvent('event_shared_${event.id}');
 
-    final String eventUrl = "${Uri.base.origin}/event/${event.id}"; // cite: event_detail_screen.dart
+    final String eventUrl = kIsWeb
+        ? "${Uri.base.origin}/event/${event.id}"
+        : "https://mangobackend-yayy.onrender.com/event/${event.id}";
 
-    final String shareMessage = "🎫 *${event.title}*\n" // cite: event_detail_screen.dart
-        "📅 Date: ${event.eventDate}\n" // cite: event_detail_screen.dart
-        "📍 Venue: ${event.venue}, ${event.city}\n\n" // cite: event_detail_screen.dart
-        "🔗 Book ticket allocations safely here:\n$eventUrl"; // cite: event_detail_screen.dart
+    final String shareMessage =
+        "🎫 ${event.title}\n"
+        "📅 ${event.eventDate}\n"
+        "📍 ${event.venue}, ${event.city}\n\n"
+        "Book your tickets on MangoHub:\n"
+        "$eventUrl";
 
-    analyticsService.logEvent('event_shared_${event.id}'); // cite: event_detail_screen.dart
-
-    // 🌟 Create anchor coordinate bounds fallback to ensure stability on mobile viewports
-    final Rect shareBounds = box != null 
-        ? (box.localToGlobal(Offset.zero) & box.size)
-        : const Rect.fromLTWH(0, 0, 100, 100);
+    final box = context.findRenderObject() as RenderBox?;
+    final sharePositionOrigin =
+        box != null ? box.localToGlobal(Offset.zero) & box.size : null;
 
     try {
+      if (event.banner.isNotEmpty) {
+        final response = await http.get(Uri.parse(event.banner));
+
+        if (response.statusCode == 200) {
+          final tempDir = await getTemporaryDirectory();
+
+          final extension = event.banner
+              .split('.')
+              .last
+              .split('?')
+              .first
+              .toLowerCase();
+
+          final validExtension =
+              ['jpg', 'jpeg', 'png', 'webp'].contains(extension)
+                  ? extension
+                  : 'jpg';
+
+          final file = await File(
+            '${tempDir.path}/shared_event_${event.id}.$validExtension',
+          ).create();
+
+          await file.writeAsBytes(response.bodyBytes);
+
+          await Share.shareXFiles(
+            [XFile(file.path)],
+            text: shareMessage,
+            sharePositionOrigin: sharePositionOrigin,
+          );
+
+          return;
+        }
+      }
+
       await Share.share(
-        shareMessage, // cite: event_detail_screen.dart
-        subject: 'Look what I found on Mangochi!', // cite: event_detail_screen.dart
-        sharePositionOrigin: shareBounds,
+        shareMessage,
+        sharePositionOrigin: sharePositionOrigin,
       );
     } catch (e) {
-      debugPrint("Event sharing failed: $e");
+      debugPrint("Event share failed: $e");
+
+      await Share.share(
+        shareMessage,
+        sharePositionOrigin: sharePositionOrigin,
+      );
     }
   },
 ),
