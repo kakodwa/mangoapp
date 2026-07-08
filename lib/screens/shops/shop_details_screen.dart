@@ -9,13 +9,14 @@ import 'package:flutter/foundation.dart';
 import 'package:gal/gal.dart'; 
 import 'package:http/http.dart' as http; 
 import 'dart:convert';
-import 'dart:js_interop'; 
 
-import 'package:web/web.dart' as web; 
+// 🌟 FIX: Removed dart:js_interop and package:web. 
+// Added universal_html which safely works on BOTH web and mobile.
+import 'package:universal_html/html.dart' as html; 
 
 import '../../providers/shops_provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../providers/products_provider.dart'; // 🌟 Keeps your working provider intact
+import '../../providers/products_provider.dart'; 
 
 import '../../widgets/shop_map_modal.dart';
 import '../../widgets/app_fab.dart';
@@ -53,9 +54,8 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
   
   int _selectedTabIndex = 0;
 
-  // 🌟 INLINE HYBRID PAGINATION SYSTEM
   final List<Product> _extendedProducts = [];
-  int _currentPage = 2; // Initial page is fetched by provider, so we start at 2
+  int _currentPage = 2; 
   bool _isLoadingMore = false;
   bool _hasMore = true;
 
@@ -71,7 +71,6 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.position.pixels;
     
-    // Trigger lazy loading of page 2+ when reaching 90% of the screen
     if (currentScroll >= (maxScroll * 0.9)) {
       _loadNextPage();
     }
@@ -85,7 +84,6 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
     });
 
     try {
-      // Points exactly to your live deployed render target
       final url = "https://mangobackend-yayy.onrender.com/api/shops/${widget.shopId}/products/?page=$_currentPage";
       final response = await http.get(Uri.parse(url));
 
@@ -154,7 +152,8 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
     return 5;                      
   }
 
-  Future<void> _downloadOrSaveQr(BuildContext context, String url, String shopName) async {
+  // 🌟 FIX: Cleaned up the method to remove all web.Blob and js_interop conversions
+Future<void> _downloadOrSaveQr(BuildContext context, String url, String shopName) async {
     try {
       AppToast.info(context, "Preparing file download...");
 
@@ -164,17 +163,19 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
       final fileName = "${shopName.replaceAll(' ', '_')}_QR.png"; 
 
       if (kIsWeb) {
-        final blob = web.Blob([bytes.toJS].toJS, web.BlobPropertyBag(type: 'image/png')); 
-        final blobUrl = web.URL.createObjectURL(blob); 
+        // 🌟 FIX: Removed the invalid #if / #endif macros completely.
+        // Standard runtime evaluation handles this safely via universal_html.
+        final blob = html.Blob([bytes], 'image/png');
+        final blobUrl = html.Url.createObjectUrlFromBlob(blob);
         
-        final anchor = web.HTMLAnchorElement() 
+        final anchor = html.AnchorElement() 
           ..href = blobUrl 
           ..download = fileName; 
           
-        web.document.body?.append(anchor); 
+        html.document.body?.append(anchor); 
         anchor.click(); 
         anchor.remove(); 
-        web.URL.revokeObjectURL(blobUrl); 
+        html.Url.revokeObjectUrl(blobUrl); 
         
         if (context.mounted) {
           AppToast.info(context, "QR image saved to your local device downloads."); 
@@ -301,7 +302,6 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
                 CustomScrollView(
                   controller: _scrollController, 
                   slivers: [
-                    // ================= BRAND STOREFRONT BANNER CAROUSEL FRAME
                     SliverToBoxAdapter(
                       child: SizedBox(
                         height: 240, 
@@ -380,7 +380,6 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
                       ),
                     ),
 
-                    // ================= PERFORMANCE METRICS CARD BLOCK
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.only(top: AppSpacing.md, left: AppSpacing.md, right: AppSpacing.md), 
@@ -398,7 +397,6 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
                       ),
                     ),
 
-                    // ================= STICKY TAB BAR
                     SliverPersistentHeader(
                       pinned: true, 
                       delegate: _SliverAppBarDelegate(
@@ -423,7 +421,6 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
                       ),
                     ),
 
-                    // ================= DYNAMIC TAB CONTENT VIEW MODIFIERS
                     if (_selectedTabIndex == 0) ...[
                       productsAsync.when(
                         loading: () => const SliverToBoxAdapter(
@@ -431,7 +428,6 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
                         ),
                         error: (e, _) => SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.all(16), child: Text("Error: $e"))), 
                         data: (baseProducts) {
-                          // 🌟 Merge your working Riverpod first-page products list with our scrolling layout lists
                           final List<Product> combinedList = [...baseProducts, ..._extendedProducts];
 
                           if (combinedList.isEmpty) {
@@ -548,7 +544,6 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
                   ],
                 ),
 
-                // ================= FLOATING ACTION SIDE NAVIGATION PANEL
                 Positioned(
                   bottom: 50, 
                   right: 10, 
@@ -583,9 +578,6 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
                         icon: Icons.share_outlined, 
                         tooltip: "Share Shop",
                         onPressed: () async {
-                          // 🌟 FIX: Added the hash segment (/慶/) for direct URL sharing security stability
-                     
-
                           final String shopUrl ="${Uri.base.origin}/shop/${widget.shopId}"; 
 
                           final String shareMessage = "🏪 *${shop.name}*\n" 
