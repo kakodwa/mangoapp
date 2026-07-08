@@ -670,20 +670,27 @@ AppFab(
   icon: Icons.share_outlined,
   tooltip: "Share Product",
   onPressed: () async {
+    // 🌟 Capture the layout frame safely from the current build context
+    final RenderBox? box = context.findRenderObject() as RenderBox?;
 
-    final String productUrl = "${Uri.base.origin}/product/${product.id}";
+    final String productUrl = "${Uri.base.origin}/product/${product.id}"; // cite: product_details_screen.dart
 
-    final String shareMessage = "Check out *${product.name}* on Mangochi Marketplace!\n"
-        "Price: MWK ${product.price}\n\n"
-        "👉 View details here:\n$productUrl";
+    final String shareMessage = "Check out *${product.name}* on Mangohub Marketplace!\n" // cite: product_details_screen.dart
+        "Price: MWK ${product.price}\n\n" // cite: product_details_screen.dart
+        "👉 View details here:\n$productUrl"; // cite: product_details_screen.dart
     
-    analytics.logEvent('product_shared_${product.id}');
+    analytics.logEvent('product_shared_${product.id}'); // cite: product_details_screen.dart
 
-    final box = context.findRenderObject() as RenderBox?;
-    await Share.share(
-      shareMessage,
-      subject: 'Look what I found on Mangochi!',
-      sharePositionOrigin: box != null ? box.localToGlobal(Offset.zero) & box.size : null,
+    // 🌟 Create a safe dimension position fallback if 'box' comes back null on mobile
+    final Rect shareBounds = box != null 
+        ? (box.localToGlobal(Offset.zero) & box.size)
+        : const Rect.fromLTWH(0, 0, 100, 100);
+
+    await Share.share( // cite: product_details_screen.dart
+      shareMessage, // cite: product_details_screen.dart
+      subject: 'Look what I found on Mangochi!', // cite: product_details_screen.dart
+      // 🌟 Pass the safe position bounds variable here
+      sharePositionOrigin: shareBounds,
     );
   },
 ),

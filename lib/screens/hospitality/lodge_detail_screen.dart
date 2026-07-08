@@ -398,21 +398,31 @@ AppFab(
   icon: Icons.share_outlined,
   tooltip: "Share Lodge Listing",
   onPressed: () async {
+    // 🌟 Capture layout context safely prior to triggering the async share engine
+    final RenderBox? box = context.findRenderObject() as RenderBox?;
  
-    final String lodgeUrl = "${Uri.base.origin}/lodge/${widget.lodge.id}";
+    final String lodgeUrl = "${Uri.base.origin}/lodge/${widget.lodge.id}"; // cite: lodge_detail_screen.dart
 
-    final String shareMessage = "🏨 *${widget.lodge.name}*\n"
-        "📍 Location: ${widget.lodge.district ?? 'Mangochi'}\n\n"
-        "👉 View rooms and book accommodations on Mangochi Marketplace:\n$lodgeUrl";
+    final String shareMessage = "🏨 *${widget.lodge.name}*\n" // cite: lodge_detail_screen.dart
+        "📍 Location: ${widget.lodge.district ?? 'Mangochi'}\n\n" // cite: lodge_detail_screen.dart
+        "🔗 View rooms and book accommodations on MangoHub Marketplace:\n$lodgeUrl"; // cite: lodge_detail_screen.dart
 
-    _analyticsService.logEvent('lodge_shared_${widget.lodge.id}');
+    _analyticsService.logEvent('lodge_shared_${widget.lodge.id}'); // cite: lodge_detail_screen.dart
 
-    final box = context.findRenderObject() as RenderBox?;
-    await Share.share(
-      shareMessage,
-      subject: 'Looking for a place to stay in Mangochi?',
-      sharePositionOrigin: box != null ? box.localToGlobal(Offset.zero) & box.size : null,
-    );
+    // 🌟 Create anchor coordinate bounds fallback to ensure stability on mobile viewports
+    final Rect shareBounds = box != null 
+        ? (box.localToGlobal(Offset.zero) & box.size)
+        : const Rect.fromLTWH(0, 0, 100, 100);
+
+    try {
+      await Share.share(
+        shareMessage, // cite: lodge_detail_screen.dart
+        subject: 'Looking for a place to stay in Mangochi?', // cite: lodge_detail_screen.dart
+        sharePositionOrigin: shareBounds,
+      );
+    } catch (e) {
+      debugPrint("Lodge sharing failed: $e");
+    }
   },
 ),
                 const SizedBox(height: AppSpacing.sm),

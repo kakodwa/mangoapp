@@ -383,22 +383,32 @@ AppFab(
   icon: Icons.share_outlined,
   tooltip: "Share Event",
   onPressed: () async {
+    // 🌟 Capture layout context safely prior to triggering the async share engine
+    final RenderBox? box = context.findRenderObject() as RenderBox?;
 
-    final String eventUrl = "${Uri.base.origin}/event/${event.id}";
+    final String eventUrl = "${Uri.base.origin}/event/${event.id}"; // cite: event_detail_screen.dart
 
-    final String shareMessage = "🎉 *${event.title}*\n"
-        "📅 Date: ${event.eventDate}\n"
-        "📍 Venue: ${event.venue}, ${event.city}\n\n"
-        "👉 Book ticket allocations safely here:\n$eventUrl";
+    final String shareMessage = "🎫 *${event.title}*\n" // cite: event_detail_screen.dart
+        "📅 Date: ${event.eventDate}\n" // cite: event_detail_screen.dart
+        "📍 Venue: ${event.venue}, ${event.city}\n\n" // cite: event_detail_screen.dart
+        "🔗 Book ticket allocations safely here:\n$eventUrl"; // cite: event_detail_screen.dart
 
-    analyticsService.logEvent('event_shared_${event.id}');
+    analyticsService.logEvent('event_shared_${event.id}'); // cite: event_detail_screen.dart
 
-    final box = context.findRenderObject() as RenderBox?;
-    await Share.share(
-      shareMessage,
-      subject: 'Look what I found on Mangochi!',
-      sharePositionOrigin: box != null ? box.localToGlobal(Offset.zero) & box.size : null,
-    );
+    // 🌟 Create anchor coordinate bounds fallback to ensure stability on mobile viewports
+    final Rect shareBounds = box != null 
+        ? (box.localToGlobal(Offset.zero) & box.size)
+        : const Rect.fromLTWH(0, 0, 100, 100);
+
+    try {
+      await Share.share(
+        shareMessage, // cite: event_detail_screen.dart
+        subject: 'Look what I found on Mangochi!', // cite: event_detail_screen.dart
+        sharePositionOrigin: shareBounds,
+      );
+    } catch (e) {
+      debugPrint("Event sharing failed: $e");
+    }
   },
 ),
           ],

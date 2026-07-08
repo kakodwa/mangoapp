@@ -11,6 +11,14 @@ enum CropShapeType {
   rectangle,
 }
 
+// 🌟 Created a safe container model to pair the XFile metadata with its raw bytes
+class CroppedImageContainer {
+  final XFile file;
+  final Uint8List bytes;
+
+  CroppedImageContainer({required this.file, required this.bytes});
+}
+
 class ImageCropPicker extends StatefulWidget {
   final int maxImages;
   final CropShapeType cropType;
@@ -31,7 +39,9 @@ class ImageCropPicker extends StatefulWidget {
 
 class _ImageCropPickerState extends State<ImageCropPicker> {
   final ImagePicker _picker = ImagePicker();
-  late List<XFile> images;
+  
+  // 🌟 Changed state arrays to manage byte data alongside metadata
+  late List<CroppedImageContainer> images;
   final CropController _cropController = CropController();
 
   Uint8List? _rawImage;
@@ -41,7 +51,20 @@ class _ImageCropPickerState extends State<ImageCropPicker> {
   @override
   void initState() {
     super.initState();
-    images = [...widget.initialImages];
+    images = [];
+    _initializeDefaultImages();
+  }
+
+  // Helper to safely unpack any initial files passed to the widget
+  Future<void> _initializeDefaultImages() async {
+    for (final file in widget.initialImages) {
+      final bytes = await file.readAsBytes();
+      if (mounted) {
+        setState(() {
+          images.add(CroppedImageContainer(file: file, bytes: bytes));
+        });
+      }
+    }
   }
 
   // =========================
@@ -52,9 +75,9 @@ class _ImageCropPickerState extends State<ImageCropPicker> {
 
     final picked = await _picker.pickImage(
       source: source,
-      maxWidth: 1024,   // Scales down large camera inputs instantly
-      maxHeight: 1024,  // Limits memory footprint of the cropping canvas
-      imageQuality: 80, // Drops unnecessary data to keep execution instant
+      maxWidth: 1024,   
+      maxHeight: 1024,  
+      imageQuality: 80, 
     );
 
     if (picked == null) return;
@@ -163,7 +186,6 @@ class _ImageCropPickerState extends State<ImageCropPicker> {
                                 )
                               : ElevatedButton(
                                   onPressed: () {
-                                    // Lock views instantly
                                     setButtonState(() {
                                       _isProcessingCrop = true;
                                     });
@@ -171,7 +193,6 @@ class _ImageCropPickerState extends State<ImageCropPicker> {
                                       _isProcessingCrop = true;
                                     });
                                     
-                                    // Delays execution slightly to allow progress loader to draw
                                     Future.delayed(const Duration(milliseconds: 60), () {
                                       _cropController.crop();
                                     });
@@ -204,29 +225,30 @@ class _ImageCropPickerState extends State<ImageCropPicker> {
     );
 
     setState(() {
-      images.add(file);
+      // 🌟 Store both the file schema and raw image bytes directly
+      images.add(CroppedImageContainer(file: file, bytes: cropped));
       _rawImage = null;
       _pendingFile = null;
       _isProcessingCrop = false;
     });
 
-    widget.onChanged(images);
+    widget.onChanged(images.map((e) => e.file).toList());
   }
 
   // =========================
   // REMOVE IMAGE
   // =========================
-  void _removeImage(XFile img) {
+  void _removeImage(CroppedImageContainer img) {
     setState(() {
       images.remove(img);
     });
-    widget.onChanged(images);
+    widget.onChanged(images.map((e) => e.file).toList());
   }
 
   // =========================
   // IMAGE CARD
   // =========================
-  Widget _imageCard(XFile img) {
+  Widget _imageCard(CroppedImageContainer img) {
     final width = widget.cropType == CropShapeType.square ? 95.0 : 140.0;
 
     return Stack(
@@ -236,9 +258,16 @@ class _ImageCropPickerState extends State<ImageCropPicker> {
           child: SizedBox(
             width: width,
             height: 95,
-            child: kIsWeb
-                ? Image.network(img.path, fit: BoxFit.cover)
-                : Image.file(File(img.path), fit: BoxFit.cover),
+            child: Image.memory(
+              img.bytes, 
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: Colors.grey.shade200,
+                  child: const Icon(Icons.broken_image_outlined, color: Colors.grey),
+                );
+              },
+            ),
           ),
         ),
         Positioned(

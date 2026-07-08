@@ -573,27 +573,38 @@ Future<void> _downloadOrSaveQr(BuildContext context, String url, String shopName
                         },
                       ),
                       const SizedBox(height: AppSpacing.sm), 
-                      AppFab(
-                        heroTag: "share_shop_fab",
-                        icon: Icons.share_outlined, 
-                        tooltip: "Share Shop",
-                        onPressed: () async {
-                          final String shopUrl ="${Uri.base.origin}/shop/${widget.shopId}"; 
+                     AppFab(
+  heroTag: "share_shop_fab",
+  icon: Icons.share_outlined, 
+  tooltip: "Share Shop",
+  onPressed: () async {
+    // 🌟 Capture layout context safely prior to triggering the async share engine
+    final RenderBox? box = context.findRenderObject() as RenderBox?; 
 
-                          final String shareMessage = "🏪 *${shop.name}*\n" 
-                              "📍 Category: ${shop.category}\n\n" 
-                              "👉 Visit our digital storefront here:\n$shopUrl"; 
+    final String shopUrl = "${Uri.base.origin}/shop/${widget.shopId}"; // cite: shop_details_screen.dart
 
-                          _analytics.logEvent('shop_shared_${widget.shopId}'); 
+    final String shareMessage = "🏪 *${shop.name}*\n" // cite: shop_details_screen.dart
+        "📍 Category: ${shop.category}\n\n" // cite: shop_details_screen.dart
+        "👉 Visit our digital storefront here:\n$shopUrl"; // cite: shop_details_screen.dart
 
-                          final box = context.findRenderObject() as RenderBox?; 
-                          await Share.share(
-                            shareMessage, 
-                            subject: 'Check out this shop on Mangochi Market!', 
-                            sharePositionOrigin: box != null ? box.localToGlobal(Offset.zero) & box.size : null, 
-                          );
-                        },
-                      ),
+    _analytics.logEvent('shop_shared_${widget.shopId}'); // cite: shop_details_screen.dart
+
+    // 🌟 Create anchor coordinate bounds fallback to ensure stability on mobile viewports
+    final Rect shareBounds = box != null 
+        ? (box.localToGlobal(Offset.zero) & box.size)
+        : const Rect.fromLTWH(0, 0, 100, 100);
+
+    try {
+      await Share.share(
+        shareMessage, // cite: shop_details_screen.dart
+        subject: 'Check out this shop on Mangochi Market!', // cite: shop_details_screen.dart
+        sharePositionOrigin: shareBounds,
+      );
+    } catch (e) {
+      debugPrint("Shop sharing failed: $e");
+    }
+  },
+),
                       const SizedBox(height: AppSpacing.sm), 
                       AppFab(
                         heroTag: "qr_shop_fab",
