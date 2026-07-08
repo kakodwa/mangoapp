@@ -1,12 +1,16 @@
 // lib/app/app.dart
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb; // 🌟 Added to safely guard web-only execution
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'dart:html' as html;
+
+// 🌟 FIX: Swapped out dart:html for universal_html so compilation passes on Android
+import 'package:universal_html/html.dart' as html; 
+
 import '../screens/main_tabs_screen.dart'; 
 import '../screens/splash_screen.dart'; 
 import '../theme/app_colors.dart';
 import '../providers/auth_provider.dart';
-import '../main.dart' show globalNavigatorKey; // 🌟 IMPORTED GLOBAL KEY
+import '../main.dart' show globalNavigatorKey; 
 
 class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
@@ -19,7 +23,10 @@ class _MyAppState extends ConsumerState<MyApp> {
   @override
   void initState() {
     super.initState();
-    _setupWebRouting();
+    // 🌟 Only execute web routing if we are explicitly running in a web browser
+    if (kIsWeb) {
+      _setupWebRouting();
+    }
   }
 
   /// Configure web-specific routing to handle query parameters and hash routes
@@ -53,7 +60,7 @@ class _MyAppState extends ConsumerState<MyApp> {
     final authState = ref.watch(authProvider);
 
     return MaterialApp(
-      navigatorKey: globalNavigatorKey, // 🌟 ATTACHED NAVIGATOR KEY HERE
+      navigatorKey: globalNavigatorKey, 
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
