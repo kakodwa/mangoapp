@@ -16,7 +16,7 @@
         android:maxSdkVersion="28"/>
 
     <application
-        android:label="MangoHub"
+        android:label="MalaTrade"
         android:name="${applicationName}"
         android:requestLegacyExternalStorage="true"
         android:icon="@mipmap/ic_launcher"

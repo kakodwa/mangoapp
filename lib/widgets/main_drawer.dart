@@ -127,7 +127,7 @@ class MainDrawer extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'MangoHub',
+                      'MalaTrade',
                       style: Theme.of(context)
                           .textTheme
                           .headlineSmall

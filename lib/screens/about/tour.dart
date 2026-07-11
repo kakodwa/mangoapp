@@ -1,3 +1,4 @@
+// lib/screens/about/tour.dart
 import 'package:flutter/material.dart';
 
 import '../../theme/app_colors.dart';
@@ -18,7 +19,6 @@ class MangoHubScreen extends StatefulWidget {
 class _MangoHubScreenState extends State<MangoHubScreen> {
   int _selectedWorkflowIndex = 0;
 
-  // Data matching the infographic specifications
   final List<Map<String, dynamic>> _workflows = [
     {
       "title": "RETAIL/SHOP WORKFLOWS",
@@ -37,9 +37,9 @@ class _MangoHubScreenState extends State<MangoHubScreen> {
       "color": Colors.deepOrange,
       "steps": [
         {"title": "1. Customer Buys", "sub": "Customer purchases an event ticket."},
-        {"title": "2. Revenue Held", "sub": "Revenue is securely held by MangoHub."},
+        {"title": "2. Revenue Held", "sub": "Revenue is securely held by MalaTrade."},
         {"title": "3. Customer Presents", "sub": "Digital Ticket presented at venue entry."},
-        {"title": "4. Organizer Scans", "sub": "Authorized organizer scans using MangoHub app."},
+        {"title": "4. Organizer Scans", "sub": "Authorized organizer scans using MalaTrade app."},
         {"title": "5. Funds Released", "sub": "Check-in is registered and funds released."}
       ]
     },
@@ -50,7 +50,7 @@ class _MangoHubScreenState extends State<MangoHubScreen> {
         {"title": "1. Customer Books", "sub": "Customer books a room and pays via platform."},
         {"title": "2. Funds Held", "sub": "Funds are held securely in escrow."},
         {"title": "3. Customer Presents", "sub": "Upon arrival, customer presents QR code."},
-        {"title": "4. Lodge Scans", "sub": "Lodge owner scans using MangoHub app scanner."},
+        {"title": "4. Lodge Scans", "sub": "Lodge owner scans using MalaTrade app scanner."},
         {"title": "5. Funds Released", "sub": "Check-in triggers release of payment to owner."}
       ]
     },
@@ -67,47 +67,73 @@ class _MangoHubScreenState extends State<MangoHubScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool isDesktop = screenWidth >= 900;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(
-        title: Text(
-          'MangoHub Ecosystem', 
-          style: AppTypography.headlineMedium.copyWith(color: Colors.white),
-        ),
-        backgroundColor: AppColors.mangoOrange,
-        elevation: 0,
-      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.md),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeaderSection(),
-            const SizedBox(height: AppSpacing.lg),
-            _buildSectionHeader("1. CORE MARKETPLACE ECOSYSTEM"),
-            const SizedBox(height: AppSpacing.sm),
-            _buildCoreEcosystemGrid(),
-            const SizedBox(height: AppSpacing.lg),
-            _buildSectionHeader("2. SMART ESCROW & TRANSACTION WORKFLOW"),
-            const SizedBox(height: AppSpacing.sm),
-            _buildWorkflowSelector(),
-            const SizedBox(height: AppSpacing.md),
-            _buildWorkflowTimeline(),
-            const SizedBox(height: AppSpacing.md),
-            _buildCommissionBanner(),
-            const SizedBox(height: AppSpacing.lg),
-            _buildSectionHeader("3. FINANCIAL INFRASTRUCTURE & POLICIES"),
-            const SizedBox(height: AppSpacing.sm),
-            _buildFinancialAndPoliciesSection(),
-            const SizedBox(height: AppSpacing.md),
-            _buildContactInfoBox(),
+            Center(
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                padding: EdgeInsets.all(isDesktop ? AppSpacing.lg : AppSpacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildHeaderSection(),
+                    const SizedBox(height: AppSpacing.lg),
+                    _buildSectionHeader("1. CORE MARKETPLACE ECOSYSTEM"),
+                    const SizedBox(height: AppSpacing.sm),
+                    _buildCoreEcosystemGrid(screenWidth),
+                    const SizedBox(height: AppSpacing.lg),
+                    _buildSectionHeader("2. SMART ESCROW & TRANSACTION WORKFLOW"),
+                    const SizedBox(height: AppSpacing.sm),
+                    _buildWorkflowSelector(),
+                    const SizedBox(height: AppSpacing.md),
+                    if (isDesktop)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(flex: 3, child: _buildWorkflowTimeline()),
+                          const SizedBox(width: AppSpacing.md),
+                          Expanded(
+                            flex: 2,
+                            child: Column(
+                              children: [
+                                _buildCommissionBanner(),
+                                const SizedBox(height: AppSpacing.md),
+                                _buildContactInfoBox(),
+                              ],
+                            ),
+                          )
+                        ],
+                      )
+                    else ...[
+                      _buildWorkflowTimeline(),
+                      const SizedBox(height: AppSpacing.md),
+                      _buildCommissionBanner(),
+                    ],
+                    const SizedBox(height: AppSpacing.lg),
+                    _buildSectionHeader("3. FINANCIAL INFRASTRUCTURE & POLICIES"),
+                    const SizedBox(height: AppSpacing.sm),
+                    _buildFinancialAndPoliciesSection(isDesktop),
+                    if (!isDesktop) ...[
+                      const SizedBox(height: AppSpacing.md),
+                      _buildContactInfoBox(),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 40),
+            WebFooter(), // Removed const keyword from construction here
           ],
         ),
       ),
     );
   }
-
-  // --- SECTION BUILDERS ---
 
   Widget _buildHeaderSection() {
     return AppCard(
@@ -123,17 +149,10 @@ class _MangoHubScreenState extends State<MangoHubScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
-                    Text(
-                      "MangoHub", 
-                      style: AppTypography.displayMedium,
-                    ),
+                    Text("MalaTrade", style: AppTypography.displayMedium),
                     Text(
                       "Everything Local. One Hub.", 
-                      style: TextStyle(
-                        fontSize: 14, 
-                        color: AppColors.leafGreen, 
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: TextStyle(fontSize: 14, color: AppColors.leafGreen, fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -142,7 +161,7 @@ class _MangoHubScreenState extends State<MangoHubScreen> {
           ),
           const Divider(height: AppSpacing.lg),
           const Text(
-            "MangoHub is a unified, multi-service digital marketplace designed to bridge the gap between daily commerce, lifestyle services, and secure fintech. By integrating shopping, hospitality, real estate, event ticketing, and instant mobile payments into a single platform, MangoHub eliminates the friction of switching between multiple apps.",
+            "MalaTrade is a unified, multi-service digital marketplace designed to bridge the gap between daily commerce, lifestyle services, and secure fintech. By integrating shopping, hospitality, real estate, event ticketing, and instant mobile payments into a single platform, MalaTrade eliminates the friction of switching between multiple apps.",
             style: AppTypography.bodyMedium,
           ),
         ],
@@ -154,19 +173,12 @@ class _MangoHubScreenState extends State<MangoHubScreen> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs, horizontal: AppSpacing.sm),
-      decoration: BoxDecoration(
-        color: AppColors.mangoOrange,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        title,
-        textAlign: TextAlign.center,
-        style: AppTypography.titleMedium.copyWith(color: Colors.white),
-      ),
+      decoration: BoxDecoration(color: AppColors.mangoOrange, borderRadius: BorderRadius.circular(6)),
+      child: Text(title, textAlign: TextAlign.center, style: AppTypography.titleMedium.copyWith(color: Colors.white)),
     );
   }
 
-  Widget _buildCoreEcosystemGrid() {
+  Widget _buildCoreEcosystemGrid(double screenWidth) {
     final coreServices = [
       {"icon": Icons.shopping_cart, "title": "A. RETAIL & E-COMMERCE", "desc": "Seller frontends, universal cart checkout, and direct product management."},
       {"icon": Icons.home, "title": "B. REAL ESTATE", "desc": "Verified agents only. Anti-scam protection, hidden location mapping until unlocked."},
@@ -174,14 +186,27 @@ class _MangoHubScreenState extends State<MangoHubScreen> {
       {"icon": Icons.hotel, "title": "D. HOSPITALITY & LODGING", "desc": "Real-time calendar anti-double booking sync & multi-room reservation states."}
     ];
 
+    int crossAxisCount = 2;
+    double childAspectRatio = 0.85;
+    if (screenWidth >= 1000) {
+      crossAxisCount = 4;
+      childAspectRatio = 1.1;
+    } else if (screenWidth >= 650) {
+      crossAxisCount = 2;
+      childAspectRatio = 1.3;
+    } else {
+      crossAxisCount = 1;
+      childAspectRatio = 2.4;
+    }
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
         crossAxisSpacing: AppSpacing.sm,
         mainAxisSpacing: AppSpacing.sm,
-        childAspectRatio: 0.82,
+        childAspectRatio: childAspectRatio,
       ),
       itemCount: coreServices.length,
       itemBuilder: (context, index) {
@@ -190,22 +215,20 @@ class _MangoHubScreenState extends State<MangoHubScreen> {
           padding: const EdgeInsets.all(AppSpacing.sm),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               CircleAvatar(
                 backgroundColor: AppColors.mangoLight.withOpacity(0.15),
                 child: Icon(service["icon"] as IconData, color: AppColors.mangoOrange),
               ),
               const SizedBox(height: AppSpacing.xs),
-              Text(
-                service["title"] as String, 
-                style: AppTypography.titleSmall,
-              ),
+              Text(service["title"] as String, style: AppTypography.titleSmall),
               const SizedBox(height: AppSpacing.xxs),
-              Expanded(
+              Flexible(
                 child: Text(
                   service["desc"] as String,
                   style: AppTypography.bodySmall.copyWith(color: AppColors.darkText.withOpacity(0.7)),
-                  overflow: TextOverflow.fade,
+                  overflow: TextOverflow.visible,
                 ),
               )
             ],
@@ -226,14 +249,10 @@ class _MangoHubScreenState extends State<MangoHubScreen> {
           return Padding(
             padding: const EdgeInsets.only(right: AppSpacing.xs),
             child: ChoiceChip(
-              label: Text(
-                _workflows[index]["title"].toString().split(' ')[0],
-              ),
+              label: Text(_workflows[index]["title"].toString().split(' ')[0]),
               selected: isSelected,
               selectedColor: _workflows[index]["color"],
-              labelStyle: AppTypography.labelMedium.copyWith(
-                color: isSelected ? Colors.white : AppColors.darkText,
-              ),
+              labelStyle: AppTypography.labelMedium.copyWith(color: isSelected ? Colors.white : AppColors.darkText),
               onSelected: (selected) {
                 if (selected) setState(() => _selectedWorkflowIndex = index);
               },
@@ -256,12 +275,7 @@ class _MangoHubScreenState extends State<MangoHubScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Text(
-                  selectedData["title"],
-                  style: AppTypography.headlineSmall.copyWith(color: selectedData["color"]),
-                ),
-              ),
+              Expanded(child: Text(selectedData["title"], style: AppTypography.headlineSmall.copyWith(color: selectedData["color"]))),
               const AppBadge(text: "Escrow Locked", type: BadgeType.warning),
             ],
           ),
@@ -279,13 +293,9 @@ class _MangoHubScreenState extends State<MangoHubScreen> {
                       CircleAvatar(
                         radius: 12,
                         backgroundColor: selectedData["color"],
-                        child: Text(
-                          "${index + 1}", 
-                          style: AppTypography.labelSmall.copyWith(color: Colors.white),
-                        ),
+                        child: Text("${index + 1}", style: AppTypography.labelSmall.copyWith(color: Colors.white)),
                       ),
-                      if (index != steps.length - 1)
-                        Container(width: 2, height: 40, color: Colors.grey.shade300),
+                      if (index != steps.length - 1) Container(width: 2, height: 40, color: Colors.grey.shade300),
                     ],
                   ),
                   const SizedBox(width: AppSpacing.sm),
@@ -295,10 +305,7 @@ class _MangoHubScreenState extends State<MangoHubScreen> {
                       children: [
                         Text(steps[index]["title"]!, style: AppTypography.titleMedium),
                         const SizedBox(height: AppSpacing.xxs),
-                        Text(
-                          steps[index]["sub"]!, 
-                          style: AppTypography.bodySmall.copyWith(color: AppColors.darkText.withOpacity(0.7)),
-                        ),
+                        Text(steps[index]["sub"]!, style: AppTypography.bodySmall.copyWith(color: AppColors.darkText.withOpacity(0.7))),
                         const SizedBox(height: AppSpacing.sm),
                       ],
                     ),
@@ -316,71 +323,77 @@ class _MangoHubScreenState extends State<MangoHubScreen> {
     return AppInfoBox(
       type: AppInfoType.info,
       icon: Icons.percent,
-      message: "MANGOHUB COMMISSION: Platform standard takes a 10% cut structure for every completed pipeline transaction handled natively across all business verticals.",
+      message: "MALATRADE COMMISSION: Platform standard takes a 10% cut structure for every completed pipeline transaction handled natively across all business verticals.",
     );
   }
 
-  Widget _buildFinancialAndPoliciesSection() {
-    return Column(
-      children: [
-        AppCard(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text("3. Financial Infrastructure", style: AppTypography.titleLarge),
-              const SizedBox(height: AppSpacing.xs),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const CircleAvatar(
-                  backgroundColor: Colors.blueAccent,
-                  child: Icon(Icons.payment, color: Colors.white),
-                ),
-                title: const Text("PayChangu Native Gateway", style: AppTypography.titleSmall),
-                subtitle: Text(
-                  "Powers all operations natively for instant local mobile wallets (TNM Mpamba, Airtel Money).", 
-                  style: AppTypography.bodySmall.copyWith(color: AppColors.darkText.withOpacity(0.7)),
-                ),
+  Widget _buildFinancialAndPoliciesSection(bool isDesktop) {
+    final elements = [
+      AppCard(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text("3. Financial Infrastructure", style: AppTypography.titleLarge),
+            const SizedBox(height: AppSpacing.xs),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const CircleAvatar(backgroundColor: Colors.blueAccent, child: Icon(Icons.payment, color: Colors.white)),
+              title: const Text("PayChangu Native Gateway", style: AppTypography.titleSmall),
+              subtitle: Text(
+                "Powers all operations natively for instant local mobile wallets (TNM Mpamba, Airtel Money).", 
+                style: AppTypography.bodySmall.copyWith(color: AppColors.darkText.withOpacity(0.7)),
               ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: const CircleAvatar(
-                  backgroundColor: Colors.purple,
-                  child: Icon(Icons.credit_card, color: Colors.white),
-                ),
-                title: const Text("Card Payments", style: AppTypography.titleSmall),
-                subtitle: Text(
-                  "Visa active implementation pipeline for international processing capability.", 
-                  style: AppTypography.bodySmall.copyWith(color: AppColors.darkText.withOpacity(0.7)),
-                ),
+            ),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const CircleAvatar(backgroundColor: Colors.purple, child: Icon(Icons.credit_card, color: Colors.white)),
+              title: const Text("Card Payments", style: AppTypography.titleSmall),
+              subtitle: Text(
+                "Visa active implementation pipeline for international processing capability.", 
+                style: AppTypography.bodySmall.copyWith(color: AppColors.darkText.withOpacity(0.7)),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        const SizedBox(height: AppSpacing.sm),
-        AppCard(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text("Refund & Protection Rules", style: AppTypography.titleLarge),
-              const SizedBox(height: AppSpacing.xs),
-              AppInfoBox(
-                type: AppInfoType.success,
-                icon: Icons.shield_outlined,
-                message: "Escrow Protection: Funds safely covered for Shops, Events, Bookings. Non-delivery defaults to 100% refund configuration workflow state.",
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              AppInfoBox(
-                type: AppInfoType.error,
-                icon: Icons.gavel_outlined,
-                message: "Real Estate Exception: Property Viewing Fee is strictly non-refundable due to instantaneous precise navigation maps data reveal logic.",
-              ),
-            ],
-          ),
-        )
-      ],
-    );
+      ),
+      AppCard(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text("Refund & Protection Rules", style: AppTypography.titleLarge),
+            const SizedBox(height: AppSpacing.xs),
+            AppInfoBox(
+              type: AppInfoType.success,
+              icon: Icons.shield_outlined,
+              message: "Escrow Protection: Funds safely covered for Shops, Events, Bookings. Non-delivery defaults to 100% refund configuration workflow state.",
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            AppInfoBox(
+              type: AppInfoType.error,
+              icon: Icons.gavel_outlined,
+              message: "Real Estate Exception: Property Viewing Fee is strictly non-refundable due to instantaneous precise navigation maps data reveal logic.",
+            ),
+          ],
+        ),
+      )
+    ];
+
+    if (isDesktop) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: elements[0]),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(child: elements[1]),
+        ],
+      );
+    } else {
+      return Column(children: [elements[0], const SizedBox(height: AppSpacing.sm), elements[1]]);
+    }
   }
 
   Widget _buildContactInfoBox() {
@@ -388,10 +401,7 @@ class _MangoHubScreenState extends State<MangoHubScreen> {
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Row(
         children: [
-          CircleAvatar(
-            backgroundColor: AppColors.leafGreen.withOpacity(0.15),
-            child: const Icon(Icons.phone, color: AppColors.leafGreen),
-          ),
+          CircleAvatar(backgroundColor: AppColors.leafGreen.withOpacity(0.15), child: const Icon(Icons.phone, color: AppColors.leafGreen)),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
@@ -399,10 +409,7 @@ class _MangoHubScreenState extends State<MangoHubScreen> {
               children: [
                 const Text("For Support & Inquiries", style: AppTypography.titleSmall),
                 const SizedBox(height: AppSpacing.xxs),
-                Text(
-                  "+265 993 344 56", 
-                  style: AppTypography.headlineSmall.copyWith(color: AppColors.leafGreen),
-                ),
+                Text("+265 993 344 56", style: AppTypography.headlineSmall.copyWith(color: AppColors.leafGreen)),
               ],
             ),
           )

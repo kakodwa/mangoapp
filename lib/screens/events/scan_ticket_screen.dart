@@ -1,3 +1,4 @@
+// lib/screens/events/scan_ticket_screen.dart
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -7,7 +8,6 @@ import '../../core/api/api_client.dart';
 import '../../utils/app_toast.dart';
 import '../../widgets/main_app_bar.dart';
 import '../../theme/design_system/app_spacing.dart';
-// Import your Analytics Service
 import '../../services/analytics_service.dart';
 
 class ScanTicketScreen extends StatefulWidget {
@@ -22,6 +22,10 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
   final AudioPlayer player = AudioPlayer();
   final AnalyticsService analyticsService = AnalyticsService();
 
+  // Explicitly instantiating a controller to manually control camera states
+  late final MobileScannerController _scannerController;
+
+  bool isCameraInitialized = false;
   bool isProcessing = false;
   Map<String, dynamic>? ticketData;
   bool isSuccess = false;
@@ -30,10 +34,38 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
   void initState() {
     super.initState();
     
-    // Track when the user opens the ticket scanning scanner panel
+    // Initializing the controller with autoStart set to false 
+    // to prevent hardware capture on layout construction
+    _scannerController = MobileScannerController(
+      autoStart: false,
+      facing: CameraFacing.back,
+    );
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       analyticsService.logEvent('view_ticket_scanner');
     });
+  }
+
+  @override
+  void dispose() {
+    _scannerController.dispose();
+    player.dispose();
+    super.dispose();
+  }
+
+  void _startCameraScanner() async {
+    setState(() {
+      isCameraInitialized = true;
+    });
+    try {
+      await _scannerController.start();
+      analyticsService.logEvent('camera_started_manually');
+    } catch (e) {
+      AppToast.error(context, "Could not access hardware camera channel.");
+      setState(() {
+        isCameraInitialized = false;
+      });
+    }
   }
 
   // =========================
@@ -75,7 +107,6 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
 
       if (!mounted) return;
 
-      // SUCCESS
       await playSuccess();
 
       AppToast.success(
@@ -83,10 +114,12 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
         response['message'] ?? "Check-in successful",
       );
 
-      // Track successful check-in
       final responseData = response['data'];
       final eventId = responseData?['event_id'] ?? 'unknown';
       analyticsService.logEvent('ticket_checkin_success_event_id_$eventId');
+
+      // Stop scanning when data is successfully found
+      await _scannerController.stop();
 
       setState(() {
         ticketData = responseData;
@@ -95,14 +128,12 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
 
     } catch (e) {
       await playError();
-
       String message = "Something went wrong";
 
       if (e is Exception) {
         message = e.toString().replaceAll("Exception: ", "");
       }
 
-      // 🔥 TRY TO GET REAL BACKEND MESSAGE (DIO)
       if (e.toString().contains("DioException")) {
         try {
           final dioError = e as dynamic;
@@ -129,18 +160,17 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
     }
   }
 
-  void _resetScanner() {
+  void _resetScanner() async {
     analyticsService.logEvent('click_scan_next_ticket');
     setState(() {
       ticketData = null;
       isProcessing = false;
       isSuccess = false;
     });
+    // Restart camera for the next check-in action sequence
+    await _scannerController.start();
   }
 
-  // =========================
-  // SCANNER FRAME OVERLAY
-  // =========================
   Widget _scannerFrame() {
     return Center(
       child: Container(
@@ -149,7 +179,7 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSuccess ? Theme.of(context).colorScheme.secondary : Theme.of(context).colorScheme.error,
+            color: isSuccess ? Theme.of(context).colorScheme.secondary : Colors.orange,
             width: 3,
           ),
         ),
@@ -182,69 +212,109 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Scan Ticket')),
-      body: ticketData == null
-          ? Stack(
-              children: [
-                MobileScanner(onDetect: _onDetect),
-                _scannerFrame(),
-              ],
-            )
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Text(
-                      "CHECK-IN SUCCESSFUL",
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.secondary,
+      // Dedicated AppBar removed entirely to prevent collision with MainTabsScreen scaffold architecture
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Center(
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: ticketData == null
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: AppSpacing.lg),
+                          if (!isCameraInitialized)
+                            Container(
+                              width: double.infinity,
+                              height: 350,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade200,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.camera_alt_outlined, size: 64, color: Colors.grey.shade500),
+                                  const SizedBox(height: AppSpacing.sm),
+                                  ElevatedButton(
+                                    onPressed: _startCameraScanner,
+                                    child: const Text("Start Camera Scanner"),
+                                  ),
+                                ],
+                              ),
+                            )
+                          else
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: SizedBox(
+                                height: 400,
+                                child: Stack(
+                                  children: [
+                                    MobileScanner(
+                                      controller: _scannerController,
+                                      onDetect: _onDetect,
+                                    ),
+                                    _scannerFrame(),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          const SizedBox(height: AppSpacing.lg),
+                        ],
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Center(
+                            child: Text(
+                              "CHECK-IN SUCCESSFUL",
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.secondary,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          _infoTile("Event", ticketData!['event_title']),
+                          _infoTile("Ticket", ticketData!['ticket_number']),
+                          _infoTile("Attendee", ticketData!['attendee_name']),
+                          const SizedBox(height: AppSpacing.md),
+                          const Text(
+                            "Ticket Items",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 10),
+                          if (ticketData!['ticket_items'] != null)
+                            ...List.generate(
+                              (ticketData!['ticket_items'] as List).length,
+                              (i) {
+                                final item = ticketData!['ticket_items'][i];
+                                return Text(
+                                  "• ${item['name']} (${item['type']}) x${item['quantity']}",
+                                );
+                              },
+                            ),
+                          const SizedBox(height: 30),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              onPressed: _resetScanner,
+                              icon: const Icon(Icons.qr_code_scanner),
+                              label: const Text("Scan Next Ticket"),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  _infoTile("Event", ticketData!['event_title']),
-                  _infoTile("Ticket", ticketData!['ticket_number']),
-                  _infoTile("Attendee", ticketData!['attendee_name']),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  const Text(
-                    "Ticket Items",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  if (ticketData!['ticket_items'] != null)
-                    ...List.generate(
-                      (ticketData!['ticket_items'] as List).length,
-                      (i) {
-                        final item = ticketData!['ticket_items'][i];
-                        return Text(
-                          "• ${item['name']} (${item['type']}) x${item['quantity']}",
-                        );
-                      },
-                    ),
-
-                  const SizedBox(height: 30),
-
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: _resetScanner,
-                      icon: const Icon(Icons.qr_code_scanner),
-                      label: const Text("Scan Next Ticket"),
-                    ),
-                  ),
-                ],
               ),
             ),
+            const SizedBox(height: 40),
+            WebFooter(),
+          ],
+        ),
+      ),
     );
   }
 }

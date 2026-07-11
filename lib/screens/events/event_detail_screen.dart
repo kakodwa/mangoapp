@@ -21,6 +21,7 @@ import 'buy_ticket_screen.dart';
 import '../auth/login_screen.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/app_fab.dart';
+import '../main_tabs_screen.dart';
 import '../../theme/design_system/app_spacing.dart';
 
 // Analytics Import
@@ -491,23 +492,21 @@ AppFab(
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                onPressed: () {
-                  analyticsService.logEvent('click_buy_ticket_button_event_id_${event.id}');
+                // Inside lib/screens/events/event_detail_screen.dart -> Buy Ticket Navigation Deck section
 
-                  if (event.ticketTypes.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("No ticket inventory allotments published yet")),
-                    );
-                    return;
-                  }
+onPressed: () {
+  analyticsService.logEvent('click_buy_ticket_button_event_id_${event.id}');
 
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => BuyTicketScreen(event: event),
-                    ),
-                  );
-                },
+  if (event.ticketTypes.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("No ticket inventory allotments published yet")),
+    );
+    return;
+  }
+
+  // Swaps screen states contextually inside MainTabsScreen without breaking execution layers
+  MainTabsScreen.of(context)?.navigateToBuyTicket(event);
+},
               ),
             ),
           ),

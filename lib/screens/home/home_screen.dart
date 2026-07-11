@@ -14,9 +14,12 @@ import '../../widgets/update.dart';
 import '../../screens/delivery/delivery_code_entry_screen.dart';
 import '../../screens/events/scan_ticket_screen.dart';
 import '../../screens/shops/shops_list_screen.dart';
+import '../../screens/shops/shop_qr_advert.dart';
 import '../../screens/auth/register_screen.dart';
 import '../about/how_it_works.dart';
 import '../about/tour.dart';
+
+import '../main_tabs_screen.dart';
 
 import '../../services/analytics_service.dart'; 
 
@@ -144,19 +147,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               },
                               itemBuilder: (context, index) {
                                 if (index == banners.length) {
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                                    child: _buildBanner(
-                                      context,
-                                      image: 'assets/images/banner.png',
-                                      title: 'CREATE YOUR SHOP ON MANGOHUB',
-                                      subtitle: 'START LISTING YOUR PRODUCTS FOR FREE',
-                                      isAssetImage: true,
-                                      showJoinButton: true,
-                                      screenWidth: screenWidth,
-                                    ),
-                                  );
-                                }
+
+  return ShopQrBanner(
+
+    onTap: () {
+
+      _analytics.logEvent(
+        'create_shop_banner_click',
+      );
+
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const RegisterScreen(),
+        ),
+      );
+
+    },
+
+  );
+
+}
 
                                 final banner = banners[index];
                                 return Padding(
@@ -237,12 +249,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           label: 'Guide',
                           onTap: () {
                             _analytics.logEvent('click_Guide');
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const MangoHubScreen(),
-                              ),
-                            );
+                            MainTabsScreen.of(context)?.setSelectedIndex(43);
                           },
                         ),
                       ),
@@ -268,12 +275,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           label: 'Scan Ticket',
                           onTap: () {
                             _analytics.logEvent('click_scan_ticket');
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const ScanTicketScreen(),
-                              ),
-                            );
+                            MainTabsScreen.of(context)?.setSelectedIndex(44);
                           },
                         ),
                       ),

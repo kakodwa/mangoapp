@@ -11,7 +11,7 @@ enum CropShapeType {
   rectangle,
 }
 
-// 🌟 Created a safe container model to pair the XFile metadata with its raw bytes
+
 class CroppedImageContainer {
   final XFile file;
   final Uint8List bytes;

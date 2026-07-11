@@ -14,7 +14,6 @@ import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_button.dart';
 import '../../widgets/main_app_bar.dart';
 import '../../widgets/app_scaffold.dart';
-// Import your Analytics Service
 import '../../services/analytics_service.dart';
 
 class DeliveryCodeScreen extends ConsumerStatefulWidget {
@@ -34,7 +33,6 @@ class _DeliveryCodeScreenState extends ConsumerState<DeliveryCodeScreen> {
   void initState() {
     super.initState();
     
-    // Track when the user opens the delivery code screen view
     WidgetsBinding.instance.addPostFrameCallback((_) {
       analyticsService.logEvent('view_delivery_code_screen');
     });
@@ -85,55 +83,66 @@ class _DeliveryCodeScreenState extends ConsumerState<DeliveryCodeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Center(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 1200),
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: AppSpacing.md),
 
-            const SizedBox(height: AppSpacing.md),
+                  // =========================
+                  // 🔥 INFO HEADER
+                  // =========================
+                  AppInfoBox(
+                    type: AppInfoType.info,
+                    icon: Icons.info_outline,
+                    message: "Please enter the delivery code you received from the shop owner you are delivering for.",
+                  ),
+                  const SizedBox(height: 25),
 
-            // =========================
-            // 🔥 INFO HEADER (NEW)
-            // =========================
-            AppInfoBox(
-              type: AppInfoType.info,
-              icon: Icons.info_outline,
-              message: "Please enter the delivery code you received from the shop owner you are delivering for.",
+                  // =========================
+                  // INPUT FIELD
+                  // =========================
+                  AppTextField(
+                    label: 'Delivery Code',
+                    hint: 'Enter Delivery Code',
+                    controller: codeController,
+                    type: TextFieldType.text,
+                    isRequired: true,
+                    validator: (value) {
+                      if (value?.isEmpty ?? true) return 'Required';
+                      return null;
+                    },
+                  ),
+
+                  const SizedBox(height: AppSpacing.md),
+
+                  // =========================
+                  // BUTTON
+                  // =========================
+                  SizedBox(
+                    width: double.infinity,
+                    child: AppButton(
+                      text: loading ? "Opening..." : "Open Delivery",
+                      loading: loading,
+                      fullWidth: true,
+                      onPressed: openDelivery,
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                ],
               ),
-            const SizedBox(height: 25),
-
-            // =========================
-            // INPUT FIELD
-            // =========================
-            AppTextField(
-              label: 'Delivery Code',
-              hint: 'Enter Delivery Code',
-              controller:codeController,
-              type: TextFieldType.text,
-              isRequired: true,
-              validator: (value) {
-                if (value?.isEmpty ?? true) return 'Required';
-                return null;
-                },
             ),
-
-            const SizedBox(height: AppSpacing.md),
-
-            // =========================
-            // BUTTON
-            // =========================
-            SizedBox(
-              width: double.infinity,
-              child: AppButton(
-                text: loading ? "Opening..." : "Open Delivery",
-                loading: loading,
-                fullWidth: true,
-                onPressed: openDelivery,
-                ),
-            ),
-          ],
-        ),
+          ),
+          // WebFooter matches structural dynamic rendering requirements (no const key used)
+          WebFooter(),
+        ],
+      ),
     );
   }
 }

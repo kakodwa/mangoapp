@@ -1,13 +1,13 @@
+// lib/screens/events/buy_ticket_screen.dart
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import '../../core/api/api_client.dart';
 import '../../models/event_model.dart';
 import '../../utils/app_toast.dart';
 import '../payments/payment_checkout_screen.dart';
+import '../main_tabs_screen.dart'; // Imported to tap into the global routing context
 import '../../theme/design_system/app_spacing.dart';
 import '../../widgets/web_footer.dart';
-import '../../widgets/main_drawer.dart';
-import '../../widgets/main_app_bar.dart';
 import '../../services/analytics_service.dart';
 
 class SelectedTicket {
@@ -46,15 +46,11 @@ class _BuyTicketScreenState extends State<BuyTicketScreen> {
   void initState() {
     super.initState();
 
-    // Track when the user opens the ticket selection view
     WidgetsBinding.instance.addPostFrameCallback((_) {
       analyticsService.logEvent('view_ticket_selection_event_id_${widget.event.id}');
     });
 
-    // ================= INIT TICKETS =================
     selectedTickets = widget.event.ticketTypes.map((t) {
-      print("TICKET TYPE => ${t.id} ${t.name}");
-
       return SelectedTicket(
         id: t.id,
         name: t.name,
@@ -64,7 +60,6 @@ class _BuyTicketScreenState extends State<BuyTicketScreen> {
     }).toList();
   }
 
-  // ================= TOTAL =================
   double get total {
     return selectedTickets.fold(
       0,
@@ -72,7 +67,6 @@ class _BuyTicketScreenState extends State<BuyTicketScreen> {
     );
   }
 
-  // ================= BUY =================
   Future<void> buyTicket() async {
     try {
       setState(() => loading = true);
@@ -85,31 +79,16 @@ class _BuyTicketScreenState extends State<BuyTicketScreen> {
               })
           .toList();
 
-      // ================= VALIDATION =================
       if (ticketData.isEmpty) {
         analyticsService.logEvent('validation_failed_zero_tickets_event_id_${widget.event.id}');
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              "Select at least one ticket",
-            ),
-          ),
+          const SnackBar(content: Text("Select at least one ticket")),
         );
         return;
       }
 
-      // Track purchase checkout intention right before API invocation
       analyticsService.logEvent('click_confirm_ticket_purchase_event_id_${widget.event.id}');
 
-      // ================= DEBUG =================
-      print("========== REQUEST ==========");
-      print({
-        "event_id": widget.event.id,
-        "tickets": ticketData,
-      });
-      print("=============================");
-
-      // ================= API =================
       final res = await api.post(
         'tickets/purchase/',
         data: {
@@ -119,38 +98,51 @@ class _BuyTicketScreenState extends State<BuyTicketScreen> {
         fromJson: (json) => json,
       );
 
-      print("TICKET RESPONSE => $res");
-
       final ticket = res['ticket'];
-
       if (ticket == null) {
         throw Exception("Ticket not returned");
       }
 
       final int ticketId = ticket['id'];
-
-      final double amount = double.tryParse(
-            ticket['total_amount'].toString(),
-          ) ??
-          0;
+      final double amount = double.tryParse(ticket['total_amount'].toString()) ?? 0;
 
       if (!mounted) return;
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => PaymentCheckoutScreen(
-            transactionId: ticketId,
-            amount: amount,
-            purpose: "event_ticket",
-            referenceType: "ticket",
-          ),
-        ),
-      );
-    } on DioException catch (e) {
-      print("BUY ERROR STATUS => ${e.response?.statusCode}");
-      print("BUY ERROR DATA => ${e.response?.data}");
+      AppToast.success(context, "Ticket reservation generated");
 
+      // Look up the global tabs system manager context
+      final tabsScreen = MainTabsScreen.of(context);
+
+      if (tabsScreen != null) {
+        // ✅ Routes directly inside the tab layout structure matching the Order pattern
+        tabsScreen.navigateToPayment(
+          transactionId: ticketId,
+          amount: amount,
+          purpose: "event_ticket",
+          referenceType: "ticket",
+          onSuccess: (paymentStatus) {
+            // Optional: Invalidate ticket providers or navigate back to tickets dashboard here
+            AppToast.success(context, "Ticket payment complete");
+          },
+        );
+      } else {
+        // Fallback execution route if not accessed directly inside the layout environment
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => PaymentCheckoutScreen(
+              transactionId: ticketId,
+              amount: amount,
+              purpose: "event_ticket",
+              referenceType: "ticket",
+              onSuccess: (paymentStatus) {
+                AppToast.success(context, "Ticket payment complete");
+              },
+            ),
+          ),
+        );
+      }
+    } on DioException catch (e) {
       String message = "Request failed";
       final data = e.response?.data;
 
@@ -159,168 +151,133 @@ class _BuyTicketScreenState extends State<BuyTicketScreen> {
           message = data["error"].toString();
         } else if (data["errors"] != null) {
           final errors = data["errors"];
-
           if (errors is Map && errors.isNotEmpty) {
             final firstKey = errors.keys.first;
             final firstValue = errors[firstKey];
-
             if (firstValue is List && firstValue.isNotEmpty) {
               message = firstValue.first.toString();
             } else {
               message = firstValue.toString();
             }
           }
-        } else if (data.values.isNotEmpty) {
-          final first = data.values.first;
-          if (first is List && first.isNotEmpty) {
-            message = first.first.toString();
-          } else {
-            message = first.toString();
-          }
         }
-      } else if (data is String) {
-        message = data;
       }
 
       analyticsService.logEvent('error_ticket_purchase_api_event_id_${widget.event.id}');
       AppToast.error(context, message);
     } catch (e) {
-      print("BUY ERROR => $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-        ),
+        SnackBar(content: Text(e.toString())),
       );
     } finally {
-      setState(() => loading = false);
+      if (mounted) {
+        setState(() => loading = false);
+      }
     }
   }
 
-  // ================= UI =================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Buy Ticket'), // Fixed structural typo from 'Bay Ticket'
-      ),
       backgroundColor: const Color(0xFFF5F7FA),
-      body: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
+      body: SingleChildScrollView(
         child: Column(
           children: [
-            // ================= TITLE =================
-            Text(
-              widget.event.title,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: AppSpacing.md),
-
-            // ================= TICKETS =================
-            Expanded(
-              child: ListView(
-                children: selectedTickets.map((t) {
-                  return Container(
-                    margin: const EdgeInsets.only(
-                      bottom: 12,
+            Center(
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.event.title,
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                     ),
-                    padding: const EdgeInsets.all(AppSpacing.sm),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              t.name.toUpperCase(),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: AppSpacing.xxs),
-                            Text(
-                              "MWK ${t.price.toStringAsFixed(0)}",
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                        const Spacer(),
-
-                        // ================= MINUS =================
-                        IconButton(
-                          onPressed: () {
-                            if (t.quantity > 0) {
-                              analyticsService.logEvent('decrement_ticket_id_${t.id}_event_id_${widget.event.id}');
-                              setState(() {
-                                t.quantity--;
-                              });
-                            }
-                          },
-                          icon: const Icon(Icons.remove),
-                        ),
-
-                        Text(
-                          t.quantity.toString(),
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                    const SizedBox(height: AppSpacing.md),
+                    
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: selectedTickets.length,
+                      itemBuilder: (context, idx) {
+                        final t = selectedTickets[idx];
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          padding: const EdgeInsets.all(AppSpacing.sm),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                        ),
-
-                        // ================= ADD =================
-                        IconButton(
-                          onPressed: () {
-                            analyticsService.logEvent('increment_ticket_id_${t.id}_event_id_${widget.event.id}');
-                            setState(() {
-                              t.quantity++;
-                            });
-                          },
-                          icon: const Icon(Icons.add),
-                        ),
-                      ],
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      t.name.toUpperCase(),
+                                      style: const TextStyle(fontWeight: FontWeight.bold),
+                                    ),
+                                    const SizedBox(height: AppSpacing.xxs),
+                                    Text(
+                                      "MWK ${t.price.toStringAsFixed(0)}",
+                                      style: TextStyle(
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  if (t.quantity > 0) {
+                                    analyticsService.logEvent('decrement_ticket_id_${t.id}_event_id_${widget.event.id}');
+                                    setState(() => t.quantity--);
+                                  }
+                                },
+                                icon: const Icon(Icons.remove),
+                              ),
+                              Text(
+                                t.quantity.toString(),
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                              IconButton(
+                                onPressed: () {
+                                  analyticsService.logEvent('increment_ticket_id_${t.id}_event_id_${widget.event.id}');
+                                  setState(() => t.quantity++);
+                                },
+                                icon: const Icon(Icons.add),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
-                  );
-                }).toList(),
-              ),
-            ),
-
-            const SizedBox(height: 10),
-
-            // ================= TOTAL =================
-            Text(
-              "Total: MWK ${total.toStringAsFixed(0)}",
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: 10),
-
-            // ================= BUTTON =================
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton(
-                onPressed: loading ? null : buyTicket,
-                child: loading
-                    ? CircularProgressIndicator(
-                        color: Theme.of(context).colorScheme.surface,
-                      )
-                    : const Text(
-                        "Confirm Purchase",
+                    const SizedBox(height: 20),
+                    Center(
+                      child: Text(
+                        "Total: MWK ${total.toStringAsFixed(0)}",
+                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                       ),
+                    ),
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: loading ? null : buyTicket,
+                        child: loading
+                            ? CircularProgressIndicator(color: Theme.of(context).colorScheme.surface)
+                            : const Text("Confirm Purchase", style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+                  ],
+                ),
               ),
             ),
+            WebFooter(),
           ],
         ),
       ),

@@ -423,14 +423,17 @@ Widget buildVariantSelector(List<LocalProductVariant> variants) {
               AppCard(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 onTap: () {
-                  analytics.logEvent('product_view_shop_click_${product.shopId}');
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ShopDetailsScreen(shopId: product.shopId),
-                    ),
-                  );
-                },
+                              analytics.logEvent('product_view_shop_fab_click_${product.shopId}');
+                              final tabsScreen = MainTabsScreen.of(context);
+                              if (tabsScreen != null) {
+                                tabsScreen.navigateToShopDetails(product.shopId);
+                              } else {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => ShopDetailsScreen(shopId: product.shopId)),
+                                );
+                              }
+                            },
                 child: Row(
                   children: [
                     Icon(Icons.storefront, color: AppColors.mangoOrange),

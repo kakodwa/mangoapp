@@ -6,14 +6,11 @@ import '../../models/room_model.dart';
 import '../../models/requests/booking_create_request.dart';
 import '../../providers/api_provider.dart';
 
-import '../../widgets/main_drawer.dart';
-import '../../widgets/main_app_bar.dart';
-
 import '../../widgets/web_footer.dart';
-
+import '../main_tabs_screen.dart'; // Added to use tab matrix routing hooks
 import '../payments/payment_checkout_screen.dart';
 import '../../theme/design_system/app_spacing.dart';
-// Import your Analytics Service (Adjust path matching your directory layout)
+import '../../theme/design_system/app_card.dart';
 import '../../services/analytics_service.dart';
 
 class BookingCheckoutScreen extends ConsumerStatefulWidget {
@@ -82,26 +79,40 @@ class _BookingCheckoutScreenState
 
       if (!mounted) return;
 
-      /// 2. OPEN PAYMENT SCREEN
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => PaymentCheckoutScreen(
-            transactionId: bookingId,
-            amount: widget.room.pricePerNight,
-            purpose: "booking",
-            referenceType: "booking", // now FIXED
+      /// 2. OPEN PAYMENT SCREEN MATCHING TABS CHECKOUT ENGINE FLOW
+      final tabsScreen = MainTabsScreen.of(context);
 
-            onSuccess: (payment) {
-              // Track successful terminal payments matching the record hook
-              _analyticsService.logEvent('booking_payment_success_$bookingId');
-
-              Navigator.pop(context); // payment screen
-              Navigator.pop(context); // booking screen
-            },
+      if (tabsScreen != null) {
+        // ✅ FIXED: Routes directly inside the tab slot view framework engine at index 42
+        tabsScreen.navigateToPayment(
+          transactionId: bookingId,
+          amount: widget.room.pricePerNight,
+          purpose: "booking",
+          referenceType: "booking",
+          onSuccess: (payment) {
+            // Track successful terminal payments matching the record hook
+            _analyticsService.logEvent('booking_payment_success_$bookingId');
+          },
+        );
+      } else {
+        // Standard context route stack fallback execution if running outside main tabs container
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => PaymentCheckoutScreen(
+              transactionId: bookingId,
+              amount: widget.room.pricePerNight,
+              purpose: "booking",
+              referenceType: "booking",
+              onSuccess: (payment) {
+                _analyticsService.logEvent('booking_payment_success_$bookingId');
+                Navigator.pop(context); // close payment view overlay
+                MainTabsScreen.of(context)?.setSelectedIndex(14);
+              },
+            ),
           ),
-        ),
-      );
+        );
+      }
     } catch (e) {
       print("❌ BOOKING ERROR => $e");
 
@@ -125,71 +136,145 @@ class _BookingCheckoutScreenState
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(title: const Text('Booking Checkout'),),
-      body: Padding(
-        padding: EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          children: [
-            ListTile(
-              title: const Text('Check In'),
-              subtitle: Text(
-                checkIn != null
-                    ? formatDate(checkIn!)
-                    : 'Select date',
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool isDesktop = screenWidth >= 900;
+
+    Widget checkoutFormContent = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AppCard(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Column(
+            children: [
+              ListTile(
+                title: const Text('Check In', style: TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: Text(
+                  checkIn != null ? formatDate(checkIn!) : 'Select date',
+                  style: TextStyle(color: checkIn != null ? Colors.black : Colors.grey),
+                ),
+                trailing: Icon(Icons.calendar_month, color: Theme.of(context).colorScheme.primary),
+                onTap: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime(2030),
+                  );
+
+                  if (picked != null) {
+                    _analyticsService.logEvent('booking_date_select_checkin');
+                    setState(() => checkIn = picked);
+                  }
+                },
               ),
-              trailing: const Icon(Icons.calendar_month),
-              onTap: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  firstDate: DateTime.now(),
-                  lastDate: DateTime(2030),
-                );
+              const Divider(),
+              ListTile(
+                title: const Text('Check Out', style: TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: Text(
+                  checkOut != null ? formatDate(checkOut!) : 'Select date',
+                  style: TextStyle(color: checkOut != null ? Colors.black : Colors.grey),
+                ),
+                trailing: Icon(Icons.calendar_month, color: Theme.of(context).colorScheme.primary),
+                onTap: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    firstDate: DateTime.now(),
+                    lastDate: DateTime(2030),
+                  );
 
-                if (picked != null) {
-                  _analyticsService.logEvent('booking_date_select_checkin');
-                  setState(() => checkIn = picked);
-                }
-              },
-            ),
-
-            ListTile(
-              title: const Text('Check Out'),
-              subtitle: Text(
-                checkOut != null
-                    ? formatDate(checkOut!)
-                    : 'Select date',
+                  if (picked != null) {
+                    _analyticsService.logEvent('booking_date_select_checkout');
+                    setState(() => checkOut = picked);
+                  }
+                },
               ),
-              trailing: const Icon(Icons.calendar_month),
-              onTap: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  firstDate: DateTime.now(),
-                  lastDate: DateTime(2030),
-                );
-
-                if (picked != null) {
-                  _analyticsService.logEvent('booking_date_select_checkout');
-                  setState(() => checkOut = picked);
-                }
-              },
-            ),
-
-            const Spacer(),
-
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: loading ? null : submitBooking,
-                child: loading
-                    ? CircularProgressIndicator(color: Theme.of(context).colorScheme.surface)
-                    : const Text("Proceed To Payment"),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
+        const SizedBox(height: AppSpacing.lg),
+        SizedBox(
+          width: double.infinity,
+          height: 50,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: loading ? null : submitBooking,
+            child: loading
+                ? CircularProgressIndicator(color: Theme.of(context).colorScheme.surface)
+                : const Text("Proceed To Payment", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          ),
+        ),
+      ],
+    );
+
+    return Material(
+      color: const Color(0xFFF5F7FA),
+      child: CustomScrollView(
+        slivers: [
+          const SliverToBoxAdapter(
+            child: SizedBox(height: AppSpacing.lg),
+          ),
+          
+          SliverToBoxAdapter(
+            child: Center(
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: isDesktop
+                    ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 5,
+                            child: AppCard(
+                              padding: const EdgeInsets.all(AppSpacing.lg),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("Booking Summary", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary)),
+                                  const SizedBox(height: AppSpacing.sm),
+                                  Text(widget.room.title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                                  Text("Room Type: ${widget.room.roomType.toUpperCase()}", style: TextStyle(color: Colors.grey.shade600)),
+                                  const SizedBox(height: AppSpacing.md),
+                                  Text("Price Per Night: MWK ${widget.room.pricePerNight}", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green)),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.xl),
+                          Expanded(flex: 6, child: checkoutFormContent),
+                        ],
+                      )
+                    : Column(
+                        children: [
+                          AppCard(
+                            padding: const EdgeInsets.all(AppSpacing.md),
+                            child: ListTile(
+                              leading: Icon(Icons.hotel, color: Theme.of(context).colorScheme.primary),
+                              title: Text(widget.room.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              subtitle: Text("MWK ${widget.room.pricePerNight} / Night", style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w600)),
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.md),
+                          checkoutFormContent,
+                        ],
+                      ),
+              ),
+            ),
+          ),
+          
+          const SliverToBoxAdapter(child: SizedBox(height: 120)),
+          
+          const SliverFillRemaining(
+            hasScrollBody: false,
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: WebFooter(),
+            ),
+          ),
+        ],
       ),
     );
   }

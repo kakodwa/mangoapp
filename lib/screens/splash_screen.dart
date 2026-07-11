@@ -65,7 +65,7 @@ Future<void> _initFlow() async {
             ),
             const SizedBox(height: 24),
             Text(
-              'MangoHub',
+              'MalaTrade',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),

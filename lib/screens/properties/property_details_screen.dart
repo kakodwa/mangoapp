@@ -17,7 +17,7 @@ import '../../providers/api_provider.dart';
 import '../../widgets/shop_map_modal.dart';
 import '../../widgets/reviews/review_section_widget.dart';
 import '../../theme/app_colors.dart';
-import 'property_unlock_screen.dart';
+import '../main_tabs_screen.dart'; // Import added to gain access to MainTabsScreenState methods
 import 'property_card.dart';
 import '../../widgets/app_fab.dart';
 import '../../providers/auth_provider.dart';
@@ -74,8 +74,6 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
     final bool isDesktop = screenWidth >= 900;
     final bool isTablet = screenWidth >= 600 && screenWidth < 900;
 
-    // The standalone Scaffold shell has been completely removed to prevent rendering conflict artifacts.
-    // The view tree now returns directly inside the master coordinate sub-viewport frame layer.
     return propertyAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => Center(child: Text('Error rendering view: $error')),
@@ -90,10 +88,8 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
           _hasLoggedView = true;
         }
 
-        // Dynamic Column Configuration based on view matrix breakpoint references
         final int detailGridColumns = isDesktop ? 4 : (isTablet ? 3 : 2);
 
-        // Shared Widget Components to avoid duplicate code branches
         Widget mediaGallery = SizedBox(
           height: isDesktop ? 450 : 300,
           child: property.images.isNotEmpty
@@ -317,15 +313,11 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                             Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
                             return;
                           }
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => PropertyUnlockScreen(
-                                propertyId: property.id,
-                                propertyTitle: property.title,
-                                unlockFee: property.unlockFee,
-                              ),
-                            ),
+                          // MODIFIED: Directly coordinates updates to parent host controller framework instead of performing generic push actions
+                          MainTabsScreen.of(context)?.navigateToPropertyUnlock(
+                            propertyId: property.id,
+                            propertyTitle: property.title,
+                            unlockFee: property.unlockFee,
                           );
                         },
                         child: Text('Unlock for MWK ${property.unlockFee.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
@@ -393,7 +385,6 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                   controller: _scrollController,
                   slivers: [
                     if (!isDesktop) ...[
-                      // Mobile/Tablet: Standard Linear Stack layout
                       SliverToBoxAdapter(child: mediaGallery),
                       SliverToBoxAdapter(
                         child: Padding(
@@ -402,7 +393,6 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                         ),
                       ),
                     ] else ...[
-                      // Desktop Multi-Column adaptive Split Frame
                       SliverToBoxAdapter(
                         child: Padding(
                           padding: const EdgeInsets.only(top: AppSpacing.lg, left: AppSpacing.md, right: AppSpacing.md),
@@ -417,8 +407,6 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                         ),
                       ),
                     ],
-
-                    // Bottom Content Tracks Layout Structure
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.md),
@@ -429,7 +417,6 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                         ),
                       ),
                     ),
-
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.all(AppSpacing.md),
@@ -477,8 +464,6 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                 ),
               ),
             ),
-
-            // Floating Controls Context Alignment Layers
             if (property.isUnlocked || isOwner)
               Positioned(
                 bottom: 90,
@@ -524,7 +509,6 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                   ],
                 ),
               ),
-
             Positioned(
               bottom: 20,
               right: isDesktop ? (screenWidth - 1200) / 2 + 16 : 16,

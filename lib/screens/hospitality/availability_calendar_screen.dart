@@ -1,11 +1,10 @@
+// lib/screens/hospitality/availability_calendar_screen.dart
 import 'package:flutter/material.dart';
 
 import '../../widgets/hospitality/availability_calendar.dart';
-import '../../widgets/main_app_bar.dart';
-import '../../theme/app_colors.dart';
-import '../../widgets/app_scaffold.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../widgets/web_footer.dart';
+import '../main_tabs_screen.dart'; // Import added to use main tab navigation system hooks
 
 class AvailabilityCalendarScreen extends StatelessWidget {
   final int roomId;
@@ -17,15 +16,38 @@ class AvailabilityCalendarScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(title: const Text('Availability Calendar'),),
-      body: Padding(
-        padding: EdgeInsets.all(AppSpacing.md),
-        child: AvailabilityCalendar(
-          roomId: roomId,
-        ),
+    // ✅ FIXED: Scaffold and redundant App Bar removed. Built inside a responsive CustomScrollView canvas.
+    return Material(
+      color: const Color(0xFFF5F7FA),
+      child: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Center(
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Column(
+                  children: [
+                    AvailabilityCalendar(
+                      roomId: roomId,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          
+          const SliverToBoxAdapter(child: SizedBox(height: 120)),
+          
+          // Securely appends the responsive web footer view at the bottom of the viewport
+          const SliverFillRemaining(
+            hasScrollBody: false,
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: WebFooter(),
+            ),
+          ),
+        ],
       ),
     );
   }

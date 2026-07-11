@@ -2,8 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../screens/about/about_screen.dart';
-import '../screens/help/help_screen.dart';
+import '../screens/main_tabs_screen.dart'; 
 import '../services/analytics_service.dart';
 
 class WebFooter extends StatelessWidget {
@@ -18,9 +17,8 @@ class WebFooter extends StatelessWidget {
     this.onHelpTap,
   });
 
-  // Helper method to safely launch external URLs for the admin portal
   Future<void> _launchAdminUrl() async {
-    final Uri url = Uri.parse('https://mangobackend-yayy.onrender.com/admin_appconsole/dashboard/'); // Replace with your actual admin web URL
+    final Uri url = Uri.parse('https://mangobackend-yayy.onrender.com/admin_appconsole/dashboard/'); 
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw Exception('Could not launch $url');
     }
@@ -38,7 +36,6 @@ class WebFooter extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      // Styled with Mango brand orange color base
       color: const Color(0xFFF57C00),
       padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
       child: Center(
@@ -71,14 +68,13 @@ class WebFooter extends StatelessWidget {
                 child: Divider(thickness: 0.5, height: 1, color: Colors.white30),
               ),
               
-              // Responsive flex lane for legal copy and administrative entries
               Flex(
                 direction: isDesktop ? Axis.horizontal : Axis.vertical,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   const Text(
-                    '© 2026 MangoHub Marketplace. All rights reserved.',
+                    '© 2026 MalaTrade Marketplace. All rights reserved.',
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 13,
@@ -128,13 +124,12 @@ class WebFooter extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             const Text(
-              'MangoHub',
+              'MalaTrade',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
             ),
           ],
         ),
         const SizedBox(height: 8),
-        // FIXED: Replaced 'Colors.whiteAmd' typo with standard 'Colors.white70'
         const Text(
           'Everything Local. One Hub.',
           style: TextStyle(color: Colors.white70, fontSize: 13),
@@ -179,14 +174,13 @@ class WebFooter extends StatelessWidget {
           children: [
             TextButton(
               onPressed: () {
-              // Trigger analytics event safely in the background
-              _analyticsService.logEvent('footer_about_click');
-              
-              Navigator.pop(context);
-              if (onAboutTap != null) {
-                onAboutTap!();
-              }
-            },
+                _analyticsService.logEvent('footer_about_click');
+                if (onAboutTap != null) {
+                  onAboutTap!();
+                } else {
+                  MainTabsScreen.of(context)?.setSelectedIndex(10);
+                }
+              },
               child: const Text('About App', style: linkStyle),
             ),
             TextButton(
@@ -195,10 +189,7 @@ class WebFooter extends StatelessWidget {
                 if (onHelpTap != null) {
                   onHelpTap!();
                 } else {
-                  Navigator.push(
-                    context, 
-                    MaterialPageRoute(builder: (_) => HelpSupportScreen()),
-                  );
+                  MainTabsScreen.of(context)?.setSelectedIndex(11);
                 }
               },
               child: const Text('Help & Support', style: linkStyle),
@@ -267,7 +258,7 @@ class WebFooter extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Get the MangoHub App'),
+        title: const Text('Get the Malatrade App'),
         content: const Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
