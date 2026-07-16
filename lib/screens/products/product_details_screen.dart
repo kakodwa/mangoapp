@@ -299,68 +299,64 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
           return attributes.entries.map((e) => "${e.key}: ${e.value}").join(", ");
         }
 
-        // Wrap layout component to ensure all multi-line selections stack nicely
-        // lib/screens/products/product_details_screen.dart
+        Widget buildVariantSelector(List<LocalProductVariant> variants) {
+          if (variants.isEmpty) return const SizedBox.shrink(); 
 
-Widget buildVariantSelector(List<LocalProductVariant> variants) {
-  if (variants.isEmpty) return const SizedBox.shrink(); //
-
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start, //
-    children: [
-      Text(
-        "Available Options",
-        style: AppTypography.titleMedium.copyWith(fontWeight: FontWeight.bold), //
-      ),
-      const SizedBox(height: AppSpacing.xs), //
-      Wrap(
-        spacing: AppSpacing.sm, //
-        runSpacing: AppSpacing.xs, //
-        children: variants.map((variant) {
-          final isSelected = _selectedVariant == variant; //
-          final bool isOutOfStock = variant.stock <= 0; // 🛑 Check if this specific option is out of stock
-
-          return ChoiceChip(
-            label: Text(
-              formatAttributes(variant.attributes) + (isOutOfStock ? " (Out of Stock)" : ""), //
-              style: TextStyle(
-                color: isSelected 
-                    ? Colors.white 
-                    : (isOutOfStock ? Colors.grey.shade400 : Colors.black87), //
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal, //
-                decoration: isOutOfStock ? TextDecoration.lineThrough : null, // Put a line through out-of-stock items
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start, 
+            children: [
+              Text(
+                "Available Options",
+                style: AppTypography.titleMedium.copyWith(fontWeight: FontWeight.bold), 
               ),
-            ),
-            selected: isSelected, //
-            selectedColor: AppColors.mangoOrange, //
-            backgroundColor: Colors.grey.shade100, //
-            checkmarkColor: Colors.white, //
-            // 🛑 Disable selection tap events if the variant has no stock remaining
-            onSelected: isOutOfStock ? null : (bool selected) {
-              setState(() {
-                _selectedVariant = selected ? variant : null; //
-              });
-            },
+              const SizedBox(height: AppSpacing.xs), 
+              Wrap(
+                spacing: AppSpacing.sm, 
+                runSpacing: AppSpacing.xs, 
+                children: variants.map((variant) {
+                  final isSelected = _selectedVariant == variant; 
+                  final bool isOutOfStock = variant.stock <= 0; 
+
+                  return ChoiceChip(
+                    label: Text(
+                      formatAttributes(variant.attributes) + (isOutOfStock ? " (Out of Stock)" : ""), 
+                      style: TextStyle(
+                        color: isSelected 
+                            ? Colors.white 
+                            : (isOutOfStock ? Colors.grey.shade400 : Colors.black87), 
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal, 
+                        decoration: isOutOfStock ? TextDecoration.lineThrough : null, 
+                      ),
+                    ),
+                    selected: isSelected, 
+                    selectedColor: AppColors.mangoOrange, 
+                    backgroundColor: Colors.grey.shade100, 
+                    checkmarkColor: Colors.white, 
+                    onSelected: isOutOfStock ? null : (bool selected) {
+                      setState(() {
+                        _selectedVariant = selected ? variant : null; 
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+              if (_selectedVariant != null) ...[ 
+                const SizedBox(height: AppSpacing.sm), 
+                Row(
+                  children: [
+                    Icon(Icons.inventory_2_outlined, size: 14, color: Colors.grey.shade600), 
+                    const SizedBox(width: 4), 
+                    Text(
+                      "Stock for this option: ${_selectedVariant!.stock} items left", 
+                      style: AppTypography.bodySmall.copyWith(color: Colors.grey.shade600), 
+                    ),
+                  ],
+                ),
+              ],
+              const SizedBox(height: AppSpacing.md), 
+            ],
           );
-        }).toList(),
-      ),
-      if (_selectedVariant != null) ...[ //
-        const SizedBox(height: AppSpacing.sm), //
-        Row(
-          children: [
-            Icon(Icons.inventory_2_outlined, size: 14, color: Colors.grey.shade600), //
-            const SizedBox(width: 4), //
-            Text(
-              "Stock for this option: ${_selectedVariant!.stock} items left", //
-              style: AppTypography.bodySmall.copyWith(color: Colors.grey.shade600), //
-            ),
-          ],
-        ),
-      ],
-      const SizedBox(height: AppSpacing.md), //
-    ],
-  );
-}
+        }
 
         Widget buildProductInfo() {
           return Column(
@@ -371,6 +367,102 @@ Widget buildVariantSelector(List<LocalProductVariant> variants) {
                 style: isDesktop ? AppTypography.displayMedium : AppTypography.displaySmall,
               ),
               const SizedBox(height: AppSpacing.xs),
+              
+              // Hierarchical Category, Subcategory & Brand Badge Progress Sequence
+              Wrap(
+                spacing: AppSpacing.xs,
+                runSpacing: AppSpacing.xs,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  // 1. Main Category Chip
+                  Chip(
+                    elevation: 0,
+                    backgroundColor: Colors.orange.shade50,
+                    side: BorderSide(color: Colors.orange.shade200),
+                    labelPadding: const EdgeInsets.symmetric(horizontal: 4),
+                    avatar: Icon(Icons.grid_view_rounded, size: 14, color: Colors.orange.shade700),
+                    label: Text(
+                      product.category,
+                      style: AppTypography.bodySmall.copyWith(
+                        color: Colors.orange.shade900,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+
+                  // Separator Icon if Subcategory exists
+                  if (product.subCategory.isNotEmpty)
+                    Icon(Icons.chevron_right_rounded, size: 16, color: Colors.grey.shade400),
+
+                  // 2. Subcategory Chip
+                  if (product.subCategory.isNotEmpty)
+                    Chip(
+                      elevation: 0,
+                      backgroundColor: Colors.orange.shade100,
+                      side: BorderSide(color: Colors.orange.shade300),
+                      labelPadding: const EdgeInsets.symmetric(horizontal: 4),
+                      avatar: Icon(Icons.category_outlined, size: 14, color: Colors.orange.shade600),
+                      label: Text(
+                        product.subCategory,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: Colors.orange.shade800,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+
+                  // Separator Icon if Brand exists
+                  if (product.brand.isNotEmpty)
+                    Icon(Icons.chevron_right_rounded, size: 16, color: Colors.grey.shade400),
+
+                  // 3. Brand Chip
+                  if (product.brand.isNotEmpty)
+                    Chip(
+                      elevation: 0,
+                      backgroundColor: Colors.orange.shade50,
+                      side: BorderSide(color: Colors.orange.shade200),
+                      labelPadding: const EdgeInsets.symmetric(horizontal: 4),
+                      avatar: Icon(Icons.label_outline_rounded, size: 14, color: Colors.orange.shade700),
+                      label: Text(
+                        product.brand,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: Colors.orange.shade900,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.sm),
+
+              // Estimated Delivery Timeline Tile Panel 👈 Added
+              if (product.deliveryDuration.isNotEmpty) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+                  decoration: BoxDecoration(
+                    color: Colors.blueGrey.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blueGrey.shade100),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.local_shipping_outlined, color: Colors.blueGrey.shade700, size: 18),
+                      const SizedBox(width: AppSpacing.sm),
+                      Text(
+                        "Estimated Delivery: ",
+                        style: AppTypography.bodySmall.copyWith(fontWeight: FontWeight.bold, color: Colors.blueGrey.shade900),
+                      ),
+                      Text(
+                        product.deliveryDuration,
+                        style: AppTypography.bodySmall.copyWith(color: Colors.blueGrey.shade700, fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+              ],
+
               Text(
                 "MWK ${product.price}",
                 style: AppTypography.headlineLarge.copyWith(
@@ -423,17 +515,17 @@ Widget buildVariantSelector(List<LocalProductVariant> variants) {
               AppCard(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 onTap: () {
-                              analytics.logEvent('product_view_shop_fab_click_${product.shopId}');
-                              final tabsScreen = MainTabsScreen.of(context);
-                              if (tabsScreen != null) {
-                                tabsScreen.navigateToShopDetails(product.shopId);
-                              } else {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (_) => ShopDetailsScreen(shopId: product.shopId)),
-                                );
-                              }
-                            },
+                  analytics.logEvent('product_view_shop_fab_click_${product.shopId}');
+                  final tabsScreen = MainTabsScreen.of(context);
+                  if (tabsScreen != null) {
+                    tabsScreen.navigateToShopDetails(product.shopId);
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => ShopDetailsScreen(shopId: product.shopId)),
+                    );
+                  }
+                },
                 child: Row(
                   children: [
                     Icon(Icons.storefront, color: AppColors.mangoOrange),
@@ -622,7 +714,6 @@ Widget buildVariantSelector(List<LocalProductVariant> variants) {
                           return;
                         }
 
-                        // Guard constraint logic: option select fallback verification check
                         if (product.variants.isNotEmpty && _selectedVariant == null) {
                           AppToast.info(context, "Please select an option first");
                           return;
@@ -670,80 +761,78 @@ Widget buildVariantSelector(List<LocalProductVariant> variants) {
                           ),
                           const SizedBox(height: AppSpacing.sm),
 
-                         
+                          AppFab(
+                            heroTag: "share_product",
+                            icon: Icons.share_outlined,
+                            tooltip: "Share Product",
+                            onPressed: () async {
+                              analytics.logEvent('product_shared_${product.id}');
 
-AppFab(
-  heroTag: "share_product",
-  icon: Icons.share_outlined,
-  tooltip: "Share Product",
-  onPressed: () async {
-    analytics.logEvent('product_shared_${product.id}');
+                              final String productUrl = kIsWeb
+                                  ? "${Uri.base.origin}/product/${product.id}"
+                                  : "https://mangobackend-yayy.onrender.com/product/${product.id}";
 
-    final String productUrl = kIsWeb
-        ? "${Uri.base.origin}/product/${product.id}"
-        : "https://mangobackend-yayy.onrender.com/product/${product.id}";
+                              final String shareMessage =
+                                  "🛍️ ${product.name}\n"
+                                  "💰 Price: MWK ${product.price}\n"
+                                  "🏪 Shop: ${product.shopName}\n\n"
+                                  "View this product on MangoHub:\n$productUrl";
 
-    final String shareMessage =
-        "🛍️ ${product.name}\n"
-        "💰 Price: MWK ${product.price}\n"
-        "🏪 Shop: ${product.shopName}\n\n"
-        "View this product on MangoHub:\n$productUrl";
+                              final box = context.findRenderObject() as RenderBox?;
+                              final sharePositionOrigin =
+                                  box != null ? box.localToGlobal(Offset.zero) & box.size : null;
 
-    final box = context.findRenderObject() as RenderBox?;
-    final sharePositionOrigin =
-        box != null ? box.localToGlobal(Offset.zero) & box.size : null;
+                              try {
+                                if (product.images.isNotEmpty) {
+                                  final imageUrl = product.images.first;
 
-    try {
-      if (product.images.isNotEmpty) {
-        final imageUrl = product.images.first;
+                                  final response = await http.get(Uri.parse(imageUrl));
 
-        final response = await http.get(Uri.parse(imageUrl));
+                                  if (response.statusCode == 200) {
+                                    final tempDir = await getTemporaryDirectory();
 
-        if (response.statusCode == 200) {
-          final tempDir = await getTemporaryDirectory();
+                                    final extension = imageUrl
+                                        .split('.')
+                                        .last
+                                        .split('?')
+                                        .first
+                                        .toLowerCase();
 
-          final extension = imageUrl
-              .split('.')
-              .last
-              .split('?')
-              .first
-              .toLowerCase();
+                                    final validExtension =
+                                        ['jpg', 'jpeg', 'png', 'webp'].contains(extension)
+                                            ? extension
+                                            : 'jpg';
 
-          final validExtension =
-              ['jpg', 'jpeg', 'png', 'webp'].contains(extension)
-                  ? extension
-                  : 'jpg';
+                                    final file = await File(
+                                      '${tempDir.path}/shared_product_${product.id}.$validExtension',
+                                    ).create();
 
-          final file = await File(
-            '${tempDir.path}/shared_product_${product.id}.$validExtension',
-          ).create();
+                                    await file.writeAsBytes(response.bodyBytes);
 
-          await file.writeAsBytes(response.bodyBytes);
+                                    await Share.shareXFiles(
+                                      [XFile(file.path)],
+                                      text: shareMessage,
+                                      sharePositionOrigin: sharePositionOrigin,
+                                    );
 
-          await Share.shareXFiles(
-            [XFile(file.path)],
-            text: shareMessage,
-            sharePositionOrigin: sharePositionOrigin,
-          );
+                                    return;
+                                  }
+                                }
 
-          return;
-        }
-      }
+                                await Share.share(
+                                  shareMessage,
+                                  sharePositionOrigin: sharePositionOrigin,
+                                );
+                              } catch (e) {
+                                debugPrint("Product share failed: $e");
 
-      await Share.share(
-        shareMessage,
-        sharePositionOrigin: sharePositionOrigin,
-      );
-    } catch (e) {
-      debugPrint("Product share failed: $e");
-
-      await Share.share(
-        shareMessage,
-        sharePositionOrigin: sharePositionOrigin,
-      );
-    }
-  },
-),
+                                await Share.share(
+                                  shareMessage,
+                                  sharePositionOrigin: sharePositionOrigin,
+                                );
+                              }
+                            },
+                          ),
                           const SizedBox(height: AppSpacing.sm),
 
                           AppFab(

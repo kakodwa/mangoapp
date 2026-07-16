@@ -2,11 +2,8 @@
 
 import 'package:flutter/material.dart';
 import '../../widgets/web_footer.dart';
-import 'create_lodge_screen.dart';
-import 'my_lodges_screen.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/app_colors.dart';
-import 'owner_bookings_screen.dart';
 import 'bookings_scanner_screen.dart';
 import '../main_tabs_screen.dart';
 
@@ -26,8 +23,6 @@ class LodgeOwnerDashboard extends StatelessWidget {
     final bool isLargeScreen = screenWidth > 900;
     final int crossAxisCount = _getCrossAxisCount(screenWidth);
 
-    // Standalone root Scaffold containers and explicit top AppBar elements are removed 
-    // to allow native continuous layout embedding in MainTabsScreen.
     return CustomScrollView(
       slivers: [
         SliverPadding(
@@ -49,12 +44,7 @@ class LodgeOwnerDashboard extends StatelessWidget {
                   icon: Icons.book_online,
                   color: AppColors.mangoOrange,
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const OwnerBookingsScreen(),
-                      ),
-                    );
+                    MainTabsScreen.of(context)?.navigateToOwnerBookings();
                   },
                 ),
                 _DashboardCard(
@@ -62,28 +52,7 @@ class LodgeOwnerDashboard extends StatelessWidget {
                   icon: Icons.qr_code_scanner,
                   color: Colors.deepPurple,
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => const BookingQrScannerScreen(),
-                      ),
-                    );
-                  },
-                ),
-                _DashboardCard(
-                  title: 'Revenue',
-                  icon: Icons.payments,
-                  color: AppColors.leafGreen,
-                  onTap: () {
-                    // TODO: revenue screen tracking metrics integration
-                  },
-                ),
-                _DashboardCard(
-                  title: 'Guests',
-                  icon: Icons.people,
-                  color: Colors.blue.shade700,
-                  onTap: () {
-                    // TODO: guests management list interface
+                    MainTabsScreen.of(context)?.navigateToBookingScanner();
                   },
                 ),
 
@@ -132,38 +101,49 @@ class _DashboardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final defaultColor = Theme.of(context).brightness == Brightness.dark 
+    final activeColor = color ?? (Theme.of(context).brightness == Brightness.dark 
         ? Colors.white70 
-        : Colors.black87;
+        : Colors.black87);
 
-    return Card(
-      elevation: 1.5,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-        side: BorderSide(color: Colors.grey.withOpacity(0.15), width: 1),
+    return Container(
+      decoration: BoxDecoration(
+        color: activeColor.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: activeColor.withOpacity(0.12),
+          width: 1,
+        ),
       ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 42,
-              color: color ?? defaultColor,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          splashColor: activeColor.withOpacity(0.1),
+          highlightColor: activeColor.withOpacity(0.05),
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.sm),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  icon,
+                  size: 38,
+                  color: activeColor,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                    color: activeColor.withOpacity(0.9),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-                color: color ?? defaultColor,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

@@ -17,6 +17,7 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final VoidCallback? onSearchTap;
   final VoidCallback? onCartTap;
   final String title;
+  final Widget? leading; // 👈 ADDED: Explicit property to inject dynamic back buttons
 
   static final AnalyticsService _analyticsService = AnalyticsService();
 
@@ -26,6 +27,7 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
     this.onProfileTap, 
     this.onSearchTap,
     this.onCartTap, 
+    this.leading, // 👈 ADDED to constructor
   });
 
   @override
@@ -39,8 +41,9 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
     return AppBar(
       centerTitle: false,
       titleSpacing: isDesktop ? AppSpacing.xl : AppSpacing.md,
-      // Hide standard drawer menu icon on desktop web since side rail navigation is active
-      automaticallyImplyLeading: !isDesktop,
+      // 👈 MODIFIED: Show drawer toggle ONLY on mobile AND when no custom leading widget (like our back button) is passed
+      automaticallyImplyLeading: leading == null ? !isDesktop : false,
+      leading: leading, // 👈 ADDED: Binds our custom back button action directly to the AppBar layout
       title: Center(
         child: Container(
           constraints: const BoxConstraints(maxWidth: 1200),

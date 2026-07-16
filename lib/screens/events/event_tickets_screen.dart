@@ -20,592 +20,401 @@ class EventTicketsScreen extends ConsumerStatefulWidget {
       _EventTicketsScreenState();
 }
 
-class _EventTicketsScreenState
-    extends ConsumerState<EventTicketsScreen> {
-
-  final TextEditingController _searchController =
-      TextEditingController();
-
+class _EventTicketsScreenState extends ConsumerState<EventTicketsScreen>  {
+  final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
   String searchQuery = '';
+  
+  // Pagination & Lazy Loading States
+  int _visibleCount = 10;
+  bool _isLoadingMore = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients || _isLoadingMore) return;
+    
+    // Trigger infinite scroll load threshold when within 200 pixels of bottom boundary
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      _loadMoreTickets();
+    }
+  }
+
+  void _loadMoreTickets() {
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    // Simulate small framework microtask pipeline latency for a native fluid UX response
+    Future.delayed(const Duration(milliseconds: 400), () {
+      if (mounted) {
+        setState(() {
+          _visibleCount += 10;
+          _isLoadingMore = false;
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-
     final ticketsAsync = ref.watch(
       eventTicketsProvider(widget.event.id),
     );
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        foregroundColor: AppColors.darkText,
-        title: Text(
-          "Sold Tickets",
-          style: TextStyle(fontWeight: FontWeight.bold),
+    return ticketsAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Text(error.toString()),
         ),
       ),
+      data: (allTickets) {
+        // ================= SEARCH FILTER =================
+        final filteredTickets = allTickets.where((ticket) {
+          final query = searchQuery.toLowerCase();
+          final customer = ticket.customerName?.toLowerCase() ?? '';
+          final ticketNo = ticket.ticketNumber.toLowerCase();
+          final eventTitle = ticket.eventTitle.toLowerCase();
 
-      body: ticketsAsync.when(
-        loading: () =>
-            const Center(child: CircularProgressIndicator()),
+          return customer.contains(query) ||
+              ticketNo.contains(query) ||
+              eventTitle.contains(query);
+        }).toList();
 
-        error: (error, stack) => Center(
-          child: Padding(
-            padding: EdgeInsets.all(20),
-            child: Text(error.toString()),
-          ),
-        ),
+        // Lazy Loading Array Slicing Boundary
+        final hasMoreData = filteredTickets.length > _visibleCount;
+        final tickets = filteredTickets.take(_visibleCount).toList();
 
-        data: (allTickets) {
+        // ================= TOTALS =================
+        final totalRevenue = filteredTickets.fold<double>(
+          0,
+          (sum, t) => sum + t.totalAmount,
+        );
 
-          // ================= SEARCH FILTER =================
+        final totalTickets = filteredTickets.fold<int>(
+          0,
+          (sum, t) => sum + t.quantity,
+        );
 
-          final tickets = allTickets.where((ticket) {
-
-            final query = searchQuery.toLowerCase();
-
-            final customer =
-                ticket.customerName?.toLowerCase() ?? '';
-
-            final ticketNo =
-                ticket.ticketNumber.toLowerCase();
-
-            final eventTitle =
-                ticket.eventTitle.toLowerCase();
-
-            return customer.contains(query) ||
-                ticketNo.contains(query) ||
-                eventTitle.contains(query);
-
-          }).toList();
-
-          // ================= TOTALS =================
-
-          final totalRevenue = tickets.fold<double>(
-            0,
-            (sum, t) => sum + t.totalAmount,
-          );
-
-          final totalTickets = tickets.fold<int>(
-            0,
-            (sum, t) => sum + t.quantity,
-          );
-
-          final Map<String, int> breakdown = {};
-
-          for (final ticket in tickets) {
-            for (final item in ticket.items) {
-              breakdown[item.ticketTypeName] =
-                  (breakdown[item.ticketTypeName] ?? 0) +
-                      item.quantity;
-            }
+        final Map<String, int> breakdown = {};
+        for (final ticket in filteredTickets) {
+          for (final item in ticket.items) {
+            breakdown[item.ticketTypeName] =
+                (breakdown[item.ticketTypeName] ?? 0) + item.quantity;
           }
+        }
 
-          return RefreshIndicator(
-            onRefresh: () async {
-              ref.refresh(
-                eventTicketsProvider(widget.event.id).future,
-              );
-            },
-
-            child: SingleChildScrollView(
-              physics:
-                  const AlwaysScrollableScrollPhysics(),
-
-              padding: EdgeInsets.only(bottom: 30),
-
-              child: Column(
-                children: [
-
-                  // ================= HEADER =================
-
-                  Container(
-                    width: double.infinity,
-                    margin: EdgeInsets.all(AppSpacing.md),
-                    padding: EdgeInsets.all(22),
-
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          AppColors.mangoOrange,
-                          AppColors.mangoLight,
-                        ],
-                      ),
-
-                      borderRadius:
-                          BorderRadius.circular(24),
-
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.mangoOrange
-                              .withOpacity(.25),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-
-                    child: Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
-
-                      children: [
-
-                        Text(
-                          widget.event.title,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.surface,
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-
-                        const SizedBox(height: AppSpacing.xs),
-
-                        Text(
-                          "${widget.event.venue}, ${widget.event.city}",
-                          style: const TextStyle(
-                            color: Colors.white70,
-                          ),
-                        ),
-
-                        const SizedBox(height: 22),
-
-                        Row(
-                          children: [
-
-                            Expanded(
-                              child: _summaryCard(
-                                "Tickets",
-                                totalTickets.toString(),
-                                Icons.confirmation_number,
-                              ),
-                            ),
-
-                            const SizedBox(width: AppSpacing.sm),
-
-                            Expanded(
-                              child: _summaryCard(
-                                "Revenue",
-                                "MWK ${totalRevenue.toStringAsFixed(0)}",
-                                Icons.payments,
-                              ),
-                            ),
+        return RefreshIndicator(
+          onRefresh: () async {
+            setState(() {
+              _visibleCount = 10;
+            });
+            ref.refresh(eventTicketsProvider(widget.event.id).future);
+          },
+          child: CustomScrollView(
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              // Unified Layout Content Body Container block mapped as a single structural sliver
+              SliverToBoxAdapter(
+                child: Column(
+                  children: [
+                    // ================= HEADER =================
+                    Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.all(AppSpacing.md),
+                      padding: const EdgeInsets.all(22),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [
+                            AppColors.mangoOrange,
+                            AppColors.mangoLight,
                           ],
                         ),
-                      ],
-                    ),
-                  ),
-
-                  // ================= SEARCH =================
-
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 16,
-                    ),
-
-                    child: TextField(
-                      controller: _searchController,
-
-                      onChanged: (value) {
-                        setState(() {
-                          searchQuery = value;
-                        });
-                      },
-
-                      decoration: InputDecoration(
-                        hintText:
-                            "Search customer or ticket number",
-
-                        prefixIcon:
-                            Icon(Icons.search),
-
-                        filled: true,
-                        fillColor: Theme.of(context).colorScheme.surface,
-
-                        contentPadding:
-                            EdgeInsets.symmetric(
-                          vertical: 0,
-                        ),
-
-                        border: OutlineInputBorder(
-                          borderRadius:
-                              BorderRadius.circular(18),
-                          borderSide: BorderSide.none,
-                        ),
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.mangoOrange.withOpacity(.25),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
+                          ),
+                        ],
                       ),
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  // ================= BREAKDOWN =================
-
-                  Container(
-                    margin: EdgeInsets.symmetric(
-                      horizontal: 16,
-                    ),
-
-                    padding: EdgeInsets.all(18),
-
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      borderRadius:
-                          BorderRadius.circular(22),
-                    ),
-
-                    child: Column(
-                      crossAxisAlignment:
-                          CrossAxisAlignment.start,
-
-                      children: [
-
-                        Text(
-                          "Ticket Breakdown",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-
-                        const SizedBox(height: AppSpacing.sm),
-
-                        if (tickets.isEmpty)
-                          const Padding(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 12,
-                            ),
-                            child: Text(
-                              "No tickets sold yet",
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            widget.event.title,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.surface,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
-
-                        ...breakdown.entries.map((e) {
-
-                          return Container(
-                            margin:
-                                EdgeInsets.only(
-                              bottom: 10,
-                            ),
-
-                            padding:
-                                EdgeInsets.all(14),
-
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.outline.withOpacity(0.05),
-                              borderRadius:
-                                  BorderRadius.circular(
-                                      14),
-                            ),
-
-                            child: Row(
-                              children: [
-
-                                CircleAvatar(
-                                  radius: 18,
-                                  backgroundColor:
-                                      AppColors
-                                          .mangoOrange
-                                          .withOpacity(.1),
-
-                                  child: Icon(
-                                    Icons.local_activity,
-                                    color: AppColors
-                                        .mangoOrange,
-                                    size: 18,
-                                  ),
-                                ),
-
-                                const SizedBox(width: AppSpacing.sm),
-
-                                Expanded(
-                                  child: Text(
-                                    e.key,
-                                    style:
-                                        const TextStyle(
-                                      fontWeight:
-                                          FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-
-                                Text(
-                                  "${e.value} sold",
-                                  style: TextStyle(
-                                    color: AppColors
-                                        .mangoOrange,
-                                    fontWeight:
-                                        FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        }),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.sm),
-
-                  // ================= TICKETS =================
-
-                  if (tickets.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.all(30),
-                      child: Text(
-                        "No tickets found",
-                      ),
-                    )
-                  else
-                    ListView.builder(
-                      itemCount: tickets.length,
-                      shrinkWrap: true,
-
-                      physics:
-                          const NeverScrollableScrollPhysics(),
-
-                      padding: EdgeInsets.all(AppSpacing.md),
-
-                      itemBuilder: (context, i) {
-
-                        final ticket = tickets[i];
-
-                        return Container(
-                          margin:
-                              EdgeInsets.only(
-                            bottom: 14,
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            "${widget.event.venue}, ${widget.event.city}",
+                            style: const TextStyle(color: Colors.white70),
                           ),
-
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surface,
-                            borderRadius:
-                                BorderRadius.circular(
-                                    24),
-
-                            boxShadow: [
-                              BoxShadow(
-                                color: Theme.of(context).colorScheme.onSurface
-                                    .withOpacity(.04),
-                                blurRadius: 12,
-                                offset:
-                                    const Offset(0, 4),
+                          const SizedBox(height: 22),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _summaryCard(
+                                  "Tickets",
+                                  totalTickets.toString(),
+                                  Icons.confirmation_number,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.sm),
+                              Expanded(
+                                child: _summaryCard(
+                                  "Revenue",
+                                  "MWK ${totalRevenue.toStringAsFixed(0)}",
+                                  Icons.payments,
+                                ),
                               ),
                             ],
                           ),
+                        ],
+                      ),
+                    ),
 
+                    // ================= SEARCH =================
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: (value) {
+                          setState(() {
+                            searchQuery = value;
+                            _visibleCount = 10; // Reset pagination window constraints on search filter modification
+                          });
+                        },
+                        decoration: InputDecoration(
+                          hintText: "Search customer or ticket number",
+                          prefixIcon: const Icon(Icons.search),
+                          filled: true,
+                          fillColor: Theme.of(context).colorScheme.surface,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(18),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+
+                    // ================= BREAKDOWN =================
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface,
+                        borderRadius: BorderRadius.circular(22),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            "Ticket Breakdown",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          if (filteredTickets.isEmpty)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 12),
+                              child: Text("No tickets sold yet"),
+                            ),
+                          ...breakdown.entries.map((e) {
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 10),
+                              padding: const EdgeInsets.all(14),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.outline.withOpacity(0.05),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 18,
+                                    backgroundColor: AppColors.mangoOrange.withOpacity(.1),
+                                    child: const Icon(
+                                      Icons.local_activity,
+                                      color: AppColors.mangoOrange,
+                                      size: 18,
+                                    ),
+                                  ),
+                                  const SizedBox(width: AppSpacing.sm),
+                                  Expanded(
+                                    child: Text(
+                                      e.key,
+                                      style: const TextStyle(fontWeight: FontWeight.w600),
+                                    ),
+                                  ),
+                                  Text(
+                                    "${e.value} sold",
+                                    style: const TextStyle(
+                                      color: AppColors.mangoOrange,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                  ],
+                ),
+              ),
+
+              // ================= LAZY LOAD TICKETS STREAM LIST =================
+              if (tickets.isEmpty)
+                const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.all(30),
+                    child: Center(child: Text("No tickets found")),
+                  ),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, i) {
+                        final ticket = tickets[i];
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 14),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surface,
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Theme.of(context).colorScheme.onSurface.withOpacity(.04),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
                           child: Padding(
-                            padding:
-                                EdgeInsets.all(18),
-
+                            padding: const EdgeInsets.all(18),
                             child: Column(
-                              crossAxisAlignment:
-                                  CrossAxisAlignment
-                                      .start,
-
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-
                                 Row(
                                   children: [
-
                                     Container(
-                                      padding:
-                                          const EdgeInsets
-                                              .all(14),
-
-                                      decoration:
-                                          BoxDecoration(
-                                        color: AppColors
-                                            .mangoOrange
-                                            .withOpacity(
-                                                .1),
-
-                                        borderRadius:
-                                            BorderRadius
-                                                .circular(
-                                                    16),
+                                      padding: const EdgeInsets.all(14),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.mangoOrange.withOpacity(.1),
+                                        borderRadius: BorderRadius.circular(16),
                                       ),
-
-                                      child: Icon(
-                                        Icons
-                                            .confirmation_number,
-                                        color: AppColors
-                                            .mangoOrange,
+                                      child: const Icon(
+                                        Icons.confirmation_number,
+                                        color: AppColors.mangoOrange,
                                       ),
                                     ),
-
-                                    const SizedBox(
-                                        width: 14),
-
+                                    const SizedBox(width: 14),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment
-                                                .start,
-
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-
                                           Text(
-                                            ticket
-                                                .ticketNumber,
-                                            style:
-                                                const TextStyle(
-                                              fontWeight:
-                                                  FontWeight
-                                                      .bold,
+                                            ticket.ticketNumber,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
                                               fontSize: 16,
                                             ),
                                           ),
-
-                                          const SizedBox(
-                                              height: 4),
-
+                                          const SizedBox(height: 4),
                                           Text(
-                                            ticket
-                                                    .customerName ??
-                                                "Customer",
-                                            style:
-                                                TextStyle(
-                                              color: Colors
-                                                  .grey
-                                                  .withOpacity(0.8),
+                                            ticket.customerName ?? "Customer",
+                                            style: TextStyle(
+                                              color: Colors.grey.withOpacity(0.8),
                                             ),
                                           ),
                                         ],
                                       ),
                                     ),
-
                                     Container(
-                                      padding:
-                                          const EdgeInsets
-                                              .symmetric(
-                                        horizontal: 12,
-                                        vertical: 6,
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).colorScheme.secondary.withOpacity(.1),
+                                        borderRadius: BorderRadius.circular(30),
                                       ),
-
-                                      decoration:
-                                          BoxDecoration(
-                                        color: Theme.of(context).colorScheme.secondary
-                                            .withOpacity(
-                                                .1),
-
-                                        borderRadius:
-                                            BorderRadius
-                                                .circular(
-                                                    30),
-                                      ),
-
                                       child: Text(
                                         "PAID",
                                         style: TextStyle(
-                                          color:
-                                              Theme.of(context).colorScheme.secondary,
-                                          fontWeight:
-                                              FontWeight
-                                                  .bold,
+                                          color: Theme.of(context).colorScheme.secondary,
+                                          fontWeight: FontWeight.bold,
                                           fontSize: 12,
                                         ),
                                       ),
                                     ),
                                   ],
                                 ),
-
                                 const SizedBox(height: 18),
-
                                 Container(
-                                  padding:
-                                      EdgeInsets.all(
-                                          14),
-
+                                  padding: const EdgeInsets.all(14),
                                   decoration: BoxDecoration(
-                                    color:
-                                        Theme.of(context).colorScheme.outline.withOpacity(0.05),
-                                    borderRadius:
-                                        BorderRadius
-                                            .circular(16),
+                                    color: Theme.of(context).colorScheme.outline.withOpacity(0.05),
+                                    borderRadius: BorderRadius.circular(16),
                                   ),
-
                                   child: Column(
                                     children: [
-
                                       Row(
                                         children: [
-
-                                          Icon(
-                                            Icons.payments,
-                                            size: 18,
-                                          ),
-
-                                          const SizedBox(
-                                              width: 8),
-
+                                          const Icon(Icons.payments, size: 18),
+                                          const SizedBox(width: 8),
                                           Text(
                                             "MWK ${ticket.totalAmount.toStringAsFixed(0)}",
-                                            style:
-                                                const TextStyle(
-                                              fontWeight:
-                                                  FontWeight
-                                                      .bold,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
                                               fontSize: 18,
                                             ),
                                           ),
                                         ],
                                       ),
-
-                                      const SizedBox(
-                                          height: 14),
-
-                                      ...ticket.items
-                                          .map((item) {
-
+                                      const SizedBox(height: 14),
+                                      ...ticket.items.map((item) {
                                         return Padding(
-                                          padding:
-                                              const EdgeInsets
-                                                  .only(
-                                            bottom: 8,
-                                          ),
-
+                                          padding: const EdgeInsets.only(bottom: 8),
                                           child: Row(
                                             children: [
-
                                               Expanded(
-                                                child: Text(
-                                                  item
-                                                      .ticketTypeName,
-                                                ),
+                                                child: Text(item.ticketTypeName),
                                               ),
-
                                               Container(
-                                                padding:
-                                                    const EdgeInsets
-                                                        .symmetric(
-                                                  horizontal:
-                                                      10,
-                                                  vertical: 5,
+                                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                                decoration: BoxDecoration(
+                                                  color: AppColors.mangoOrange.withOpacity(.1),
+                                                  borderRadius: BorderRadius.circular(20),
                                                 ),
-
-                                                decoration:
-                                                    BoxDecoration(
-                                                  color: AppColors
-                                                      .mangoOrange
-                                                      .withOpacity(
-                                                          .1),
-
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          20),
-                                                ),
-
                                                 child: Text(
                                                   "x${item.quantity}",
-                                                  style:
-                                                      TextStyle(
-                                                    color:
-                                                        AppColors.mangoOrange,
-                                                    fontWeight:
-                                                        FontWeight.bold,
+                                                  style: const TextStyle(
+                                                    color: AppColors.mangoOrange,
+                                                    fontWeight: FontWeight.bold,
                                                   ),
                                                 ),
                                               ),
@@ -621,13 +430,33 @@ class _EventTicketsScreenState
                           ),
                         );
                       },
+                      childCount: tickets.length,
                     ),
-                ],
+                  ),
+                ),
+
+              // Infinite Scroll Pagination Loading Indicator Module
+              if (hasMoreData || _isLoadingMore)
+                const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: Center(
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2.5),
+                      ),
+                    ),
+                  ),
+                ),
+              
+              const SliverToBoxAdapter(
+                child: SizedBox(height: 40),
               ),
-            ),
-          );
-        },
-      ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -637,23 +466,18 @@ class _EventTicketsScreenState
     IconData icon,
   ) {
     return Container(
-      padding: EdgeInsets.all(AppSpacing.md),
-
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface.withOpacity(.15),
         borderRadius: BorderRadius.circular(18),
       ),
-
       child: Column(
         children: [
-
           Icon(
             icon,
             color: Theme.of(context).colorScheme.surface,
           ),
-
           const SizedBox(height: 10),
-
           Text(
             value,
             textAlign: TextAlign.center,
@@ -663,14 +487,10 @@ class _EventTicketsScreenState
               fontSize: 16,
             ),
           ),
-
           const SizedBox(height: 5),
-
           Text(
             title,
-            style: const TextStyle(
-              color: Colors.white70,
-            ),
+            style: const TextStyle(color: Colors.white70),
           ),
         ],
       ),

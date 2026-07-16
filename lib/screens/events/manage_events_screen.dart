@@ -26,10 +26,16 @@ class _ManageEventsScreenState
     extends ConsumerState<ManageEventsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final ScrollController _scrollController = ScrollController();
+  
+  // Pagination & Lazy Loading States
+  int _visibleCount = 8; // Starting local threshold layout window
+  bool _isLoadingMore = false;
 
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
 
     _tabController = TabController(
       length: 2,
@@ -40,7 +46,34 @@ class _ManageEventsScreenState
   @override
   void dispose() {
     _tabController.dispose();
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients || _isLoadingMore) return;
+
+    // Trigger lazy loading when user scrolls within 250 logical pixels of the bottom
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 250) {
+      _loadMoreEvents();
+    }
+  }
+
+  void _loadMoreEvents() {
+    setState(() {
+      _isLoadingMore = true;
+    });
+
+    // Simulate standard microtask network timeline rendering pipeline latency
+    Future.delayed(const Duration(milliseconds: 400), () {
+      if (mounted) {
+        setState(() {
+          _visibleCount += 6; // Dynamically expand visibility count context window
+          _isLoadingMore = false;
+        });
+      }
+    });
   }
 
   // =========================
@@ -85,12 +118,8 @@ class _ManageEventsScreenState
 
   Widget buildEventCard(EventModel event) {
     final totalTickets = getTotalTickets(event);
-
-    final availableTickets =
-        getAvailableTickets(event);
-
+    final availableTickets = getAvailableTickets(event);
     final soldTickets = getSoldTickets(event);
-
     final revenue = getRevenue(event);
 
     final soldPercentage =
@@ -112,18 +141,15 @@ class _ManageEventsScreenState
         ],
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ======================
           // IMAGE
           // ======================
-
           Stack(
             children: [
               ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(
+                borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(22),
                 ),
                 child: Image.network(
@@ -131,8 +157,7 @@ class _ManageEventsScreenState
                   width: double.infinity,
                   height: 210,
                   fit: BoxFit.cover,
-                  errorBuilder:
-                      (context, error, stackTrace) {
+                  errorBuilder: (context, error, stackTrace) {
                     return Container(
                       height: 210,
                       color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
@@ -149,8 +174,7 @@ class _ManageEventsScreenState
               Container(
                 height: 210,
                 decoration: BoxDecoration(
-                  borderRadius:
-                      const BorderRadius.vertical(
+                  borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(22),
                   ),
                   gradient: LinearGradient(
@@ -169,8 +193,7 @@ class _ManageEventsScreenState
                 bottom: 18,
                 right: 18,
                 child: Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       event.title,
@@ -212,15 +235,13 @@ class _ManageEventsScreenState
                   top: 14,
                   right: 14,
                   child: Container(
-                    padding:
-                        const EdgeInsets.symmetric(
+                    padding: const EdgeInsets.symmetric(
                       horizontal: 14,
                       vertical: 7,
                     ),
                     decoration: BoxDecoration(
                       color: AppColors.mangoOrange,
-                      borderRadius:
-                          BorderRadius.circular(30),
+                      borderRadius: BorderRadius.circular(30),
                     ),
                     child: Text(
                       "FEATURED",
@@ -238,13 +259,11 @@ class _ManageEventsScreenState
           Padding(
             padding: const EdgeInsets.all(18),
             child: Column(
-              crossAxisAlignment:
-                  CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // ======================
                 // DATE
                 // ======================
-
                 Row(
                   children: [
                     const Icon(
@@ -279,7 +298,6 @@ class _ManageEventsScreenState
                 // ======================
                 // TICKET TYPES
                 // ======================
-
                 const Text(
                   "Ticket Types",
                   style: TextStyle(
@@ -294,10 +312,7 @@ class _ManageEventsScreenState
                   spacing: 10,
                   runSpacing: 10,
                   children: event.ticketTypes
-                      .map(
-                        (type) =>
-                            buildTicketTypeChip(type),
-                      )
+                      .map((type) => buildTicketTypeChip(type))
                       .toList(),
                 ),
 
@@ -306,16 +321,13 @@ class _ManageEventsScreenState
                 // ======================
                 // STATS
                 // ======================
-
                 Row(
                   children: [
                     Expanded(
                       child: statCard(
                         title: "Total",
-                        value:
-                            totalTickets.toString(),
-                        icon:
-                            Icons.confirmation_num,
+                        value: totalTickets.toString(),
+                        icon: Icons.confirmation_num,
                       ),
                     ),
 
@@ -324,8 +336,7 @@ class _ManageEventsScreenState
                     Expanded(
                       child: statCard(
                         title: "Sold",
-                        value:
-                            soldTickets.toString(),
+                        value: soldTickets.toString(),
                         icon: Icons.sell,
                       ),
                     ),
@@ -335,10 +346,8 @@ class _ManageEventsScreenState
                     Expanded(
                       child: statCard(
                         title: "Revenue",
-                        value:
-                            "MWK ${revenue.toStringAsFixed(0)}",
-                        icon:
-                            Icons.account_balance_wallet,
+                        value: "MWK ${revenue.toStringAsFixed(0)}",
+                        icon: Icons.account_balance_wallet,
                       ),
                     ),
                   ],
@@ -347,15 +356,12 @@ class _ManageEventsScreenState
                 const SizedBox(height: AppSpacing.md),
 
                 ClipRRect(
-                  borderRadius:
-                      BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(20),
                   child: LinearProgressIndicator(
                     value: soldPercentage,
                     minHeight: 10,
-                    backgroundColor:
-                        Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
-                    valueColor:
-                        const AlwaysStoppedAnimation(
+                    backgroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
+                    valueColor: const AlwaysStoppedAnimation(
                       AppColors.leafGreen,
                     ),
                   ),
@@ -377,29 +383,19 @@ class _ManageEventsScreenState
                   children: [
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(
-                          Icons.qr_code_scanner,
-                        ),
-                        label: const Text(
-                          "Check-ins",
-                        ),
-                        style:
-                            OutlinedButton.styleFrom(
-                          minimumSize:
-                              const Size(0, 52),
-                          foregroundColor:
-                              AppColors.mangoOrange,
+                        onPressed: () {
+                          MainTabsScreen.of(context)?.setSelectedIndex(44);
+                          },
+                        icon: const Icon(Icons.qr_code_scanner),
+                        label: const Text("Check-ins"),
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size(0, 52),
+                          foregroundColor: AppColors.mangoOrange,
                           side: const BorderSide(
-                            color:
-                                AppColors.mangoOrange,
+                            color: AppColors.mangoOrange,
                           ),
-                          shape:
-                              RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(
-                              14,
-                            ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
                           ),
                         ),
                       ),
@@ -410,32 +406,16 @@ class _ManageEventsScreenState
                     Expanded(
                       child: ElevatedButton.icon(
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => EventTicketsScreen(event: event),
-                              ),
-                            );
-                          },
-                        icon: const Icon(
-                          Icons.settings,
-                        ),
-                        label:
-                            const Text("Manage"),
-                        style:
-                            ElevatedButton.styleFrom(
-                          backgroundColor:
-                              AppColors.mangoOrange,
-                          foregroundColor:
-                              Theme.of(context).colorScheme.surface,
-                          minimumSize:
-                              const Size(0, 52),
-                          shape:
-                              RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(
-                              14,
-                            ),
+                          MainTabsScreen.of(context)?.navigateToEventTickets(event);
+                        },
+                        icon: const Icon(Icons.settings),
+                        label: const Text("Manage"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.mangoOrange,
+                          foregroundColor: Theme.of(context).colorScheme.surface,
+                          minimumSize: const Size(0, 52),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
                           ),
                         ),
                       ),
@@ -454,11 +434,8 @@ class _ManageEventsScreenState
   // TICKET TYPE CHIP
   // =========================
 
-  Widget buildTicketTypeChip(
-    EventTicketTypeModel type,
-  ) {
-    final sold =
-        type.totalSeats - type.availableSeats;
+  Widget buildTicketTypeChip(EventTicketTypeModel type) {
+    final sold = type.totalSeats - type.availableSeats;
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.sm),
@@ -466,13 +443,11 @@ class _ManageEventsScreenState
         color: AppColors.mangoOrange.withOpacity(.08),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color:
-              AppColors.mangoOrange.withOpacity(.2),
+          color: AppColors.mangoOrange.withOpacity(.2),
         ),
       ),
       child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
@@ -519,8 +494,7 @@ class _ManageEventsScreenState
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
-        borderRadius:
-            BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
         children: [
@@ -557,38 +531,101 @@ class _ManageEventsScreenState
 
   @override
   Widget build(BuildContext context) {
-    final eventsAsync = ref.watch(
-      myEventsProvider,
-    );
+    final eventsAsync = ref.watch(myEventsProvider);
+    final screenWidth = MediaQuery.of(context).size.width;
 
-    // Standalone root Scaffold framework modules and top explicit AppBar rendering sections are 
-    // cleanly lifted out to allow native continuous layout embedding in MainTabsScreen.
     return Stack(
       children: [
         eventsAsync.when(
           loading: () => const Center(
             child: CircularProgressIndicator(),
           ),
-
           error: (e, _) => Center(
             child: Text(e.toString()),
           ),
-
-          data: (events) {
-            if (events.isEmpty) {
+          data: (allEvents) {
+            if (allEvents.isEmpty) {
               return const Center(
                 child: Text("No events found"),
               );
             }
 
-            return ListView.builder(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              itemCount: events.length,
-              itemBuilder: (context, index) {
-                return buildEventCard(
-                  events[index],
-                );
+            // Lazy Load Slicing Logic Checks
+            final hasMoreData = allEvents.length > _visibleCount;
+            final events = allEvents.take(_visibleCount).toList();
+
+            return RefreshIndicator(
+              onRefresh: () async {
+                setState(() {
+                  _visibleCount = 8; // Reset pagination window tracking
+                });
+                ref.refresh(myEventsProvider);
               },
+              child: CustomScrollView(
+                controller: _scrollController,
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  // Mobile dynamic breakout branch (1 column)
+                  if (screenWidth < 800)
+                    SliverPadding(
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) => buildEventCard(events[index]),
+                          childCount: events.length,
+                        ),
+                      ),
+                    )
+                  else
+                    // Desktop chunked responsive flex layout (2 columns)
+                    SliverPadding(
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, rowIndex) {
+                            final firstIndex = rowIndex * 2;
+                            final secondIndex = firstIndex + 1;
+
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: buildEventCard(events[firstIndex]),
+                                ),
+                                const SizedBox(width: AppSpacing.md),
+                                Expanded(
+                                  child: secondIndex < events.length
+                                      ? buildEventCard(events[secondIndex])
+                                      : const SizedBox.shrink(),
+                                ),
+                              ],
+                            );
+                          },
+                          childCount: (events.length / 2).ceil(),
+                        ),
+                      ),
+                    ),
+
+                  // Infinite Scroll Bottom Spinner Indicator Element
+                  if (hasMoreData || _isLoadingMore)
+                    const SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 24),
+                        child: Center(
+                          child: SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2.5),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  const SliverToBoxAdapter(
+                    child: SizedBox(height: 40),
+                  ),
+                ],
+              ),
             );
           },
         ),

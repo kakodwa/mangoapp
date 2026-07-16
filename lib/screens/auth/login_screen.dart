@@ -1,12 +1,13 @@
+// lib/screens/auth/login_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
-import '../../providers/api_provider.dart';
 import '../../theme/design_system/app_text_field.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_button.dart';
 import '../../theme/app_colors.dart';
 import 'register_screen.dart';
+import 'forgot_password_screen.dart'; // Ensure you import your new reset screen here
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -36,28 +37,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+      SnackBar(
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        backgroundColor: Colors.redAccent,
+      ),
     );
   }
 
-  /// ✅ CLEAN ERROR FORMATTER (IMPORTANT)
   String formatError(dynamic error) {
     final msg = error.toString();
-
     if (msg.contains('401')) {
-      return 'Login failed:\nIncorrect username or password';
+      return 'Incorrect username or password.';
     }
     if (msg.contains('400')) {
-      return 'Invalid request.\nPlease check your input';
+      return 'Invalid request. Please check your input.';
     }
     if (msg.contains('500')) {
-      return 'Server error.\nPlease try again later';
+      return 'Server error. Please try again later.';
     }
     if (msg.contains('SocketException') || msg.contains('network')) {
-      return 'No internet connection';
+      return 'No internet connection.';
     }
-
-    return 'Login failed.\nPlease try again';
+    return 'Login failed. Please try again.';
   }
 
   Future<void> _handleLogin() async {
@@ -87,7 +90,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         );
       }
     } catch (e) {
-      _showError(formatError(e)); // ✅ CLEAN 1–2 LINE ERROR
+      _showError(formatError(e));
     }
   }
 
@@ -96,131 +99,184 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final authState = ref.watch(authProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: AppSpacing.xl),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppColors.mangoOrange,
+              Color(0xFFFF8C00),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final bool isDesktopOrTablet = constraints.maxWidth > 600;
+                
+                return SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isDesktopOrTablet ? AppSpacing.xl : AppSpacing.lg,
+                    vertical: AppSpacing.md,
+                  ),
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 460),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.12),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        padding: const EdgeInsets.all(32.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            // Logo Wrapper
+                            Center(
+                              child: Image.asset(
+                                'assets/images/logo2.png',
+                                height: 90,
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) {
+                                  if (!_logoErrorShown) {
+                                    _logoErrorShown = true;
+                                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                                      _showError('Logo failed to load');
+                                    });
+                                  }
+                                  return const Icon(
+                                    Icons.storefront_rounded, 
+                                    size: 70, 
+                                    color: AppColors.mangoOrange,
+                                  );
+                                },
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.lg),
 
-              // ✅ LOGO (UNCHANGED)
-              Image.asset(
-                'assets/images/logo2.png',
-                height: 100,
-                errorBuilder: (context, error, stackTrace) {
-                  if (!_logoErrorShown) {
-                    _logoErrorShown = true;
+                            // Welcoming Context Headings
+                            Text(
+                              'Welcome Back',
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.darkText,
+                                    letterSpacing: -0.5,
+                                  ),
+                            ),
+                            const SizedBox(height: AppSpacing.xs),
+                            Text(
+                              'Log in to continue secure marketplace trading',
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Colors.grey.shade600,
+                                  ),
+                            ),
+                            const SizedBox(height: AppSpacing.xl),
 
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      _showError('Logo failed to load');
-                    });
-                  }
-                  return Icon(Icons.broken_image, size: 80);
-                },
-              ),
+                            // Input Text Fields Framework
+                            AppTextField(
+                              label: 'Username',
+                              hint: 'Enter your username',
+                              controller: _usernameController,
+                              prefix: const Icon(Icons.person_outline, color: Colors.grey),
+                              isRequired: true,
+                            ),
+                            const SizedBox(height: AppSpacing.lg),
+                            AppTextField(
+                              label: 'Password',
+                              hint: 'Enter your password',
+                              controller: _passwordController,
+                              type: TextFieldType.password,
+                              prefix: const Icon(Icons.lock_outline, color: Colors.grey),
+                              isRequired: true,
+                            ),
+                            
+                            // 🌟 Beautiful Forgot Password Redirection Link
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => const ForgotPasswordScreen(),
+                                    ),
+                                  );
+                                },
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  minimumSize: const Size(0, 0),
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                child: const Text(
+                                  'Forgot Password?',
+                                  style: TextStyle(
+                                    color: AppColors.mangoOrange,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.xl),
 
-              const SizedBox(height: AppSpacing.lg),
+                            // Primary Action Button Pipeline
+                            AppButton(
+                              text: authState.isLoading ? 'Logging in...' : 'Sign In',
+                              onPressed: authState.isLoading ? null : _handleLogin,
+                              loading: authState.isLoading,
+                              fullWidth: true,
+                            ),
+                            const SizedBox(height: AppSpacing.xl),
 
-              Text(
-                'Welcome Back',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-
-              const SizedBox(height: AppSpacing.xs),
-
-              Text(
-                'Log in to your account to continue shopping',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-              ),
-
-              const SizedBox(height: AppSpacing.xl),
-
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 400),
-                child: Column(
-                  children: [
-                    AppTextField(
-                      label: 'Username',
-                      hint: 'Enter your username',
-                      controller: _usernameController,
-                      prefix: Icon(Icons.person),
-                      isRequired: true,
-                      validator: (value) {
-                        if (value?.isEmpty ?? true) {
-                          return 'Username is required';
-                        }
-                        return null;
-                      },
-                    ),
-
-                    const SizedBox(height: AppSpacing.lg),
-
-                    AppTextField(
-                      label: 'Password',
-                      hint: 'Enter your password',
-                      controller: _passwordController,
-                      type: TextFieldType.password,
-                      prefix: Icon(Icons.lock),
-                      isRequired: true,
-                      validator: (value) {
-                        if (value?.isEmpty ?? true) {
-                          return 'Password is required';
-                        }
-                        return null;
-                      },
-                    ),
-
-                    const SizedBox(height: AppSpacing.xl),
-
-                    SizedBox(
-                      width: double.infinity,
-                      child: AppButton(
-                        text: authState.isLoading ? 'Logging in...' : 'Login',
-                        onPressed: authState.isLoading ? null : _handleLogin,
-                        loading: authState.isLoading,
-                        fullWidth: true,
+                            // Footer Redirection Layout
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Don't have an account? ",
+                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                        color: Colors.grey.shade600,
+                                      ),
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => const RegisterScreen(),
+                                      ),
+                                    );
+                                  },
+                                  child: const Text(
+                                    'Register',
+                                    style: TextStyle(
+                                      color: AppColors.mangoOrange,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: AppSpacing.md),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Don't have an account? ",
-                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (_) => const RegisterScreen(),
-                        ),
-                      );
-                    },
-                    child: Text(
-                      'Register',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+                );
+              },
+            ),
           ),
         ),
       ),

@@ -1,10 +1,10 @@
-import 'product_variant_model.dart'; // Make sure to import your variant model file
+import 'product_variant_model.dart';
 
 class Product {
   final int id;
   final int? ownerId;
   final String? shopDistrict;
-  final String? shopPhoneNumber; // ✅ Added
+  final String? shopPhoneNumber; 
   final int shopId;
   final String shopName;
   final String name;
@@ -12,6 +12,9 @@ class Product {
   final String description;
   final String? image;
   final String category;
+  final String subCategory; 
+  final String brand;       
+  final String deliveryDuration; // 👈 Added
   final double price;
   final double? originalPrice;
   final int discountPercentage;
@@ -21,11 +24,7 @@ class Product {
   final double rating;
   final int totalReviews;
   final DateTime createdAt;
-
-  // ✅ MULTIPLE IMAGES
   final List<String> images;
-
-  // 1. Declare the variants list property
   final List<LocalProductVariant> variants;
 
   Product({
@@ -33,13 +32,16 @@ class Product {
     this.ownerId,
     required this.shopId,
     this.shopDistrict,
-    this.shopPhoneNumber, // ✅ Added
+    this.shopPhoneNumber, 
     required this.shopName,
     required this.name,
     required this.slug,
     required this.description,
     this.image,
     required this.category,
+    this.subCategory = '', 
+    this.brand = '',       
+    this.deliveryDuration = '1 - 2 Business Days', // 👈 Added default safe fallback
     required this.price,
     this.originalPrice,
     required this.discountPercentage,
@@ -50,23 +52,25 @@ class Product {
     required this.totalReviews,
     required this.createdAt,
     this.images = const [],
-    this.variants = const [], // 2. Default to an empty list
+    this.variants = const [],
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      id: json['id'] ??
-          (throw Exception("Product ID missing from API response")),
+      id: json['id'] ?? (throw Exception("Product ID missing from API response")),
       ownerId: json['owner_id'],
       shopId: json['shop'] ?? 0,
       shopDistrict: json['shop_district'],
-      shopPhoneNumber: json['shop_phone_number'], // ✅ Added
+      shopPhoneNumber: json['shop_phone_number'], 
       shopName: json['shop_name'] ?? '',
       name: json['name'] ?? '',
       slug: json['slug'] ?? '',
       description: json['description'] ?? '',
       image: json['image'],
       category: json['category'] ?? 'Electronics',
+      subCategory: json['sub_category'] ?? '', 
+      brand: json['brand'] ?? '',             
+      deliveryDuration: json['delivery_duration'] ?? '1 - 2 Business Days', // 👈 Parsed from backend mapping
       price: double.tryParse(json['price'].toString()) ?? 0.0,
       originalPrice: json['original_price'] != null
           ? double.tryParse(json['original_price'].toString())
@@ -80,14 +84,10 @@ class Product {
       createdAt: DateTime.parse(
         json['created_at'] ?? DateTime.now().toIso8601String(),
       ),
-
-      // ✅ MULTIPLE IMAGES
       images: (json['images'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ??
           [],
-
-      // 3. Map the JSON variants list into your variant model array
       variants: (json['variants'] as List<dynamic>?)
               ?.map((e) => LocalProductVariant.fromJson(e as Map<String, dynamic>))
               .toList() ??
@@ -100,7 +100,7 @@ class Product {
       'id': id,
       'shop': shopId,
       'shop_district': shopDistrict,
-      'shop_phone_number': shopPhoneNumber, // ✅ Added
+      'shop_phone_number': shopPhoneNumber, 
       'shop_name': shopName,
       'name': name,
       'slug': slug,
@@ -114,11 +114,11 @@ class Product {
       'rating': rating,
       'total_reviews': totalReviews,
       'created_at': createdAt.toIso8601String(),
-
-      // ✅ IMAGES
+      'category': category,
+      'sub_category': subCategory, 
+      'brand': brand,             
+      'delivery_duration': deliveryDuration, // 👈 Serialized back out safely
       'images': images,
-
-      // 4. Map variant entities back to JSON structures
       'variants': variants.map((v) => v.toJson()).toList(),
     };
   }
@@ -127,7 +127,5 @@ class Product {
   bool get isInStock => stock > 0;
   bool get hasImage => image?.isNotEmpty == true;
   String get safeImage => image ?? '';
-
-  // ✅ Convenience getter
   String get phoneNumber => shopPhoneNumber ?? '';
 }

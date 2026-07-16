@@ -1,7 +1,9 @@
+// lib/screens/events/ticket_detail_screen.dart
 import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../widgets/web_footer.dart';
+
 class TicketDetailScreen extends StatelessWidget {
   final dynamic ticket;
 
@@ -12,38 +14,47 @@ class TicketDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(
-        title: Text("My Ticket"),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          children: [
-            // ================= TICKET CARD =================
-            Container(
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool isMobile = screenWidth < 650;
+    
+    // Grid alignment parameters for the sub-ticket breakdown list
+    final int crossAxisCount = isMobile ? 1 : 2;
+    final double crossAxisSpacing = AppSpacing.md;
+    final double mainAxisSpacing = AppSpacing.md;
+    
+    // Extract ticket items cleanly safely
+    final List<dynamic> subItems = ticket.items ?? [];
+
+    return CustomScrollView(
+      slivers: [
+        // ================= HERO PRESENTATION HEADER & QR DISPLAY =================
+        SliverPadding(
+          padding: EdgeInsets.symmetric(
+            vertical: AppSpacing.md,
+            horizontal: !isMobile ? (screenWidth - 850) / 2 : AppSpacing.md,
+          ),
+          sliver: SliverToBoxAdapter(
+            child: Container(
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.08),
-                    blurRadius: 12,
-                    offset: const Offset(0, 6),
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.06),
+                    blurRadius: 16,
+                    offset: const Offset(0, 4),
                   )
                 ],
               ),
               child: Column(
                 children: [
-                  // ================= HEADER =================
+                  // Dynamic Top Header Banner
                   Container(
                     width: double.infinity,
                     padding: EdgeInsets.all(AppSpacing.md),
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AppColors.mangoOrange,
-                      borderRadius: const BorderRadius.only(
+                      borderRadius: BorderRadius.only(
                         topLeft: Radius.circular(20),
                         topRight: Radius.circular(20),
                       ),
@@ -52,7 +63,7 @@ class TicketDetailScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          ticket.eventTitle,
+                          ticket.eventTitle ?? "Event Ticket",
                           style: TextStyle(
                             color: Theme.of(context).colorScheme.surface,
                             fontSize: 18,
@@ -61,7 +72,7 @@ class TicketDetailScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          "Ticket #: ${ticket.ticketNumber}",
+                          "Ticket #: ${ticket.ticketNumber ?? ''}",
                           style: const TextStyle(
                             color: Colors.white70,
                             fontSize: 12,
@@ -71,99 +82,53 @@ class TicketDetailScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: AppSpacing.md),
-
-                  // ================= QR CODE =================
-                  Container(
-                    padding: EdgeInsets.all(AppSpacing.sm),
+                  // Core Verification QR Code
+                  Padding(
+                    padding: EdgeInsets.all(AppSpacing.md),
                     child: ticket.qrCodeUrl != null
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(12),
                             child: Image.network(
                               ticket.qrCodeUrl,
-                              height: 220,
+                              height: 200,
                               fit: BoxFit.cover,
                             ),
                           )
                         : Container(
-                            height: 220,
+                            height: 200,
+                            width: 200,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.25),
+                              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Icon(
-                              Icons.qr_code,
-                              size: 120,
+                              Icons.qr_code_2,
+                              size: 110,
                               color: Theme.of(context).colorScheme.outline,
                             ),
                           ),
                   ),
 
-                  const SizedBox(height: AppSpacing.md),
-
-                  // ================= DETAILS =================
+                  // Aggregated Financial Metrics Block
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _infoRow(context, "Quantity", "${ticket.quantity}"),
-                        _infoRow(context, "Total", "MWK ${ticket.totalAmount}"),
-
-                        const SizedBox(height: 10),
-
-                        // ================= ITEMS =================
-                        if (ticket.items != null)
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "Ticket Types",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: AppSpacing.xs),
-
-                              ...ticket.items.map<Widget>((item) {
-                                return Container(
-                                  margin: EdgeInsets.only(bottom: 6),
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 8,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(item.ticketTypeName ?? ""),
-                                      Text("x${item.quantity}"),
-                                    ],
-                                  ),
-                                );
-                              }).toList(),
-                            ],
-                          ),
-
-                        const SizedBox(height: AppSpacing.md),
-
-                        // ================= STATUS =================
+                        _infoRow(context, "Global Aggregated Quantity", "${ticket.quantity ?? 0}"),
+                        _infoRow(context, "Total Amount Transacted", "MWK ${ticket.totalAmount ?? 0}"),
+                        const SizedBox(height: 8),
                         Container(
                           width: double.infinity,
                           padding: EdgeInsets.all(AppSpacing.sm),
                           decoration: BoxDecoration(
                             color: ticket.paymentStatus == "paid"
-                                ? AppColors.leafGreen.withOpacity(0.15)
+                                ? AppColors.leafGreen.withOpacity(0.12)
                                 : Theme.of(context).colorScheme.error.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
-                            ticket.paymentStatus.toUpperCase(),
+                            (ticket.paymentStatus ?? "unpaid").toUpperCase(),
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
@@ -173,43 +138,132 @@ class TicketDetailScreen extends StatelessWidget {
                             ),
                           ),
                         ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            ),
+          ),
+        ),
 
-                        const SizedBox(height: AppSpacing.md),
+        // ================= ADAPTIVE SUB-TICKETS TITLE HEADER =================
+        if (subItems.isNotEmpty)
+          SliverPadding(
+            padding: EdgeInsets.symmetric(
+              horizontal: !isMobile ? (screenWidth - 850) / 2 : AppSpacing.md,
+            ),
+            sliver: SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Text(
+                  "Associated Live Sub-Ticket Matrix",
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ),
+            ),
+          ),
 
-                        Text(
-                          "Show this QR code at the entrance",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.outline,
-                            fontSize: 12,
+        // ================= RESPONSIVE LAYOUT GRID =================
+        if (subItems.isNotEmpty)
+          SliverPadding(
+            padding: EdgeInsets.symmetric(
+              horizontal: !isMobile ? (screenWidth - 850) / 2 : AppSpacing.md,
+            ),
+            sliver: SliverGrid(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                mainAxisSpacing: mainAxisSpacing,
+                crossAxisSpacing: crossAxisSpacing,
+                childAspectRatio: isMobile ? 4.5 : 3.5,
+              ),
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
+                  final item = subItems[index];
+                  return Container(
+                    padding: EdgeInsets.all(AppSpacing.sm),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.12),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item.ticketTypeName ?? "Standard Entry",
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                "Validation Queue Dynamic Item",
+                                style: TextStyle(
+                                  fontSize: 11, 
+                                  color: Theme.of(context).colorScheme.outline,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: AppColors.mangoOrange.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            "x${item.quantity ?? 0}",
+                            style: const TextStyle(
+                              color: AppColors.mangoOrange,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
                           ),
                         ),
                       ],
                     ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.md),
-                ],
+                  );
+                },
+                childCount: subItems.length,
               ),
             ),
-          ],
+          ),
+
+        // ================= FOOTER ATTACHMENT =================
+        const SliverToBoxAdapter(
+          child: SizedBox(height: 60),
         ),
-      ),
+        const SliverToBoxAdapter(
+          child: WebFooter(),
+        ),
+      ],
     );
   }
 
   Widget _infoRow(BuildContext context, String title, String value) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 6),
+      padding: const EdgeInsets.symmetric(vertical: 5.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            title, style: TextStyle(color: Theme.of(context).colorScheme.outline),
+            title,
+            style: TextStyle(color: Theme.of(context).colorScheme.outline, fontSize: 13),
           ),
           Text(
             value,
-            style: const TextStyle(fontWeight: FontWeight.w600),
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
           ),
         ],
       ),

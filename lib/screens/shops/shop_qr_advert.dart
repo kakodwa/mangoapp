@@ -103,7 +103,7 @@ class _ShopQrBannerState extends State<ShopQrBanner>
 
                   const Text(
 
-                    "OPEN YOUR SHOP ON MANGOHUB",
+                    "OPEN YOUR SHOP ON MALATRADE",
 
                     style: TextStyle(
                       color: Colors.white,

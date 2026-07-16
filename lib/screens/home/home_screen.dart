@@ -3,13 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../providers/feed/main_feed_providers.dart';
-import '../../providers/products_provider.dart'; // contains bannersProvider
+import '../../providers/products_provider.dart'; 
 
 import '../../theme/design_system/app_spacing.dart';
 
 import '../../widgets/feed/feed_list_widget.dart';
 import '../../widgets/web_footer.dart';
-import '../../widgets/update.dart';
+
 
 import '../../screens/delivery/delivery_code_entry_screen.dart';
 import '../../screens/events/scan_ticket_screen.dart';
@@ -62,7 +62,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
       if (mounted) {
         final dbBanners = ref.read(bannersProvider).valueOrNull ?? [];
-        final totalBannersCount = dbBanners.length + 1; // DB count + your custom default banner
+        
+        // 🛑 FILTER: Filter out banners containing 'text banner' or 'install app'
+        final filteredBanners = dbBanners.where((banner) {
+          final String sub = (banner.subtitle ?? '').trim();
+          return sub != 'text banner' && sub != 'install app';
+        }).toList();
+
+        final totalBannersCount = filteredBanners.length + 1; // Filtered DB count + custom default banner
 
         if (totalBannersCount > 0) {
           final nextIndex = (bannerIndex + 1) % totalBannersCount;
@@ -115,14 +122,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return CustomScrollView(
           controller: controller,
           slivers: [
-            const SliverToBoxAdapter(
-              child: UpdatesTicker(),
-            ),
-            /// Banner
+            /// Banner Section
             SliverToBoxAdapter(
               child: bannersAsync.when(
                 data: (banners) {
-                  final displayLength = banners.length + 1;
+                  // 🛑 FILTER: Exclude backend banners that contain 'text banner' or 'install app'
+                  final validBanners = banners.where((banner) {
+                    final String sub = (banner.subtitle ?? '').trim();
+                    return sub != 'text banner' && sub != 'install app';
+                  }).toList();
+
+                  final displayLength = validBanners.length + 1;
 
                   return Align(
                     alignment: Alignment.topCenter,
@@ -146,31 +156,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 bannerIndex = index;
                               },
                               itemBuilder: (context, index) {
-                                if (index == banners.length) {
+                                if (index == validBanners.length) {
+                                  return ShopQrBanner(
+                                    onTap: () {
+                                      _analytics.logEvent(
+                                        'create_shop_banner_click',
+                                      );
 
-  return ShopQrBanner(
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => const RegisterScreen(),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                }
 
-    onTap: () {
-
-      _analytics.logEvent(
-        'create_shop_banner_click',
-      );
-
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => const RegisterScreen(),
-        ),
-      );
-
-    },
-
-  );
-
-}
-
-                                final banner = banners[index];
+                                final banner = validBanners[index];
                                 return Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 2.0),
                                   child: InkWell(
@@ -228,10 +231,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
        
-            
-
-
-
             /// Quick Actions
             SliverToBoxAdapter(
               child: Align(
@@ -294,8 +293,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: SizedBox(height: 40),
             ),
             const SliverToBoxAdapter(
-      child: WebFooter(),
-    ),
+              child: WebFooter(),
+            ),
           ],
         );
       },

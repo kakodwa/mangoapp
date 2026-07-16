@@ -97,27 +97,22 @@ class ProductActions {
 
     if (kIsWeb) {
       final bytes = await image.readAsBytes();
-      
-      // Determine image extension to set exact content type headers dynamically
       String ext = image.name.split('.').last.toLowerCase();
       String mimeSubType = (ext == 'png') ? 'png' : 'jpeg';
 
       final filename = image.name.isEmpty
-    ? "upload.${mimeSubType == "png" ? "png" : "jpg"}"
-    : image.name;
+          ? "upload.${mimeSubType == 'png' ? 'png' : 'jpg'}"
+          : image.name;
 
-file = MultipartFile.fromBytes(
-  bytes,
-  filename: filename,
-  contentType: MediaType('image', mimeSubType),
-);
-
-print("Multipart filename: ${file.filename}");
+      file = MultipartFile.fromBytes(
+        bytes,
+        filename: filename,
+        contentType: MediaType('image', mimeSubType),
+      );
     } else {
       file = await MultipartFile.fromFile(image.path);
     }
 
-    // Convert variants array objects list into a raw JSON text string
     final String variantsJsonString = jsonEncode(
       variants.map((v) => v.toJson()).toList(),
     );
@@ -129,6 +124,9 @@ print("Multipart filename: ${file.filename}");
       "stock": product.stock,
       "shop": product.shopId,
       "category": product.category,
+      "sub_category": product.subCategory, 
+      "brand": product.brand,               
+      "delivery_duration": product.deliveryDuration, // 👈 Added
       "image": file,
       "variants": variantsJsonString,
     });
@@ -138,7 +136,6 @@ print("Multipart filename: ${file.filename}");
       formData,
     );
 
-    print("FULL CREATE RESPONSE: $response");
     return Product.fromJson(response);
   }
 
@@ -162,10 +159,10 @@ print("Multipart filename: ${file.filename}");
     print("🔥 Uploading ${images.length} images");
     print("Files: ${formData.files.length}");
 
-for (final f in formData.files) {
-  print("Field: ${f.key}");
-  print("Filename: '${f.value.filename}'");
-}
+    for (final f in formData.files) {
+      print("Field: ${f.key}");
+      print("Filename: '${f.value.filename}'");
+    }
 
     for (final image in images) {
       final bytes = await image.readAsBytes();
@@ -179,8 +176,8 @@ for (final f in formData.files) {
           MultipartFile.fromBytes(
             bytes,
             filename: image.name.isEmpty
-            ? "gallery_${DateTime.now().millisecondsSinceEpoch}.jpg"
-            : image.name,
+                ? "gallery_${DateTime.now().millisecondsSinceEpoch}.jpg"
+                : image.name,
             contentType: MediaType('image', mimeSubType), // 👈 CRITICAL: Web support boundary for sub-gallery
           ),
         ),
@@ -287,11 +284,9 @@ final cartTotalProvider = Provider<double>((ref) {
 });
 
 final addToCartProvider = Provider((ref) {
-  // Uses brackets [] around variant to mark it optional so existing product cards continue working
   return (Product product, int qty, [LocalProductVariant? variant]) {
     final cart = ref.read(cartProvider);
     
-    // Finds matching product using custom attribute property deep comparison check hooks
     final index = cart.indexWhere((e) {
       final matchProduct = e.product.id == product.id;
       if (e.variant == null && variant == null) return matchProduct;
@@ -315,7 +310,6 @@ final addToCartProvider = Provider((ref) {
 });
 
 final removeFromCartProvider = Provider((ref) {
-  // Identifies lines by looking at matching target properties mapping
   return (int productId, Map<String, dynamic>? variantAttributes) {
     final cart = ref.read(cartProvider);
     

@@ -465,41 +465,39 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
       AppToast.success(context, "Order created successfully");
 
-      // lib/screens/cart/checkout_screen.dart
+      // Look up the tabs manager system context
+      final tabsScreen = MainTabsScreen.of(context);
 
-// Look up the tabs manager system context
-final tabsScreen = MainTabsScreen.of(context);
-
-if (tabsScreen != null) {
-  // ✅ FIXED: Routes directly inside the tab slot view framework engine at index 42
-  tabsScreen.navigateToPayment(
-    transactionId: orderId,
-    amount: widget.total,
-    purpose: "order_payment",
-    referenceType: "order",
-    onSuccess: (payment) {
-      ref.invalidate(userOrdersProvider);
-      ref.read(cartProvider.notifier).state = [];
-    },
-  );
-} else {
-  // Standard context route stack fallback execution
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => PaymentCheckoutScreen(
-        transactionId: orderId,
-        amount: widget.total,
-        purpose: "order_payment",
-        referenceType: "order",
-        onSuccess: (payment) {
-          ref.invalidate(userOrdersProvider);
-          ref.read(cartProvider.notifier).state = [];
-        },
-      ),
-    ),
-  );
-}
+      if (tabsScreen != null) {
+        // ✅ FIXED: Routes directly inside the tab slot view framework engine at index 42
+        tabsScreen.navigateToPayment(
+          transactionId: orderId,
+          amount: widget.total,
+          purpose: "order_payment",
+          referenceType: "order",
+          onSuccess: (payment) {
+            ref.invalidate(ordersPaginationProvider);
+            ref.read(cartProvider.notifier).state = [];
+          },
+        );
+      } else {
+        // Standard context route stack fallback execution
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => PaymentCheckoutScreen(
+              transactionId: orderId,
+              amount: widget.total,
+              purpose: "order_payment",
+              referenceType: "order",
+              onSuccess: (payment) {
+                ref.invalidate(ordersPaginationProvider);
+                ref.read(cartProvider.notifier).state = [];
+              },
+            ),
+          ),
+        );
+      }
     } catch (e) {
       AppToast.error(context, "Failed: $e");
     } finally {
