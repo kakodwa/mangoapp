@@ -391,7 +391,7 @@ AppFab(
 
     final String eventUrl = kIsWeb
         ? "${Uri.base.origin}/event/${event.id}"
-        : "https://mangobackend-yayy.onrender.com/event/${event.id}";
+        : "https://malatrade.com/event/${event.id}";
 
     final String shareMessage =
         "🎫 ${event.title}\n"

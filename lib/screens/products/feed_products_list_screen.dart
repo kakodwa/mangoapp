@@ -13,7 +13,6 @@ import '../../providers/feed/main_feed_providers.dart';
 import '../../widgets/feed/feed_list_widget.dart';
 import '../../widgets/web_footer.dart';
 
-
 // Analytics & Services
 import '../../services/analytics_service.dart';
 
@@ -87,27 +86,71 @@ class _ProductsListScreenState extends ConsumerState<ProductsListScreen> {
             
             await ref.read(homeFeedProvider.notifier).refresh();
           },
-          child: CustomScrollView(
-            controller: _controller,
-            slivers: [
-              FeedListWidget(
-                items: items,
-              ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Center(
-                    child: ref.watch(homeFeedProvider.notifier).loadingMore
-                        ? const CircularProgressIndicator()
-                        : const SizedBox(),
-                  ),
+          child: items.isEmpty
+              ? CustomScrollView(
+                  // physics ensures pull-to-refresh still works when empty
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.shopping_bag_outlined,
+                                size: 72,
+                                color: Colors.grey[400],
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'No Products Found',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'There are no items to display at the moment. Pull down to refresh and try again.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[500],
+                                  height: 1.4,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              : CustomScrollView(
+                  controller: _controller,
+                  slivers: [
+                    FeedListWidget(
+                      items: items,
+                    ),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Center(
+                          child: ref.watch(homeFeedProvider.notifier).loadingMore
+                              ? const CircularProgressIndicator()
+                              : const SizedBox(),
+                        ),
+                      ),
+                    ),
+                    const SliverToBoxAdapter(
+                      child: WebFooter(),
+                    ),
+                  ],
                 ),
-              ),
-              const SliverToBoxAdapter(
-                child: WebFooter(),
-                ),
-            ],
-          ),
         );
       },
     );

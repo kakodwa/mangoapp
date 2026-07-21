@@ -437,7 +437,7 @@ class _LodgeDetailScreenState extends ConsumerState<LodgeDetailScreen> {
 
                     final String lodgeUrl = kIsWeb
                         ? "${Uri.base.origin}/lodge/${widget.lodge.id}"
-                        : "https://mangobackend-yayy.onrender.com/lodge/${widget.lodge.id}";
+                        : "https://malatrade.com/lodge/${widget.lodge.id}";
 
                     final String shareMessage =
                         "🏡 ${widget.lodge.name}\n"

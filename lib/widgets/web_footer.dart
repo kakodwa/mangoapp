@@ -18,7 +18,7 @@ class WebFooter extends StatelessWidget {
   });
 
   Future<void> _launchAdminUrl() async {
-    final Uri url = Uri.parse('https://mangobackend-yayy.onrender.com/admin_appconsole/dashboard/'); 
+    final Uri url = Uri.parse('https://malatrade.com/admin/'); 
     if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
       throw Exception('Could not launch $url');
     }

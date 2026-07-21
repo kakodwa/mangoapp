@@ -584,7 +584,7 @@ Future<void> _downloadOrSaveQr(BuildContext context, String url, String shopName
 
     final String shopUrl = kIsWeb
         ? "${Uri.base.origin}/shop/${widget.shopId}"
-        : "https://mangobackend-yayy.onrender.com/shop/${widget.shopId}";
+        : "https://malatrade.com/shop/${widget.shopId}";
 
     final String shareMessage =
         "🏪 ${shop.name}\n"

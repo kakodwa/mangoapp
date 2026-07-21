@@ -59,27 +59,71 @@ class _EventListScreenState extends ConsumerState<EventListScreen> {
         onRefresh: () async {
           await ref.read(eventFeedProvider.notifier).refresh();
         },
-        child: CustomScrollView(
-          controller: _controller,
-          slivers: [
-            FeedListWidget(
-              items: items,
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Center(
-                  child: ref.watch(eventFeedProvider.notifier).loadingMore
-                      ? const CircularProgressIndicator()
-                      : const SizedBox(),
-                ),
+        child: items.isEmpty
+            ? CustomScrollView(
+                // physics ensures pull-to-refresh still works when empty
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.calendar_today_outlined,
+                              size: 72,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No Events Found',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'There are no upcoming events scheduled right now. Pull down to refresh and check again.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[500],
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            : CustomScrollView(
+                controller: _controller,
+                slivers: [
+                  FeedListWidget(
+                    items: items,
+                  ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Center(
+                        child: ref.watch(eventFeedProvider.notifier).loadingMore
+                            ? const CircularProgressIndicator()
+                            : const SizedBox(),
+                      ),
+                    ),
+                  ),
+                  const SliverToBoxAdapter(
+                    child: WebFooter(),
+                  ),
+                ],
               ),
-            ),
-            const SliverToBoxAdapter(
-                child: WebFooter(),
-                ),
-          ],
-        ),
       ),
     );
   }

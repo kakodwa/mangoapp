@@ -5,17 +5,19 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logger/logger.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../models/payment_model.dart';
 import '../../models/review_model.dart';
+
 import '../errors/api_exception.dart';
 
 class ApiClient {
   static String get baseUrl {
-    if (kIsWeb) return 'https://mangobackend-yayy.onrender.com/api/';
-    return 'https://mangobackend-yayy.onrender.com/api/';
+    if (kIsWeb) return 'https://malatrade.com/api/';
+    return 'https://malatrade.com/api/';
   }
 
-  static const String host = 'https://mangobackend-yayy.onrender.com/api/';
+  static const String host = 'https://malatrade.com/api/';
   
   late Dio _dio;
   final _secureStorage = const FlutterSecureStorage();

@@ -770,7 +770,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
 
                               final String productUrl = kIsWeb
                                   ? "${Uri.base.origin}/product/${product.id}"
-                                  : "https://mangobackend-yayy.onrender.com/product/${product.id}";
+                                  : "https://malatrade.com/product/${product.id}";
 
                               final String shareMessage =
                                   "🛍️ ${product.name}\n"

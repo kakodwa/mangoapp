@@ -78,27 +78,71 @@ class _PropertiesListScreenState extends ConsumerState<PropertiesListScreen> {
 
             await ref.read(propertyFeedProvider.notifier).refresh();
           },
-          child: CustomScrollView(
-            controller: _controller,
-            slivers: [
-              FeedListWidget(
-                items: items,
-              ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Center(
-                    child: ref.watch(propertyFeedProvider.notifier).loadingMore
-                        ? const CircularProgressIndicator()
-                        : const SizedBox(),
-                  ),
+          child: items.isEmpty
+              ? CustomScrollView(
+                  // physics ensures pull-to-refresh still works when empty
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.real_estate_agent_outlined, // Real estate icon
+                                size: 72,
+                                color: Colors.grey[400],
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'No Properties Found',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[700],
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'There are no active property listings available right now. Pull down to refresh and try again.',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey[500],
+                                  height: 1.4,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
+              : CustomScrollView(
+                  controller: _controller,
+                  slivers: [
+                    FeedListWidget(
+                      items: items,
+                    ),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Center(
+                          child: ref.watch(propertyFeedProvider.notifier).loadingMore
+                              ? const CircularProgressIndicator()
+                              : const SizedBox(),
+                        ),
+                      ),
+                    ),
+                    const SliverToBoxAdapter(
+                      child: WebFooter(),
+                    ),
+                  ],
                 ),
-              ),
-              const SliverToBoxAdapter(
-                child: WebFooter(),
-                ),
-            ],
-          ),
         );
       },
     );

@@ -9,6 +9,8 @@ flutter pub run flutter_launcher_icons
 
 https://mangobackend-yayy.onrender.com
 
+source /home/malanxux/virtualenv/MALATRADE/3.11/bin/activate
+
 
 FAB
 bottom:30,
@@ -38,3 +40,31 @@ Mangochi@#2026
 FireBase
 
 -MamgoHub - MangoApp
+
+/__________________________________________________________________________________________
+source /home/malanxux/virtualenv/MALATRADE_/3.11/bin/activate && cd /home/malanxux/MALATRADE_
+
+
+import os
+import sys
+
+PROJECT_ROOT = "/home/malanxux/MALATRADE2/mangobackend"
+
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+os.environ.setdefault(
+    "DJANGO_SETTINGS_MODULE",
+    "marketplace.settings"
+)
+
+from django.core.wsgi import get_wsgi_application
+
+application = get_wsgi_application()
+/____________________________________________________________________________________________
+DB_ENGINE=django.db.backends.mysql
+DB_NAME=malanxux_malatrade_db
+DB_USER=malanxux_malatrade_db
+DB_PASSWORD=MalaTrade2026Secure!
+DB_HOST=localhost
+DB_PORT=3306

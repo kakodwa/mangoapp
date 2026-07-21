@@ -216,7 +216,7 @@ class HelpSupportScreen extends StatelessWidget {
                                   context: context,
                                   icon: Icons.email,
                                   title: "Email Support",
-                                  value: "malatrade@gmail.com",
+                                  value: "info@malatrade.com",
                                   color: Theme.of(context).colorScheme.primary,
                                 ),
                                 _contactCard(
@@ -246,7 +246,7 @@ class HelpSupportScreen extends StatelessWidget {
                         context: context,
                         icon: Icons.email,
                         title: "Email Support",
-                        value: "malatrade@gmail.com",
+                        value: "support@malatrade.com",
                         color: Theme.of(context).colorScheme.primary,
                       ),
                       _contactCard(
