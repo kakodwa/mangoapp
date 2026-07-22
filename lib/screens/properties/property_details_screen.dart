@@ -472,21 +472,18 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     AppFab(
-                      heroTag: "map_coord_fab",
-                      icon: Icons.map_outlined,
-                      tooltip: "View Geolocation Map",
-                      onPressed: () {
-                        analytics.logEvent('property_details_map_click');
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          builder: (_) => ShopMapModal(
-                            shopLat: property.latitude,
-                            shopLng: property.longitude,
-                          ),
-                        );
-                      },
-                    ),
+  heroTag: "map_coord_fab",
+  icon: Icons.map_outlined,
+  tooltip: "View Geolocation Map",
+  onPressed: () {
+    analytics.logEvent('property_details_map_click');
+    // Triggers navigation through MainTabsScreen's IndexedStack router
+    MainTabsScreen.of(context)?.navigateToShopMap(
+      property.latitude,
+      property.longitude,
+    );
+  },
+),
                     const SizedBox(height: AppSpacing.sm),
                     AppFab(
                       heroTag: "whatsapp_prop_fab",

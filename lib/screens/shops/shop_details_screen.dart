@@ -39,6 +39,7 @@ import '../../utils/app_toast.dart';
 import '../../models/shop_model.dart'; 
 import '../../models/product_model.dart'; 
 import '../../services/analytics_service.dart';
+import '../main_tabs_screen.dart'; 
 
 class ShopDetailsScreen extends ConsumerStatefulWidget {
   final int shopId;
@@ -86,7 +87,7 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
     });
 
     try {
-      final url = "https://mangobackend-yayy.onrender.com/api/shops/${widget.shopId}/products/?page=$_currentPage";
+      final url = "https://malatrade.com/api/shops/${widget.shopId}/products/?page=$_currentPage";
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
@@ -218,7 +219,7 @@ Future<void> _downloadOrSaveQr(BuildContext context, String url, String shopName
               const Icon(Icons.shopping_bag, color: AppColors.mangoOrange, size: 20), 
               const SizedBox(width: 6), 
               Text(
-                "MangoHub Marketplace",
+                "MalaTrade Marketplace",
                 style: TextStyle(
                   color: Colors.grey.shade800, 
                   fontWeight: FontWeight.bold, 
@@ -714,19 +715,20 @@ Future<void> _downloadOrSaveQr(BuildContext context, String url, String shopName
                         },
                       ),
                       const SizedBox(height: AppSpacing.sm), 
-                      AppFab(
-                        heroTag: "map_shop_fab",
-                        icon: Icons.map_outlined, 
-                        tooltip: "Open Map Geolocation",
-                        onPressed: () {
-                          _analytics.logEvent('shop_map_click'); 
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true, 
-                            builder: (_) => ShopMapModal(shopLat: shop.latitude, shopLng: shop.longitude), 
-                          );
-                        },
-                      ),
+                      // NEW CODE:
+AppFab(
+  heroTag: "map_shop_fab",
+  icon: Icons.map_outlined, 
+  tooltip: "Open Map Geolocation",
+  onPressed: () {
+    _analytics.logEvent('shop_map_click'); 
+    // Triggers navigation inside MainTabsScreen's IndexedStack
+    MainTabsScreen.of(context)?.navigateToShopMap(
+      shop.latitude, 
+      shop.longitude,
+    );
+  },
+),
                     ],
                   ),
                 ),

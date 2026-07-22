@@ -1,12 +1,13 @@
+// lib/screens/shops/shop_map_modal.dart
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
-import '../../widgets/main_app_bar.dart';
 import '../../services/map_service.dart';
 import '../../theme/app_colors.dart';
 
@@ -55,8 +56,7 @@ class _ShopMapModalState extends State<ShopMapModal> {
         return;
       }
 
-      LocationPermission perm =
-          await Geolocator.checkPermission();
+      LocationPermission perm = await Geolocator.checkPermission();
 
       if (perm == LocationPermission.denied) {
         perm = await Geolocator.requestPermission();
@@ -109,9 +109,7 @@ class _ShopMapModalState extends State<ShopMapModal> {
       final shop = LatLng(widget.shopLat, widget.shopLng);
 
       _heading =
-          (pos.heading.isFinite && pos.heading >= 0)
-              ? pos.heading
-              : 0;
+          (pos.heading.isFinite && pos.heading >= 0) ? pos.heading : 0;
 
       speed = pos.speed;
 
@@ -146,156 +144,146 @@ class _ShopMapModalState extends State<ShopMapModal> {
   Widget build(BuildContext context) {
     final shop = LatLng(widget.shopLat, widget.shopLng);
 
-    return Scaffold(
-      backgroundColor: Colors.grey.shade100,
+    if (loading) {
+      return Center(
+        child: CircularProgressIndicator(
+          color: AppColors.primary(context),
+        ),
+      );
+    }
 
-      appBar: const MainAppBar(title: 'Navigation'),
-
-      body: loading
-          ? Center(
-              child: CircularProgressIndicator(
-                color: AppColors.primary(context),
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: Colors.grey.shade100,
+      child: Stack(
+        children: [
+          // ================= MAP =================
+          FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter: userLocation ?? shop,
+              initialZoom: 16,
+              onMapReady: () {
+                mapReady = true;
+              },
+              onPositionChanged: (pos, hasGesture) {
+                if (hasGesture) {
+                  followUser = false;
+                  setState(() {});
+                }
+              },
+            ),
+            children: [
+              TileLayer(
+                urlTemplate: kIsWeb
+                    ? 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
+                    : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                subdomains: kIsWeb ? const ['a', 'b', 'c', 'd'] : const [],
+                userAgentPackageName: 'com.example.mangochi_marketplace',
               ),
-            )
-          : Stack(
-              children: [
-
-                // ================= MAP =================
-                FlutterMap(
-                  mapController: _mapController,
-                  options: MapOptions(
-                    initialCenter: userLocation ?? shop,
-                    initialZoom: 16,
-
-                    onMapReady: () {
-                      mapReady = true;
-                    },
-
-                    onPositionChanged: (pos, hasGesture) {
-                      if (hasGesture) {
-                        followUser = false;
-                        setState(() {});
-                      }
-                    },
+              PolylineLayer(
+                polylines: [
+                  Polyline(
+                    points: routePoints,
+                    strokeWidth: 5,
+                    color: AppColors.primary(context),
                   ),
-
-                  children: [
-                     TileLayer(
-                      urlTemplate:
-                      "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                      userAgentPackageName: 'com.example.mangochi_marketplace',
-                      ),
-
-                    PolylineLayer(
-                      polylines: [
-                        Polyline(
-                          points: routePoints,
-                          strokeWidth: 5,
+                ],
+              ),
+              MarkerLayer(
+                markers: [
+                  if (userLocation != null)
+                    Marker(
+                      point: userLocation!,
+                      width: 60,
+                      height: 60,
+                      child: Transform.rotate(
+                        angle: _heading * (pi / 180),
+                        child: Icon(
+                          Icons.navigation,
                           color: AppColors.primary(context),
+                          size: 32,
                         ),
-                      ],
+                      ),
                     ),
+                  Marker(
+                    point: shop,
+                    width: 60,
+                    height: 60,
+                    child: const Icon(
+                      Icons.storefront,
+                      color: Colors.green,
+                      size: 40,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
 
-                    MarkerLayer(
-                      markers: [
-                        if (userLocation != null)
-                          Marker(
-                            point: userLocation!,
-                            width: 60,
-                            height: 60,
-                            child: Transform.rotate(
-                              angle: _heading * (pi / 180),
-                              child: Icon(
-                                Icons.navigation,
-                                color: AppColors.primary(context),
-                                size: 32,
-                              ),
-                            ),
-                          ),
-
-                        Marker(
-                          point: shop,
-                          width: 60,
-                          height: 60,
-                          child: const Icon(
-                            Icons.storefront,
-                            color: Colors.green,
-                            size: 40,
-                          ),
-                        ),
-                      ],
+          // ================= FLOATING PILL INFO =================
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 250),
+            top: followUser ? 16 : 10,
+            left: 16,
+            right: 16,
+            child: Center(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                width: followUser
+                    ? MediaQuery.of(context).size.width > 700
+                        ? 420
+                        : double.infinity
+                    : 140,
+                padding: followUser
+                    ? const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      )
+                    : const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.92),
+                  borderRadius: BorderRadius.circular(999),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.10),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
-
-                // ================= FLOATING PILL INFO =================
-                AnimatedPositioned(
-                  duration: const Duration(milliseconds: 250),
-                  top: followUser ? 16 : 10,
-                  left: 16,
-                  right: 16,
-
-                  child: Center(
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 250),
-
-                      width: followUser
-                          ? MediaQuery.of(context).size.width > 700
-                              ? 420
-                              : double.infinity
-                          : 140,
-
-                      padding: followUser
-                          ? const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 12,
-                            )
-                          : const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 8,
-                            ),
-
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.92),
-                        borderRadius: BorderRadius.circular(999),
-
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.10),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-
-                      child: followUser
-                          ? _expandedCard()
-                          : _collapsedCard(),
-                    ),
-                  ),
-                ),
-
-                // ================= RECENTER BUTTON =================
-                Positioned(
-                  bottom: 110,
-                  right: 18,
-                  child: FloatingActionButton(
-                    heroTag: "follow",
-                    backgroundColor: AppColors.primary(context),
-                    child: const Icon(Icons.my_location),
-                    onPressed: () {
-                      followUser = true;
-
-                      if (userLocation != null && mapReady) {
-                        _mapController.move(userLocation!, 16);
-                      }
-
-                      setState(() {});
-                    },
-                  ),
-                ),
-              ],
+                child: followUser
+                    ? _expandedCard()
+                    : _collapsedCard(),
+              ),
             ),
+          ),
+
+          // ================= RECENTER BUTTON =================
+          Positioned(
+            bottom: 110,
+            right: 18,
+            child: FloatingActionButton(
+              heroTag: "follow",
+              backgroundColor: AppColors.primary(context),
+              child: const Icon(Icons.my_location),
+              onPressed: () {
+                followUser = true;
+
+                if (userLocation != null && mapReady) {
+                  _mapController.move(userLocation!, 16);
+                }
+
+                setState(() {});
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -304,13 +292,11 @@ class _ShopMapModalState extends State<ShopMapModal> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-
         // SPEED
         Row(
           children: [
             Icon(Icons.speed,
-                size: 18,
-                color: AppColors.primary(context)),
+                size: 18, color: AppColors.primary(context)),
             const SizedBox(width: 8),
             Text(
               "${(speed * 3.6).toStringAsFixed(1)} km/h",
@@ -347,8 +333,7 @@ class _ShopMapModalState extends State<ShopMapModal> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Icon(Icons.navigation,
-            size: 18,
-            color: AppColors.primary(context)),
+            size: 18, color: AppColors.primary(context)),
         const SizedBox(width: 6),
         Text(
           "${(remainingDistance / 1000).toStringAsFixed(1)} km",

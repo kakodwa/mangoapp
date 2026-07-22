@@ -482,22 +482,18 @@ class _LodgeDetailScreenState extends ConsumerState<LodgeDetailScreen> {
 
                 if (widget.lodge.latitude != null && widget.lodge.longitude != null)
                   AppFab(
-                    heroTag: "map_lodge_fab",
-                    icon: Icons.map_outlined,
-                    tooltip: "Open Geolocation Tracking",
-                    onPressed: () {
-                      _analyticsService.logEvent('lodge_map_view_${widget.lodge.id}');
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (_) => ShopMapModal(
-                          shopLat: widget.lodge.latitude!,
-                          shopLng: widget.lodge.longitude!,
-                        ),
-                      );
-                    },
-                  ),
+  heroTag: "map_lodge_fab",
+  icon: Icons.map_outlined,
+  tooltip: "Open Geolocation Tracking",
+  onPressed: () {
+    _analyticsService.logEvent('lodge_map_view_${widget.lodge.id}');
+    // Triggers navigation through MainTabsScreen's IndexedStack router
+    MainTabsScreen.of(context)?.navigateToShopMap(
+      widget.lodge.latitude!,
+      widget.lodge.longitude!,
+    );
+  },
+),
               ],
             ),
           ),

@@ -8,6 +8,7 @@ import '../widgets/app_scaffold.dart'; //
 import '../widgets/main_app_bar.dart'; //
 import '../widgets/main_drawer.dart'; //
 import '../widgets/hospitality/lodge_card.dart'; //
+import '../widgets/shop_map_modal.dart'; //
 import '../widgets/update.dart'; //
 
 import '../models/lodge_model.dart';           //
@@ -63,6 +64,7 @@ import 'shops/shop_details_screen.dart'; //
 import 'shops/my_shop_screen.dart'; //
 import 'shops/edit_shop_screen.dart'; //
 import 'shops/create_shop_screen.dart'; //
+ 
 
 import 'wallet/wallet_transactions_screen.dart'; //
 import 'wallet/withdrawal_screen.dart'; //
@@ -132,6 +134,9 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
 
   int? _calendarRoomId; //
 
+  double? _shopMapLat; // 👈 Coordinates for shop map route
+  double? _shopMapLng; // 👈 Coordinates for shop map route
+
   static bool _hasBeenDismissedGlobal = false; //
   bool _showAdBanner = true; //
 
@@ -147,7 +152,7 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
   late final List<Widget> _screens; //
   static MainTabsScreenState? instance; //
 
-  // 👈 NEW: History stack tracker to enable true procedural pop/back logic inside IndexedStack
+  // 👈 History stack tracker to enable true procedural pop/back logic inside IndexedStack
   final List<int> _navigationHistory = [];
 
   @override
@@ -205,7 +210,7 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
             _bannerPageController = PageController(); //
             _bannerTimer = Timer.periodic(const Duration(seconds: 5), (timer) { //
               if (_bannerPageController != null && _bannerPageController!.hasClients) { //
-                // 1. Re-calculate the filtered list right here so the timer knows the real target length
+                // Re-calculate the filtered list right here so the timer knows the real target length
                 final validAdsCount = _allBackendAds.where((ad) { //
                   final sub = (ad['subtitle'] ?? '').toString().trim(); //
                   return sub == 'text banner' || (sub == 'install app' && kIsWeb); //
@@ -249,24 +254,22 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
 
   // Method to evaluate if we are currently displaying a detail or third-level viewport
   bool _isDetailScreen() {
-    // These indexes correspond directly to nested/pushed forms, details, or checkout modules
     final detailIndices = {
-      12, 13, 14, 15, 16, // Primary Details (Product, Shop, Lodge, Property, Event)
+      12, 13, 14, 15, 16, // Primary Details
       17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, // Secondary Dashboard menus
-      31, 32, 33, 34, 35, 36, 37, 38, 39, 40, // Creation, Edit Form templates & Management pages
-      41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53 // Checkouts, calendars, scanned layouts, sub-rooms
+      31, 32, 33, 34, 35, 36, 37, 38, 39, 40, // Forms & Creation pages
+      41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54 // Checkouts & Shop Map Modal
     };
     return detailIndices.contains(_currentIndex);
   }
 
-  // 👈 Pops the top layout index from history, falling back seamlessly if history is dry
+  // Pops the top layout index from history
   void _navigateBack() {
     if (_navigationHistory.isNotEmpty) {
       setState(() {
         _currentIndex = _navigationHistory.removeLast();
       });
     } else {
-      // Direct hardcoded structural fallback mapping in case stack is completely bypassed
       setState(() {
         switch (_currentIndex) {
           case 12: _currentIndex = 2; break; // Product details -> Product list
@@ -276,7 +279,8 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
           case 16: _currentIndex = 4; break; // Event details -> Event list
           case 47: _currentIndex = 14; break; // Room details -> Lodge details
           case 48: _currentIndex = 47; break; // Booking Checkout -> Room details
-          default: _currentIndex = 0; // Ultimate fallback: Dashboard home
+          case 54: _currentIndex = 13; break; // Shop Map -> Shop details
+          default: _currentIndex = 0; // Fallback: Dashboard
         }
       });
     }
@@ -285,42 +289,50 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
   void navigateToProductDetails(int productId) {
     setState(() {
       _activeProductId = productId; //
-      _changeTab(12); // Use centralized router tracker to append history stack
+      _changeTab(12); //
     });
   }
 
   void navigateToShopDetails(int shopId) {
     setState(() {
       _activeShopId = shopId; //
-      _changeTab(13); // Use centralized router tracker to append history stack
+      _changeTab(13); //
+    });
+  }
+
+  void navigateToShopMap(double lat, double lng) {
+    setState(() {
+      _shopMapLat = lat;
+      _shopMapLng = lng;
+      _changeTab(54);
     });
   }
 
   void navigateToLodgeDetails(Lodge lodge) {
     setState(() {
       _activeLodge = lodge; //
-      _changeTab(14); // Use centralized router tracker to append history stack
+      _changeTab(14); //
     });
   }
 
   void navigateToPropertyDetails(int propertyId) {
     setState(() {
       _activePropertyId = propertyId; //
-      _changeTab(15); // Use centralized router tracker to append history stack
+      _changeTab(15); //
     });
   }
 
   void navigateToEventDetails(EventModel event) {
     setState(() {
       _activeEvent = event; //
-      _changeTab(16); // Use centralized router tracker to append history stack
+      _changeTab(16); //
     });
   }
 
   void navigateToTicketDetails(dynamic ticket) {
     setState(() {
       _activeTicket = ticket; //
-      _changeTab(50); // Use centralized router tracker to append history stack
+      _changeTab(50); //
     });
   }
 
@@ -333,7 +345,7 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
       _unlockPropertyId = propertyId; //
       _unlockPropertyTitle = propertyTitle; //
       _unlockPropertyFee = unlockFee; //
-      _changeTab(46); // Use centralized router tracker to append history stack
+      _changeTab(46); //
     });
   }
 
@@ -341,21 +353,21 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
     setState(() {
       _activeRoom = room; //
       _activeRoomLodgeImages = lodgeImages; //
-      _changeTab(47); // Use centralized router tracker to append history stack
+      _changeTab(47); //
     });
   }
 
   void navigateToBookingCheckout(Room room) {
     setState(() {
       _checkoutBookingRoom = room; //
-      _changeTab(48); // Use centralized router tracker to append history stack
+      _changeTab(48); //
     });
   }
 
   void navigateToBuyTicket(EventModel event) {
     setState(() {
       _activeEvent = event; //
-      _changeTab(45); // Use centralized router tracker to append history stack
+      _changeTab(45); //
     });
   }
 
@@ -363,7 +375,7 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
     setState(() {
       _checkoutItems = items; //
       _checkoutTotal = total; //
-      _changeTab(41); // Use centralized router tracker to append history stack
+      _changeTab(41); //
     });
   }
 
@@ -380,7 +392,7 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
       _paymentPurpose = purpose; //
       _packageReferenceType = referenceType; //
       _paymentOnSuccess = onSuccess; //
-      _changeTab(42); // Use centralized router tracker to append history stack
+      _changeTab(42); //
     });
   }
 
@@ -388,7 +400,6 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
     _changeTab(index, searchQuery: searchQuery);
   }
 
-  // 👈 MODIFIED: Intercepts all state switches to safely store the prior tab configuration in stack history
   void _changeTab(int index, {String? searchQuery}) {
     if (_currentIndex == index && searchQuery == null) return;
     setState(() {
@@ -530,6 +541,7 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
       case 51: return "Owner Bookings"; //
       case 52: return "Scan Booking QR"; //
       case 53: return "Sold Tickets"; //
+      case 54: return "Shop Navigation"; // 👈 AppBar Title for ShopMapModal
       default: return "MalaTrade"; //
     }
   }
@@ -544,12 +556,10 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
     final String targetUrl = _activeBackendAd!['target_url'] ?? _activeBackendAd!['url'] ?? '';  //
     final String title = _activeBackendAd!['title'] ?? 'Download the MalaTrade App';  //
 
-    // 🛡️ SAFETY GUARD: Completely hide if subtitle field is empty or unrecognized
     if (subtitle != 'install app' && subtitle != 'text banner') { //
       return const SizedBox.shrink(); //
     }
 
-    // 📱 OPTION A: App Installation Prompt (Restricted exclusively to kIsWeb surface layout matches)
     if (subtitle == 'install app') { //
       if (!kIsWeb) return const SizedBox.shrink();  //
 
@@ -639,9 +649,7 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
       );
     }
 
-    // 🖥️ OPTION B: Ultra-Thin Responsive GIF Banner Slider Panel (1000:50 Profile)
     if (subtitle == 'text banner') { //
-      // Filter out elements to make sure PageView only renders contextually visible slides
       final validAds = _allBackendAds.where((ad) { //
         final sub = (ad['subtitle'] ?? '').toString().trim(); //
         return sub == 'text banner' || (sub == 'install app' && kIsWeb); //
@@ -761,6 +769,7 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
     if (_currentIndex == 51) displayIndex = 6;  //
     if (_currentIndex == 52) displayIndex = 6; //
     if (_currentIndex == 53) displayIndex = 4; //
+    if (_currentIndex == 54) displayIndex = 1; // 👈 Highlights Shops tab in Bottom Navigation Bar
 
     return AppScaffold(
       currentIndex: displayIndex, //
@@ -770,7 +779,6 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
         onProfileTap: () => _changeTab(6), //
         onSearchTap: () => _changeTab(7), //
         onCartTap: () => _changeTab(8), //
-        // 👈 NEW: Inject a dynamic Back Arrow directly when on a sub-screen!
         leading: _isDetailScreen() 
             ? IconButton(
                 icon: const Icon(Icons.arrow_back_rounded),
@@ -887,6 +895,15 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
                     _activeEvent != null //
                         ? EventTicketsScreen(key: ValueKey('ev_tickets_${_activeEvent!.id}'), event: _activeEvent!) //
                         : const Center(child: Text("No active event selected for ticket viewing")), //
+                        
+                    // 👈 ShopMapModal Widget Route Entry
+                    _shopMapLat != null && _shopMapLng != null
+                        ? ShopMapModal(
+                            key: ValueKey('shop_map_${_shopMapLat}_$_shopMapLng'),
+                            shopLat: _shopMapLat!,
+                            shopLng: _shopMapLng!,
+                          )
+                        : const Center(child: Text("No shop location selected")),
                   ],
                 ),
               ),

@@ -339,21 +339,18 @@ class EventDetailScreen extends ConsumerWidget {
             // 🗺 MAP ACTIONS FAB BOUND
             if (event.latitude != null && event.longitude != null) ...[
               AppFab(
-                heroTag: "map_event_fab",
-                icon: Icons.map_outlined,
-                tooltip: "Open Map Tracking",
-                onPressed: () {
-                  analyticsService.logEvent('click_event_map_id_${event.id}');
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    builder: (_) => ShopMapModal(
-                      shopLat: event.latitude!,
-                      shopLng: event.longitude!,
-                    ),
-                  );
-                },
-              ),
+  heroTag: "map_event_fab",
+  icon: Icons.map_outlined,
+  tooltip: "Open Map Tracking",
+  onPressed: () {
+    analyticsService.logEvent('click_event_map_id_${event.id}');
+    // Triggers navigation through MainTabsScreen's IndexedStack router
+    MainTabsScreen.of(context)?.navigateToShopMap(
+      event.latitude!,
+      event.longitude!,
+    );
+  },
+),
               const SizedBox(height: AppSpacing.sm),
             ],
 
