@@ -4,6 +4,9 @@ import '../../widgets/web_footer.dart';
 import '../../providers/feed/main_feed_providers.dart';
 import '../../widgets/feed/feed_list_widget.dart';
 
+import '../../screens/search/global_search_input_bar.dart';
+import '../../screens/search/unified_search_screen.dart';
+
 class EventListScreen extends ConsumerStatefulWidget {
   const EventListScreen({
     super.key,
@@ -106,6 +109,7 @@ class _EventListScreenState extends ConsumerState<EventListScreen> {
             : CustomScrollView(
                 controller: _controller,
                 slivers: [
+                  GlobalSearchInputBar.sliver(),
                   FeedListWidget(
                     items: items,
                   ),

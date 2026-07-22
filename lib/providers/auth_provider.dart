@@ -1,4 +1,6 @@
 import 'dart:async'; // ⚡ Required for Completer
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../core/api/api_client.dart';
@@ -54,26 +56,50 @@ class AuthNotifier extends StateNotifier<AuthState> {
   // ✅ ERROR FORMATTER
   // ============================
   String formatDioError(dynamic error) {
-    final msg = error.toString();
 
-    if (msg.contains('401')) {
-      return 'Incorrect username or password';
+  if (error is DioException) {
+
+    debugPrint("========== API ERROR ==========");
+    debugPrint("STATUS: ${error.response?.statusCode}");
+    debugPrint("DATA:");
+    debugPrint(error.response?.data.toString());
+    debugPrint("===============================");
+
+    final data = error.response?.data;
+
+    if (data is Map<String, dynamic>) {
+
+      // Convert Django validation errors into readable text
+      return data.entries.map((entry) {
+        final value = entry.value;
+
+        if (value is List) {
+          return "${entry.key}: ${value.join(', ')}";
+        }
+
+        return "${entry.key}: $value";
+
+      }).join("\n");
     }
 
-    if (msg.contains('400')) {
-      return 'Invalid request. Check your input';
+
+    if (error.response?.statusCode == 401) {
+      return "Incorrect username or password";
     }
 
-    if (msg.contains('500')) {
-      return 'Server error. Try again later';
+    if (error.response?.statusCode == 500) {
+      return "Server error. Try again later";
     }
-
-    if (msg.contains('SocketException') || msg.contains('network')) {
-      return 'No internet connection';
-    }
-
-    return 'Something went wrong. Try again';
   }
+
+
+  if (error.toString().contains('SocketException')) {
+    return "No internet connection";
+  }
+
+
+  return "Something went wrong. Try again";
+}
 
   Future<void> _checkAuthStatus() async {
     try {

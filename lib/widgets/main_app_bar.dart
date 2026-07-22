@@ -11,6 +11,7 @@ import '../screens/auth/login_screen.dart';
 import '../screens/auth/register_screen.dart'; 
 import '../screens/search/unified_search_screen.dart'; 
 import '../services/analytics_service.dart';
+import '../widgets/install_app_button.dart';
 
 class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final VoidCallback? onProfileTap; 
@@ -80,6 +81,7 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // 🔍 GLOBAL UNIFIED SEARCH BUTTON
+                  //const InstallAppButton(),
                   IconButton(
                     icon: const Icon(Icons.search_rounded),
                     tooltip: 'Search Platform',

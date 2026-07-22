@@ -10,10 +10,11 @@ import '../../theme/design_system/app_spacing.dart';
 import '../../widgets/feed/feed_list_widget.dart';
 import '../../widgets/web_footer.dart';
 
+import '../../screens/search/unified_search_screen.dart';
+import '../../screens/search/global_search_input_bar.dart';
 
 import '../../screens/delivery/delivery_code_entry_screen.dart';
 import '../../screens/events/scan_ticket_screen.dart';
-import '../../screens/shops/shops_list_screen.dart';
 import '../../screens/shops/shop_qr_advert.dart';
 import '../../screens/auth/register_screen.dart';
 import '../about/how_it_works.dart';
@@ -22,6 +23,8 @@ import '../about/tour.dart';
 import '../main_tabs_screen.dart';
 
 import '../../services/analytics_service.dart'; 
+
+// ... existing imports ...
 
 class HomeScreen extends ConsumerStatefulWidget {
   final VoidCallback onDeliveryTap;
@@ -40,6 +43,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final PageController bannerController = PageController(); 
   final AnalyticsService _analytics = AnalyticsService(); 
   int bannerIndex = 0;
+
+  // Domain filter tabs matching UnifiedSearchScreen keys
+  final List<Map<String, String>> _quickSearchTypes = [
+    {'key': 'all', 'label': 'All items'},
+    {'key': 'product', 'label': 'Products'},
+    {'key': 'shop', 'label': 'Shops'},
+    {'key': 'property', 'label': 'Properties'},
+    {'key': 'lodge', 'label': 'Lodges'},
+    {'key': 'event', 'label': 'Events'},
+  ];
 
   @override
   void initState() {
@@ -63,13 +76,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (mounted) {
         final dbBanners = ref.read(bannersProvider).valueOrNull ?? [];
         
-        // 🛑 FILTER: Filter out banners containing 'text banner' or 'install app'
         final filteredBanners = dbBanners.where((banner) {
           final String sub = (banner.subtitle ?? '').trim();
           return sub != 'text banner' && sub != 'install app';
         }).toList();
 
-        final totalBannersCount = filteredBanners.length + 1; // Filtered DB count + custom default banner
+        final totalBannersCount = filteredBanners.length + 1;
 
         if (totalBannersCount > 0) {
           final nextIndex = (bannerIndex + 1) % totalBannersCount;
@@ -101,14 +113,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final bannersAsync = ref.watch(bannersProvider);
     final double screenWidth = MediaQuery.of(context).size.width;
 
-    // Responsive Carousel Heights
     double bannerCarouselHeight = 190.0;
     if (screenWidth >= 1200) {
-      bannerCarouselHeight = 340.0; // Desktop
+      bannerCarouselHeight = 340.0;
     } else if (screenWidth >= 800) {
-      bannerCarouselHeight = 260.0; // Tablet
+      bannerCarouselHeight = 260.0;
     } else if (screenWidth >= 600) {
-      bannerCarouselHeight = 220.0; // Large Foldables / Mini Tablets
+      bannerCarouselHeight = 220.0;
     }
 
     return feed.when(
@@ -122,11 +133,56 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return CustomScrollView(
           controller: controller,
           slivers: [
+            /// 0. SEARCH BAR SECTION
+            GlobalSearchInputBar.sliver(),
+
+            /// 1. DOMAIN FILTER CHIPS (All, Products, Shops, Properties, Lodges, Events)
+            SliverToBoxAdapter(
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 1200),
+                  height: 40,
+                  margin: const EdgeInsets.symmetric(vertical: 4),
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    itemCount: _quickSearchTypes.length,
+                    itemBuilder: (context, index) {
+                      final type = _quickSearchTypes[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: ActionChip(
+                          backgroundColor: Colors.white,
+                          side: BorderSide(color: Colors.grey.shade300),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          label: Text(
+                            type['label']!,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          onPressed: () {
+                            _analytics.logEvent('click_home_chip_${type['key']}');
+                            
+                            // Navigate directly to Unified Search Tab (Index 7)
+                            MainTabsScreen.of(context)?.setSelectedIndex(7);
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+
             /// Banner Section
             SliverToBoxAdapter(
               child: bannersAsync.when(
                 data: (banners) {
-                  // 🛑 FILTER: Exclude backend banners that contain 'text banner' or 'install app'
                   final validBanners = banners.where((banner) {
                     final String sub = (banner.subtitle ?? '').trim();
                     return sub != 'text banner' && sub != 'install app';
@@ -139,7 +195,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     child: Container(
                       constraints: const BoxConstraints(maxWidth: 1200),
                       margin: const EdgeInsets.only(
-                        top: 12,
+                        top: 8,
                         left: 12,
                         right: 12,
                         bottom: 8,
@@ -230,7 +286,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 height: AppSpacing.sm,
               ),
             ),
-       
+
             /// Quick Actions
             SliverToBoxAdapter(
               child: Align(
@@ -300,6 +356,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       },
     );
   }
+
 
   Widget _buildBanner(
     BuildContext context, {

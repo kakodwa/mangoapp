@@ -17,12 +17,6 @@ class WebFooter extends StatelessWidget {
     this.onHelpTap,
   });
 
-  Future<void> _launchAdminUrl() async {
-    final Uri url = Uri.parse('https://malatrade.com/admin/'); 
-    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-      throw Exception('Could not launch $url');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,33 +62,16 @@ class WebFooter extends StatelessWidget {
                 child: Divider(thickness: 0.5, height: 1, color: Colors.white30),
               ),
               
-              Flex(
-                direction: isDesktop ? Axis.horizontal : Axis.vertical,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Text(
-                    '© 2026 MalaTrade Marketplace. All rights reserved.',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 13,
-                    ),
-                  ),
-                  if (!isDesktop) const SizedBox(height: 12),
-                  TextButton.icon(
-                    onPressed: () {
-                      _analyticsService.logEvent('footer_admin_portal_click');
-                      _launchAdminUrl();
-                    },
-                    icon: const Icon(Icons.admin_panel_settings_outlined, size: 16, color: Colors.white),
-                    label: const Text('Admin Portal'),
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              ),
+              Center(
+  child: const Text(
+    '© 2026 MalaTrade Marketplace. All rights reserved.',
+    textAlign: TextAlign.center,
+    style: TextStyle(
+      color: Colors.white70,
+      fontSize: 13,
+    ),
+  ),
+),
             ],
           ),
         ),

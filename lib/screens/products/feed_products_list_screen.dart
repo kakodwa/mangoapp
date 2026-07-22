@@ -16,6 +16,9 @@ import '../../widgets/web_footer.dart';
 // Analytics & Services
 import '../../services/analytics_service.dart';
 
+import '../../screens/search/global_search_input_bar.dart';
+import '../../screens/search/unified_search_screen.dart';
+
 class ProductsListScreen extends ConsumerStatefulWidget {
   const ProductsListScreen({
     super.key,
@@ -133,6 +136,7 @@ class _ProductsListScreenState extends ConsumerState<ProductsListScreen> {
               : CustomScrollView(
                   controller: _controller,
                   slivers: [
+                    GlobalSearchInputBar.sliver(),
                     FeedListWidget(
                       items: items,
                     ),

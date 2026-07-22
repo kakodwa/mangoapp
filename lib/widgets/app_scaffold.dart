@@ -59,6 +59,8 @@ class AppScaffold extends StatelessWidget {
               NavigationRail(
                 selectedIndex: navBarIndex,
                 elevation: 1,
+                minWidth: 56,          
+                minExtendedWidth: 180,
                 backgroundColor: colorScheme.surface,
                 selectedIconTheme: IconThemeData(color: colorScheme.primary),
                 unselectedIconTheme: IconThemeData(color: colorScheme.onSurface.withOpacity(0.6)),
@@ -81,7 +83,7 @@ class AppScaffold extends StatelessWidget {
                   NavigationRailDestination(icon: Icon(Icons.hotel_outlined), selectedIcon: Icon(Icons.hotel), label: Text('Booking')),
                 ],
               ),
-              const VerticalDivider(thickness: 1, width: 1),
+              //const VerticalDivider(thickness: 1, width: 1),
             ],
 
             // Content Panel area housing viewport page components

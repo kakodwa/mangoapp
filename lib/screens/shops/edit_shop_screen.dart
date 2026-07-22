@@ -64,7 +64,7 @@ class _EditShopScreenState extends ConsumerState<EditShopScreen> {
     "Dowa","Karonga","Kasungu","Likoma","Lilongwe","Machinga",
     "Mangochi","Mchinji","Mulanje","Mwanza","Mzimba","Neno",
     "Nkhata Bay","Nkhotakota","Nsanje","Ntcheu","Ntchisi",
-    "Phalombe","Rumphi","Salima","Thyolo","Zomba",
+    "Phalombe","Rumphi","Salima","Thyolo","Zomba","China","USA","Canada","Tanzania","South Africa","Other",
   ];
 
   final List<String> categories = [

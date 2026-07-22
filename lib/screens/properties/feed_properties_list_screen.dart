@@ -8,6 +8,9 @@ import '../../widgets/feed/feed_list_widget.dart';
 import '../../services/analytics_service.dart';
 import '../../widgets/web_footer.dart';
 
+import '../../screens/search/global_search_input_bar.dart';
+import '../../screens/search/unified_search_screen.dart';
+
 class PropertiesListScreen extends ConsumerStatefulWidget {
   const PropertiesListScreen({
     super.key,
@@ -125,6 +128,7 @@ class _PropertiesListScreenState extends ConsumerState<PropertiesListScreen> {
               : CustomScrollView(
                   controller: _controller,
                   slivers: [
+                    GlobalSearchInputBar.sliver(),
                     FeedListWidget(
                       items: items,
                     ),

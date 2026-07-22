@@ -104,6 +104,7 @@ class MainTabsScreen extends StatefulWidget {
 
 class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
   int _currentIndex = 0; //
+  String? _searchQuery;//
   int? _activeProductId; //
   int? _activeShopId; //
   Lodge? _activeLodge; //
@@ -170,7 +171,10 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
       const EventListScreen(),        //
       const LodgeListScreen(),        //
       const ProfileScreen(),          //
-      const UnifiedSearchScreen(),    //
+      UnifiedSearchScreen(
+        key: ValueKey(_searchQuery),
+        initialQuery: _searchQuery,
+      ), // 7
       const CartScreen(),             //
       const DeliveryCodeScreen(),     //
       const AboutScreen(),            //
@@ -380,16 +384,19 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
     });
   }
 
-  void setSelectedIndex(int index) {
-    _changeTab(index); //
+  void setSelectedIndex(int index, {String? searchQuery}) {
+    _changeTab(index, searchQuery: searchQuery);
   }
 
   // 👈 MODIFIED: Intercepts all state switches to safely store the prior tab configuration in stack history
-  void _changeTab(int index) {
-    if (_currentIndex == index) return; //
+  void _changeTab(int index, {String? searchQuery}) {
+    if (_currentIndex == index && searchQuery == null) return;
     setState(() {
       _navigationHistory.add(_currentIndex);
-      _currentIndex = index; //
+      _currentIndex = index;
+      if (searchQuery != null) {
+        _searchQuery = searchQuery;
+      }
     });
   }
 

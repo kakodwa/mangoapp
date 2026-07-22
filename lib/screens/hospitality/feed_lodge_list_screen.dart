@@ -5,6 +5,9 @@ import '../../providers/feed/main_feed_providers.dart';
 import '../../widgets/feed/feed_list_widget.dart';
 import '../../widgets/web_footer.dart';
 
+import '../../screens/search/global_search_input_bar.dart';
+import '../../screens/search/unified_search_screen.dart';
+
 class LodgeListScreen extends ConsumerStatefulWidget {
   const LodgeListScreen({
     super.key,
@@ -106,7 +109,9 @@ class _LodgeListScreenState extends ConsumerState<LodgeListScreen> {
               )
             : CustomScrollView(
                 controller: _controller,
+
                 slivers: [
+                  GlobalSearchInputBar.sliver(),
                   FeedListWidget(
                     items: items,
                   ),

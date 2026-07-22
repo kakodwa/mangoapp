@@ -4,6 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/feed/main_feed_providers.dart';
 import '../../providers/feed/feed_notifier.dart';
 
+import '../../screens/search/global_search_input_bar.dart';
+import '../../screens/search/unified_search_screen.dart';
+
 import '../../widgets/feed/feed_list_widget.dart';
 import '../../widgets/web_footer.dart';
 
@@ -67,6 +70,8 @@ class _ShopsListScreenState extends ConsumerState<ShopsListScreen> {
                 // physics ensures pull-to-refresh still works when empty
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
+      
+                  
                   SliverFillRemaining(
                     hasScrollBody: false,
                     child: Center(
@@ -109,6 +114,7 @@ class _ShopsListScreenState extends ConsumerState<ShopsListScreen> {
             : CustomScrollView(
                 controller: _controller,
                 slivers: [
+                 GlobalSearchInputBar.sliver(),
                   FeedListWidget(
                     items: items,
                   ),

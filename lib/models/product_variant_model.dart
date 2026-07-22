@@ -16,7 +16,6 @@ class LocalProductVariant {
     this.stock = 0,
   });
 
-  // 1. Added factory constructor for deserialization
   factory LocalProductVariant.fromJson(Map<String, dynamic> json) {
     return LocalProductVariant(
       cjVariantId: json['cj_variant_id'],
@@ -41,9 +40,16 @@ class LocalProductVariant {
     };
   }
 
-  // 2. Added convenience helper for UI text labels
+  /// Formats attributes for UI displays, safely filtering out N/A entries
   String get formattedAttributes {
     if (attributes.isEmpty) return "Standard Option";
-    return attributes.entries.map((e) => "${e.key}: ${e.value}").join(", ");
+    
+    final validEntries = attributes.entries.where((e) {
+      final val = e.value?.toString().trim().toUpperCase();
+      return val != null && val.isNotEmpty && val != "N/A" && val != "NONE";
+    });
+
+    if (validEntries.isEmpty) return "Standard Option";
+    return validEntries.map((e) => "${e.key}: ${e.value}").join(", ");
   }
 }
