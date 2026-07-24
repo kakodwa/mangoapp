@@ -11,7 +11,6 @@ enum CropShapeType {
   rectangle,
 }
 
-
 class CroppedImageContainer {
   final XFile file;
   final Uint8List bytes;
@@ -39,8 +38,6 @@ class ImageCropPicker extends StatefulWidget {
 
 class _ImageCropPickerState extends State<ImageCropPicker> {
   final ImagePicker _picker = ImagePicker();
-  
-  // 🌟 Changed state arrays to manage byte data alongside metadata
   late List<CroppedImageContainer> images;
   final CropController _cropController = CropController();
 
@@ -55,7 +52,6 @@ class _ImageCropPickerState extends State<ImageCropPicker> {
     _initializeDefaultImages();
   }
 
-  // Helper to safely unpack any initial files passed to the widget
   Future<void> _initializeDefaultImages() async {
     for (final file in widget.initialImages) {
       final bytes = await file.readAsBytes();
@@ -67,17 +63,14 @@ class _ImageCropPickerState extends State<ImageCropPicker> {
     }
   }
 
-  // =========================
-  // PICK IMAGE (WITH AGGRESSIVE DOWN-SAMPLING)
-  // =========================
   Future<void> _pickImage(ImageSource source) async {
     if (images.length >= widget.maxImages) return;
 
     final picked = await _picker.pickImage(
       source: source,
-      maxWidth: 1024,   
-      maxHeight: 1024,  
-      imageQuality: 80, 
+      maxWidth: 1024,
+      maxHeight: 1024,
+      imageQuality: 80,
     );
 
     if (picked == null) return;
@@ -94,9 +87,6 @@ class _ImageCropPickerState extends State<ImageCropPicker> {
     }
   }
 
-  // =========================
-  // MULTI PICK
-  // =========================
   Future<void> _pickMultipleImages() async {
     final picked = await _picker.pickMultiImage(
       maxWidth: 1024,
@@ -120,101 +110,205 @@ class _ImageCropPickerState extends State<ImageCropPicker> {
   }
 
   // =========================
-  // CROPPER DIALOG
+  // CROPPER DIALOG WITH PINCH & ZOOM
   // =========================
-  Future<void> _showCropDialog() async {
-    if (_rawImage == null) return;
+// =========================
+// CROPPER DIALOG WITH DIRECT CLICKABLE ZOOM BUTTONS (+ / -)
+// =========================
+Future<void> _showCropDialog() async {
+  if (_rawImage == null) return;
 
-    setState(() {
-      _isProcessingCrop = false;
-    });
+  setState(() {
+    _isProcessingCrop = false;
+  });
 
-    await showDialog(
-      context: context,
-      barrierDismissible: false, 
-      builder: (dialogContext) {
-        return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: SizedBox(
-            width: 400,
-            height: 500,
-            child: Column(
-              children: [
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
-                    ),
-                    child: Crop(
-                      image: _rawImage!,
-                      controller: _cropController,
-                      interactive: true,
-                      aspectRatio: widget.cropType == CropShapeType.square ? 1 : 4 / 3,
-                      onCropped: (croppedData) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          if (Navigator.canPop(dialogContext)) {
-                            Navigator.pop(dialogContext);
-                          }
-                          _addCroppedImage(croppedData);
-                        });
-                      },
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      TextButton(
-                        onPressed: () {
-                          if (!_isProcessingCrop) Navigator.pop(dialogContext);
-                        },
-                        child: const Text("Cancel"),
-                      ),
-                      StatefulBuilder(
-                        builder: (context, setButtonState) {
-                          return _isProcessingCrop
-                              ? const Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: SizedBox(
-                                    width: 24,
-                                    height: 24,
-                                    child: CircularProgressIndicator(strokeWidth: 2),
-                                  ),
-                                )
-                              : ElevatedButton(
-                                  onPressed: () {
-                                    setButtonState(() {
-                                      _isProcessingCrop = true;
-                                    });
-                                    setState(() {
-                                      _isProcessingCrop = true;
-                                    });
-                                    
-                                    Future.delayed(const Duration(milliseconds: 60), () {
-                                      _cropController.crop();
-                                    });
-                                  },
-                                  child: const Text("Crop"),
-                                );
-                        },
-                      ),
-                    ],
-                  ),
-                )
-              ],
-            ),
-          ),
-        );
-      },
-    );
+  // Controller to programmatically control the + and - zoom actions
+  final TransformationController transformController = TransformationController();
+  double currentScale = 1.0;
+
+  void zoom(double step) {
+    // Calculate new target scale (bounded between 1.0x and 3.0x)
+    final double targetScale = (currentScale + step).clamp(1.0, 3.0);
+    if (targetScale == currentScale) return;
+
+    currentScale = targetScale;
+    
+    // Programmatically set the scale matrix
+    transformController.value = Matrix4.identity()..scale(targetScale);
   }
 
-  // =========================
-  // ADD CROPPED IMAGE
-  // =========================
+  await showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (dialogContext) {
+      return StatefulBuilder(
+        builder: (context, setDialogState) {
+          return Dialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: SizedBox(
+              width: 440,
+              height: 560,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        topRight: Radius.circular(16),
+                      ),
+                      child: Stack(
+                        children: [
+                          // 🔍 InteractiveViewer provides programmatic zoom control
+                          InteractiveViewer(
+                            transformationController: transformController,
+                            minScale: 1.0,
+                            maxScale: 3.0,
+                            panEnabled: true, // Click & drag to pan around
+                            scaleEnabled: true, // Allows mouse wheel / pinch zoom as well
+                            child: Crop(
+                              image: _rawImage!,
+                              controller: _cropController,
+                              interactive: false, // Gesture handling managed by InteractiveViewer
+                              fixCropRect: false,
+                              aspectRatio: widget.cropType == CropShapeType.square ? 1 : 4 / 3,
+                              onCropped: (croppedData) {
+                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                  if (Navigator.canPop(dialogContext)) {
+                                    Navigator.pop(dialogContext);
+                                  }
+                                  _addCroppedImage(croppedData);
+                                });
+                              },
+                            ),
+                          ),
+                          
+                          // Floating instruction badge
+                          Positioned(
+                            top: 12,
+                            left: 12,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.7),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.touch_app, color: Colors.white, size: 14),
+                                  SizedBox(width: 6),
+                                  Text(
+                                    "Use + / - buttons or drag to align",
+                                    style: TextStyle(color: Colors.white, fontSize: 11),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                  // ➕ / ➖ CLICKABLE ZOOM CONTROLS
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    color: Colors.grey.shade100,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Zoom Out (-) Button
+                        IconButton.filledTonal(
+                          icon: const Icon(Icons.remove),
+                          tooltip: "Zoom Out",
+                          onPressed: () {
+                            setDialogState(() {
+                              zoom(-0.25); // Scale down by 0.25x
+                            });
+                          },
+                        ),
+                        const SizedBox(width: 16),
+                        
+                        // Current Scale Indicator Text
+                        Text(
+                          "${(currentScale * 100).toInt()}%",
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                        ),
+                        
+                        const SizedBox(width: 16),
+                        
+                        // Zoom In (+) Button
+                        IconButton.filledTonal(
+                          icon: const Icon(Icons.add),
+                          tooltip: "Zoom In",
+                          onPressed: () {
+                            setDialogState(() {
+                              zoom(0.25); // Scale up by 0.25x
+                            });
+                          },
+                        ),
+                        
+                        const SizedBox(width: 20),
+                        
+                        // Reset Zoom Button
+                        TextButton.icon(
+                          icon: const Icon(Icons.restart_alt, size: 18),
+                          label: const Text("Reset"),
+                          onPressed: () {
+                            setDialogState(() {
+                              currentScale = 1.0;
+                              transformController.value = Matrix4.identity();
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Action Buttons (Cancel / Crop)
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            if (!_isProcessingCrop) Navigator.pop(dialogContext);
+                          },
+                          child: const Text("Cancel"),
+                        ),
+                        ElevatedButton(
+                          onPressed: _isProcessingCrop
+                              ? null
+                              : () {
+                                  setDialogState(() => _isProcessingCrop = true);
+                                  setState(() => _isProcessingCrop = true);
+
+                                  Future.delayed(const Duration(milliseconds: 60), () {
+                                    _cropController.crop();
+                                  });
+                                },
+                          child: _isProcessingCrop
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : const Text("Crop"),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    },
+  );
+}
+
   void _addCroppedImage(Uint8List cropped) {
     if (_pendingFile == null || !mounted) return;
 
@@ -225,7 +319,6 @@ class _ImageCropPickerState extends State<ImageCropPicker> {
     );
 
     setState(() {
-      // 🌟 Store both the file schema and raw image bytes directly
       images.add(CroppedImageContainer(file: file, bytes: cropped));
       _rawImage = null;
       _pendingFile = null;
@@ -235,9 +328,6 @@ class _ImageCropPickerState extends State<ImageCropPicker> {
     widget.onChanged(images.map((e) => e.file).toList());
   }
 
-  // =========================
-  // REMOVE IMAGE
-  // =========================
   void _removeImage(CroppedImageContainer img) {
     setState(() {
       images.remove(img);
@@ -245,9 +335,6 @@ class _ImageCropPickerState extends State<ImageCropPicker> {
     widget.onChanged(images.map((e) => e.file).toList());
   }
 
-  // =========================
-  // IMAGE CARD
-  // =========================
   Widget _imageCard(CroppedImageContainer img) {
     final width = widget.cropType == CropShapeType.square ? 95.0 : 140.0;
 
@@ -259,7 +346,7 @@ class _ImageCropPickerState extends State<ImageCropPicker> {
             width: width,
             height: 95,
             child: Image.memory(
-              img.bytes, 
+              img.bytes,
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) {
                 return Container(
@@ -289,9 +376,6 @@ class _ImageCropPickerState extends State<ImageCropPicker> {
     );
   }
 
-  // =========================
-  // SOURCE PICKER
-  // =========================
   void _showSourcePicker() {
     showModalBottomSheet(
       context: context,

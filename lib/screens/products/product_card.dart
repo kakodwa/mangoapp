@@ -29,6 +29,7 @@ import '../../widgets/capitalize_text.dart';
 import '../../services/analytics_service.dart';
 import '../../utils/app_toast.dart';
 import '../../utils/price_helper.dart';
+import '../main_tabs_screen.dart';
 
 // Design System & Theme
 import '../../theme/app_colors.dart';
@@ -246,13 +247,7 @@ class ProductCard extends ConsumerWidget {
                           onTap: isOwner
                               ? () {
                                   analytics.logEvent('product_owner_edit_click_${product.id}');
-
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => EditProductScreen(product: product),
-                                    ),
-                                  );
+                                  MainTabsScreen.of(context)?.navigateToEditProduct(product);
                                 }
                               : (product.isInStock
                                   ? () {

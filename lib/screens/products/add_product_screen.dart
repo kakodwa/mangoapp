@@ -15,6 +15,7 @@ import '../../utils/app_toast.dart';
 import 'category_cascade_selector.dart';
 import '../../widgets/image_crop_picker.dart';
 import '../../widgets/web_footer.dart';
+import '../main_tabs_screen.dart';
 
 class CategoryAttributeInput extends StatefulWidget {
   final String label;
@@ -64,7 +65,6 @@ class _CategoryAttributeInputState extends State<CategoryAttributeInput> {
             suffixIcon: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Quick N/A Button
                 TextButton(
                   onPressed: () => _addTag("N/A"),
                   child: const Text("N/A", style: TextStyle(fontWeight: FontWeight.bold)),
@@ -112,6 +112,9 @@ class AddProductScreen extends ConsumerStatefulWidget {
 class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   final _formKey = GlobalKey<FormState>();
 
+  // Key to force resetting child widgets like CategoryCascadeSelector
+  Key _categorySelectorKey = UniqueKey();
+
   final nameController = TextEditingController();
   final descriptionController = TextEditingController();
   final priceController = TextEditingController();
@@ -129,6 +132,26 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
   String selectedDelivery = '1 - 2 Business Days';
 
   List<XFile> images = [];
+
+  // 🧹 Helper method to completely reset all form inputs and state
+  void _resetForm() {
+    _formKey.currentState?.reset();
+    nameController.clear();
+    descriptionController.clear();
+    priceController.clear();
+    stockController.clear();
+
+    setState(() {
+      selectedCategory = null;
+      selectedSubCategory = null;
+      selectedBrand = null;
+      selectedDelivery = '1 - 2 Business Days';
+      variants = [];
+      images = [];
+      isActive = true;
+      _categorySelectorKey = UniqueKey(); // Re-creates CategoryCascadeSelector clean state
+    });
+  }
 
   List<Map<String, String>> generateCombinations(Map<String, List<String>> attributes) {
     List<Map<String, String>> combinations = [{}];
@@ -326,7 +349,8 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
 
       if (mounted) {
         AppToast.success(context, "Product created successfully");
-        Navigator.pop(context);
+        _resetForm(); // 🧼 Clear out state and form fields
+        MainTabsScreen.of(context)?.navigateToAddProduct();
       }
     } catch (e) {
       if (mounted) AppToast.error(context, "Error: ${e.toString()}");
@@ -435,6 +459,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                       const SizedBox(height: AppSpacing.md),
 
                       CategoryCascadeSelector(
+                        key: _categorySelectorKey, // Reset key forces redrawing category dropdowns
                         onChanged: (cat, subCat, brand) {
                           setState(() {
                             selectedCategory = cat;
@@ -466,6 +491,7 @@ class _AddProductScreenState extends ConsumerState<AddProductScreen> {
                       const Text("Product Images (Max 4 - Required *)", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                       const SizedBox(height: 14),
                       ImageCropPicker(
+                        key: ValueKey(images.length), // Rebuilds picker when reset
                         maxImages: 4,
                         cropType: CropShapeType.square,
                         initialImages: images,

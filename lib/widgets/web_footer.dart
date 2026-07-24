@@ -101,7 +101,7 @@ class WebFooter extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             const Text(
-              'MalaTrade',
+              '',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.white),
             ),
           ],

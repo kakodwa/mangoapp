@@ -486,23 +486,25 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
 ),
                     const SizedBox(height: AppSpacing.sm),
                     AppFab(
-                      heroTag: "whatsapp_prop_fab",
-                      icon: FontAwesomeIcons.whatsapp,
-                      tooltip: "Chat on WhatsApp",
-                      onPressed: () {
-                        if (!isLoggedIn) {
-                          Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
-                          return;
-                        }
-                        final phone = property.ownerPhoneNumber;
-                        if (phone == null || phone.isEmpty) {
-                          AppToast.info(context, "Owner profile contact configurations missing");
-                          return;
-                        }
-                        analytics.logEvent('property_details_whatsapp_click');
-                        _openWhatsApp(phone);
-                      },
-                    ),
+  heroTag: "whatsapp_prop_fab",
+  icon: FontAwesomeIcons.whatsapp,
+  backgroundColor: const Color(0xFF25D366), 
+  foregroundColor: Colors.white,            
+  tooltip: "Chat on WhatsApp",
+  onPressed: () {
+    if (!isLoggedIn) {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+      return;
+    }
+    final phone = property.ownerPhoneNumber;
+    if (phone == null || phone.isEmpty) {
+      AppToast.info(context, "Owner profile contact configurations missing");
+      return;
+    }
+    analytics.logEvent('property_details_whatsapp_click');
+    _openWhatsApp(phone);
+  },
+),
                   ],
                 ),
               ),

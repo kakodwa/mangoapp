@@ -9,6 +9,8 @@ class AppFab extends StatelessWidget {
   final String? tooltip;
   final String? toastMessage;
   final bool mini;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
 
   const AppFab({
     super.key,
@@ -18,21 +20,26 @@ class AppFab extends StatelessWidget {
     this.tooltip,
     this.toastMessage,
     this.mini = true,
+    this.backgroundColor,
+    this.foregroundColor,
   });
 
   @override
   Widget build(BuildContext context) {
+    final effectiveBgColor = backgroundColor ?? AppColors.mangoOrange;
+    final effectiveFgColor = foregroundColor ?? Colors.white;
+
     return FloatingActionButton(
       heroTag: heroTag,
       mini: mini,
-      backgroundColor:AppColors.mangoOrange,
-      foregroundColor:Colors.white,
+      backgroundColor: effectiveBgColor,
+      foregroundColor: effectiveFgColor,
       elevation: 4,
       tooltip: tooltip,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: AppColors.mangoOrange.withOpacity(0.15),
+          color: effectiveBgColor.withOpacity(0.15),
         ),
       ),
       onPressed: () {

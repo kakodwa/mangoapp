@@ -405,27 +405,29 @@ class _LodgeDetailScreenState extends ConsumerState<LodgeDetailScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                AppFab(
-                  heroTag: "whatsapp_lodge_fab",
-                  icon: FontAwesomeIcons.whatsapp,
-                  tooltip: "Chat on WhatsApp",
-                  onPressed: () {
-                    if (!isLoggedIn) {
-                      _analyticsService.logEvent('lodge_whatsapp_unauthenticated_redirect');
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
-                      return;
-                    }
+               AppFab(
+  heroTag: "whatsapp_lodge_fab",
+  icon: FontAwesomeIcons.whatsapp,
+  backgroundColor: const Color(0xFF25D366), 
+  foregroundColor: Colors.white,            
+  tooltip: "Chat on WhatsApp",
+  onPressed: () {
+    if (!isLoggedIn) {
+      _analyticsService.logEvent('lodge_whatsapp_unauthenticated_redirect');
+      Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+      return;
+    }
 
-                    final phone = widget.lodge.phoneNumber;
-                    if (phone.isEmpty) {
-                      AppToast.info(context, "No WhatsApp contact channel available");
-                      return;
-                    }
+    final phone = widget.lodge.phoneNumber;
+    if (phone.isEmpty) {
+      AppToast.info(context, "No WhatsApp contact channel available");
+      return;
+    }
 
-                    _analyticsService.logEvent('lodge_whatsapp_chat_start_${widget.lodge.id}');
-                    _openWhatsApp(phone);
-                  },
-                ),
+    _analyticsService.logEvent('lodge_whatsapp_chat_start_${widget.lodge.id}');
+    _openWhatsApp(phone);
+  },
+),
                 const SizedBox(height: AppSpacing.sm),
 
                 AppFab(

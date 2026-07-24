@@ -357,23 +357,25 @@ class EventDetailScreen extends ConsumerWidget {
             // 💬 SOCIAL CONNECT WHATSAPP FAB BOUND
             if (event.organizerPhoneNumber != null && event.organizerPhoneNumber!.isNotEmpty) ...[
               AppFab(
-                heroTag: "whatsapp_event_fab",
-                icon:FontAwesomeIcons.whatsapp,
-                tooltip: "Chat with Organizer",
-                onPressed: () {
-                  analyticsService.logEvent('click_event_whatsapp_id_${event.id}');
-                  if (!isLoggedIn) {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
-                    return;
-                  }
-                  final phone = event.organizerPhoneNumber;
-                  if (phone == null || phone.isEmpty) {
-                    AppToast.info(context, "No WhatsApp coordinate setup available");
-                    return;
-                  }
-                  _openWhatsApp(phone);
-                },
-              ),
+  heroTag: "whatsapp_event_fab",
+  icon: FontAwesomeIcons.whatsapp,
+  backgroundColor: const Color(0xFF25D366), // 🟢 Official WhatsApp Green
+  foregroundColor: Colors.white,            // ⚪ Crisp White Icon
+  tooltip: "Chat with Organizer",
+  onPressed: () {
+    analyticsService.logEvent('click_event_whatsapp_id_${event.id}');
+    if (!isLoggedIn) {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+      return;
+    }
+    final phone = event.organizerPhoneNumber;
+    if (phone == null || phone.isEmpty) {
+      AppToast.info(context, "No WhatsApp coordinate setup available");
+      return;
+    }
+    _openWhatsApp(phone);
+  },
+),
               const SizedBox(height: AppSpacing.sm),
             ],
 

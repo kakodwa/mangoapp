@@ -75,9 +75,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
   // Track viewed state to avoid duplicate triggers during local UI builds
   bool _hasLoggedView = false;
 
-  // State variable to manage the dynamic FAB expansion menu
-  bool _isMenuOpen = false;
-
   // Track selected variant across product loads
   LocalProductVariant? _selectedVariant;
   int? _lastInitializedProductId;
@@ -435,7 +432,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
               ),
               const SizedBox(height: AppSpacing.sm),
 
-              // Estimated Delivery Timeline Tile Panel 👈 Added
+              // Estimated Delivery Timeline Tile Panel
               if (product.deliveryDuration.isNotEmpty) ...[
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
@@ -694,12 +691,14 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
               ),
             ),
 
+            // 🌟 ALWAYS-VISIBLE FLOATING ACTION BUTTONS
             Positioned(
               bottom: 50,
               right: isDesktop ? (screenWidth - 1200 > 0 ? (screenWidth - 1200) / 2 + 24 : 24) : 10,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // 1. Add to Cart FAB (When in stock & not owner)
                   if (product.isInStock && !isOwner) ...[
                     AppFab(
                       heroTag: "cart",
@@ -727,165 +726,150 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                     const SizedBox(height: AppSpacing.sm),
                   ],
 
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeInOut,
-                    child: Column(
-                      children: [
-                        if (_isMenuOpen) ...[
-                          if (!isOwner) ...[
-                            AppFab(
-                              heroTag: "fav",
-                              icon: Icons.favorite_border,
-                              tooltip: "Favorite",
-                              onPressed: () {
-                                analytics.logEvent('product_fav_click_${product.id}');
-                                AppToast.success(context, "ADDED TO FAVORITES");
-                              },
-                            ),
-                            const SizedBox(height: AppSpacing.sm),
-                          ],
-
-                          AppFab(
-                            heroTag: "whatsapp",
-                            icon: FontAwesomeIcons.whatsapp,
-                            tooltip: "Chat on WhatsApp",
-                            onPressed: () {
-                              if (product.phoneNumber.isNotEmpty) {
-                                analytics.logEvent('product_whatsapp_click_${product.id}');
-                                _openWhatsApp(product.phoneNumber);
-                              } else {
-                                AppToast.info(context, "Shop phone number is unavailable");
-                              }
-                            },
-                          ),
-                          const SizedBox(height: AppSpacing.sm),
-
-                          AppFab(
-                            heroTag: "share_product",
-                            icon: Icons.share_outlined,
-                            tooltip: "Share Product",
-                            onPressed: () async {
-                              analytics.logEvent('product_shared_${product.id}');
-
-                              final String productUrl = kIsWeb
-                                  ? "${Uri.base.origin}/product/${product.id}"
-                                  : "https://malatrade.com/product/${product.id}";
-
-                              final String shareMessage =
-                                  "🛍️ ${product.name}\n"
-                                  "💰 Price: MWK ${product.price}\n"
-                                  "🏪 Shop: ${product.shopName}\n\n"
-                                  "View this product on MangoHub:\n$productUrl";
-
-                              final box = context.findRenderObject() as RenderBox?;
-                              final sharePositionOrigin =
-                                  box != null ? box.localToGlobal(Offset.zero) & box.size : null;
-
-                              try {
-                                if (product.images.isNotEmpty) {
-                                  final imageUrl = product.images.first;
-
-                                  final response = await http.get(Uri.parse(imageUrl));
-
-                                  if (response.statusCode == 200) {
-                                    final tempDir = await getTemporaryDirectory();
-
-                                    final extension = imageUrl
-                                        .split('.')
-                                        .last
-                                        .split('?')
-                                        .first
-                                        .toLowerCase();
-
-                                    final validExtension =
-                                        ['jpg', 'jpeg', 'png', 'webp'].contains(extension)
-                                            ? extension
-                                            : 'jpg';
-
-                                    final file = await File(
-                                      '${tempDir.path}/shared_product_${product.id}.$validExtension',
-                                    ).create();
-
-                                    await file.writeAsBytes(response.bodyBytes);
-
-                                    await Share.shareXFiles(
-                                      [XFile(file.path)],
-                                      text: shareMessage,
-                                      sharePositionOrigin: sharePositionOrigin,
-                                    );
-
-                                    return;
-                                  }
-                                }
-
-                                await Share.share(
-                                  shareMessage,
-                                  sharePositionOrigin: sharePositionOrigin,
-                                );
-                              } catch (e) {
-                                debugPrint("Product share failed: $e");
-
-                                await Share.share(
-                                  shareMessage,
-                                  sharePositionOrigin: sharePositionOrigin,
-                                );
-                              }
-                            },
-                          ),
-                          const SizedBox(height: AppSpacing.sm),
-
-                          AppFab(
-                            heroTag: "shop",
-                            icon: Icons.storefront,
-                            tooltip: "View Shop",
-                            onPressed: () {
-                              analytics.logEvent('product_view_shop_fab_click_${product.shopId}');
-                              final tabsScreen = MainTabsScreen.of(context);
-                              if (tabsScreen != null) {
-                                tabsScreen.navigateToShopDetails(product.shopId);
-                              } else {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (_) => ShopDetailsScreen(shopId: product.shopId)),
-                                );
-                              }
-                            },
-                          ),
-
-                          if (isOwner) ...[
-                            const SizedBox(height: AppSpacing.sm),
-                            AppFab(
-                              heroTag: "edit",
-                              icon: Icons.edit,
-                              tooltip: "Edit Product",
-                              onPressed: () {
-                                analytics.logEvent('product_edit_click_${product.id}');
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => EditProductScreen(product: product),
-                                  ),
-                                );
-                              },
-                            ),
-                          ],
-                          const SizedBox(height: AppSpacing.sm),
-                        ],
-                      ],
+                  // 2. Favorite FAB (When not owner)
+                  if (!isOwner) ...[
+                    AppFab(
+                      heroTag: "fav",
+                      icon: Icons.favorite_border,
+                      tooltip: "Favorite",
+                      onPressed: () {
+                        analytics.logEvent('product_fav_click_${product.id}');
+                        AppToast.success(context, "ADDED TO FAVORITES");
+                      },
                     ),
-                  ),
+                    const SizedBox(height: AppSpacing.sm),
+                  ],
 
+                  // 3. WhatsApp FAB (With custom green background)
                   AppFab(
-                    heroTag: "menu_toggle",
-                    icon: _isMenuOpen ? Icons.close : Icons.more_vert,
-                    tooltip: "Show Options",
+                    heroTag: "whatsapp",
+                    icon: FontAwesomeIcons.whatsapp,
+                    backgroundColor: const Color(0xFF25D366), // 🟢 Official WhatsApp Green
+                    foregroundColor: Colors.white,
+                    tooltip: "Chat on WhatsApp",
                     onPressed: () {
-                      setState(() {
-                        _isMenuOpen = !_isMenuOpen;
-                      });
+                      if (product.phoneNumber.isNotEmpty) {
+                        analytics.logEvent('product_whatsapp_click_${product.id}');
+                        _openWhatsApp(product.phoneNumber);
+                      } else {
+                        AppToast.info(context, "Shop phone number is unavailable");
+                      }
                     },
                   ),
+                  const SizedBox(height: AppSpacing.sm),
+
+                  // 4. Share Product FAB
+                  AppFab(
+                    heroTag: "share_product",
+                    icon: Icons.share_outlined,
+                    tooltip: "Share Product",
+                    onPressed: () async {
+                      analytics.logEvent('product_shared_${product.id}');
+
+                      final String productUrl = kIsWeb
+                          ? "${Uri.base.origin}/product/${product.id}"
+                          : "https://malatrade.com/product/${product.id}";
+
+                      final String shareMessage =
+                          "🛍️ ${product.name}\n"
+                          "💰 Price: MWK ${product.price}\n"
+                          "🏪 Shop: ${product.shopName}\n\n"
+                          "View this product on MangoHub:\n$productUrl";
+
+                      final box = context.findRenderObject() as RenderBox?;
+                      final sharePositionOrigin =
+                          box != null ? box.localToGlobal(Offset.zero) & box.size : null;
+
+                      try {
+                        if (product.images.isNotEmpty) {
+                          final imageUrl = product.images.first;
+
+                          final response = await http.get(Uri.parse(imageUrl));
+
+                          if (response.statusCode == 200) {
+                            final tempDir = await getTemporaryDirectory();
+
+                            final extension = imageUrl
+                                .split('.')
+                                .last
+                                .split('?')
+                                .first
+                                .toLowerCase();
+
+                            final validExtension =
+                                ['jpg', 'jpeg', 'png', 'webp'].contains(extension)
+                                    ? extension
+                                    : 'jpg';
+
+                            final file = await File(
+                              '${tempDir.path}/shared_product_${product.id}.$validExtension',
+                            ).create();
+
+                            await file.writeAsBytes(response.bodyBytes);
+
+                            await Share.shareXFiles(
+                              [XFile(file.path)],
+                              text: shareMessage,
+                              sharePositionOrigin: sharePositionOrigin,
+                            );
+
+                            return;
+                          }
+                        }
+
+                        await Share.share(
+                          shareMessage,
+                          sharePositionOrigin: sharePositionOrigin,
+                        );
+                      } catch (e) {
+                        debugPrint("Product share failed: $e");
+
+                        await Share.share(
+                          shareMessage,
+                          sharePositionOrigin: sharePositionOrigin,
+                        );
+                      }
+                    },
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+
+                  // 5. View Shop FAB
+                  AppFab(
+                    heroTag: "shop",
+                    icon: Icons.storefront,
+                    tooltip: "View Shop",
+                    onPressed: () {
+                      analytics.logEvent('product_view_shop_fab_click_${product.shopId}');
+                      final tabsScreen = MainTabsScreen.of(context);
+                      if (tabsScreen != null) {
+                        tabsScreen.navigateToShopDetails(product.shopId);
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => ShopDetailsScreen(shopId: product.shopId)),
+                        );
+                      }
+                    },
+                  ),
+
+                  // 6. Edit Product FAB (Owner only)
+                  if (isOwner) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    AppFab(
+                      heroTag: "edit",
+                      icon: Icons.edit,
+                      tooltip: "Edit Product",
+                      onPressed: () {
+                        analytics.logEvent('product_edit_click_${product.id}');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => EditProductScreen(product: product),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ],
               ),
             ),

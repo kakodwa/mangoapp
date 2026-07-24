@@ -560,21 +560,23 @@ Future<void> _downloadOrSaveQr(BuildContext context, String url, String shopName
                       ),
                       const SizedBox(height: AppSpacing.sm), 
                       AppFab(
-                        heroTag: "whatsapp_shop_fab",
-                        icon: FontAwesomeIcons.whatsapp, 
-                        tooltip: "WhatsApp Storefront",
-                        onPressed: () {
-                          if (!isLoggedIn) { 
-                            Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen())); 
-                            return;
-                          }
-                          if (shop.phoneNumber.isEmpty) { 
-                            AppToast.info(context, "No phone number available"); 
-                            return;
-                          }
-                          _openWhatsApp(context, shop.phoneNumber); 
-                        },
-                      ),
+  heroTag: "whatsapp_shop_fab",
+  icon: FontAwesomeIcons.whatsapp, 
+  backgroundColor: const Color(0xFF25D366), // 👈 Official WhatsApp Green
+  foregroundColor: Colors.white,            // 👈 Keeps the icon crisp white
+  tooltip: "WhatsApp Storefront",
+  onPressed: () {
+    if (!isLoggedIn) { 
+      Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen())); 
+      return;
+    }
+    if (shop.phoneNumber.isEmpty) { 
+      AppToast.info(context, "No phone number available"); 
+      return;
+    }
+    _openWhatsApp(context, shop.phoneNumber); 
+  },
+),
                       const SizedBox(height: AppSpacing.sm), 
                      AppFab(
   heroTag: "share_shop_fab",
