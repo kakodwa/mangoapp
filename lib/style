@@ -30,6 +30,10 @@ MangoHub
 .\adb logcat
 .\adb logcat *:E  - only error
 .\adb logcat -c   - Clear old logs
+.\adb logcat | findstr "flutter"
+
+.\adb shell pidof com.example.mangochi_marketplace
+.\adb logcat --pid 1512
 
 .\adb logcat | findstr com.example.mangochi_marketplace
 
@@ -85,3 +89,11 @@ DB_HOST=ep-shy-lab-alynrnco-pooler.c-3.eu-central-1.aws.neon.tech
 DB_PORT=5432
 
 Hi, I came across your business and thought Malatrade could help you reach more customers online. I have attached a short poster explaining the platform. We are currently helping businesses create their online shops for free. I would be happy to help you set up yours.
+
+
+07-28 20:04:34.187  1512  1512 I flutter : ❌ Exception details: HandshakeException: Handshake error in client (OS Error:
+07-28 20:04:34.187  1512  1512 I flutter :      CERTIFICATE_VERIFY_FAILED: unable to get local issuer certificate(handshake.cc:298))
+07-28 20:04:34.235  1512  1512 I flutter : ❌ APK Image Load Error for URL: https://www.malatrade.com/media/product_images/product_images/scaled_See3127c47324449698a0b12543b0160bH.jpg_220x220q75.jpg_.jpg
+07-28 20:04:34.235  1512  1512 I flutter : ❌ Exception details: HandshakeException: Handshake error in client (OS Error:
+07-28 20:04:34.235  1512  1512 I flutter :      CERTIFICATE_VERIFY_FAILED: unable to get local issuer certificate(handshake.cc:298))
+07-28 20:04:36.104  1512  1512 I flutter : Product Image URL: https://www.malatrade.com/media/product_images/scaled_k-s-oss-1702997051802aZBxMCshXR.jpg
