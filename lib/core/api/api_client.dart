@@ -16,7 +16,7 @@ class ApiClient {
 
      static String get baseUrl {
     if (kIsWeb) return 'https://www.malatrade.com/api/';
-    return 'https://wwww.malatrade.com/api/';
+    return 'https://www.malatrade.com/api/';
   }
 
   static const String host = 'https://www.malatrade.com/api/';
