@@ -7,10 +7,10 @@ import '../../providers/products_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/shops_provider.dart';
 
+import '../../screens/products/product_constants.dart';
 import '../../theme/design_system/app_spacing.dart';
 
 import '../../widgets/feed/feed_list_widget.dart';
-import '../../widgets/web_footer.dart';
 
 import '../../screens/search/unified_search_screen.dart';
 import '../../screens/search/global_search_input_bar.dart';
@@ -41,11 +41,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   final AnalyticsService _analytics = AnalyticsService(); 
   int bannerIndex = 0;
 
+  // Selected Category State for Desktop Sidebar
+  String? _selectedCategory;
+
   // Bounce animation controllers
   late AnimationController _bounceController;
   late Animation<double> _bounceScale;
 
-  // Updated image path to 'assets/images/logo.png' for all items
   final List<Map<String, String>> _quickSearchTypes = [
     {'key': 'all', 'label': 'All items', 'image': 'assets/images/all.png'},
     {'key': 'electronics', 'label': 'Electronics', 'image': 'assets/images/Electronics.png'},
@@ -78,7 +80,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
     _analytics.logEvent('home_screen_open');
 
-    // Bounce animation configuration matching ShopQrBanner
     _bounceController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -169,6 +170,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final feed = ref.watch(homeFeedProvider);
     final bannersAsync = ref.watch(bannersProvider);
     final double screenWidth = MediaQuery.of(context).size.width;
+    final bool isDesktop = screenWidth >= 900;
 
     return feed.when(
       loading: () => const Center(
@@ -184,7 +186,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             /// 0. SEARCH BAR SECTION
             GlobalSearchInputBar.sliver(),
 
-            /// 1. BANNER SECTION
+            /// 1. BANNER & CATEGORY SECTION
             SliverToBoxAdapter(
               child: bannersAsync.when(
                 data: (banners) {
@@ -193,103 +195,101 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     return sub != 'text banner' && sub != 'install app';
                   }).toList();
 
-                  if (validBanners.isEmpty) {
-                    return Align(
-                      alignment: Alignment.topCenter,
-                      child: Container(
-                        constraints: const BoxConstraints(maxWidth: 1200),
-                        margin: const EdgeInsets.all(12),
-                        child: AspectRatio(
-                          aspectRatio: 2560 / 1440,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(14),
-                            onTap: _handleDefaultBannerTap,
-                            child: ScaleTransition(
-                              scale: _bounceScale,
-                              child: ClipRRect(
+                  final displayLength = validBanners.length + 1;
+
+                  Widget bannerSlider = Column(
+                    children: [
+                      AspectRatio(
+                        aspectRatio: isDesktop ? (16 / 7) : (2560 / 1440),
+                        child: PageView.builder(
+                          controller: bannerController,
+                          itemCount: displayLength,
+                          onPageChanged: (index) {
+                            bannerIndex = index;
+                          },
+                          itemBuilder: (context, index) {
+                            if (index == validBanners.length) {
+                              return ShopQrBanner(
+                                onTap: _handleDefaultBannerTap,
+                              );
+                            }
+
+                            final banner = validBanners[index];
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                              child: InkWell(
                                 borderRadius: BorderRadius.circular(14),
-                                child: Image.asset(
-                                  'assets/images/banner.png',
-                                  fit: BoxFit.fill,
-                                  width: double.infinity,
-                                  height: double.infinity,
+                                onTap: () {
+                                  _analytics.logEvent(
+                                    'banner_click_${banner.title.replaceAll(' ', '_').toLowerCase()}',
+                                  );
+                                },
+                                child: _buildBanner(
+                                  context,
+                                  image: banner.imageUrl,
+                                  title: banner.title,
+                                  subtitle: banner.subtitle,
+                                  url: banner.url,
+                                  ctaText: banner.ctaText,
+                                  screenWidth: screenWidth,
                                 ),
                               ),
-                            ),
-                          ),
+                            );
+                          },
                         ),
                       ),
-                    );
-                  }
-
-                  final displayLength = validBanners.length + 1;
+                      const SizedBox(height: 10),
+                      SmoothPageIndicator(
+                        controller: bannerController,
+                        count: displayLength,
+                        effect: WormEffect(
+                          dotHeight: 8,
+                          dotWidth: 8,
+                          activeDotColor: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  );
 
                   return Align(
                     alignment: Alignment.topCenter,
                     child: Container(
                       constraints: const BoxConstraints(maxWidth: 1200),
-                      margin: const EdgeInsets.only(
-                        top: 8,
-                        left: 12,
-                        right: 12,
-                        bottom: 8,
-                      ),
-                      child: Column(
-                        children: [
-                          AspectRatio(
-                            aspectRatio: 2560 / 1440,
-                            child: PageView.builder(
-                              controller: bannerController,
-                              itemCount: displayLength,
-                              onPageChanged: (index) {
-                                bannerIndex = index;
-                              },
-                              itemBuilder: (context, index) {
-                                if (index == validBanners.length) {
-                                  return ShopQrBanner(
-                                    onTap: _handleDefaultBannerTap,
-                                  );
-                                }
-
-                                final banner = validBanners[index];
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                                  child: InkWell(
+                      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      child: isDesktop
+                          ? Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Left Categories & Subcategories Panel for Desktop
+                                Container(
+                                  width: 280,
+                                  height: 380,
+                                  margin: const EdgeInsets.only(right: 16),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
                                     borderRadius: BorderRadius.circular(14),
-                                    onTap: () {
-                                      _analytics.logEvent(
-                                        'banner_click_${banner.title.replaceAll(' ', '_').toLowerCase()}',
-                                      );
-                                    },
-                                    child: _buildBanner(
-                                      context,
-                                      image: banner.imageUrl,
-                                      title: banner.title,
-                                      subtitle: banner.subtitle,
-                                      url: banner.url,
-                                      ctaText: banner.ctaText,
-                                      screenWidth: screenWidth,
-                                    ),
+                                    border: Border.all(color: Colors.grey.shade200),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.03),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
                                   ),
-                                );
-                              },
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          SmoothPageIndicator(
-                            controller: bannerController,
-                            count: displayLength,
-                            effect: WormEffect(
-                              dotHeight: 8,
-                              dotWidth: 8,
-                              activeDotColor:
-                                  Theme.of(context).colorScheme.primary,
-                            ),
-                          ),
-                        ],
-                      ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(14),
+                                    child: _selectedCategory == null
+                                        ? _buildPrimaryCategoriesList()
+                                        : _buildSubCategoriesList(_selectedCategory!),
+                                  ),
+                                ),
+
+                                // Right Promo Banner Slider
+                                Expanded(child: bannerSlider),
+                              ],
+                            )
+                          : bannerSlider,
                     ),
                   );
                 },
@@ -303,13 +303,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               ),
             ),
 
-            /// 2. DOMAIN & CATEGORY LIST (LARGER CIRCLES)
+            /// 2. DOMAIN & CATEGORY LIST
             SliverToBoxAdapter(
               child: Align(
                 alignment: Alignment.topCenter,
                 child: Container(
                   constraints: const BoxConstraints(maxWidth: 1200),
-                  height: 105, // Raised height to fit larger 65x65 circles
+                  height: 105,
                   margin: const EdgeInsets.symmetric(vertical: 8),
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
@@ -356,8 +356,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Container(
-                                width: 65, // Increased circle width
-                                height: 65, // Increased circle height
+                                width: 65,
+                                height: 65,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: Colors.grey.shade100,
@@ -380,7 +380,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                               ),
                               const SizedBox(height: 6),
                               SizedBox(
-                                width: 80, // Slightly wider label constraint
+                                width: 80,
                                 child: Text(
                                   type['label']!,
                                   textAlign: TextAlign.center,
@@ -417,12 +417,141 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             const SliverToBoxAdapter(
               child: SizedBox(height: 40),
             ),
-            const SliverToBoxAdapter(
-              child: WebFooter(),
-            ),
           ],
         );
       },
+    );
+  }
+
+  // Desktop Primary Categories List Widget
+  Widget _buildPrimaryCategoriesList() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+          child: Row(
+            children: [
+              Icon(Icons.category, size: 18, color: Theme.of(context).colorScheme.primary),
+              const SizedBox(width: 8),
+              Text(
+                'Categories',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: ListView.separated(
+            itemCount: ProductConstants.categories.length,
+            separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey.shade100),
+            itemBuilder: (context, index) {
+              final category = ProductConstants.categories[index];
+              return ListTile(
+                dense: true,
+                visualDensity: VisualDensity.compact,
+                title: Text(
+                  category,
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                ),
+                trailing: const Icon(Icons.chevron_right, size: 18, color: Colors.grey),
+                onTap: () {
+                  setState(() {
+                    _selectedCategory = category;
+                  });
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Desktop Subcategories List Widget
+  Widget _buildSubCategoriesList(String parentCategory) {
+    final subCategoryMap = ProductConstants.categorySubCategoryBrands[parentCategory] ?? {};
+    final subCategories = subCategoryMap.keys.toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          child: Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back, size: 18),
+                onPressed: () {
+                  setState(() {
+                    _selectedCategory = null;
+                  });
+                },
+              ),
+              Expanded(
+                child: Text(
+                  parentCategory,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: subCategories.isEmpty
+              ? Center(
+                  child: TextButton(
+                    onPressed: () {
+                      MainTabsScreen.of(context)?.setSelectedIndex(
+                        7,
+                        searchType: 'product',
+                        category: parentCategory,
+                      );
+                    },
+                    child: Text("Explore $parentCategory"),
+                  ),
+                )
+              : ListView.separated(
+                  itemCount: subCategories.length,
+                  separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey.shade100),
+                  itemBuilder: (context, index) {
+                    final subCategory = subCategories[index];
+                    return ListTile(
+                      dense: true,
+                      visualDensity: VisualDensity.compact,
+                      title: Text(
+                        subCategory,
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
+                      ),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 12, color: Colors.grey),
+                      onTap: () {
+                        _analytics.logEvent('click_desktop_subcategory_$subCategory');
+                        
+                        // Pass subcategory as query & parent category to search view
+                        MainTabsScreen.of(context)?.setSelectedIndex(
+                          7,
+                          searchType: 'product',
+                          searchQuery: subCategory,
+                          category: parentCategory,
+                        );
+                      },
+                    );
+                  },
+                ),
+        ),
+      ],
     );
   }
 

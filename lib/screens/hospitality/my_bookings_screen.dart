@@ -8,7 +8,7 @@ import '../../widgets/hospitality/booking_card.dart';
 import '../../theme/design_system/app_loader.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_typography.dart';
-import '../../widgets/web_footer.dart';
+
 
 // First-letter capitalization extension string utility (Preserved)
 extension CapitalizeString on String {
@@ -103,8 +103,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                       ),
                     ),
                     const Spacer(),
-                    // Web footer displays even during an empty data state payload
-                    const WebFooter(),
+                
                   ],
                 ),
               ),
@@ -137,10 +136,6 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
               child: SizedBox(height: 40),
             ),
 
-            // ================= WEB FOOTER =================
-            const SliverToBoxAdapter(
-              child: WebFooter(),
-            ),
           ],
         );
       },
@@ -170,7 +165,7 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                   ),
                 ),
                 const Spacer(),
-                const WebFooter(),
+      
               ],
             ),
           ),

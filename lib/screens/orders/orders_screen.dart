@@ -13,7 +13,6 @@ import '../../theme/design_system/app_loader.dart';
 import '../../theme/design_system/app_info_box.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_typography.dart';
-import '../../widgets/web_footer.dart';
 
 extension CapitalizeString on String {
   String toCapitalized() {
@@ -478,7 +477,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
             ),
 
           const SliverToBoxAdapter(child: SizedBox(height: 40)),
-          const SliverToBoxAdapter(child: WebFooter()),
+
         ],
       ),
     );

@@ -9,7 +9,7 @@ import '../../theme/design_system/app_info_box.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_typography.dart';
 
-import '../../widgets/web_footer.dart';
+
 
 class WalletTransactionsScreen extends ConsumerStatefulWidget {
   const WalletTransactionsScreen({super.key});
@@ -278,7 +278,7 @@ class _WalletTransactionsScreenState
             ),
 
             const SliverToBoxAdapter(child: SizedBox(height: 20)),
-            const SliverToBoxAdapter(child: WebFooter()),
+
           ],
         );
       },

@@ -14,7 +14,7 @@ import '../../theme/design_system/app_text_field.dart';
 import '../../utils/app_toast.dart';
 import '../../widgets/main_app_bar.dart';
 import '../../theme/design_system/app_spacing.dart';
-import '../main_tabs_screen.dart'; // Core structural coordinator layout
+import '../main_tabs_screen.dart'; 
 import '../../widgets/image_crop_picker.dart';
 
 class AddEventScreen extends ConsumerStatefulWidget {

@@ -7,6 +7,7 @@ import '../services/analytics_service.dart';
 class WebFooter extends StatelessWidget {
   final VoidCallback? onAboutTap;
   final VoidCallback? onHelpTap;
+  final VoidCallback? onDeliveryTap;
 
   static final AnalyticsService _analyticsService = AnalyticsService();
 
@@ -14,6 +15,7 @@ class WebFooter extends StatelessWidget {
     super.key,
     this.onAboutTap,
     this.onHelpTap,
+    this.onDeliveryTap,
   });
 
   @override
@@ -135,6 +137,24 @@ class WebFooter extends StatelessWidget {
           spacing: 12,
           runSpacing: 8,
           children: [
+            TextButton(
+              onPressed: () {
+                _analyticsService.logEvent('footer_delivery_click');
+                if (onDeliveryTap != null) {
+                  onDeliveryTap!();
+                } else {
+                  MainTabsScreen.of(context)?.setSelectedIndex(9); // Delivery Code Screen Index
+                }
+              },
+              child: const Text('Delivery Code', style: linkStyle),
+            ),
+            TextButton(
+              onPressed: () {
+                _analyticsService.logEvent('footer_scan_ticket_click');
+                MainTabsScreen.of(context)?.setSelectedIndex(44); // Scan Ticket Panel Index
+              },
+              child: const Text('Scan Ticket', style: linkStyle),
+            ),
             TextButton(
               onPressed: () {
                 _analyticsService.logEvent('footer_about_click');

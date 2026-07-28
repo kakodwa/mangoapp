@@ -13,7 +13,7 @@ import '../../theme/design_system/app_spacing.dart';
 
 import '../main_tabs_screen.dart';
 import '../../theme/app_colors.dart';
-import '../../widgets/web_footer.dart';
+
 
 class MyLodgesScreen extends ConsumerStatefulWidget {
   const MyLodgesScreen({super.key});
@@ -136,7 +136,7 @@ class _MyLodgesScreenState extends ConsumerState<MyLodgesScreen> {
                   ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 40)),
-          const SliverToBoxAdapter(child: WebFooter()),
+
         ],
       ),
     );

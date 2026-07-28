@@ -12,7 +12,7 @@ import '../../providers/api_provider.dart';
 import '../../models/delivery.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_spacing.dart';
-import '../../widgets/web_footer.dart';
+
 
 // ============================
 // PROVIDER
@@ -61,24 +61,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                 itemBuilder: (context, index) => _DeliveryCard(d: deliveries[index]),
               );
 
-        if (isDesktop) {
-          return SelectionArea(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1200),
-                    child: SizedBox(
-                      height: MediaQuery.of(context).size.height - 200,
-                      child: content,
-                    ),
-                  ),
-                  const WebFooter(),
-                ],
-              ),
-            ),
-          );
-        }
+
 
         return content;
       },

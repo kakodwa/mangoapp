@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_spacing.dart';
-import '../../widgets/web_footer.dart';
 
 class TicketDetailScreen extends StatelessWidget {
   final dynamic ticket;
@@ -244,9 +243,7 @@ class TicketDetailScreen extends StatelessWidget {
         const SliverToBoxAdapter(
           child: SizedBox(height: 60),
         ),
-        const SliverToBoxAdapter(
-          child: WebFooter(),
-        ),
+
       ],
     );
   }

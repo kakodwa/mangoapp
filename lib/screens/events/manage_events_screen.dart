@@ -2,14 +2,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../widgets/web_footer.dart';
 import '../../models/event_model.dart';
 import '../../models/event_ticket_type_model.dart';
 import '../../providers/events_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/app_fab.dart';
-import '../main_tabs_screen.dart'; // Core structural coordinator layout
+import '../main_tabs_screen.dart';
 import 'event_tickets_screen.dart';
 import 'create_event_screen.dart';
 import '../../theme/design_system/app_spacing.dart';

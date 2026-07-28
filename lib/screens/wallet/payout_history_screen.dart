@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 import '../../models/withdrawal_model.dart';
 import '../../providers/wallet_provider.dart';
 import '../../theme/app_colors.dart';
-import '../../widgets/web_footer.dart';
+
 
 class PayoutHistoryScreen extends ConsumerStatefulWidget {
   const PayoutHistoryScreen({super.key});
@@ -143,7 +143,7 @@ class _PayoutHistoryScreenState extends ConsumerState<PayoutHistoryScreen> {
               ),
 
               const SliverToBoxAdapter(child: SizedBox(height: 30)),
-              const SliverToBoxAdapter(child: WebFooter()),
+   
             ],
           );
         },

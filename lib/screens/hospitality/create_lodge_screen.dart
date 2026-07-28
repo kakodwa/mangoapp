@@ -10,11 +10,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
 import 'package:geolocator/geolocator.dart';
 
-import '../../widgets/web_footer.dart';
 import '../../providers/api_provider.dart';
 import '../../providers/amenities_provider.dart';
 import '../../models/amenity_model.dart';
-import '../main_tabs_screen.dart'; // Core structural coordinator layout
+import '../main_tabs_screen.dart'; 
 
 import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_text_field.dart';
@@ -398,7 +397,7 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
             ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 40)),
-          const SliverToBoxAdapter(child: WebFooter()),
+
         ],
       ),
     );

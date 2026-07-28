@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/wallet_provider.dart';
-import '../../widgets/web_footer.dart';
-import '../main_tabs_screen.dart'; // Core structural coordinator layout
+import '../main_tabs_screen.dart'; 
 
 class WithdrawalScreen extends ConsumerStatefulWidget {
   const WithdrawalScreen({super.key});
@@ -172,12 +171,7 @@ class _WithdrawalScreenState extends ConsumerState<WithdrawalScreen> {
         const SliverToBoxAdapter(
           child: SizedBox(height: 40),
         ),
-        
-        // ================= WEB FOOTER =================
-        // Safely bound to the structural scroll root to render beneath the centered form block
-        const SliverToBoxAdapter(
-          child: WebFooter(),
-        ),
+
       ],
     );
   }

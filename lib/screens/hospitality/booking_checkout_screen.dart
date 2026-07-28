@@ -6,8 +6,8 @@ import '../../models/room_model.dart';
 import '../../models/requests/booking_create_request.dart';
 import '../../providers/api_provider.dart';
 
-import '../../widgets/web_footer.dart';
-import '../main_tabs_screen.dart'; // Added to use tab matrix routing hooks
+
+import '../main_tabs_screen.dart';
 import '../payments/payment_checkout_screen.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_card.dart';
@@ -266,14 +266,7 @@ class _BookingCheckoutScreenState
           ),
           
           const SliverToBoxAdapter(child: SizedBox(height: 120)),
-          
-          const SliverFillRemaining(
-            hasScrollBody: false,
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: WebFooter(),
-            ),
-          ),
+
         ],
       ),
     );

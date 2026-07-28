@@ -11,7 +11,7 @@ import '../../utils/app_snackbar.dart';
 import '../../utils/app_toast.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/app_fab.dart';
-import '../../widgets/web_footer.dart';
+
 
 class MyPropertiesScreen extends ConsumerWidget {
   const MyPropertiesScreen({super.key});
@@ -175,12 +175,6 @@ class MyPropertiesScreen extends ConsumerWidget {
                 // Dynamic structural alignment box to prevent FAB overlaps before footer bounds
                 const SliverToBoxAdapter(
                   child: SizedBox(height: 60),
-                ),
-
-                // ================= WEB FOOTER =================
-                // Extends completely across edge layout coordinates globally at the scroll end
-                const SliverToBoxAdapter(
-                  child: WebFooter(),
                 ),
               ],
             );

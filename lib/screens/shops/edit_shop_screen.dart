@@ -14,7 +14,7 @@ import '../main_tabs_screen.dart'; // Core structural coordinator layout
 
 import '../../utils/app_toast.dart';
 import '../../widgets/image_crop_picker.dart';
-import '../../widgets/web_footer.dart';
+
 
 class EditShopScreen extends ConsumerStatefulWidget {
   final Shop shop;
@@ -481,7 +481,7 @@ for (final img in bannerImages) {
                 ],
               ),
             ),
-            if (isDesktop) const WebFooter(),
+
           ],
         ),
       ),

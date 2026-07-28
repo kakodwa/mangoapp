@@ -6,7 +6,7 @@ import '../../widgets/feed/feed_list_widget.dart';
 
 // Analytics Import
 import '../../services/analytics_service.dart';
-import '../../widgets/web_footer.dart';
+
 
 import '../../screens/search/global_search_input_bar.dart';
 import '../../screens/search/unified_search_screen.dart';
@@ -141,9 +141,6 @@ class _PropertiesListScreenState extends ConsumerState<PropertiesListScreen> {
                               : const SizedBox(),
                         ),
                       ),
-                    ),
-                    const SliverToBoxAdapter(
-                      child: WebFooter(),
                     ),
                   ],
                 ),

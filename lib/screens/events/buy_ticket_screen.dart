@@ -5,9 +5,8 @@ import '../../core/api/api_client.dart';
 import '../../models/event_model.dart';
 import '../../utils/app_toast.dart';
 import '../payments/payment_checkout_screen.dart';
-import '../main_tabs_screen.dart'; // Imported to tap into the global routing context
+import '../main_tabs_screen.dart'; 
 import '../../theme/design_system/app_spacing.dart';
-import '../../widgets/web_footer.dart';
 import '../../services/analytics_service.dart';
 
 class SelectedTicket {
@@ -277,7 +276,6 @@ class _BuyTicketScreenState extends State<BuyTicketScreen> {
                 ),
               ),
             ),
-            WebFooter(),
           ],
         ),
       ),

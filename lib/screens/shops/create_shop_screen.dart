@@ -13,7 +13,7 @@ import '../../providers/shops_provider.dart';
 import '../main_tabs_screen.dart'; 
 import '../../utils/app_toast.dart';
 import '../../widgets/image_crop_picker.dart';
-import '../../widgets/web_footer.dart';
+
 
 class CreateShopScreen extends ConsumerStatefulWidget {
   const CreateShopScreen({super.key});
@@ -26,18 +26,18 @@ class _CreateShopScreenState extends ConsumerState<CreateShopScreen> {
   final _formKey = GlobalKey<FormState>();
 
   Future<MultipartFile> _multipartFileFromXFile(XFile file) async {
-  if (kIsWeb) {
-    return MultipartFile.fromBytes(
-      await file.readAsBytes(),
+    if (kIsWeb) {
+      return MultipartFile.fromBytes(
+        await file.readAsBytes(),
+        filename: file.name,
+      );
+    }
+
+    return MultipartFile.fromFile(
+      file.path,
       filename: file.name,
     );
   }
-
-  return MultipartFile.fromFile(
-    file.path,
-    filename: file.name,
-  );
-}
 
   // ======================
   // CONTROLLERS
@@ -162,29 +162,31 @@ class _CreateShopScreenState extends ConsumerState<CreateShopScreen> {
       });
 
       for (final img in logoImages) {
-  formData.files.add(
-    MapEntry(
-      "logo",
-      await _multipartFileFromXFile(img),
-    ),
-  );
-}
+        formData.files.add(
+          MapEntry(
+            "logo",
+            await _multipartFileFromXFile(img),
+          ),
+        );
+      }
 
-for (final img in bannerImages) {
-  formData.files.add(
-    MapEntry(
-      "banner",
-      await _multipartFileFromXFile(img),
-    ),
-  );
-}
+      for (final img in bannerImages) {
+        formData.files.add(
+          MapEntry(
+            "banner",
+            await _multipartFileFromXFile(img),
+          ),
+        );
+      }
 
       await ref.read(shopActionsProvider).api.postMultipart(
             "shops/",
             formData,
           );
 
+      // Invalidate both standard shop listing and user specific shop state
       ref.invalidate(shopsProvider);
+      ref.invalidate(userShopsProvider);
 
       if (mounted) {
         AppToast.success(context, "Shop created successfully");
@@ -456,7 +458,7 @@ for (final img in bannerImages) {
                 ],
               ),
             ),
-            if (isDesktop) const WebFooter(),
+  
           ],
         ),
       ),

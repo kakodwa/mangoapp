@@ -11,7 +11,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/foundation.dart';
-import '../../widgets/web_footer.dart';
 import '../../models/lodge_model.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/rooms_provider.dart';
@@ -394,7 +393,6 @@ class _LodgeDetailScreenState extends ConsumerState<LodgeDetailScreen> {
               ),
 
               const SliverToBoxAdapter(child: SizedBox(height: 160)),
-              const SliverToBoxAdapter(child: WebFooter()),
             ],
           ),
 
@@ -444,7 +442,7 @@ class _LodgeDetailScreenState extends ConsumerState<LodgeDetailScreen> {
                     final String shareMessage =
                         "🏡 ${widget.lodge.name}\n"
                         "📍 ${widget.lodge.city}, ${widget.lodge.district}\n\n"
-                        "Browse rooms and book your stay on MangoHub:\n"
+                        "Browse rooms and book your stay on MalaTrade:\n"
                         "$lodgeUrl";
 
                     final box = context.findRenderObject() as RenderBox?;

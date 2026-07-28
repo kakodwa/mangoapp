@@ -8,7 +8,7 @@ import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_text_field.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../main_tabs_screen.dart';
-import '../../widgets/web_footer.dart';
+
 
 class AddRoomScreen extends ConsumerStatefulWidget {
   final int lodgeId;
@@ -237,7 +237,7 @@ class _AddRoomScreenState extends ConsumerState<AddRoomScreen> {
             ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 40)),
-          const SliverToBoxAdapter(child: WebFooter()),
+
         ],
       ),
     );

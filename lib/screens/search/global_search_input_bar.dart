@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 import '../../services/analytics_service.dart';
 import '../main_tabs_screen.dart';
 
@@ -30,7 +29,8 @@ class GlobalSearchInputBar extends StatelessWidget {
     this.searchTabIndex = 7,
   });
 
-  /// Factory helper to conveniently render directly inside a [CustomScrollView]
+  /// Factory helper to conveniently render directly inside a [CustomScrollView].
+  /// Automatically hides the search bar when rendered on desktop (width >= 900px).
   static Widget sliver({
     Key? key,
     String hintText = 'Search products, shops, lodges, properties...',
@@ -43,19 +43,31 @@ class GlobalSearchInputBar extends StatelessWidget {
     String analyticsEventName = 'home_search_submit',
     int searchTabIndex = 7,
   }) {
-    return SliverToBoxAdapter(
-      key: key,
-      child: GlobalSearchInputBar(
-        hintText: hintText,
-        controller: controller,
-        onChanged: onChanged,
-        onSubmitted: onSubmitted,
-        onClear: onClear,
-        suffixIcon: suffixIcon,
-        maxWidth: maxWidth,
-        analyticsEventName: analyticsEventName,
-        searchTabIndex: searchTabIndex,
-      ),
+    return Builder(
+      builder: (context) {
+        final bool isDesktop = MediaQuery.of(context).size.width >= 900;
+
+        if (isDesktop) {
+          return const SliverToBoxAdapter(
+            child: SizedBox.shrink(),
+          );
+        }
+
+        return SliverToBoxAdapter(
+          key: key,
+          child: GlobalSearchInputBar(
+            hintText: hintText,
+            controller: controller,
+            onChanged: onChanged,
+            onSubmitted: onSubmitted,
+            onClear: onClear,
+            suffixIcon: suffixIcon,
+            maxWidth: maxWidth,
+            analyticsEventName: analyticsEventName,
+            searchTabIndex: searchTabIndex,
+          ),
+        );
+      },
     );
   }
 
@@ -70,8 +82,8 @@ class GlobalSearchInputBar extends StatelessWidget {
       } else {
         // Fallback default navigation behavior
         MainTabsScreen.of(context)?.setSelectedIndex(
-        searchTabIndex,
-        searchQuery: trimmedQuery,
+          searchTabIndex,
+          searchQuery: trimmedQuery,
         );
       }
     }

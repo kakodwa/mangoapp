@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart'; // Required for mobile IOHttpClientAdapter
 import 'package:flutter/foundation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -8,16 +10,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/payment_model.dart';
 import '../../models/review_model.dart';
-
 import '../errors/api_exception.dart';
 
 class ApiClient {
-  static String get baseUrl {
-    if (kIsWeb) return 'https://malatrade.com/api/';
-    return 'https://malatrade.com/api/';
+
+     static String get baseUrl {
+    if (kIsWeb) return 'https://www.malatrade.com/api/';
+    return 'https://wwww.malatrade.com/api/';
   }
 
-  static const String host = 'https://malatrade.com/api/';
+  static const String host = 'https://www.malatrade.com/api/';
   
   late Dio _dio;
   final _secureStorage = const FlutterSecureStorage();
@@ -30,9 +32,20 @@ class ApiClient {
       receiveTimeout: const Duration(seconds: 30),
       headers: {
         'Content-Type': 'application/json',
-        'ngrok-skip-browser-warning': 'true',
       },
     ));
+
+    // Bypass SSL certificate validation on native Mobile builds (Android & iOS)
+    if (!kIsWeb) {
+      _dio.httpClientAdapter = IOHttpClientAdapter(
+        createHttpClient: () {
+          final client = HttpClient();
+          client.badCertificateCallback =
+              (X509Certificate cert, String host, int port) => true;
+          return client;
+        },
+      );
+    }
 
     // Add JWT interceptor
     _dio.interceptors.add(
@@ -197,8 +210,8 @@ class ApiClient {
       return await getList<Review>(
         'reviews/',
         queryParameters: {
-          'content_type': targetType, // 👈 Django backend reads this to filter content type
-          'object_id': targetId,     // 👈 Django backend reads this to filter specific ID
+          'content_type': targetType, // Django backend reads this to filter content type
+          'object_id': targetId,     // Django backend reads this to filter specific ID
         },
         fromJson: (json) => Review.fromJson(json),
       );
@@ -221,7 +234,7 @@ class ApiClient {
       return await post<Review>(
         'reviews/',
         data: {
-          "resource_type": targetType, // 👈 Matches write_only deserializer rules
+          "resource_type": targetType, // Matches write_only deserializer rules
           "resource_id": targetId,
           "rating": rating,
           "title": title,
@@ -972,7 +985,7 @@ class ApiClient {
   }) async {
     try {
       final response = await _dio.post(
-        'payments/initiate_payment/', // 👈 Removed leading slash
+        'payments/initiate_payment/',
         data: {
           "property_id": propertyId,
           "amount": amount,

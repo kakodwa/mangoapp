@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/feed/main_feed_providers.dart';
 import '../../widgets/feed/feed_list_widget.dart';
-import '../../widgets/web_footer.dart';
+
 
 import '../../screens/search/global_search_input_bar.dart';
 import '../../screens/search/unified_search_screen.dart';
@@ -125,9 +125,6 @@ class _LodgeListScreenState extends ConsumerState<LodgeListScreen> {
                         ),
                       ),
                     ),
-                  const SliverToBoxAdapter(
-                    child: WebFooter(),
-                  ),
                 ],
               ),
       ),

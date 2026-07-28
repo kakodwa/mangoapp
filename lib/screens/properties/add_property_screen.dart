@@ -14,9 +14,9 @@ import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_text_field.dart';
 
 import '../../widgets/image_crop_picker.dart';
-import '../main_tabs_screen.dart'; // Core structural coordinator layout
+import '../main_tabs_screen.dart';
 import '../../utils/app_toast.dart';
-import '../../widgets/web_footer.dart';
+
 
 class AddPropertyScreen extends ConsumerStatefulWidget {
   const AddPropertyScreen({super.key});
@@ -425,23 +425,6 @@ class _AddPropertyScreenState extends ConsumerState<AddPropertyScreen> {
         ],
       ),
     );
-
-    if (isDesktop) {
-      return SelectionArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 800),
-                child: content,
-              ),
-              const WebFooter(),
-            ],
-          ),
-        ),
-      );
-    }
-
     return content;
   }
 

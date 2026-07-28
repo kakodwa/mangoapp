@@ -14,7 +14,6 @@ import '../../theme/design_system/app_text_field.dart';
 import '../../utils/app_toast.dart';
 import 'category_cascade_selector.dart';
 import '../../widgets/image_crop_picker.dart';
-import '../../widgets/web_footer.dart';
 import '../main_tabs_screen.dart';
 
 class CategoryAttributeInput extends StatefulWidget {
@@ -599,7 +598,6 @@ class _EditProductScreenState extends ConsumerState<EditProductScreen> {
                 ],
               ),
             ),
-            if (isDesktop) const WebFooter(),
           ],
         ),
       ),

@@ -6,7 +6,7 @@ import '../../providers/properties_provider.dart';
 import 'property_card.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_spacing.dart';
-import '../../widgets/web_footer.dart';
+
 
 class MyUnlockedPropertiesScreen extends ConsumerStatefulWidget {
   const MyUnlockedPropertiesScreen({super.key});
@@ -98,9 +98,6 @@ class _MyUnlockedPropertiesScreenState extends ConsumerState<MyUnlockedPropertie
                           ),
                         ),
                       ),
-                      const Spacer(),
-                      // Web footer stays at the very bottom edge even during empty state
-                      const WebFooter(),
                     ],
                   ),
                 ),
@@ -135,11 +132,6 @@ class _MyUnlockedPropertiesScreenState extends ConsumerState<MyUnlockedPropertie
               const SliverToBoxAdapter(
                 child: SizedBox(height: 40),
               ),
-
-              // ================= WEB FOOTER =================
-              const SliverToBoxAdapter(
-                child: WebFooter(),
-              ),
             ],
           );
         },
@@ -169,8 +161,7 @@ class _MyUnlockedPropertiesScreenState extends ConsumerState<MyUnlockedPropertie
                       style: TextStyle(color: Theme.of(context).colorScheme.error),
                     ),
                   ),
-                  const Spacer(),
-                  const WebFooter(),
+
                 ],
               ),
             ),

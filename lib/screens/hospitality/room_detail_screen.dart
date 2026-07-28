@@ -12,7 +12,6 @@ import '../main_tabs_screen.dart';
 import 'availability_calendar_screen.dart';
 import 'booking_checkout_screen.dart';
 import '../../providers/rooms_provider.dart';
-import '../../widgets/web_footer.dart';
 import '../main_tabs_screen.dart';
 
 class RoomDetailScreen extends ConsumerWidget {
@@ -273,13 +272,6 @@ class RoomDetailScreen extends ConsumerWidget {
                 ),
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 120)),
-              const SliverFillRemaining(
-                hasScrollBody: false,
-                child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: WebFooter(),
-                ),
-              ),
             ],
           ),
         ),

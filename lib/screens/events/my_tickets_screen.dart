@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:share_plus/share_plus.dart';
-import '../../widgets/web_footer.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path/path.dart' as path;
 
@@ -177,8 +176,7 @@ class _MyTicketsScreenState extends ConsumerState<MyTicketsScreen> {
                       ),
                     ),
                     const Spacer(),
-                    // Web footer visible on empty viewport layouts
-                    const WebFooter(),
+               
                   ],
                 ),
               ),
@@ -364,10 +362,7 @@ class _MyTicketsScreenState extends ConsumerState<MyTicketsScreen> {
             const SliverToBoxAdapter(
               child: SizedBox(height: 40),
             ),
-            // ================= WEB FOOTER =================
-            const SliverToBoxAdapter(
-              child: WebFooter(),
-            ),
+
           ],
         );
       },

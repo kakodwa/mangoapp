@@ -9,7 +9,7 @@ import 'package:vibration/vibration.dart';
 import '../../providers/api_provider.dart';
 import '../../utils/app_toast.dart';
 import '../../theme/design_system/app_spacing.dart';
-import '../../widgets/web_footer.dart';
+
 
 class BookingQrScannerScreen extends ConsumerStatefulWidget {
   const BookingQrScannerScreen({super.key});
@@ -264,7 +264,7 @@ class _BookingQrScannerScreenState extends ConsumerState<BookingQrScannerScreen>
             ),
           ),
           const SizedBox(height: 40),
-          const WebFooter(),
+
         ],
       ),
     );

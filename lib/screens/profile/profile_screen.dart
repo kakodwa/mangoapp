@@ -31,7 +31,7 @@ import '../hospitality/my_bookings_screen.dart';
 
 import '../../theme/design_system/app_spacing.dart';
 import '../../services/analytics_service.dart';
-import '../../widgets/web_footer.dart';
+
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -355,12 +355,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           
           const SizedBox(height: 40),
-          
-          // ================= FULL WIDTH EDGE-TO-EDGE FOOTER =================
-          const SizedBox(
-            width: double.infinity,
-            child: WebFooter(),
-          ),
         ],
       ),
     );

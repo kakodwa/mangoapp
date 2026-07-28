@@ -11,7 +11,7 @@ import '../../providers/feed/main_feed_providers.dart';
 
 // Widgets
 import '../../widgets/feed/feed_list_widget.dart';
-import '../../widgets/web_footer.dart';
+
 
 // Analytics & Services
 import '../../services/analytics_service.dart';
@@ -149,9 +149,6 @@ class _ProductsListScreenState extends ConsumerState<ProductsListScreen> {
                               : const SizedBox(),
                         ),
                       ),
-                    ),
-                    const SliverToBoxAdapter(
-                      child: WebFooter(),
                     ),
                   ],
                 ),

@@ -2,7 +2,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../widgets/web_footer.dart';
 import '../../providers/products_provider.dart';
 import '../../theme/design_system/app_button.dart';
 import '../../providers/api_provider.dart';
@@ -315,15 +314,6 @@ AppButton(
                   ),
                 ),
 
-                // ========================================================
-                // 3. WEB FOOTER (REACHABLE AT THE VERY BOTTOM)
-                // ========================================================
-                const SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 24.0),
-                    child: WebFooter(),
-                  ),
-                ),
               ],
             ),
     );

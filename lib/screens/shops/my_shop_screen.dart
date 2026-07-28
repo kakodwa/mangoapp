@@ -19,7 +19,7 @@ import '../../theme/design_system/app_info_box.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_typography.dart';
 
-import '../../widgets/web_footer.dart';
+
 
 class MyShopScreen extends ConsumerWidget {
   const MyShopScreen({super.key});
@@ -54,9 +54,9 @@ class MyShopScreen extends ConsumerWidget {
                     type: AppInfoType.info,
                     message: _capitalize("You have not created a shop yet."),
                   ),
-                  ),
-                );
-              }
+                ),
+              );
+            }
 
             final shop = shops.first;
             final productsAsync = ref.watch(productsByShopProvider(shop.id));
@@ -151,9 +151,71 @@ class MyShopScreen extends ConsumerWidget {
                                     return Padding(
                                       padding: const EdgeInsets.all(AppSpacing.md),
                                       child: Center(
-                                        child: Text(
-                                          _capitalize("No products yet"),
-                                          style: AppTypography.bodyMedium,
+                                        child: AppCard(
+                                          padding: const EdgeInsets.all(AppSpacing.lg),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.all(AppSpacing.md),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.red.shade50,
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: const Icon(
+                                                  Icons.add_shopping_cart,
+                                                  size: 40,
+                                                  color: Colors.red,
+                                                ),
+                                              ),
+                                              const SizedBox(height: AppSpacing.md),
+                                              Text(
+                                                "Your shop is ready!",
+                                                style: AppTypography.headlineSmall.copyWith(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                textAlign: TextAlign.center,
+                                              ),
+                                              const SizedBox(height: AppSpacing.xs),
+                                              Text(
+                                                "You can start posting products by clicking the red '+' button at the bottom right.",
+                                                style: AppTypography.bodyMedium,
+                                                textAlign: TextAlign.center,
+                                              ),
+                                              const SizedBox(height: AppSpacing.md),
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(
+                                                  horizontal: AppSpacing.md,
+                                                  vertical: AppSpacing.xs,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.amber.shade50,
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  border: Border.all(color: Colors.amber.shade300),
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    const Icon(
+                                                      Icons.verified_user_outlined,
+                                                      size: 18,
+                                                      color: Colors.amber,
+                                                    ),
+                                                    const SizedBox(width: AppSpacing.xs),
+                                                    Flexible(
+                                                      child: Text(
+                                                        "Note: Your shop will be 100% active once it is verified.",
+                                                        style: AppTypography.bodySmall.copyWith(
+                                                          color: Colors.amber.shade900,
+                                                          fontWeight: FontWeight.w600,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     );
@@ -311,9 +373,7 @@ class MyShopScreen extends ConsumerWidget {
                       },
                     ),
                     
-                    // ================= GLOBAL FOOTER INTEGRATION =================
-                    const SizedBox(height: AppSpacing.lg),
-                    const WebFooter(),
+
                   ],
                 ),
               ),

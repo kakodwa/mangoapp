@@ -37,6 +37,13 @@ mangohub26@gmail.com
 Mangochi@#2026
 
 
+git reset --hard HEAD
+git pull origin main
+
+rm -rf staticfiles/*
+python manage.py collectstatic --noinput
+
+
 FireBase
 
 -MamgoHub - MangoApp

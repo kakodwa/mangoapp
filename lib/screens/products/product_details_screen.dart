@@ -30,7 +30,6 @@ import '../shops/shop_details_screen.dart';
 
 import '../../widgets/app_fab.dart';
 import '../../widgets/reviews/review_section_widget.dart';
-import '../../widgets/web_footer.dart';
 import '../../widgets/update.dart';
 
 import '../../services/analytics_service.dart';
@@ -135,7 +134,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
         "🛍️ ${product.name}\n"
         "💰 Price: MWK ${product.price}\n"
         "🏪 Shop: ${product.shopName}\n\n"
-        "View this product on MangoHub:\n$productUrl";
+        "View this product on MalaTrade:\n$productUrl";
 
     final box = context.findRenderObject() as RenderBox?;
     final sharePositionOrigin =
@@ -792,8 +791,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                     child: buildRelatedProducts(),
                   ),
                 ),
-                const SizedBox(height: 40),
-                const WebFooter(),
                 const SizedBox(height: 60), 
               ],
             ),

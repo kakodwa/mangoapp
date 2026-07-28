@@ -156,7 +156,7 @@ class MainDrawer extends StatelessWidget {
                   _menuItem(
                     context: context,
                     icon: Icons.local_shipping,
-                    title: "Delivery",
+                    title: "Confirm Delivery",
                     color: Colors.orange,
                     onTap: () {
                       _analyticsService.logEvent('drawer_delivery_click');
@@ -208,7 +208,7 @@ class MainDrawer extends StatelessWidget {
                   _menuItem(
                     context: context,
                     icon: Icons.help,
-                    title: "Help & Support",
+                    title: "Help Center",
                     color: AppColors.leafGreen,
                     onTap: () {
                       _analyticsService.logEvent('drawer_help_click');

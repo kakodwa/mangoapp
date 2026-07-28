@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../widgets/hospitality/availability_calendar.dart';
 import '../../theme/design_system/app_spacing.dart';
-import '../../widgets/web_footer.dart';
-import '../main_tabs_screen.dart'; // Import added to use main tab navigation system hooks
+import '../main_tabs_screen.dart'; 
 
 class AvailabilityCalendarScreen extends StatelessWidget {
   final int roomId;
@@ -38,15 +37,7 @@ class AvailabilityCalendarScreen extends StatelessWidget {
           ),
           
           const SliverToBoxAdapter(child: SizedBox(height: 120)),
-          
-          // Securely appends the responsive web footer view at the bottom of the viewport
-          const SliverFillRemaining(
-            hasScrollBody: false,
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: WebFooter(),
-            ),
-          ),
+
         ],
       ),
     );

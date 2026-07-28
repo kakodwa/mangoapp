@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../widgets/web_footer.dart';
 import '../../providers/feed/main_feed_providers.dart';
 import '../../widgets/feed/feed_list_widget.dart';
 
@@ -123,9 +122,7 @@ class _EventListScreenState extends ConsumerState<EventListScreen> {
                       ),
                     ),
                   ),
-                  const SliverToBoxAdapter(
-                    child: WebFooter(),
-                  ),
+     
                 ],
               ),
       ),

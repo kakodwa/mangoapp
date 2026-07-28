@@ -7,7 +7,7 @@ import '../../providers/api_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../services/analytics_service.dart';
-import '../../widgets/web_footer.dart';
+
 
 class RiderDeliveryScreen extends ConsumerStatefulWidget {
   final dynamic delivery;
@@ -206,8 +206,7 @@ class _RiderDeliveryScreenState extends ConsumerState<RiderDeliveryScreen> {
                             ),
                     ),
                   ),
-                  // Render web specific footer if display surface matches web or desktop frame environments
-                  if (isWideScreen) const WebFooter(),
+             
                 ],
               ),
             ),

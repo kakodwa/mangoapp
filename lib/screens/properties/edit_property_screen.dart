@@ -12,7 +12,7 @@ import '../main_tabs_screen.dart'; // Core structural coordinator layout
 
 import '../../utils/app_toast.dart';
 import '../../theme/design_system/app_spacing.dart';
-import '../../widgets/web_footer.dart';
+
 
 class PropertyFormScreen extends ConsumerStatefulWidget {
   final Property? property;
@@ -812,10 +812,6 @@ class _PropertyFormScreenState
           ),
 
           const SizedBox(height: 40),
-          
-          // ================= WEB FOOTER =================
-          // Embedded directly within the scrolling structure to seamlessly line up at the bottom
-          const WebFooter(),
         ],
       ),
     );

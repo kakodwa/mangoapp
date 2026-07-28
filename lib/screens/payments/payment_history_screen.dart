@@ -10,7 +10,7 @@ import '../../theme/design_system/app_badge.dart';
 import '../../theme/design_system/app_loader.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_typography.dart';
-import '../../widgets/web_footer.dart';
+
 
 // Safe first-letter-only capitalization extension (Preserved)
 extension CapitalizeString on String {
@@ -81,7 +81,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                           style: const TextStyle(fontSize: 15, color: Colors.grey),
                         ),
                         const Spacer(),
-                        const WebFooter(),
+             
                       ],
                     ),
                   ),
@@ -197,7 +197,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                   ),
                 ),
                 const SliverToBoxAdapter(child: SizedBox(height: 30)),
-                const SliverToBoxAdapter(child: WebFooter()),
+ 
               ],
             ),
           );
@@ -229,7 +229,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                       style: AppTypography.bodySmall.copyWith(color: Colors.grey.shade400),
                     ),
                     const Spacer(),
-                    const WebFooter(),
+      
                   ],
                 ),
               ),

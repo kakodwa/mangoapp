@@ -23,7 +23,7 @@ import '../../providers/products_provider.dart';
 import '../../widgets/shop_map_modal.dart';
 import '../../widgets/app_fab.dart';
 import '../../widgets/reviews/review_section_widget.dart';
-import '../../widgets/web_footer.dart';
+
 
 import '../auth/login_screen.dart';
 import '../products/product_card.dart';
@@ -541,9 +541,7 @@ Future<void> _downloadOrSaveQr(BuildContext context, String url, String shopName
                         ),
                       ),
                     ],
-
-                    const SliverToBoxAdapter(child: SizedBox(height: 140)), 
-                    const SliverToBoxAdapter(child: WebFooter()), 
+ 
                   ],
                 ),
 
@@ -593,7 +591,7 @@ Future<void> _downloadOrSaveQr(BuildContext context, String url, String shopName
         "🏪 ${shop.name}\n"
         "📍 Category: ${shop.category}\n"
         "📌 Location: ${shop.district}, Malawi\n\n"
-        "Browse this shop on MangoHub:\n$shopUrl";
+        "Browse this shop on MalaTrade:\n$shopUrl";
 
     final box = context.findRenderObject() as RenderBox?;
     final sharePositionOrigin =

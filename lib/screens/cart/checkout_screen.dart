@@ -5,7 +5,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
-import '../../widgets/web_footer.dart';
 import '../../providers/api_provider.dart';
 import '../../providers/products_provider.dart';
 import '../orders/orders_screen.dart';
@@ -421,11 +420,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             ),
           ),
 
-          // ✅ Added WebFooter inside the list viewport to follow content naturally
-          const Padding(
-            padding: EdgeInsets.only(top: 40.0),
-            child: WebFooter(),
-          ),
         ],
       ),
     );

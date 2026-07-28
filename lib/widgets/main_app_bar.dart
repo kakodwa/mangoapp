@@ -1,32 +1,30 @@
-// lib/widgets/main_app_bar.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/auth_provider.dart';
 import '../providers/products_provider.dart';
-import '../theme/design_system/app_spacing.dart';
-import '../screens/cart/cart_screen.dart';
 import '../screens/auth/login_screen.dart';
-import '../screens/auth/register_screen.dart'; 
-import '../screens/search/unified_search_screen.dart'; 
+import '../screens/auth/register_screen.dart';
+import '../screens/main_tabs_screen.dart';
 import '../services/analytics_service.dart';
 
 class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
-  final VoidCallback? onProfileTap; 
+  final VoidCallback? onProfileTap;
   final VoidCallback? onSearchTap;
   final VoidCallback? onCartTap;
-  final Widget? title; 
+  final VoidCallback? onDeliveryTap;
+  final Widget? title;
   final Widget? leading;
 
   static final AnalyticsService _analyticsService = AnalyticsService();
 
   const MainAppBar({
     super.key,
-    this.title, 
-    this.onProfileTap, 
+    this.title,
+    this.onProfileTap,
     this.onSearchTap,
-    this.onCartTap, 
+    this.onCartTap,
+    this.onDeliveryTap,
     this.leading,
   });
 
@@ -38,204 +36,225 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
     final double screenWidth = MediaQuery.of(context).size.width;
     final bool isDesktop = screenWidth >= 900;
 
-    return AppBar(
-      centerTitle: false,
-      titleSpacing: 4.0, 
-      automaticallyImplyLeading: leading == null ? !isDesktop : false,
-      leading: leading,
-      
-      title: Align(
-        alignment: Alignment.centerLeft,
-        child: title ??
-            Image.asset(
-              'assets/images/logo.png',
-              height: 28,
-              fit: BoxFit.contain,
-            ),
-      ),
-
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.search_rounded),
-          tooltip: 'Search Platform',
-          onPressed: () {
-            _analyticsService.logEvent('appbar_search_click');
-            if (onSearchTap != null) {
-              onSearchTap!();
-            }
-          },
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(kToolbarHeight),
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          border: Border(bottom: BorderSide(color: Colors.grey.shade200, width: 1)),
         ),
-
-        // CART BUTTON WITH BADGE
-        Stack(
-          clipBehavior: Clip.none,
-          alignment: Alignment.center,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.shopping_cart_outlined),
-              onPressed: () {
-                _analyticsService.logEvent('appbar_cart_click');
-                if (onCartTap != null) {
-                  onCartTap!();
-                }
-              },
-              tooltip: 'Shopping Cart',
-            ),
-            if (cartItems.isNotEmpty)
-              Positioned(
-                right: 4,
-                top: 4,
-                child: Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: Colors.red,
-                    shape: BoxShape.circle,
+        child: Center(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 1200),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: AppBar(
+              centerTitle: false,
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              titleSpacing: 0,
+              automaticallyImplyLeading: leading == null ? !isDesktop : false,
+              leading: leading,
+              title: title ??
+                  Image.asset(
+                    'assets/images/logo.png',
+                    height: 32,
+                    fit: BoxFit.contain,
                   ),
-                  child: Text(
-                    '${cartItems.length}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 9,
-                      fontWeight: FontWeight.bold,
-                    ),
+              actions: [
+                // Desktop Header Navigation Links
+                if (isDesktop) ...[
+                  TextButton(
+                    onPressed: () => MainTabsScreen.of(context)?.setSelectedIndex(0),
+                    child: const Text('Home', style: TextStyle(fontWeight: FontWeight.w600)),
                   ),
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(width: 4),
+                  TextButton(
+                    onPressed: () => MainTabsScreen.of(context)?.setSelectedIndex(1),
+                    child: const Text('Shops', style: TextStyle(fontWeight: FontWeight.w600)),
+                  ),
+                  TextButton(
+                    onPressed: () => MainTabsScreen.of(context)?.setSelectedIndex(2),
+                    child: const Text('Products', style: TextStyle(fontWeight: FontWeight.w600)),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      _analyticsService.logEvent('appbar_delivery_click');
+                      if (onDeliveryTap != null) {
+                        onDeliveryTap!();
+                      } else {
+                        MainTabsScreen.of(context)?.setSelectedIndex(9); // Delivery Code Screen
+                      }
+                    },
+                    child: const Text('Confirm Delivery', style: TextStyle(fontWeight: FontWeight.w600)),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      _analyticsService.logEvent('appbar_help_click');
+                      MainTabsScreen.of(context)?.setSelectedIndex(11); // Help Screen
+                    },
+                    child: const Text('Help Center', style: TextStyle(fontWeight: FontWeight.w600)),
+                  ),
+                  const SizedBox(width: 12),
 
-        // AUTHENTICATION / PROFILE BUTTONS
-        if (isDesktop) ...[
-          if (!isLoggedIn) ...[
-            TextButton(
-              onPressed: () => _handleAuthNavigation(context, 'login'),
-              child: const Text('Login', style: TextStyle(fontWeight: FontWeight.w600)),
-            ),
-            const SizedBox(width: 4),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              ),
-              onPressed: () => _handleAuthNavigation(context, 'register'),
-              child: const Text('Register', style: TextStyle(fontWeight: FontWeight.bold)),
-            ),
-          ] else ...[
-            TextButton.icon(
-              icon: const Icon(Icons.account_circle, size: 22),
-              label: const Text('Profile', style: TextStyle(fontWeight: FontWeight.w600)),
-              onPressed: () => _handleAuthNavigation(context, 'profile'),
-            ),
-            const SizedBox(width: 8),
-            OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              ),
-              onPressed: () => _handleAuthNavigation(context, 'logout', ref: ref),
-              child: const Text('Logout'),
-            ),
-          ],
-        ] else ...[
-          // 👈 MOBILE AUTH POPUP MENU BUTTON
-          PopupMenuButton<String>(
-            offset: const Offset(0, 45), // Drops menu right below the button
-            onSelected: (value) => _handleAuthNavigation(context, value, ref: ref),
-            
-            // 👈 If logged out: Shows explicit "Login" text button with icon instead of three dots
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-              child: isLoggedIn
-                  ? const Icon(Icons.account_circle, size: 28)
-                  : Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                  // Header Desktop Search Bar
+                  Container(
+                    width: 240,
+                    height: 38,
+                    margin: const EdgeInsets.only(right: 12),
+                    child: TextField(
+                      readOnly: true,
+                      onTap: () {
+                        _analyticsService.logEvent('appbar_search_click');
+                        onSearchTap?.call();
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Search platform...',
+                        hintStyle: const TextStyle(fontSize: 13),
+                        prefixIcon: const Icon(Icons.search, size: 18),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                        filled: true,
+                        fillColor: Colors.grey.shade100,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(24),
+                          borderSide: BorderSide.none,
                         ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.person_outline_rounded,
-                            size: 16,
-                            color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ] else ...[
+                  IconButton(
+                    icon: const Icon(Icons.search_rounded),
+                    tooltip: 'Search Platform',
+                    onPressed: () {
+                      _analyticsService.logEvent('appbar_search_click');
+                      onSearchTap?.call();
+                    },
+                  ),
+                ],
+
+                // Shopping Cart Button
+                Stack(
+                  clipBehavior: Clip.none,
+                  alignment: Alignment.center,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.shopping_cart_outlined),
+                      onPressed: () {
+                        _analyticsService.logEvent('appbar_cart_click');
+                        onCartTap?.call();
+                      },
+                      tooltip: 'Shopping Cart',
+                    ),
+                    if (cartItems.isNotEmpty)
+                      Positioned(
+                        right: 4,
+                        top: 4,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
                           ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Login',
-                            style: TextStyle(
-                              fontSize: 12,
+                          child: Text(
+                            '${cartItems.length}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
                               fontWeight: FontWeight.bold,
-                              color: Theme.of(context).colorScheme.primary,
                             ),
                           ),
-                        ],
+                        ),
                       ),
+                  ],
+                ),
+                const SizedBox(width: 8),
+
+                // Auth Action Buttons
+                if (isDesktop) ...[
+                  if (!isLoggedIn) ...[
+                    TextButton(
+                      onPressed: () => _handleAuthNavigation(context, 'login'),
+                      child: const Text('Login', style: TextStyle(fontWeight: FontWeight.w600)),
                     ),
+                    const SizedBox(width: 4),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      ),
+                      onPressed: () => _handleAuthNavigation(context, 'register'),
+                      child: const Text('Register', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ] else ...[
+                    TextButton.icon(
+                      icon: const Icon(Icons.account_circle, size: 22),
+                      label: const Text('Profile', style: TextStyle(fontWeight: FontWeight.w600)),
+                      onPressed: () => _handleAuthNavigation(context, 'profile'),
+                    ),
+                    const SizedBox(width: 4),
+                    OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      ),
+                      onPressed: () => _handleAuthNavigation(context, 'logout', ref: ref),
+                      child: const Text('Logout'),
+                    ),
+                  ],
+                ] else ...[
+                  PopupMenuButton<String>(
+                    offset: const Offset(0, 45),
+                    onSelected: (value) => _handleAuthNavigation(context, value, ref: ref),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                      child: isLoggedIn
+                          ? const Icon(Icons.account_circle, size: 28)
+                          : Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.person_outline_rounded,
+                                      size: 16, color: Theme.of(context).colorScheme.primary),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Login',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: Theme.of(context).colorScheme.primary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                    ),
+                    itemBuilder: (_) => !isLoggedIn
+                        ? const [
+                            PopupMenuItem(value: 'login', child: Text('Login')),
+                            PopupMenuItem(value: 'register', child: Text('Register')),
+                          ]
+                        : const [
+                            PopupMenuItem(value: 'profile', child: Text('Profile')),
+                            PopupMenuItem(value: 'logout', child: Text('Logout')),
+                          ],
+                  ),
+                ],
+              ],
             ),
-            
-            itemBuilder: (_) {
-              if (!isLoggedIn) {
-                return const [
-                  PopupMenuItem(
-                    value: 'login',
-                    child: Row(
-                      children: [
-                        Icon(Icons.login, size: 18),
-                        SizedBox(width: 8),
-                        Text('Login'),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 'register',
-                    child: Row(
-                      children: [
-                        Icon(Icons.person_add_outlined, size: 18),
-                        SizedBox(width: 8),
-                        Text('Register'),
-                      ],
-                    ),
-                  ),
-                ];
-              }
-              return const [
-                PopupMenuItem(
-                  value: 'profile',
-                  child: Row(
-                    children: [
-                      Icon(Icons.person_outline, size: 18),
-                      SizedBox(width: 8),
-                      Text('Profile'),
-                    ],
-                  ),
-                ),
-                PopupMenuDivider(),
-                PopupMenuItem(
-                  value: 'logout',
-                  child: Row(
-                    children: [
-                      Icon(Icons.logout, size: 18, color: Colors.red),
-                      SizedBox(width: 8),
-                      Text('Logout', style: TextStyle(color: Colors.red)),
-                    ],
-                  ),
-                ),
-              ];
-            },
           ),
-        ],
-        const SizedBox(width: 8),
-      ],
+        ),
+      ),
     );
   }
 
   void _handleAuthNavigation(BuildContext context, String destination, {WidgetRef? ref}) async {
     _analyticsService.logEvent('appbar_${destination}_click');
-
     switch (destination) {
       case 'login':
         Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
@@ -244,7 +263,7 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
         Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterScreen()));
         break;
       case 'profile':
-        if (onProfileTap != null) onProfileTap!();
+        onProfileTap?.call();
         break;
       case 'logout':
         if (ref != null) {

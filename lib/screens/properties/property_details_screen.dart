@@ -17,12 +17,12 @@ import '../../providers/api_provider.dart';
 import '../../widgets/shop_map_modal.dart';
 import '../../widgets/reviews/review_section_widget.dart';
 import '../../theme/app_colors.dart';
-import '../main_tabs_screen.dart'; // Import added to gain access to MainTabsScreenState methods
+import '../main_tabs_screen.dart';
 import 'property_card.dart';
 import '../../widgets/app_fab.dart';
 import '../../providers/auth_provider.dart';
 import '../../theme/design_system/app_spacing.dart';
-import '../../widgets/web_footer.dart';
+
 
 // Analytics Import
 import '../../services/analytics_service.dart';
@@ -457,9 +457,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
                       ),
                     ),
                     const SliverToBoxAdapter(child: SizedBox(height: 160)),
-                    const SliverToBoxAdapter(
-                      child: WebFooter(),
-                    ),
+           
                   ],
                 ),
               ),

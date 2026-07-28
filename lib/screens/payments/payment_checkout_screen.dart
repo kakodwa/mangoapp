@@ -15,7 +15,7 @@ import 'paychangu_visa_webview.dart';
 import '../../theme/design_system/app_text_field.dart';
 import '../../utils/app_toast.dart';
 import '../../theme/design_system/app_spacing.dart';
-import '../../widgets/web_footer.dart';
+
 
 class PaymentCheckoutScreen extends ConsumerStatefulWidget {
   final int transactionId;
@@ -529,11 +529,7 @@ class _PaymentCheckoutScreenState
             ),
           ),
           
-          // ✅ WebFooter appended seamlessly to the bottom of the checkout content scroll view
-          const Padding(
-            padding: EdgeInsets.only(top: 40.0),
-            child: WebFooter(),
-          ),
+
         ],
       ),
     );

@@ -22,18 +22,18 @@ import '../../screens/shops/shop_card.dart';
 import '../../screens/properties/property_card.dart';
 import '../../widgets/hospitality/lodge_card.dart';
 import '../../widgets/events/event_card.dart';
-import '../../widgets/web_footer.dart';
+
 
 class UnifiedSearchScreen extends StatefulWidget {
   final String? initialQuery;
   final String? initialType;
-  final String? initialCategory; // <--- ACCEPTS INITIAL CATEGORY
+  final String? initialCategory;
 
   const UnifiedSearchScreen({
     Key? key,
     this.initialQuery,
     this.initialType,
-    this.initialCategory, // <--- ACCEPTS INITIAL CATEGORY
+    this.initialCategory,
   }) : super(key: key);
 
   @override
@@ -129,10 +129,17 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
     super.initState();
     _searchController = TextEditingController(text: widget.initialQuery ?? '');
     
-    // Pass initial query, type, and category filters together
+    // Auto-populate subcategory state if initial query matches subcategory
+    if (widget.initialQuery != null && widget.initialCategory != null) {
+      final subMap = _categorySubCategoryBrands[widget.initialCategory];
+      if (subMap != null && subMap.containsKey(widget.initialQuery)) {
+        _selectedSubCategory = widget.initialQuery;
+      }
+    }
+
     _provider.updateFilters(
       query: widget.initialQuery,
-      type: widget.initialType,
+      type: widget.initialType ?? 'product',
       category: widget.initialCategory,
     );
     
@@ -479,6 +486,7 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
                                         _selectedSubCategory = val;
                                         _selectedBrand = null;
                                       });
+                                      _provider.updateFilters(query: val ?? '');
                                     },
                                   ),
                                 ),
@@ -585,9 +593,6 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
                                             child: Center(child: CircularProgressIndicator(color: AppColors.mangoOrange)),
                                           ),
                                         ),
-                                      const SliverToBoxAdapter(
-                                        child: WebFooter(),
-                                      ),
                                     ],
                                   ),
                                 ),

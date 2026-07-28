@@ -10,10 +10,9 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../models/lodge_model.dart';
 import '../../models/amenity_model.dart';
-import '../../widgets/web_footer.dart';
 import '../../providers/api_provider.dart';
 import '../../providers/amenities_provider.dart';
-import '../main_tabs_screen.dart'; // Core structural coordinator layout
+import '../main_tabs_screen.dart';
 import '../../utils/app_toast.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_spacing.dart';
@@ -532,7 +531,6 @@ class _EditLodgeScreenState extends ConsumerState<EditLodgeScreen> {
             ),
           ),
           const SliverToBoxAdapter(child: SizedBox(height: 40)),
-          const SliverToBoxAdapter(child: WebFooter()),
         ],
       ),
     );
