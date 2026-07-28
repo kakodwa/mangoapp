@@ -29,7 +29,6 @@ import '../../widgets/capitalize_text.dart';
 import '../../services/analytics_service.dart';
 import '../../utils/app_toast.dart';
 import '../../utils/price_helper.dart';
-import '../main_tabs_screen.dart';
 
 // Design System & Theme
 import '../../theme/app_colors.dart';
@@ -49,6 +48,9 @@ class ProductCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // ✅ 1. DEBUG PRINT GOES HERE (Inside build method, before return)
+    debugPrint('Product Image URL: ${product.safeImage}');
+
     final auth = ref.watch(authProvider);
     final isLoggedIn = auth.isAuthenticated;
 
@@ -98,6 +100,7 @@ class ProductCard extends ConsumerWidget {
             AspectRatio(
               aspectRatio: 1,
               child: AppImageCard(
+                // ✅ 2. Clean AppImageCard without inline debug statements
                 imageUrl: product.hasImage ? product.safeImage : null,
                 height: double.infinity,
                 borderRadius: 14,
@@ -180,14 +183,14 @@ class ProductCard extends ConsumerWidget {
                         ...List.generate(5, (index) {
                           final currentStarValue = index + 1;
                           if (product.rating >= currentStarValue) {
-                            return const Icon(Icons.star_rounded, color: Colors.amber, size: 14); // ✅ FIXED: Non-const compilation context resolved
+                            return const Icon(Icons.star_rounded, color: Colors.amber, size: 14);
                           } else if (product.rating > currentStarValue - 1 && product.rating < currentStarValue) {
-                            return const Icon(Icons.star_half_rounded, color: Colors.amber, size: 14); // ✅ FIXED: Non-const context resolved
+                            return const Icon(Icons.star_half_rounded, color: Colors.amber, size: 14);
                           } else {
                             return Icon(Icons.star_border_rounded, color: Colors.grey.shade400, size: 14);
                           }
                         }),
-                        const SizedBox(width: 4), // ✅ FIXED: Const compiler exception bypassed
+                        const SizedBox(width: 4),
                         Text(
                           "(${product.totalReviews})",
                           style: AppTypography.bodySmall.copyWith(
@@ -199,7 +202,7 @@ class ProductCard extends ConsumerWidget {
                       ],
                     ),
 
-                    const SizedBox(height: 4), // ✅ FIXED: Sized bounds aligned safely
+                    const SizedBox(height: 4),
 
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center, 
@@ -211,7 +214,6 @@ class ProductCard extends ConsumerWidget {
                             children: [
                               if (product.hasDiscount)
                                 Text(
-                                  //"MWK ${formatPrice(product.originalPrice ?? 0)}",
                                   "MWK ${product.originalPrice ?? 0}",
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -225,7 +227,6 @@ class ProductCard extends ConsumerWidget {
                                 fit: BoxFit.scaleDown,
                                 alignment: Alignment.centerLeft,
                                 child: Text(
-                                  //"MWK ${formatPrice(product.price)}",
                                   "MWK ${product.price}",
                                   maxLines: 1,
                                   style: AppTypography.titleMedium.copyWith(
@@ -237,7 +238,7 @@ class ProductCard extends ConsumerWidget {
                             ],
                           ),
                         ),
-                        const SizedBox(width: AppSpacing.xxs), // ✅ FIXED: Non-const context mismatch resolved
+                        const SizedBox(width: AppSpacing.xxs),
                         AppIconButton(
                           icon: isOwner ? Icons.edit_rounded : Icons.shopping_cart_outlined,
                           style: IconButtonStyle.ghost,
@@ -263,19 +264,14 @@ class ProductCard extends ConsumerWidget {
 
                                       analytics.logEvent('product_add_to_cart_click_${product.id}');
 
-                                      // ========================================================
-                                      // 🛠️ SMART IN-STOCK VARIANT SELECTION POOL
-                                      // ========================================================
                                       dynamic defaultVariant;
 
                                       if (product.variants.isNotEmpty) {
-                                        // Filter out variations with 0 or negative stock records safely
                                         final inStockVariants = product.variants.where((v) => v.stock > 0);
                                         
                                         if (inStockVariants.isNotEmpty) {
                                           defaultVariant = inStockVariants.first;
                                         } else {
-                                          // Lock execution if all configured option models are depleted
                                           AppToast.error(context, "All options for this product are sold out!");
                                           return;
                                         }

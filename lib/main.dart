@@ -1,4 +1,5 @@
 // lib/main.dart
+import 'dart:io'; // 🔑 Required for HttpOverrides and SecurityContext
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
@@ -28,8 +29,22 @@ import 'providers/auth_provider.dart';
 final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>();
 final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
+// 🛠️ CUSTOM HTTP OVERRIDES: Fixes image blocking on native APKs by serving a standard browser User-Agent
+class CustomHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    final client = super.createHttpClient(context);
+    client.userAgent =
+        'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
+    return client;
+  }
+}
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 🚀 Register custom HttpOverrides before app bootstrap
+  HttpOverrides.global = CustomHttpOverrides();
 
   if (WebViewPlatform.instance == null) {
     WebViewPlatform.instance = AndroidWebViewPlatform();
@@ -50,9 +65,7 @@ class MainApp extends ConsumerStatefulWidget {
   ConsumerState<MainApp> createState() => _MainAppState();
 }
 
-// 🌟 FIX: Inject the AppRouterMixin to handle the web browser parsing on startup natively!
 class _MainAppState extends ConsumerState<MainApp>  {
-
 
   @override
   Widget build(BuildContext context) {
@@ -84,11 +97,9 @@ class _MainAppState extends ConsumerState<MainApp>  {
           ),
         ),
 
-        // 🚀 Dynamic Entry Point: Open tabs view by default. 
-        // The AppRouterMixin will automatically overlay the deep-linked screen on top!
         home: authState.isLoading
-    ? const SplashScreen()
-    : const MainTabsScreen(key: ValueKey('main-tabs')),
+            ? const SplashScreen()
+            : const MainTabsScreen(key: ValueKey('main-tabs')),
 
         routes: {
           '/login': (context) => const LoginScreen(),

@@ -21,26 +21,37 @@ class AppImageCard extends StatelessWidget {
     this.overlay,
     this.badges,
     this.onTap,
-    this.placeholderIcon = Icons.image,
+    this.placeholderIcon = Icons.image_outlined,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Sanitize image URL
+    final validUrl = (imageUrl != null && imageUrl!.trim().isNotEmpty)
+        ? imageUrl!.trim()
+        : null;
+
     return GestureDetector(
       onTap: onTap,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius),
         child: Stack(
           children: [
-            // ================= SHIMMER OPTIMIZED NETWORK IMAGE MIGRATION =================
+            // ================= SHIMMER OPTIMIZED NETWORK IMAGE =================
             SizedBox(
               height: height,
               width: double.infinity,
-              child: imageUrl != null && imageUrl!.isNotEmpty
+              child: validUrl != null
                   ? CachedNetworkImage(
-                      imageUrl: imageUrl!,
+                      imageUrl: validUrl,
                       fit: BoxFit.cover,
-                      // Smoothly render a glowing placeholder box during initial server payload download
+                      // 🔑 Pass headers so Apache / Namecheap does not block Dart native requests
+                      httpHeaders: const {
+                        'User-Agent':
+                            'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+                        'Accept':
+                            'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+                      },
                       placeholder: (context, url) => Shimmer.fromColors(
                         baseColor: Colors.grey.shade300,
                         highlightColor: Colors.grey.shade100,
@@ -50,7 +61,10 @@ class AppImageCard extends StatelessWidget {
                           height: double.infinity,
                         ),
                       ),
-                      errorWidget: (_, __, ___) {
+                      // 🔑 Print the EXACT error in debug terminal when loading fails
+                      errorWidget: (context, url, error) {
+                        debugPrint('❌ APK Image Load Error for URL: $url');
+                        debugPrint('❌ Exception details: $error');
                         return _buildPlaceholder();
                       },
                     )
@@ -96,10 +110,14 @@ class AppImageCard extends StatelessWidget {
   Widget _buildPlaceholder() {
     return Container(
       color: Colors.grey.shade200,
-      child: Icon(
-        placeholderIcon,
-        size: 40,
-        color: Colors.grey.shade400,
+      width: double.infinity,
+      height: double.infinity,
+      child: Center(
+        child: Icon(
+          placeholderIcon,
+          size: 40,
+          color: Colors.grey.shade400,
+        ),
       ),
     );
   }
