@@ -29,13 +29,19 @@ import 'providers/auth_provider.dart';
 final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>();
 final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
-// 🛠️ CUSTOM HTTP OVERRIDES: Fixes image blocking on native APKs by serving a standard browser User-Agent
+// 🛠️ CUSTOM HTTP OVERRIDES: Fixes image blocking & gzip decompression issues on LiteSpeed/Namecheap
 class CustomHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
     final client = super.createHttpClient(context);
+    
+    // 🔑 CRITICAL FIX: Ensures GZIP streams from LiteSpeed are properly decompressed before Flutter attempts image rendering
+    client.autoUncompress = true;
+
+    // Spoof standard browser User-Agent so LiteSpeed ModSecurity allows native requests
     client.userAgent =
         'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
+
     return client;
   }
 }
@@ -65,7 +71,7 @@ class MainApp extends ConsumerStatefulWidget {
   ConsumerState<MainApp> createState() => _MainAppState();
 }
 
-class _MainAppState extends ConsumerState<MainApp>  {
+class _MainAppState extends ConsumerState<MainApp> {
 
   @override
   Widget build(BuildContext context) {
