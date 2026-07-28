@@ -7,6 +7,7 @@ import '../../utils/app_toast.dart';
 import '../../utils/api_response_handler.dart';
 import '../../widgets/shop_map_modal.dart';
 import '../../widgets/main_app_bar.dart';
+import '../../widgets/web_footer.dart';
 import '../../core/api/api_client.dart';
 import '../../providers/api_provider.dart';
 import '../../models/delivery.dart';
@@ -43,27 +44,37 @@ class SellerDeliveryScreen extends ConsumerWidget {
           return _buildEmptyState(context);
         }
 
-        Widget content = isDesktop
-            ? GridView.builder(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 18,
-                  mainAxisSpacing: 18,
-                  mainAxisExtent: 560, // 👈 Increased slightly to leave clean vertical padding for variant tags
-                ),
-                itemCount: deliveries.length,
-                itemBuilder: (context, index) => _DeliveryCard(d: deliveries[index]),
-              )
-            : ListView.builder(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                itemCount: deliveries.length,
-                itemBuilder: (context, index) => _DeliveryCard(d: deliveries[index]),
-              );
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              isDesktop
+                  ? GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 18,
+                        mainAxisSpacing: 18,
+                        mainAxisExtent: 560,
+                      ),
+                      itemCount: deliveries.length,
+                      itemBuilder: (context, index) => _DeliveryCard(d: deliveries[index]),
+                    )
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      itemCount: deliveries.length,
+                      itemBuilder: (context, index) => _DeliveryCard(d: deliveries[index]),
+                    ),
+              const SizedBox(height: 40),
 
-
-
-        return content;
+              // Web/Desktop Footer
+              const WebFooter(),
+            ],
+          ),
+        );
       },
       loading: () => Center(
         child: CircularProgressIndicator(
@@ -89,44 +100,54 @@ class SellerDeliveryScreen extends ConsumerWidget {
   // EMPTY STATE FALLBACK
   // =========================
   Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.04),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.local_shipping_outlined,
-                size: 80,
-                color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4),
-              ),
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 60),
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.04),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.local_shipping_outlined,
+                    size: 80,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  "No deliveries yet",
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: AppColors.text(context),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  "Active deliveries managed by your profile will appear right here.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                  ),
+                ),
+                const SizedBox(height: 60),
+              ],
             ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              "No deliveries yet",
-              style: TextStyle(
-                fontSize: 18,
-                color: AppColors.text(context),
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              "Active deliveries managed by your profile will appear right here.",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
-              ),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 40),
+
+          // Web/Desktop Footer
+          const WebFooter(),
+        ],
       ),
     );
   }
@@ -135,56 +156,66 @@ class SellerDeliveryScreen extends ConsumerWidget {
   // INTERNET ISSUE FALLBACK
   // =========================
   Widget _buildNetworkErrorState(BuildContext context, WidgetRef ref) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: AppColors.mangoOrange.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.wifi_off_rounded,
-                size: 80,
-                color: AppColors.mangoOrange,
-              ),
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 60),
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    color: AppColors.mangoOrange.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.wifi_off_rounded,
+                    size: 80,
+                    color: AppColors.mangoOrange,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  "Connection Interrupted",
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: AppColors.text(context),
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  "Please inspect your internet setup or server route and try again.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                ElevatedButton.icon(
+                  onPressed: () => ref.invalidate(sellerDeliveriesProvider),
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: const Text("Retry Connection"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary(context),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+                const SizedBox(height: 60),
+              ],
             ),
-            const SizedBox(height: AppSpacing.md),
-            Text(
-              "Connection Interrupted",
-              style: TextStyle(
-                fontSize: 18,
-                color: AppColors.text(context),
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              "Please inspect your internet setup or server route and try again.",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            ElevatedButton.icon(
-              onPressed: () => ref.invalidate(sellerDeliveriesProvider),
-              icon: const Icon(Icons.refresh_rounded),
-              label: const Text("Retry Connection"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary(context),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 40),
+
+          // Web/Desktop Footer
+          const WebFooter(),
+        ],
       ),
     );
   }
@@ -193,39 +224,49 @@ class SellerDeliveryScreen extends ConsumerWidget {
   // GENERIC ERROR FALLBACK
   // =========================
   Widget _buildGenericErrorState(BuildContext context, Object error, WidgetRef ref) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline_rounded,
-              size: 60,
-              color: AppColors.error(context),
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 60),
+                Icon(
+                  Icons.error_outline_rounded,
+                  size: 60,
+                  color: AppColors.error(context),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  "Something went wrong",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.text(context),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xxs),
+                Text(
+                  error.toString(),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 13, color: AppColors.error(context)),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                TextButton(
+                  onPressed: () => ref.invalidate(sellerDeliveriesProvider),
+                  child: const Text("Try Again"),
+                ),
+                const SizedBox(height: 60),
+              ],
             ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              "Something went wrong",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: AppColors.text(context),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xxs),
-            Text(
-              error.toString(),
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: AppColors.error(context)),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            TextButton(
-              onPressed: () => ref.invalidate(sellerDeliveriesProvider),
-              child: const Text("Try Again"),
-            )
-          ],
-        ),
+          ),
+          const SizedBox(height: 40),
+
+          // Web/Desktop Footer
+          const WebFooter(),
+        ],
       ),
     );
   }
@@ -542,7 +583,6 @@ class _DeliveryCard extends ConsumerWidget {
                     const SizedBox(height: 10),
                     ...d.items!.map(
                       (item) {
-                        // ✅ Pull dynamic option maps cleanly out from nested keys
                         final variantText = _formatAttributes(item['variant_attributes']);
                         
                         return Padding(
@@ -557,7 +597,6 @@ class _DeliveryCard extends ConsumerWidget {
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
-                              // ✅ If variant settings exist, print them right beneath the title line
                               if (variantText.isNotEmpty)
                                 Padding(
                                   padding: const EdgeInsets.only(left: 14, top: 2),

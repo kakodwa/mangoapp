@@ -1,10 +1,11 @@
 // lib/screens/help/help_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_spacing.dart';
-
+import '../../widgets/web_footer.dart';
 
 class HelpSupportScreen extends StatelessWidget {
   const HelpSupportScreen({super.key});
@@ -267,6 +268,8 @@ class HelpSupportScreen extends StatelessWidget {
             ),
             const SizedBox(height: 40),
 
+            // Web/Desktop Footer
+            const WebFooter(),
           ],
         ),
       ),

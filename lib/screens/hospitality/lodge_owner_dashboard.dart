@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/web_footer.dart';
 import 'bookings_scanner_screen.dart';
 import '../main_tabs_screen.dart';
 
@@ -78,7 +79,11 @@ class LodgeOwnerDashboard extends StatelessWidget {
             ),
           ),
         ),
-        const SliverToBoxAdapter(child: SizedBox(height: 40)),
+        
+        // Web/Desktop Footer
+        const SliverToBoxAdapter(
+          child: WebFooter(),
+        ),
       ],
     );
   }

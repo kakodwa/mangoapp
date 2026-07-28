@@ -22,6 +22,7 @@ import '../../widgets/app_fab.dart';
 import '../../widgets/shop_map_modal.dart';
 import '../../widgets/reviews/review_section_widget.dart';
 import '../../widgets/hospitality/room_card.dart';
+import '../../widgets/web_footer.dart';
 
 import '../../utils/app_snackbar.dart';
 import '../../utils/app_toast.dart';
@@ -269,7 +270,7 @@ class _LodgeDetailScreenState extends ConsumerState<LodgeDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ✅ TAB SECTION 1: AVAILABLE ROOMS (WITH LAZY-LOADED RESPONSIVE RESPONSIVE GRID)
+                      // ✅ TAB SECTION 1: AVAILABLE ROOMS (WITH LAZY-LOADED RESPONSIVE GRID)
                       if (_activeTab == 'rooms') ...[
                         roomsAsync.when(
                           data: (rooms) {
@@ -392,7 +393,10 @@ class _LodgeDetailScreenState extends ConsumerState<LodgeDetailScreen> {
                 ),
               ),
 
-              const SliverToBoxAdapter(child: SizedBox(height: 160)),
+              // Web/Desktop Footer
+              const SliverToBoxAdapter(
+                child: WebFooter(),
+              ),
             ],
           ),
 
@@ -403,29 +407,29 @@ class _LodgeDetailScreenState extends ConsumerState<LodgeDetailScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-               AppFab(
-  heroTag: "whatsapp_lodge_fab",
-  icon: FontAwesomeIcons.whatsapp,
-  backgroundColor: const Color(0xFF25D366), 
-  foregroundColor: Colors.white,            
-  tooltip: "Chat on WhatsApp",
-  onPressed: () {
-    if (!isLoggedIn) {
-      _analyticsService.logEvent('lodge_whatsapp_unauthenticated_redirect');
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
-      return;
-    }
+                AppFab(
+                  heroTag: "whatsapp_lodge_fab",
+                  icon: FontAwesomeIcons.whatsapp,
+                  backgroundColor: const Color(0xFF25D366), 
+                  foregroundColor: Colors.white,            
+                  tooltip: "Chat on WhatsApp",
+                  onPressed: () {
+                    if (!isLoggedIn) {
+                      _analyticsService.logEvent('lodge_whatsapp_unauthenticated_redirect');
+                      Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+                      return;
+                    }
 
-    final phone = widget.lodge.phoneNumber;
-    if (phone.isEmpty) {
-      AppToast.info(context, "No WhatsApp contact channel available");
-      return;
-    }
+                    final phone = widget.lodge.phoneNumber;
+                    if (phone.isEmpty) {
+                      AppToast.info(context, "No WhatsApp contact channel available");
+                      return;
+                    }
 
-    _analyticsService.logEvent('lodge_whatsapp_chat_start_${widget.lodge.id}');
-    _openWhatsApp(phone);
-  },
-),
+                    _analyticsService.logEvent('lodge_whatsapp_chat_start_${widget.lodge.id}');
+                    _openWhatsApp(phone);
+                  },
+                ),
                 const SizedBox(height: AppSpacing.sm),
 
                 AppFab(
@@ -482,18 +486,18 @@ class _LodgeDetailScreenState extends ConsumerState<LodgeDetailScreen> {
 
                 if (widget.lodge.latitude != null && widget.lodge.longitude != null)
                   AppFab(
-  heroTag: "map_lodge_fab",
-  icon: Icons.map_outlined,
-  tooltip: "Open Geolocation Tracking",
-  onPressed: () {
-    _analyticsService.logEvent('lodge_map_view_${widget.lodge.id}');
-    // Triggers navigation through MainTabsScreen's IndexedStack router
-    MainTabsScreen.of(context)?.navigateToShopMap(
-      widget.lodge.latitude!,
-      widget.lodge.longitude!,
-    );
-  },
-),
+                    heroTag: "map_lodge_fab",
+                    icon: Icons.map_outlined,
+                    tooltip: "Open Geolocation Tracking",
+                    onPressed: () {
+                      _analyticsService.logEvent('lodge_map_view_${widget.lodge.id}');
+                      // Triggers navigation through MainTabsScreen's IndexedStack router
+                      MainTabsScreen.of(context)?.navigateToShopMap(
+                        widget.lodge.latitude!,
+                        widget.lodge.longitude!,
+                      );
+                    },
+                  ),
               ],
             ),
           ),

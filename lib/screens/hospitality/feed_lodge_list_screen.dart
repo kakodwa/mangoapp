@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/feed/main_feed_providers.dart';
 import '../../widgets/feed/feed_list_widget.dart';
 
-
 import '../../screens/search/global_search_input_bar.dart';
 import '../../screens/search/unified_search_screen.dart';
+import '../../widgets/web_footer.dart';
 
 class LodgeListScreen extends ConsumerStatefulWidget {
   const LodgeListScreen({
@@ -105,6 +105,11 @@ class _LodgeListScreenState extends ConsumerState<LodgeListScreen> {
                       ),
                     ),
                   ),
+                  
+                  // Web/Desktop Footer for empty state
+                  const SliverToBoxAdapter(
+                    child: WebFooter(),
+                  ),
                 ],
               )
             : CustomScrollView(
@@ -122,9 +127,14 @@ class _LodgeListScreenState extends ConsumerState<LodgeListScreen> {
                         child: ref.watch(lodgeFeedProvider.notifier).loadingMore
                             ? const CircularProgressIndicator()
                             : const SizedBox(),
-                        ),
                       ),
                     ),
+                  ),
+
+                  // Web/Desktop Footer
+                  const SliverToBoxAdapter(
+                    child: WebFooter(),
+                  ),
                 ],
               ),
       ),

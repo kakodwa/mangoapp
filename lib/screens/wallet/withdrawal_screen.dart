@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/wallet_provider.dart';
+import '../../widgets/web_footer.dart';
 import '../main_tabs_screen.dart'; 
 
 class WithdrawalScreen extends ConsumerStatefulWidget {
@@ -167,11 +168,10 @@ class _WithdrawalScreenState extends ConsumerState<WithdrawalScreen> {
           ),
         ),
         
-        // Structured spacing layout baseline buffer
+        // Web/Desktop Footer
         const SliverToBoxAdapter(
-          child: SizedBox(height: 40),
+          child: WebFooter(),
         ),
-
       ],
     );
   }

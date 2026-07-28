@@ -8,6 +8,7 @@ import '../../theme/design_system/app_loader.dart';
 import '../../theme/design_system/app_info_box.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_typography.dart';
+import '../../widgets/web_footer.dart';
 
 
 
@@ -124,14 +125,25 @@ class _WalletTransactionsScreenState
 
       data: (transactions) {
         if (transactions.isEmpty) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              child: AppInfoBox(
-                type: AppInfoType.info,
-                message: _capitalize("No transactions yet"),
+          return CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    child: AppInfoBox(
+                      type: AppInfoType.info,
+                      message: _capitalize("No transactions yet"),
+                    ),
+                  ),
+                ),
               ),
-            ),
+              const SliverToBoxAdapter(
+                child: WebFooter(),
+              ),
+            ],
           );
         }
 
@@ -167,7 +179,7 @@ class _WalletTransactionsScreenState
                     // ================= FOOTER LOADER =================
                     if (index == items.length) {
                       if (!_hasMore) {
-                        return const SizedBox(height: 80);
+                        return const SizedBox(height: 20);
                       }
 
                       return Padding(
@@ -277,8 +289,10 @@ class _WalletTransactionsScreenState
               ),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 20)),
-
+            // Web/Desktop Footer
+            const SliverToBoxAdapter(
+              child: WebFooter(),
+            ),
           ],
         );
       },

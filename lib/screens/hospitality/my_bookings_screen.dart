@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/bookings_provider.dart';
 import '../../widgets/hospitality/booking_card.dart';
+import '../../widgets/web_footer.dart';
 
 // Design System Imports
 import '../../theme/design_system/app_loader.dart';
@@ -103,9 +104,13 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                       ),
                     ),
                     const Spacer(),
-                
                   ],
                 ),
+              ),
+              
+              // Web/Desktop Footer for empty state
+              const SliverToBoxAdapter(
+                child: WebFooter(),
               ),
             ],
           );
@@ -131,11 +136,10 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
               ),
             ),
             
-            // Layout spacer bridge ensuring nice visual padding before footer bounds appear
+            // Web/Desktop Footer
             const SliverToBoxAdapter(
-              child: SizedBox(height: 40),
+              child: WebFooter(),
             ),
-
           ],
         );
       },
@@ -165,9 +169,13 @@ class _MyBookingsScreenState extends ConsumerState<MyBookingsScreen> {
                   ),
                 ),
                 const Spacer(),
-      
               ],
             ),
+          ),
+          
+          // Web/Desktop Footer for error state
+          const SliverToBoxAdapter(
+            child: WebFooter(),
           ),
         ],
       ),

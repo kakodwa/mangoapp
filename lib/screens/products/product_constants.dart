@@ -14,7 +14,7 @@ class ProductConstants {
   static const List<String> categories = [
     "Electronics",
     "Groceries",
-    "Fashion",
+    "Fashion & Clothing",
     "Home & Living",
     "Beauty & Personal Care",
     "Health & Wellness",
@@ -30,7 +30,7 @@ class ProductConstants {
     "Entertainment",
     "Services",
     "Industrial Equipment",
-    "Other", // Custom Category Support
+    "Other",
   ];
 
   /// Category Dynamic Attribute Fields Mapping

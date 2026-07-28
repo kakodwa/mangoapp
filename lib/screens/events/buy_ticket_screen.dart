@@ -8,6 +8,7 @@ import '../payments/payment_checkout_screen.dart';
 import '../main_tabs_screen.dart'; 
 import '../../theme/design_system/app_spacing.dart';
 import '../../services/analytics_service.dart';
+import '../../widgets/web_footer.dart';
 
 class SelectedTicket {
   final int id;
@@ -276,6 +277,9 @@ class _BuyTicketScreenState extends State<BuyTicketScreen> {
                 ),
               ),
             ),
+
+            // Web/Desktop Footer
+            const WebFooter(),
           ],
         ),
       ),

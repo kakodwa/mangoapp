@@ -1,4 +1,5 @@
 // lib/screens/events/event_detail_screen.dart
+
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
@@ -16,6 +17,7 @@ import '../../models/event_ticket_type_model.dart';
 import '../../utils/app_toast.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/shop_map_modal.dart';
+import '../../widgets/web_footer.dart';
 import 'buy_ticket_screen.dart';
 import '../auth/login_screen.dart';
 import '../../utils/app_snackbar.dart';
@@ -254,264 +256,262 @@ class EventDetailScreen extends ConsumerWidget {
                             const Text(
                               "Available Tickets",
                               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 14),
+                            ...event.ticketTypes.map((ticket) => ticketCard(context, ticket)),
+                          ],
                         ),
-                        const SizedBox(height: 14),
-                        ...event.ticketTypes.map((ticket) => ticketCard(context, ticket)),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ),
 
-              // ======================
-              // DESCRIPTION DOCUMENT FRAME
-              // ======================
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                  child: Container(
-                    padding: const EdgeInsets.all(18),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surface,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(.04),
-                          blurRadius: 12,
-                          offset: const Offset(0, 5),
+                  // ======================
+                  // DESCRIPTION DOCUMENT FRAME
+                  // ======================
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                      child: Container(
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(.04),
+                              blurRadius: 12,
+                              offset: const Offset(0, 5),
+                            ),
+                          ],
                         ),
-                      ],
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Description",
+                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 14),
+                            Text(
+                              event.description,
+                              style: TextStyle(
+                                height: 1.6,
+                                color: Theme.of(context).colorScheme.outline.withOpacity(0.9),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "Description",
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 14),
-                        Text(
-                          event.description,
-                          style: TextStyle(
-                            height: 1.6,
-                            color: Theme.of(context).colorScheme.outline.withOpacity(0.9),
-                          ),
-                        ),
-                      ],
+                  ),
+
+                  // ===================================
+                  // CUSTOMER REVIEWS SLIVER ADAPTER
+                  // ===================================
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      child: ReviewSectionWidget(
+                        targetType: 'event',
+                        targetId: event.id,
+                        isOwner: false,
+                      ),
                     ),
                   ),
-                ),
-              ),
 
-              // ===================================
-              // CUSTOMER REVIEWS SLIVER ADAPTER
-              // ===================================
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  child: ReviewSectionWidget(
-                    targetType: 'event',
-                    targetId: event.id,
-                    isOwner: false,
+                  // Web/Desktop Footer
+                  const SliverToBoxAdapter(
+                    child: WebFooter(),
                   ),
-                ),
-              ),
-
-              const SliverToBoxAdapter(child: SizedBox(height: 160)),
-      
-            ],
-          ),
-        ),
-      ),
-
-      // ===================================
-      // UNIFIED RIGHT ACCESSIBILITY PANEL FAB SYSTEM
-      // ===================================
-      Positioned(
-        bottom: 110, // Elevated to stack comfortably above the buy ticket bottom navigation deck
-        right: 16,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // 🗺 MAP ACTIONS FAB BOUND
-            if (event.latitude != null && event.longitude != null) ...[
-              AppFab(
-  heroTag: "map_event_fab",
-  icon: Icons.map_outlined,
-  tooltip: "Open Map Tracking",
-  onPressed: () {
-    analyticsService.logEvent('click_event_map_id_${event.id}');
-    // Triggers navigation through MainTabsScreen's IndexedStack router
-    MainTabsScreen.of(context)?.navigateToShopMap(
-      event.latitude!,
-      event.longitude!,
-    );
-  },
-),
-              const SizedBox(height: AppSpacing.sm),
-            ],
-
-            // 💬 SOCIAL CONNECT WHATSAPP FAB BOUND
-            if (event.organizerPhoneNumber != null && event.organizerPhoneNumber!.isNotEmpty) ...[
-              AppFab(
-  heroTag: "whatsapp_event_fab",
-  icon: FontAwesomeIcons.whatsapp,
-  backgroundColor: const Color(0xFF25D366), // 🟢 Official WhatsApp Green
-  foregroundColor: Colors.white,            // ⚪ Crisp White Icon
-  tooltip: "Chat with Organizer",
-  onPressed: () {
-    analyticsService.logEvent('click_event_whatsapp_id_${event.id}');
-    if (!isLoggedIn) {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
-      return;
-    }
-    final phone = event.organizerPhoneNumber;
-    if (phone == null || phone.isEmpty) {
-      AppToast.info(context, "No WhatsApp coordinate setup available");
-      return;
-    }
-    _openWhatsApp(phone);
-  },
-),
-              const SizedBox(height: AppSpacing.sm),
-            ],
-
-
-
-AppFab(
-  heroTag: "share_event_fab",
-  icon: Icons.share_outlined,
-  tooltip: "Share Event",
-  onPressed: () async {
-    analyticsService.logEvent('event_shared_${event.id}');
-
-    final String eventUrl = kIsWeb
-        ? "${Uri.base.origin}/event/${event.id}"
-        : "https://malatrade.com/event/${event.id}";
-
-    final String shareMessage =
-        "🎫 ${event.title}\n"
-        "📅 ${event.eventDate}\n"
-        "📍 ${event.venue}, ${event.city}\n\n"
-        "Book your tickets on MalaTrade:\n"
-        "$eventUrl";
-
-    final box = context.findRenderObject() as RenderBox?;
-    final sharePositionOrigin =
-        box != null ? box.localToGlobal(Offset.zero) & box.size : null;
-
-    try {
-      if (event.banner.isNotEmpty) {
-        final response = await http.get(Uri.parse(event.banner));
-
-        if (response.statusCode == 200) {
-          final tempDir = await getTemporaryDirectory();
-
-          final extension = event.banner
-              .split('.')
-              .last
-              .split('?')
-              .first
-              .toLowerCase();
-
-          final validExtension =
-              ['jpg', 'jpeg', 'png', 'webp'].contains(extension)
-                  ? extension
-                  : 'jpg';
-
-          final file = await File(
-            '${tempDir.path}/shared_event_${event.id}.$validExtension',
-          ).create();
-
-          await file.writeAsBytes(response.bodyBytes);
-
-          await Share.shareXFiles(
-            [XFile(file.path)],
-            text: shareMessage,
-            sharePositionOrigin: sharePositionOrigin,
-          );
-
-          return;
-        }
-      }
-
-      await Share.share(
-        shareMessage,
-        sharePositionOrigin: sharePositionOrigin,
-      );
-    } catch (e) {
-      debugPrint("Event share failed: $e");
-
-      await Share.share(
-        shareMessage,
-        sharePositionOrigin: sharePositionOrigin,
-      );
-    }
-  },
-),
-          ],
-        ),
-      ),
-
-      // =========================
-      // BUY TRANSACTION SYSTEM NAVIGATION RAIL
-      // =========================
-      Align(
-        alignment: Alignment.bottomCenter,
-        child: Container(
-          padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            boxShadow: [
-              BoxShadow(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(.06),
-                blurRadius: 10,
-                offset: const Offset(0, -2),
-              ),
-            ],
-          ),
-          child: SafeArea(
-            top: false,
-            child: SizedBox(
-              height: 56,
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.confirmation_num, color: Colors.white),
-                label: const Text(
-                  "Buy Ticket",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary(context),
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                // Inside lib/screens/events/event_detail_screen.dart -> Buy Ticket Navigation Deck section
-
-onPressed: () {
-  analyticsService.logEvent('click_buy_ticket_button_event_id_${event.id}');
-
-  if (event.ticketTypes.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("No ticket inventory allotments published yet")),
-    );
-    return;
-  }
-
-  // Swaps screen states contextually inside MainTabsScreen without breaking execution layers
-  MainTabsScreen.of(context)?.navigateToBuyTicket(event);
-},
+                ],
               ),
             ),
           ),
-        ),
+
+          // ===================================
+          // UNIFIED RIGHT ACCESSIBILITY PANEL FAB SYSTEM
+          // ===================================
+          Positioned(
+            bottom: 110, // Elevated to stack comfortably above the buy ticket bottom navigation deck
+            right: 16,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 🗺 MAP ACTIONS FAB BOUND
+                if (event.latitude != null && event.longitude != null) ...[
+                  AppFab(
+                    heroTag: "map_event_fab",
+                    icon: Icons.map_outlined,
+                    tooltip: "Open Map Tracking",
+                    onPressed: () {
+                      analyticsService.logEvent('click_event_map_id_${event.id}');
+                      // Triggers navigation through MainTabsScreen's IndexedStack router
+                      MainTabsScreen.of(context)?.navigateToShopMap(
+                        event.latitude!,
+                        event.longitude!,
+                      );
+                    },
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                ],
+
+                // 💬 SOCIAL CONNECT WHATSAPP FAB BOUND
+                if (event.organizerPhoneNumber != null && event.organizerPhoneNumber!.isNotEmpty) ...[
+                  AppFab(
+                    heroTag: "whatsapp_event_fab",
+                    icon: FontAwesomeIcons.whatsapp,
+                    backgroundColor: const Color(0xFF25D366), // 🟢 Official WhatsApp Green
+                    foregroundColor: Colors.white,            // ⚪ Crisp White Icon
+                    tooltip: "Chat with Organizer",
+                    onPressed: () {
+                      analyticsService.logEvent('click_event_whatsapp_id_${event.id}');
+                      if (!isLoggedIn) {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+                        return;
+                      }
+                      final phone = event.organizerPhoneNumber;
+                      if (phone == null || phone.isEmpty) {
+                        AppToast.info(context, "No WhatsApp coordinate setup available");
+                        return;
+                      }
+                      _openWhatsApp(phone);
+                    },
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                ],
+
+                AppFab(
+                  heroTag: "share_event_fab",
+                  icon: Icons.share_outlined,
+                  tooltip: "Share Event",
+                  onPressed: () async {
+                    analyticsService.logEvent('event_shared_${event.id}');
+
+                    final String eventUrl = kIsWeb
+                        ? "${Uri.base.origin}/event/${event.id}"
+                        : "https://malatrade.com/event/${event.id}";
+
+                    final String shareMessage =
+                        "🎫 ${event.title}\n"
+                        "📅 ${event.eventDate}\n"
+                        "📍 ${event.venue}, ${event.city}\n\n"
+                        "Book your tickets on MalaTrade:\n"
+                        "$eventUrl";
+
+                    final box = context.findRenderObject() as RenderBox?;
+                    final sharePositionOrigin =
+                        box != null ? box.localToGlobal(Offset.zero) & box.size : null;
+
+                    try {
+                      if (event.banner.isNotEmpty) {
+                        final response = await http.get(Uri.parse(event.banner));
+
+                        if (response.statusCode == 200) {
+                          final tempDir = await getTemporaryDirectory();
+
+                          final extension = event.banner
+                              .split('.')
+                              .last
+                              .split('?')
+                              .first
+                              .toLowerCase();
+
+                          final validExtension =
+                              ['jpg', 'jpeg', 'png', 'webp'].contains(extension)
+                                  ? extension
+                                  : 'jpg';
+
+                          final file = await File(
+                            '${tempDir.path}/shared_event_${event.id}.$validExtension',
+                          ).create();
+
+                          await file.writeAsBytes(response.bodyBytes);
+
+                          await Share.shareXFiles(
+                            [XFile(file.path)],
+                            text: shareMessage,
+                            sharePositionOrigin: sharePositionOrigin,
+                          );
+
+                          return;
+                        }
+                      }
+
+                      await Share.share(
+                        shareMessage,
+                        sharePositionOrigin: sharePositionOrigin,
+                      );
+                    } catch (e) {
+                      debugPrint("Event share failed: $e");
+
+                      await Share.share(
+                        shareMessage,
+                        sharePositionOrigin: sharePositionOrigin,
+                      );
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+
+          // =========================
+          // BUY TRANSACTION SYSTEM NAVIGATION RAIL
+          // =========================
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 20),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surface,
+                boxShadow: [
+                  BoxShadow(
+                    color: Theme.of(context).colorScheme.onSurface.withOpacity(.06),
+                    blurRadius: 10,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: SafeArea(
+                top: false,
+                child: SizedBox(
+                  height: 56,
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.confirmation_num, color: Colors.white),
+                    label: const Text(
+                      "Buy Ticket",
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary(context),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    onPressed: () {
+                      analyticsService.logEvent('click_buy_ticket_button_event_id_${event.id}');
+
+                      if (event.ticketTypes.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text("No ticket inventory allotments published yet")),
+                        );
+                        return;
+                      }
+
+                      // Swaps screen states contextually inside MainTabsScreen without breaking execution layers
+                      MainTabsScreen.of(context)?.navigateToBuyTicket(event);
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
-    ],
-  ),
-);
-}
+    );
+  }
 
   Widget statCard({
     required String title,

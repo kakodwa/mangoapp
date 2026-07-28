@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/property_model.dart';
 import '../../screens/properties/property_card.dart';
 
-
-class HorizontalProperties extends StatelessWidget {
+class HorizontalProperties extends StatefulWidget {
   final List<Property> properties;
   final bool showHeader;
 
@@ -15,42 +14,154 @@ class HorizontalProperties extends StatelessWidget {
   });
 
   @override
+  State<HorizontalProperties> createState() => _HorizontalPropertiesState();
+}
+
+class _HorizontalPropertiesState extends State<HorizontalProperties> {
+  final ScrollController _scrollController = ScrollController();
+
+  void _scrollLeft() {
+    _scrollController.animateTo(
+      _scrollController.offset - 320, // Scrolls one card width
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _scrollRight() {
+    _scrollController.animateTo(
+      _scrollController.offset + 320, // Scrolls one card width
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (properties.isEmpty) {
+    if (widget.properties.isEmpty) {
       return const SizedBox();
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (showHeader)
-          const Padding(
-            padding: EdgeInsets.all(12),
-            child: Text(
-              "Featured Properties",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+    final bool isDesktop = MediaQuery.of(context).size.width >= 900;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (widget.showHeader)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Featured Properties",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  if (isDesktop)
+                    Row(
+                      children: [
+                        IconButton(
+                          splashRadius: 24,
+                          icon: const Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            size: 28,
+                            color: Colors.orange,
+                          ),
+                          onPressed: _scrollLeft,
+                          tooltip: 'Scroll Left',
+                        ),
+                        const SizedBox(width: 4),
+                        IconButton(
+                          splashRadius: 24,
+                          icon: const Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 28,
+                            color: Colors.orange,
+                          ),
+                          onPressed: _scrollRight,
+                          tooltip: 'Scroll Right',
+                        ),
+                      ],
+                    ),
+                ],
               ),
             ),
-          ),
 
-        SizedBox(
-          height: 310,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: properties.length,
-            itemBuilder: (_, index) {
-              return SizedBox(
-                width: 320,
-                child: PropertyCard(
-                  property: properties[index],
+          SizedBox(
+            height: 310,
+            child: Stack(
+              children: [
+                ListView.builder(
+                  controller: _scrollController,
+                  scrollDirection: Axis.horizontal,
+                  itemCount: widget.properties.length,
+                  itemBuilder: (_, index) {
+                    return SizedBox(
+                      width: 320,
+                      child: PropertyCard(
+                        property: widget.properties[index],
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
+
+                // Floating Extra-Bold Orange Arrows (when section header is hidden)
+                if (isDesktop && !widget.showHeader) ...[
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        splashRadius: 24,
+                        icon: const Icon(
+                          Icons.chevron_left_rounded,
+                          color: Colors.orange,
+                          size: 36,
+                        ),
+                        onPressed: _scrollLeft,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        splashRadius: 24,
+                        icon: const Icon(
+                          Icons.chevron_right_rounded,
+                          color: Colors.orange,
+                          size: 36,
+                        ),
+                        onPressed: _scrollRight,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

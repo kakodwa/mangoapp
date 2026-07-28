@@ -10,6 +10,7 @@ import '../products/edit_product_screen.dart';
 import '../products/product_details_screen.dart';
 import '../products/add_product_screen.dart';
 import '../../widgets/app_fab.dart';
+import '../../widgets/web_footer.dart';
 import '../../core/api/api_client.dart';
 
 // Design System Imports
@@ -372,8 +373,11 @@ class MyShopScreen extends ConsumerWidget {
                         );
                       },
                     ),
-                    
 
+                    const SizedBox(height: 40),
+
+                    // ================= WEB / DESKTOP FOOTER =================
+                    const WebFooter(),
                   ],
                 ),
               ),

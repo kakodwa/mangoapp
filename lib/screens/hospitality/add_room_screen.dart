@@ -7,6 +7,7 @@ import '../../providers/api_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_text_field.dart';
 import '../../theme/design_system/app_spacing.dart';
+import '../../widgets/web_footer.dart';
 import '../main_tabs_screen.dart';
 
 
@@ -236,8 +237,11 @@ class _AddRoomScreenState extends ConsumerState<AddRoomScreen> {
               ),
             ),
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 40)),
 
+          // Web/Desktop Footer
+          const SliverToBoxAdapter(
+            child: WebFooter(),
+          ),
         ],
       ),
     );

@@ -5,6 +5,7 @@ import '../../models/ticket_model.dart';
 import '../../providers/tickets_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_spacing.dart';
+import '../../widgets/web_footer.dart';
 
 class EventTicketsScreen extends ConsumerStatefulWidget {
   final EventModel event;
@@ -449,8 +450,9 @@ class _EventTicketsScreenState extends ConsumerState<EventTicketsScreen>  {
                   ),
                 ),
               
+              // Web/Desktop Footer
               const SliverToBoxAdapter(
-                child: SizedBox(height: 40),
+                child: WebFooter(),
               ),
             ],
           ),

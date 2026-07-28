@@ -8,6 +8,7 @@ import '../../screens/search/global_search_input_bar.dart';
 import '../../screens/search/unified_search_screen.dart';
 
 import '../../widgets/feed/feed_list_widget.dart';
+import '../../widgets/web_footer.dart';
 
 
 class ShopsListScreen extends ConsumerStatefulWidget {
@@ -70,8 +71,6 @@ class _ShopsListScreenState extends ConsumerState<ShopsListScreen> {
                 // physics ensures pull-to-refresh still works when empty
                 physics: const AlwaysScrollableScrollPhysics(),
                 slivers: [
-      
-                  
                   SliverFillRemaining(
                     hasScrollBody: false,
                     child: Center(
@@ -109,12 +108,15 @@ class _ShopsListScreenState extends ConsumerState<ShopsListScreen> {
                       ),
                     ),
                   ),
+                  const SliverToBoxAdapter(
+                    child: WebFooter(),
+                  ),
                 ],
               )
             : CustomScrollView(
                 controller: _controller,
                 slivers: [
-                 GlobalSearchInputBar.sliver(),
+                  GlobalSearchInputBar.sliver(),
                   FeedListWidget(
                     items: items,
                   ),
@@ -128,7 +130,9 @@ class _ShopsListScreenState extends ConsumerState<ShopsListScreen> {
                       ),
                     ),
                   ),
-     
+                  const SliverToBoxAdapter(
+                    child: WebFooter(),
+                  ),
                 ],
               ),
       ),

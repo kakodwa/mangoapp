@@ -14,6 +14,7 @@ import '../../theme/design_system/app_text_field.dart';
 import '../../utils/app_toast.dart';
 import 'category_cascade_selector.dart';
 import '../../widgets/image_crop_picker.dart';
+import '../../widgets/web_footer.dart';
 import '../main_tabs_screen.dart';
 
 class CategoryAttributeInput extends StatefulWidget {
@@ -347,6 +348,15 @@ class _EditProductScreenState extends ConsumerState<EditProductScreen> {
   }
 
   @override
+  void dispose() {
+    nameController.dispose();
+    descriptionController.dispose();
+    priceController.dispose();
+    stockController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth > 800;
@@ -598,6 +608,9 @@ class _EditProductScreenState extends ConsumerState<EditProductScreen> {
                 ],
               ),
             ),
+
+            // Web/Desktop Footer
+            const WebFooter(),
           ],
         ),
       ),

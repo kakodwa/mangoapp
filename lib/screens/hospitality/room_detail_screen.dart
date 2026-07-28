@@ -8,11 +8,11 @@ import '../../theme/design_system/app_card.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_typography.dart';
 import '../../widgets/shop_map_modal.dart';
+import '../../widgets/web_footer.dart';
 import '../main_tabs_screen.dart'; 
 import 'availability_calendar_screen.dart';
 import 'booking_checkout_screen.dart';
 import '../../providers/rooms_provider.dart';
-import '../main_tabs_screen.dart';
 
 class RoomDetailScreen extends ConsumerWidget {
   final Room room;
@@ -271,7 +271,11 @@ class RoomDetailScreen extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SliverToBoxAdapter(child: SizedBox(height: 120)),
+              
+              // Web/Desktop Footer
+              const SliverToBoxAdapter(
+                child: WebFooter(),
+              ),
             ],
           ),
         ),

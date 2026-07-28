@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/analytics_service.dart';
+import '../../screens/products/product_constants.dart';
+import '../screens/main_tabs_screen.dart';
 import 'web_footer.dart';
 
 class AppScaffold extends StatefulWidget {
@@ -29,13 +31,20 @@ class AppScaffold extends StatefulWidget {
 class _AppScaffoldState extends State<AppScaffold> {
   bool _isNavBarVisible = true;
   double _scrollDistance = 0.0;
+  
+  // Selected Category State for Desktop Left Categories Panel
+  String? _selectedCategory;
 
   String _getTabEventName(int index) {
     switch (index) {
-      case 0: return 'nav_tab_home';
-      case 1: return 'nav_tab_shops';
-      case 2: return 'nav_tab_products';
-      default: return 'nav_tab_unknown';
+      case 0:
+        return 'nav_tab_home';
+      case 1:
+        return 'nav_tab_shops';
+      case 2:
+        return 'nav_tab_products';
+      default:
+        return 'nav_tab_unknown';
     }
   }
 
@@ -47,9 +56,10 @@ class _AppScaffoldState extends State<AppScaffold> {
     final bool isDesktop = screenWidth >= 900;
 
     const int mobileItemCount = 3;
-    final int navBarIndex = (widget.currentIndex < 0 || widget.currentIndex >= mobileItemCount)
-        ? 0
-        : widget.currentIndex;
+    final int navBarIndex =
+        (widget.currentIndex < 0 || widget.currentIndex >= mobileItemCount)
+            ? 0
+            : widget.currentIndex;
 
     return NotificationListener<ScrollNotification>(
       onNotification: (notification) {
@@ -72,7 +82,8 @@ class _AppScaffoldState extends State<AppScaffold> {
 
         if (notification is ScrollUpdateNotification) {
           final delta = notification.scrollDelta ?? 0.0;
-          if ((delta > 0 && _scrollDistance < 0) || (delta < 0 && _scrollDistance > 0)) {
+          if ((delta > 0 && _scrollDistance < 0) ||
+              (delta < 0 && _scrollDistance > 0)) {
             _scrollDistance = 0.0;
           }
           _scrollDistance += delta;
@@ -96,55 +107,196 @@ class _AppScaffoldState extends State<AppScaffold> {
         drawer: isDesktop ? null : widget.drawer,
         backgroundColor: widget.backgroundColor ?? Colors.grey.shade50,
         floatingActionButton: widget.floatingActionButton,
-        body: Stack(
-          children: [
-            // Main Content Layer (Fixed 0-Height Overflow Layout)
-            Positioned.fill(
-              child: SafeArea(
-                bottom: false,
-                child: isDesktop
-                    ? CustomScrollView(
-                        slivers: [
-                          SliverToBoxAdapter(
-                            child: Center(
-                              child: Container(
-                                constraints: const BoxConstraints(maxWidth: 1200),
-                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                                child: SizedBox(
-                                  // Provides concrete constraints for IndexedStack & child views
-                                  height: MediaQuery.of(context).size.height - kToolbarHeight - 32,
-                                  child: widget.body ?? const SizedBox.shrink(),
-                                ),
-                              ),
-                            ),
+        body: SafeArea(
+          bottom: false,
+          child: isDesktop
+              ? Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // DESKTOP LEFT CATEGORIES SIDEBAR
+                    Container(
+                      width: 260,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border(
+                          right: BorderSide(
+                            color: Colors.grey.shade200,
+                            width: 1,
                           ),
-                          const SliverToBoxAdapter(
-                            child: WebFooter(),
-                          ),
-                        ],
-                      )
-                    : Container(
-                        child: widget.body ?? const SizedBox.shrink(),
+                        ),
                       ),
-              ),
-            ),
+                      child: _selectedCategory == null
+                          ? _buildPrimaryCategoriesList(context)
+                          : _buildSubCategoriesList(context, _selectedCategory!),
+                    ),
 
-            // Floating Navigation Bar (Mobile View Only)
-            if (!isDesktop)
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: AnimatedSlide(
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeOutCubic,
-                  offset: _isNavBarVisible ? Offset.zero : const Offset(0, 1.5),
-                  child: _buildFloatingNavBar(context, colorScheme, navBarIndex, analytics),
+                    // MAIN CONTENT AREA (DIRECT EXPANDED BODY)
+                    Expanded(
+                      child: widget.body ?? const SizedBox.shrink(),
+                    ),
+                  ],
+                )
+              : Stack(
+                  children: [
+                    Positioned.fill(
+                      child: widget.body ?? const SizedBox.shrink(),
+                    ),
+
+                    // Floating Navigation Bar (Mobile View Only)
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      child: AnimatedSlide(
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeOutCubic,
+                        offset: _isNavBarVisible
+                            ? Offset.zero
+                            : const Offset(0, 1.5),
+                        child: _buildFloatingNavBar(
+                          context,
+                          colorScheme,
+                          navBarIndex,
+                          analytics,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-          ],
         ),
       ),
+    );
+  }
+
+  // Desktop Primary Categories List Widget
+  Widget _buildPrimaryCategoriesList(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+          child: Row(
+            children: [
+              Icon(Icons.category_rounded, size: 18, color: Theme.of(context).colorScheme.primary),
+              const SizedBox(width: 8),
+              Text(
+                'Categories',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: ListView.separated(
+            itemCount: ProductConstants.categories.length,
+            separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey.shade100),
+            itemBuilder: (context, index) {
+              final category = ProductConstants.categories[index];
+              return ListTile(
+                dense: true,
+                visualDensity: VisualDensity.compact,
+                title: Text(
+                  category,
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                ),
+                trailing: const Icon(Icons.chevron_right, size: 18, color: Colors.grey),
+                onTap: () {
+                  setState(() {
+                    _selectedCategory = category;
+                  });
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Desktop Subcategories List Widget
+  Widget _buildSubCategoriesList(BuildContext context, String parentCategory) {
+    final subCategoryMap = ProductConstants.categorySubCategoryBrands[parentCategory] ?? {};
+    final subCategories = subCategoryMap.keys.toList();
+    final AnalyticsService analytics = AnalyticsService();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          child: Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back, size: 18),
+                onPressed: () {
+                  setState(() {
+                    _selectedCategory = null;
+                  });
+                },
+              ),
+              Expanded(
+                child: Text(
+                  parentCategory,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: subCategories.isEmpty
+              ? Center(
+                  child: TextButton(
+                    onPressed: () {
+                      MainTabsScreen.of(context)?.setSelectedIndex(
+                        7,
+                        searchType: 'product',
+                        category: parentCategory,
+                      );
+                    },
+                    child: Text("Explore $parentCategory"),
+                  ),
+                )
+              : ListView.separated(
+                  itemCount: subCategories.length,
+                  separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey.shade100),
+                  itemBuilder: (context, index) {
+                    final subCategory = subCategories[index];
+                    return ListTile(
+                      dense: true,
+                      visualDensity: VisualDensity.compact,
+                      title: Text(
+                        subCategory,
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
+                      ),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 12, color: Colors.grey),
+                      onTap: () {
+                        analytics.logEvent('click_desktop_subcategory_$subCategory');
+                        
+                        MainTabsScreen.of(context)?.setSelectedIndex(
+                          7,
+                          searchType: 'product',
+                          searchQuery: subCategory,
+                          category: parentCategory,
+                        );
+                      },
+                    );
+                  },
+                ),
+        ),
+      ],
     );
   }
 

@@ -7,7 +7,7 @@ import '../../theme/design_system/app_badge.dart';
 import '../../theme/design_system/app_info_box.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_typography.dart';
-
+import '../../widgets/web_footer.dart';
 
 class MangoHubScreen extends StatefulWidget {
   const MangoHubScreen({super.key});
@@ -128,7 +128,9 @@ class _MangoHubScreenState extends State<MangoHubScreen> {
               ),
             ),
             const SizedBox(height: 40),
-     
+
+            // Web/Desktop Footer
+            const WebFooter(),
           ],
         ),
       ),

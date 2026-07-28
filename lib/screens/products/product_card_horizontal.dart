@@ -73,14 +73,15 @@ class ProductCardHorizontal extends ConsumerWidget {
           ? FutureBuilder<ColorScheme>(
               future: ColorScheme.fromImageProvider(provider: imageProvider),
               builder: (context, snapshot) {
-                // Extracts dominant palette from image or falls back to standard surface
-                final dominantColor = snapshot.data?.surfaceContainerHighest ?? 
+                // 🔑 Extracts the strong dominant color from image or falls back to standard theme surface
+                final dominantColor = snapshot.data?.primaryContainer ??
+                    snapshot.data?.primary ?? 
                     Theme.of(context).colorScheme.surfaceContainer;
 
                 return _buildCardContent(
                   context: context,
                   ref: ref,
-                  cardBackgroundColor: dominantColor.withOpacity(0.90),
+                  cardBackgroundColor: dominantColor.withOpacity(0.85),
                   primaryTextColor: _getContrastColor(dominantColor),
                   secondaryTextColor: _getContrastColor(dominantColor).withOpacity(0.70),
                   isLoggedIn: isLoggedIn,
@@ -95,7 +96,7 @@ class ProductCardHorizontal extends ConsumerWidget {
           : _buildCardContent(
               context: context,
               ref: ref,
-              cardBackgroundColor: Theme.of(context).colorScheme.surface.withOpacity(0.90),
+              cardBackgroundColor: Theme.of(context).colorScheme.surface,
               primaryTextColor: Theme.of(context).colorScheme.onSurface,
               secondaryTextColor: Theme.of(context).colorScheme.onSurfaceVariant,
               isLoggedIn: isLoggedIn,
@@ -128,222 +129,241 @@ class ProductCardHorizontal extends ConsumerWidget {
     required String formattedCategory,
     required String formattedName,
   }) {
+    // Calculates readable price color against dynamic dominant background
+    final bool isDarkBg = ThemeData.estimateBrightnessForColor(cardBackgroundColor) == Brightness.dark;
+    final Color dynamicPriceColor = isDarkBg 
+        ? Colors.amber.shade300 
+        : AppColors.primary(context);
+
     return Container(
       decoration: BoxDecoration(
         color: cardBackgroundColor,
         borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      child: AppCard(
-        padding: EdgeInsets.zero,
-        onTap: () {
-          final tabsScreen = MainTabsScreen.of(context);
-          if (tabsScreen != null) {
-            tabsScreen.navigateToProductDetails(product.id);
-          } else {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => ProductDetailsScreen(productId: product.id),
-              ),
-            );
-          }
-        },
-        child: SizedBox(
-          height: 120,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // ================= SQUARE IMAGE + FAVORITE BUTTON =================
-              SizedBox(
-                width: 120,
-                child: AppImageCard(
-                  imageUrl: product.hasImage ? product.safeImage : null,
-                  height: double.infinity,
-                  borderRadius: 14,
-                  placeholderIcon: Icons.image_outlined,
-                  badges: [
-                    AppIconButton(
-                      icon: isFav ? Icons.favorite : Icons.favorite_border,
-                      style: IconButtonStyle.ghost,
-                      color: Colors.white,
-                      size: 26,
-                      iconSize: 18,
-                      onTap: () async {
-                        if (!isLoggedIn) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => const LoginScreen()),
-                          );
-                          return;
-                        }
-
-                        analytics.logEvent('product_favorite_toggle_${product.id}');
-                        await ref.read(favoriteProvider.notifier).toggle(product.id);
-
-                        AppToast.info(
-                          context,
-                          isFav ? "REMOVED FROM FAVORITES" : "ADDED TO FAVORITES",
-                        );
-                      },
-                    ),
-                  ],
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () {
+            final tabsScreen = MainTabsScreen.of(context);
+            if (tabsScreen != null) {
+              tabsScreen.navigateToProductDetails(product.id);
+            } else {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ProductDetailsScreen(productId: product.id),
                 ),
-              ),
+              );
+            }
+          },
+          child: SizedBox(
+            height: 120,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // ================= SQUARE IMAGE + FAVORITE BUTTON =================
+                SizedBox(
+                  width: 120,
+                  child: AppImageCard(
+                    imageUrl: product.hasImage ? product.safeImage : null,
+                    height: double.infinity,
+                    borderRadius: 14,
+                    placeholderIcon: Icons.image_outlined,
+                    badges: [
+                      AppIconButton(
+                        icon: isFav ? Icons.favorite : Icons.favorite_border,
+                        style: IconButtonStyle.ghost,
+                        color: Colors.white,
+                        size: 26,
+                        iconSize: 18,
+                        onTap: () async {
+                          if (!isLoggedIn) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const LoginScreen()),
+                            );
+                            return;
+                          }
 
-              // ================= DETAILS CONTENT =================
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    AppSpacing.sm,
-                    AppSpacing.xs,
-                    AppSpacing.sm,
-                    AppSpacing.xs,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      // Category Tag
-                      Text(
-                        formattedCategory.toUpperCase(),
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.leafGreen,
-                          fontSize: 9,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
+                          analytics.logEvent('product_favorite_toggle_${product.id}');
+                          await ref.read(favoriteProvider.notifier).toggle(product.id);
 
-                      // Product Title
-                      Text(
-                        formattedName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.titleMedium.copyWith(
-                          color: primaryTextColor,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-
-                      // ================= STAR RATING =================
-                      Row(
-                        children: [
-                          ...List.generate(5, (index) {
-                            final currentStarValue = index + 1;
-                            if (product.rating >= currentStarValue) {
-                              return const Icon(Icons.star_rounded, color: Colors.amber, size: 12);
-                            } else if (product.rating > currentStarValue - 1 && product.rating < currentStarValue) {
-                              return const Icon(Icons.star_half_rounded, color: Colors.amber, size: 12);
-                            } else {
-                              return Icon(Icons.star_border_rounded, color: secondaryTextColor, size: 12);
-                            }
-                          }),
-                          const SizedBox(width: 4),
-                          Text(
-                            "(${product.totalReviews})",
-                            style: AppTypography.bodySmall.copyWith(
-                              color: secondaryTextColor,
-                              fontSize: 9,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-
-                      // ================= PRICE & CART/EDIT ACTION =================
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (product.hasDiscount)
-                                  Text(
-                                    "MWK ${product.originalPrice ?? 0}",
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: AppTypography.bodySmall.copyWith(
-                                      color: secondaryTextColor,
-                                      decoration: TextDecoration.lineThrough,
-                                      fontSize: 9,
-                                    ),
-                                  ),
-                                Text(
-                                  "MWK ${product.price}",
-                                  maxLines: 1,
-                                  style: AppTypography.titleMedium.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13,
-                                    color: AppColors.primary(context),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.xxs),
-                          AppIconButton(
-                            icon: isOwner ? Icons.edit_rounded : Icons.shopping_cart_outlined,
-                            style: IconButtonStyle.ghost,
-                            size: 30,
-                            iconSize: 18,
-                            color: isOwner
-                                ? AppColors.leafGreen
-                                : (product.isInStock ? AppColors.mangoOrange : secondaryTextColor),
-                            onTap: isOwner
-                                ? () {
-                                    analytics.logEvent('product_owner_edit_click_${product.id}');
-                                    MainTabsScreen.of(context)?.navigateToEditProduct(product);
-                                  }
-                                : (product.isInStock
-                                    ? () {
-                                        if (!isLoggedIn) {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(builder: (_) => const LoginScreen()),
-                                          );
-                                          return;
-                                        }
-
-                                        analytics.logEvent('product_add_to_cart_click_${product.id}');
-
-                                        dynamic defaultVariant;
-                                        if (product.variants.isNotEmpty) {
-                                          final inStockVariants = product.variants.where((v) => v.stock > 0);
-                                          if (inStockVariants.isNotEmpty) {
-                                            defaultVariant = inStockVariants.first;
-                                          } else {
-                                            AppToast.error(context, "All options for this product are sold out!");
-                                            return;
-                                          }
-                                        }
-
-                                        ref.read(addToCartProvider).call(
-                                          product,
-                                          1,
-                                          defaultVariant,
-                                        );
-
-                                        final String optionLabel = defaultVariant != null && defaultVariant.attributes.isNotEmpty
-                                            ? " (${defaultVariant.attributes.values.join(', ')})"
-                                            : "";
-
-                                        AppToast.success(context, "ADDED TO CART$optionLabel");
-                                      }
-                                    : null),
-                          ),
-                        ],
+                          AppToast.info(
+                            context,
+                            isFav ? "REMOVED FROM FAVORITES" : "ADDED TO FAVORITES",
+                          );
+                        },
                       ),
                     ],
                   ),
                 ),
-              ),
-            ],
+
+                // ================= DETAILS CONTENT =================
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.sm,
+                      AppSpacing.xs,
+                      AppSpacing.sm,
+                      AppSpacing.xs,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Category Tag
+                        Text(
+                          formattedCategory.toUpperCase(),
+                          style: AppTypography.bodySmall.copyWith(
+                            color: isDarkBg ? Colors.greenAccent.shade200 : AppColors.leafGreen,
+                            fontSize: 9,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+
+                        // Product Title
+                        Text(
+                          formattedName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.titleMedium.copyWith(
+                            color: primaryTextColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+
+                        // ================= STAR RATING =================
+                        Row(
+                          children: [
+                            ...List.generate(5, (index) {
+                              final currentStarValue = index + 1;
+                              if (product.rating >= currentStarValue) {
+                                return const Icon(Icons.star_rounded, color: Colors.amber, size: 12);
+                              } else if (product.rating > currentStarValue - 1 && product.rating < currentStarValue) {
+                                return const Icon(Icons.star_half_rounded, color: Colors.amber, size: 12);
+                              } else {
+                                return Icon(Icons.star_border_rounded, color: secondaryTextColor, size: 12);
+                              }
+                            }),
+                            const SizedBox(width: 4),
+                            Text(
+                              "(${product.totalReviews})",
+                              style: AppTypography.bodySmall.copyWith(
+                                color: secondaryTextColor,
+                                fontSize: 9,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+
+                        // ================= PRICE & CART/EDIT ACTION =================
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (product.hasDiscount)
+                                    Text(
+                                      "MWK ${product.originalPrice ?? 0}",
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: AppTypography.bodySmall.copyWith(
+                                        color: secondaryTextColor,
+                                        decoration: TextDecoration.lineThrough,
+                                        fontSize: 9,
+                                      ),
+                                    ),
+                                  Text(
+                                    "MWK ${product.price}",
+                                    maxLines: 1,
+                                    style: AppTypography.titleMedium.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                      color: dynamicPriceColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.xxs),
+                            AppIconButton(
+                              icon: isOwner ? Icons.edit_rounded : Icons.shopping_cart_outlined,
+                              style: IconButtonStyle.ghost,
+                              size: 30,
+                              iconSize: 18,
+                              color: isOwner
+                                  ? (isDarkBg ? Colors.greenAccent : AppColors.leafGreen)
+                                  : (product.isInStock 
+                                      ? (isDarkBg ? Colors.orangeAccent : AppColors.mangoOrange) 
+                                      : secondaryTextColor),
+                              onTap: isOwner
+                                  ? () {
+                                      analytics.logEvent('product_owner_edit_click_${product.id}');
+                                      MainTabsScreen.of(context)?.navigateToEditProduct(product);
+                                    }
+                                  : (product.isInStock
+                                      ? () {
+                                          if (!isLoggedIn) {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(builder: (_) => const LoginScreen()),
+                                            );
+                                            return;
+                                          }
+
+                                          analytics.logEvent('product_add_to_cart_click_${product.id}');
+
+                                          dynamic defaultVariant;
+                                          if (product.variants.isNotEmpty) {
+                                            final inStockVariants = product.variants.where((v) => v.stock > 0);
+                                            if (inStockVariants.isNotEmpty) {
+                                              defaultVariant = inStockVariants.first;
+                                            } else {
+                                              AppToast.error(context, "All options for this product are sold out!");
+                                              return;
+                                            }
+                                          }
+
+                                          ref.read(addToCartProvider).call(
+                                            product,
+                                            1,
+                                            defaultVariant,
+                                          );
+
+                                          final String optionLabel = defaultVariant != null && defaultVariant.attributes.isNotEmpty
+                                              ? " (${defaultVariant.attributes.values.join(', ')})"
+                                              : "";
+
+                                          AppToast.success(context, "ADDED TO CART$optionLabel");
+                                        }
+                                      : null),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

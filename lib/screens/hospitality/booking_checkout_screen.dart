@@ -6,12 +6,12 @@ import '../../models/room_model.dart';
 import '../../models/requests/booking_create_request.dart';
 import '../../providers/api_provider.dart';
 
-
 import '../main_tabs_screen.dart';
 import '../payments/payment_checkout_screen.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_card.dart';
 import '../../services/analytics_service.dart';
+import '../../widgets/web_footer.dart';
 
 class BookingCheckoutScreen extends ConsumerStatefulWidget {
   final Room room;
@@ -265,8 +265,10 @@ class _BookingCheckoutScreenState
             ),
           ),
           
-          const SliverToBoxAdapter(child: SizedBox(height: 120)),
-
+          // Web/Desktop Footer
+          const SliverToBoxAdapter(
+            child: WebFooter(),
+          ),
         ],
       ),
     );

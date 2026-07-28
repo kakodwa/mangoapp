@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/owner_bookings_provider.dart';
 import '../../widgets/hospitality/owner_booking_card.dart';
 import '../../theme/design_system/app_spacing.dart';
+import '../../widgets/web_footer.dart';
 
 class OwnerBookingsScreen extends ConsumerStatefulWidget {
   const OwnerBookingsScreen({super.key});
@@ -77,9 +78,13 @@ class _OwnerBookingsScreenState extends ConsumerState<OwnerBookingsScreen> {
                       ),
                     ),
                     const Spacer(),
- 
                   ],
                 ),
+              ),
+
+              // Web/Desktop Footer
+              const SliverToBoxAdapter(
+                child: WebFooter(),
               ),
             ],
           );
@@ -103,10 +108,11 @@ class _OwnerBookingsScreenState extends ConsumerState<OwnerBookingsScreen> {
                 },
               ),
             ),
+
+            // Web/Desktop Footer
             const SliverToBoxAdapter(
-              child: SizedBox(height: 40),
+              child: WebFooter(),
             ),
-    
           ],
         );
       },
@@ -132,9 +138,13 @@ class _OwnerBookingsScreenState extends ConsumerState<OwnerBookingsScreen> {
                   style: TextStyle(color: Theme.of(context).colorScheme.error),
                 ),
                 const Spacer(),
-
               ],
             ),
+          ),
+
+          // Web/Desktop Footer
+          const SliverToBoxAdapter(
+            child: WebFooter(),
           ),
         ],
       ),

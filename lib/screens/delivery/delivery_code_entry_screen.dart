@@ -13,6 +13,7 @@ import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_button.dart';
 import '../../widgets/main_app_bar.dart';
 import '../../widgets/app_scaffold.dart';
+import '../../widgets/web_footer.dart';
 import '../../services/analytics_service.dart';
 
 class DeliveryCodeScreen extends ConsumerStatefulWidget {
@@ -92,12 +93,20 @@ class _DeliveryCodeScreenState extends ConsumerState<DeliveryCodeScreen> {
     final bool isDesktop = screenWidth >= 900;
 
     return SingleChildScrollView(
-      child: Center(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 1200),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
-          child: isDesktop ? _buildDesktopLayout(context) : _buildMobileLayout(context),
-        ),
+      child: Column(
+        children: [
+          Center(
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 1200),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 32),
+              child: isDesktop ? _buildDesktopLayout(context) : _buildMobileLayout(context),
+            ),
+          ),
+          const SizedBox(height: 40),
+
+          // Web/Desktop Footer
+          const WebFooter(),
+        ],
       ),
     );
   }

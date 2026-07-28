@@ -8,6 +8,7 @@ import '../../utils/app_toast.dart';
 import '../../widgets/main_app_bar.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../services/analytics_service.dart';
+import '../../widgets/web_footer.dart';
 
 class ScanTicketScreen extends StatefulWidget {
   const ScanTicketScreen({super.key});
@@ -311,6 +312,8 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
             ),
             const SizedBox(height: 40),
 
+            // Web/Desktop Footer
+            const WebFooter(),
           ],
         ),
       ),

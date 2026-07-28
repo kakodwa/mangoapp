@@ -5,6 +5,7 @@ import '../../widgets/feed/feed_list_widget.dart';
 
 import '../../screens/search/global_search_input_bar.dart';
 import '../../screens/search/unified_search_screen.dart';
+import '../../widgets/web_footer.dart';
 
 class EventListScreen extends ConsumerStatefulWidget {
   const EventListScreen({
@@ -103,6 +104,11 @@ class _EventListScreenState extends ConsumerState<EventListScreen> {
                       ),
                     ),
                   ),
+                  
+                  // Web/Desktop Footer
+                  const SliverToBoxAdapter(
+                    child: WebFooter(),
+                  ),
                 ],
               )
             : CustomScrollView(
@@ -122,7 +128,11 @@ class _EventListScreenState extends ConsumerState<EventListScreen> {
                       ),
                     ),
                   ),
-     
+
+                  // Web/Desktop Footer
+                  const SliverToBoxAdapter(
+                    child: WebFooter(),
+                  ),
                 ],
               ),
       ),

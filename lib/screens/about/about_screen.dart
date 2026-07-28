@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_spacing.dart';
-
+import '../../widgets/web_footer.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -308,6 +308,9 @@ class AboutScreen extends StatelessWidget {
                   ),
                 ),
               ),
+
+              // Web/Desktop Footer
+              const WebFooter(),
             ],
           ),
         ),

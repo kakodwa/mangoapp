@@ -20,6 +20,7 @@ import '../../theme/design_system/app_text_field.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_typography.dart';
 import '../../widgets/image_crop_picker.dart';
+import '../../widgets/web_footer.dart';
 
 class CreateLodgeScreen extends ConsumerStatefulWidget {
   const CreateLodgeScreen({super.key});
@@ -396,8 +397,11 @@ class _CreateLodgeScreenState extends ConsumerState<CreateLodgeScreen> {
               ),
             ),
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 40)),
-
+          
+          // Web/Desktop Footer
+          const SliverToBoxAdapter(
+            child: WebFooter(),
+          ),
         ],
       ),
     );

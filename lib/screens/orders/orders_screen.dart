@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../models/order_model.dart';
 import '../../providers/api_provider.dart';
+import '../../widgets/web_footer.dart';
 
 // Design System Imports
 import '../../theme/design_system/app_card.dart';
@@ -242,27 +243,47 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
 
     // Error UI fallback block
     if (paginationState.orders.isEmpty && paginationState.errorMessage != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: AppInfoBox(
-            type: AppInfoType.error,
-            message: "Failed to load orders: ${paginationState.errorMessage}".toCapitalized(),
+      return CustomScrollView(
+        slivers: [
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: AppInfoBox(
+                  type: AppInfoType.error,
+                  message: "Failed to load orders: ${paginationState.errorMessage}".toCapitalized(),
+                ),
+              ),
+            ),
           ),
-        ),
+          const SliverToBoxAdapter(
+            child: WebFooter(),
+          ),
+        ],
       );
     }
 
     // Empty state fallback block
     if (paginationState.orders.isEmpty && !paginationState.isLoading) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: AppInfoBox(
-            type: AppInfoType.info,
-            message: "No orders yet".toCapitalized(),
+      return CustomScrollView(
+        slivers: [
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: AppInfoBox(
+                  type: AppInfoType.info,
+                  message: "No orders yet".toCapitalized(),
+                ),
+              ),
+            ),
           ),
-        ),
+          const SliverToBoxAdapter(
+            child: WebFooter(),
+          ),
+        ],
       );
     }
 
@@ -476,8 +497,10 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
               ),
             ),
 
-          const SliverToBoxAdapter(child: SizedBox(height: 40)),
-
+          // Web/Desktop Footer
+          const SliverToBoxAdapter(
+            child: WebFooter(),
+          ),
         ],
       ),
     );

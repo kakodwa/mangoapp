@@ -18,6 +18,7 @@ import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_text_field.dart';
 import '../../theme/design_system/app_typography.dart';
+import '../../widgets/web_footer.dart';
 
 class EditLodgeScreen extends ConsumerStatefulWidget {
   final Lodge lodge;
@@ -530,7 +531,11 @@ class _EditLodgeScreenState extends ConsumerState<EditLodgeScreen> {
               ),
             ),
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 40)),
+          
+          // Web/Desktop Footer
+          const SliverToBoxAdapter(
+            child: WebFooter(),
+          ),
         ],
       ),
     );

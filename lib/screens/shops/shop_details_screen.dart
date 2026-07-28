@@ -12,8 +12,6 @@ import 'package:gal/gal.dart';
 import 'package:http/http.dart' as http; 
 import 'dart:convert';
 
-// 🌟 FIX: Removed dart:js_interop and package:web. 
-// Added universal_html which safely works on BOTH web and mobile.
 import 'package:universal_html/html.dart' as html; 
 
 import '../../providers/shops_provider.dart';
@@ -23,6 +21,7 @@ import '../../providers/products_provider.dart';
 import '../../widgets/shop_map_modal.dart';
 import '../../widgets/app_fab.dart';
 import '../../widgets/reviews/review_section_widget.dart';
+import '../../widgets/web_footer.dart';
 
 
 import '../auth/login_screen.dart';
@@ -155,8 +154,7 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
     return 5;                      
   }
 
-  // 🌟 FIX: Cleaned up the method to remove all web.Blob and js_interop conversions
-Future<void> _downloadOrSaveQr(BuildContext context, String url, String shopName) async {
+  Future<void> _downloadOrSaveQr(BuildContext context, String url, String shopName) async {
     try {
       AppToast.info(context, "Preparing file download...");
 
@@ -166,8 +164,6 @@ Future<void> _downloadOrSaveQr(BuildContext context, String url, String shopName
       final fileName = "${shopName.replaceAll(' ', '_')}_QR.png"; 
 
       if (kIsWeb) {
-        // 🌟 FIX: Removed the invalid #if / #endif macros completely.
-        // Standard runtime evaluation handles this safely via universal_html.
         final blob = html.Blob([bytes], 'image/png');
         final blobUrl = html.Url.createObjectUrlFromBlob(blob);
         
@@ -541,7 +537,11 @@ Future<void> _downloadOrSaveQr(BuildContext context, String url, String shopName
                         ),
                       ),
                     ],
- 
+
+                    // Web/Desktop Footer
+                    const SliverToBoxAdapter(
+                      child: WebFooter(),
+                    ),
                   ],
                 ),
 
@@ -558,103 +558,102 @@ Future<void> _downloadOrSaveQr(BuildContext context, String url, String shopName
                       ),
                       const SizedBox(height: AppSpacing.sm), 
                       AppFab(
-  heroTag: "whatsapp_shop_fab",
-  icon: FontAwesomeIcons.whatsapp, 
-  backgroundColor: const Color(0xFF25D366), // 👈 Official WhatsApp Green
-  foregroundColor: Colors.white,            // 👈 Keeps the icon crisp white
-  tooltip: "WhatsApp Storefront",
-  onPressed: () {
-    if (!isLoggedIn) { 
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen())); 
-      return;
-    }
-    if (shop.phoneNumber.isEmpty) { 
-      AppToast.info(context, "No phone number available"); 
-      return;
-    }
-    _openWhatsApp(context, shop.phoneNumber); 
-  },
-),
+                        heroTag: "whatsapp_shop_fab",
+                        icon: FontAwesomeIcons.whatsapp, 
+                        backgroundColor: const Color(0xFF25D366),
+                        foregroundColor: Colors.white,            
+                        tooltip: "WhatsApp Storefront",
+                        onPressed: () {
+                          if (!isLoggedIn) { 
+                            Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen())); 
+                            return;
+                          }
+                          if (shop.phoneNumber.isEmpty) { 
+                            AppToast.info(context, "No phone number available"); 
+                            return;
+                          }
+                          _openWhatsApp(context, shop.phoneNumber); 
+                        },
+                      ),
                       const SizedBox(height: AppSpacing.sm), 
-                     AppFab(
-  heroTag: "share_shop_fab",
-  icon: Icons.share_outlined,
-  tooltip: "Share Shop",
-  onPressed: () async {
-    _analytics.logEvent('shop_shared_${widget.shopId}');
+                      AppFab(
+                        heroTag: "share_shop_fab",
+                        icon: Icons.share_outlined,
+                        tooltip: "Share Shop",
+                        onPressed: () async {
+                          _analytics.logEvent('shop_shared_${widget.shopId}');
 
-    final String shopUrl = kIsWeb
-        ? "${Uri.base.origin}/shop/${widget.shopId}"
-        : "https://malatrade.com/shop/${widget.shopId}";
+                          final String shopUrl = kIsWeb
+                              ? "${Uri.base.origin}/shop/${widget.shopId}"
+                              : "https://malatrade.com/shop/${widget.shopId}";
 
-    final String shareMessage =
-        "🏪 ${shop.name}\n"
-        "📍 Category: ${shop.category}\n"
-        "📌 Location: ${shop.district}, Malawi\n\n"
-        "Browse this shop on MalaTrade:\n$shopUrl";
+                          final String shareMessage =
+                              "🏪 ${shop.name}\n"
+                              "📍 Category: ${shop.category}\n"
+                              "📌 Location: ${shop.district}, Malawi\n\n"
+                              "Browse this shop on MalaTrade:\n$shopUrl";
 
-    final box = context.findRenderObject() as RenderBox?;
-    final sharePositionOrigin =
-        box != null ? box.localToGlobal(Offset.zero) & box.size : null;
+                          final box = context.findRenderObject() as RenderBox?;
+                          final sharePositionOrigin =
+                              box != null ? box.localToGlobal(Offset.zero) & box.size : null;
 
-    try {
-      // Prefer logo, otherwise banner
-      String? imageUrl;
+                          try {
+                            String? imageUrl;
 
-      if (shop.logo.isNotEmpty) {
-        imageUrl = shop.logo;
-      } else if (shop.banner != null && shop.banner!.isNotEmpty) {
-        imageUrl = shop.banner!;
-      }
+                            if (shop.logo.isNotEmpty) {
+                              imageUrl = shop.logo;
+                            } else if (shop.banner != null && shop.banner!.isNotEmpty) {
+                              imageUrl = shop.banner!;
+                            }
 
-      if (imageUrl != null) {
-        final response = await http.get(Uri.parse(imageUrl));
+                            if (imageUrl != null) {
+                              final response = await http.get(Uri.parse(imageUrl));
 
-        if (response.statusCode == 200) {
-          final tempDir = await getTemporaryDirectory();
+                              if (response.statusCode == 200) {
+                                final tempDir = await getTemporaryDirectory();
 
-          final extension = imageUrl
-              .split('.')
-              .last
-              .split('?')
-              .first
-              .toLowerCase();
+                                final extension = imageUrl
+                                    .split('.')
+                                    .last
+                                    .split('?')
+                                    .first
+                                    .toLowerCase();
 
-          final validExtension = ['jpg', 'jpeg', 'png', 'webp']
-                  .contains(extension)
-              ? extension
-              : 'jpg';
+                                final validExtension = ['jpg', 'jpeg', 'png', 'webp']
+                                        .contains(extension)
+                                    ? extension
+                                    : 'jpg';
 
-          final file = await File(
-            '${tempDir.path}/shared_shop_${shop.id}.$validExtension',
-          ).create();
+                                final file = await File(
+                                  '${tempDir.path}/shared_shop_${shop.id}.$validExtension',
+                                ).create();
 
-          await file.writeAsBytes(response.bodyBytes);
+                                await file.writeAsBytes(response.bodyBytes);
 
-          await Share.shareXFiles(
-            [XFile(file.path)],
-            text: shareMessage,
-            sharePositionOrigin: sharePositionOrigin,
-          );
+                                await Share.shareXFiles(
+                                  [XFile(file.path)],
+                                  text: shareMessage,
+                                  sharePositionOrigin: sharePositionOrigin,
+                                );
 
-          return;
-        }
-      }
+                                return;
+                              }
+                            }
 
-      await Share.share(
-        shareMessage,
-        sharePositionOrigin: sharePositionOrigin,
-      );
-    } catch (e) {
-      debugPrint("Shop share failed: $e");
+                            await Share.share(
+                              shareMessage,
+                              sharePositionOrigin: sharePositionOrigin,
+                            );
+                          } catch (e) {
+                            debugPrint("Shop share failed: $e");
 
-      await Share.share(
-        shareMessage,
-        sharePositionOrigin: sharePositionOrigin,
-      );
-    }
-  },
-),
+                            await Share.share(
+                              shareMessage,
+                              sharePositionOrigin: sharePositionOrigin,
+                            );
+                          }
+                        },
+                      ),
                       const SizedBox(height: AppSpacing.sm), 
                       AppFab(
                         heroTag: "qr_shop_fab",
@@ -715,20 +714,18 @@ Future<void> _downloadOrSaveQr(BuildContext context, String url, String shopName
                         },
                       ),
                       const SizedBox(height: AppSpacing.sm), 
-                      // NEW CODE:
-AppFab(
-  heroTag: "map_shop_fab",
-  icon: Icons.map_outlined, 
-  tooltip: "Open Map Geolocation",
-  onPressed: () {
-    _analytics.logEvent('shop_map_click'); 
-    // Triggers navigation inside MainTabsScreen's IndexedStack
-    MainTabsScreen.of(context)?.navigateToShopMap(
-      shop.latitude, 
-      shop.longitude,
-    );
-  },
-),
+                      AppFab(
+                        heroTag: "map_shop_fab",
+                        icon: Icons.map_outlined, 
+                        tooltip: "Open Map Geolocation",
+                        onPressed: () {
+                          _analytics.logEvent('shop_map_click'); 
+                          MainTabsScreen.of(context)?.navigateToShopMap(
+                            shop.latitude, 
+                            shop.longitude,
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ),

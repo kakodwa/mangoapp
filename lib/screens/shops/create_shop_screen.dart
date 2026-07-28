@@ -13,6 +13,7 @@ import '../../providers/shops_provider.dart';
 import '../main_tabs_screen.dart'; 
 import '../../utils/app_toast.dart';
 import '../../widgets/image_crop_picker.dart';
+import '../../widgets/web_footer.dart';
 
 
 class CreateShopScreen extends ConsumerStatefulWidget {
@@ -458,7 +459,9 @@ class _CreateShopScreenState extends ConsumerState<CreateShopScreen> {
                 ],
               ),
             ),
-  
+
+            // Web/Desktop Footer
+            const WebFooter(),
           ],
         ),
       ),

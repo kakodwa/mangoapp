@@ -3,13 +3,12 @@ import '../screens/main_tabs_screen.dart';
 import '../theme/app_colors.dart';
 import '../theme/design_system/app_spacing.dart';
 import '../services/analytics_service.dart';
+import '../screens/products/product_constants.dart';
 
-class MainDrawer extends StatelessWidget {
+class MainDrawer extends StatefulWidget {
   final VoidCallback? onAboutTap;
   final VoidCallback? onHelpTap;
   final VoidCallback? onDeliveryTap;
-
-  static final AnalyticsService _analyticsService = AnalyticsService();
 
   const MainDrawer({
     super.key,
@@ -18,66 +17,83 @@ class MainDrawer extends StatelessWidget {
     this.onDeliveryTap,
   });
 
-  Widget _menuItem({
+  @override
+  State<MainDrawer> createState() => _MainDrawerState();
+}
+
+class _MainDrawerState extends State<MainDrawer> {
+  static final AnalyticsService _analyticsService = AnalyticsService();
+
+  IconData _getCategoryIcon(String category) {
+    switch (category) {
+      case 'Electronics':
+        return Icons.devices_other;
+      case 'Groceries':
+        return Icons.local_grocery_store_outlined;
+      case 'Fashion':
+        return Icons.checkroom;
+      case 'Home & Living':
+        return Icons.home_outlined;
+      case 'Beauty & Personal Care':
+        return Icons.face_retouching_natural;
+      case 'Health & Wellness':
+        return Icons.health_and_safety_outlined;
+      case 'Agriculture':
+        return Icons.agriculture_outlined;
+      case 'Vehicles':
+        return Icons.directions_car_outlined;
+      case 'Construction & Hardware':
+        return Icons.handyman_outlined;
+      case 'Books & Education':
+        return Icons.menu_book_outlined;
+      case 'Sports & Outdoors':
+        return Icons.sports_basketball_outlined;
+      case 'Baby & Kids':
+        return Icons.child_friendly_outlined;
+      case 'Food & Beverages':
+        return Icons.fastfood_outlined;
+      case 'Pets & Animals':
+        return Icons.pets_outlined;
+      case 'Office Supplies':
+        return Icons.work_outline;
+      case 'Entertainment':
+        return Icons.theater_comedy_outlined;
+      case 'Services':
+        return Icons.miscellaneous_services_outlined;
+      case 'Industrial Equipment':
+        return Icons.precision_manufacturing_outlined;
+      default:
+        return Icons.category_outlined;
+    }
+  }
+
+  /// Compact Flat Navigation Tile
+  Widget _menuTile({
     required BuildContext context,
     required IconData icon,
     required String title,
     required Color color,
     required VoidCallback onTap,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xs,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.03),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(icon, color: color, size: 20),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                ),
-                Icon(
-                  Icons.chevron_right,
-                  color: Colors.grey.shade400,
-                  size: 20,
-                ),
-              ],
-            ),
-          ),
+    return ListTile(
+      dense: true,
+      visualDensity: const VisualDensity(horizontal: -2, vertical: -3),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+      leading: Icon(icon, color: color, size: 20),
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 13.5,
+          fontWeight: FontWeight.w600,
+          color: Color(0xFF1F2937),
         ),
       ),
+      trailing: Icon(
+        Icons.chevron_right,
+        color: Colors.grey.shade400,
+        size: 16,
+      ),
+      onTap: onTap,
     );
   }
 
@@ -86,7 +102,7 @@ class MainDrawer extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Drawer(
-      backgroundColor: const Color(0xFFF6F7FB),
+      backgroundColor: Colors.white,
       child: SafeArea(
         top: false,
         child: Column(
@@ -95,16 +111,16 @@ class MainDrawer extends StatelessWidget {
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
-                  // HEADER
+                  // SLIM & TIGHT HEADER (NO EXTRA LOGO BOX OR PADDING)
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.lg,
-                      60,
-                      AppSpacing.lg,
-                      AppSpacing.lg,
+                    padding: EdgeInsets.only(
+                      top: MediaQuery.of(context).padding.top + 8,
+                      bottom: 8,
+                      left: 16,
+                      right: 16,
                     ),
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
                           AppColors.mangoOrange,
@@ -115,121 +131,214 @@ class MainDrawer extends StatelessWidget {
                       ),
                     ),
                     child: Center(
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: Image.asset(
-                          'assets/images/logo.png',
-                          height: 56,
-                        ),
+                      child: Image.asset(
+                        'assets/images/logo3.png',
+                        height: 32,
+                        fit: BoxFit.contain,
                       ),
                     ),
                   ),
 
-                  const SizedBox(height: AppSpacing.md),
+                  // CATEGORIES ACCORDION
+                  Theme(
+                    data: Theme.of(context).copyWith(
+                      dividerColor: Colors.transparent,
+                      visualDensity: const VisualDensity(vertical: -3),
+                    ),
+                    child: ExpansionTile(
+                      dense: true,
+                      iconColor: AppColors.mangoOrange,
+                      collapsedIconColor: Colors.grey.shade600,
+                      tilePadding: const EdgeInsets.symmetric(horizontal: 16),
+                      leading: const Icon(
+                        Icons.grid_view_rounded,
+                        color: AppColors.mangoOrange,
+                        size: 20,
+                      ),
+                      title: const Text(
+                        "Categories",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1F2937),
+                        ),
+                      ),
+                      children: ProductConstants.categories.map((category) {
+                        final subCategoryMap =
+                            ProductConstants.categorySubCategoryBrands[category] ?? {};
+                        final subCategories = subCategoryMap.keys.toList();
 
-                  // =========================
-                  // MENU ITEMS
-                  // =========================
-                  _menuItem(
+                        return ExpansionTile(
+                          dense: true,
+                          visualDensity: const VisualDensity(vertical: -3),
+                          tilePadding: const EdgeInsets.only(left: 28, right: 16),
+                          leading: Icon(
+                            _getCategoryIcon(category),
+                            size: 18,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          title: Text(
+                            category,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF374151),
+                            ),
+                          ),
+                          children: subCategories.map((subCategory) {
+                            return InkWell(
+                              onTap: () {
+                                _analyticsService.logEvent('drawer_subcategory_click_$subCategory');
+                                Navigator.pop(context);
+
+                                MainTabsScreen.of(context)?.setSelectedIndex(
+                                  7,
+                                  searchType: 'product',
+                                  searchQuery: subCategory,
+                                  category: category,
+                                );
+                              },
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.only(
+                                  left: 54,
+                                  right: 16,
+                                  top: 8,
+                                  bottom: 8,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 4,
+                                      height: 4,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.grey.shade400,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        subCategory,
+                                        style: TextStyle(
+                                          fontSize: 12.5,
+                                          color: Colors.grey.shade700,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.chevron_right,
+                                      size: 14,
+                                      color: Colors.grey.shade400,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                    child: Divider(height: 1),
+                  ),
+
+                  // MAIN NAVIGATION (PUSHED DOWN)
+                  _menuTile(
                     context: context,
                     icon: Icons.map_outlined,
                     title: "Guide",
                     color: Colors.blue,
                     onTap: () {
                       _analyticsService.logEvent('drawer_guide_click');
-                      Navigator.pop(context); // Close Drawer
-                      MainTabsScreen.of(context)?.setSelectedIndex(43); // MangoHub / Guide
+                      Navigator.pop(context);
+                      MainTabsScreen.of(context)?.setSelectedIndex(43);
                     },
                   ),
 
-                  _menuItem(
+                  _menuTile(
                     context: context,
-                    icon: Icons.local_shipping,
+                    icon: Icons.local_shipping_outlined,
                     title: "Confirm Delivery",
                     color: Colors.orange,
                     onTap: () {
                       _analyticsService.logEvent('drawer_delivery_click');
-                      Navigator.pop(context); // Close Drawer
-                      if (onDeliveryTap != null) {
-                        onDeliveryTap!();
+                      Navigator.pop(context);
+                      if (widget.onDeliveryTap != null) {
+                        widget.onDeliveryTap!();
                       } else {
-                        MainTabsScreen.of(context)?.setSelectedIndex(9); // Delivery Code Screen Index
+                        MainTabsScreen.of(context)?.setSelectedIndex(9);
                       }
                     },
                   ),
 
-                  _menuItem(
+                  _menuTile(
                     context: context,
-                    icon: Icons.qr_code_scanner,
+                    icon: Icons.qr_code_scanner_rounded,
                     title: "Scan Ticket",
                     color: Colors.purple,
                     onTap: () {
                       _analyticsService.logEvent('drawer_scan_ticket_click');
-                      Navigator.pop(context); // Close Drawer
-                      MainTabsScreen.of(context)?.setSelectedIndex(44); // Scan Ticket Panel Index
+                      Navigator.pop(context);
+                      MainTabsScreen.of(context)?.setSelectedIndex(44);
                     },
                   ),
 
                   const Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: 8,
-                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                     child: Divider(height: 1),
                   ),
 
-                  _menuItem(
+                  _menuTile(
                     context: context,
-                    icon: Icons.info,
+                    icon: Icons.info_outline_rounded,
                     title: "About App",
                     color: AppColors.mangoOrange,
                     onTap: () {
                       _analyticsService.logEvent('drawer_about_click');
                       Navigator.pop(context);
-                      if (onAboutTap != null) {
-                        onAboutTap!();
+                      if (widget.onAboutTap != null) {
+                        widget.onAboutTap!();
                       } else {
                         MainTabsScreen.of(context)?.setSelectedIndex(10);
                       }
                     },
                   ),
 
-                  _menuItem(
+                  _menuTile(
                     context: context,
-                    icon: Icons.help,
+                    icon: Icons.help_outline_rounded,
                     title: "Help Center",
                     color: AppColors.leafGreen,
                     onTap: () {
                       _analyticsService.logEvent('drawer_help_click');
                       Navigator.pop(context);
-                      if (onHelpTap != null) {
-                        onHelpTap!();
+                      if (widget.onHelpTap != null) {
+                        widget.onHelpTap!();
                       } else {
                         MainTabsScreen.of(context)?.setSelectedIndex(11);
                       }
                     },
                   ),
+
+                  const SizedBox(height: 12),
                 ],
               ),
             ),
 
+            // FOOTER
             Padding(
-              padding: const EdgeInsets.all(AppSpacing.md),
+              padding: const EdgeInsets.only(bottom: 12, top: 4),
               child: Text(
                 "Version 1.0.0",
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: colorScheme.onSurface.withOpacity(0.5),
+                      color: colorScheme.onSurface.withOpacity(0.4),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
                     ),
               ),
             ),

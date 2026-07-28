@@ -10,6 +10,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/main_app_bar.dart';
 import '../../widgets/main_drawer.dart';
 import '../../widgets/app_scaffold.dart';
+import '../../widgets/web_footer.dart';
 
 class EditRoomScreen extends ConsumerStatefulWidget {
   final Room room;
@@ -147,7 +148,7 @@ class _EditRoomScreenState
     required Function(bool) onChanged,
   }) {
     return Container(
-      margin: EdgeInsets.only(bottom: 10),
+      margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.outline.withOpacity(0.05),
         borderRadius: BorderRadius.circular(14),
@@ -177,7 +178,7 @@ class _EditRoomScreenState
       body: Form(
         key: _formKey,
         child: ListView(
-          padding: EdgeInsets.all(AppSpacing.md),
+          padding: const EdgeInsets.all(AppSpacing.md),
           children: [
 
             /// ROOM NUMBER
@@ -269,7 +270,7 @@ class _EditRoomScreenState
             const SizedBox(height: AppSpacing.xl),
 
             /// FEATURES
-            Text(
+            const Text(
               "Room Features",
               style: TextStyle(
                 fontSize: 18,
@@ -339,7 +340,7 @@ class _EditRoomScreenState
                     ? CircularProgressIndicator(
                         color: Theme.of(context).colorScheme.surface,
                       )
-                    : Text(
+                    : const Text(
                         "Update Room",
                         style: TextStyle(
                           fontSize: 16,
@@ -350,6 +351,9 @@ class _EditRoomScreenState
             ),
 
             const SizedBox(height: 30),
+
+            // Web/Desktop Footer
+            const WebFooter(),
           ],
         ),
       ),

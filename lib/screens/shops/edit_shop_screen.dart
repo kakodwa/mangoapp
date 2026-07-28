@@ -14,6 +14,7 @@ import '../main_tabs_screen.dart'; // Core structural coordinator layout
 
 import '../../utils/app_toast.dart';
 import '../../widgets/image_crop_picker.dart';
+import '../../widgets/web_footer.dart';
 
 
 class EditShopScreen extends ConsumerStatefulWidget {
@@ -153,18 +154,18 @@ class _EditShopScreenState extends ConsumerState<EditShopScreen> {
     setState(() => loading = true);
 
     Future<MultipartFile> _multipartFileFromXFile(XFile file) async {
-  if (kIsWeb) {
-    return MultipartFile.fromBytes(
-      await file.readAsBytes(),
-      filename: file.name,
-    );
-  }
+      if (kIsWeb) {
+        return MultipartFile.fromBytes(
+          await file.readAsBytes(),
+          filename: file.name,
+        );
+      }
 
-  return MultipartFile.fromFile(
-    file.path,
-    filename: file.name,
-  );
-}
+      return MultipartFile.fromFile(
+        file.path,
+        filename: file.name,
+      );
+    }
 
     try {
       final formData = FormData.fromMap({
@@ -181,22 +182,22 @@ class _EditShopScreenState extends ConsumerState<EditShopScreen> {
       });
 
       for (final img in logoImages) {
-  formData.files.add(
-    MapEntry(
-      "logo",
-      await _multipartFileFromXFile(img),
-    ),
-  );
-}
+        formData.files.add(
+          MapEntry(
+            "logo",
+            await _multipartFileFromXFile(img),
+          ),
+        );
+      }
 
-for (final img in bannerImages) {
-  formData.files.add(
-    MapEntry(
-      "banner",
-      await _multipartFileFromXFile(img),
-    ),
-  );
-}
+      for (final img in bannerImages) {
+        formData.files.add(
+          MapEntry(
+            "banner",
+            await _multipartFileFromXFile(img),
+          ),
+        );
+      }
 
       await ref.read(shopActionsProvider).api.patchMultipart(
             "shops/${widget.shop.id}/",
@@ -482,6 +483,8 @@ for (final img in bannerImages) {
               ),
             ),
 
+            // Web/Desktop Footer
+            const WebFooter(),
           ],
         ),
       ),

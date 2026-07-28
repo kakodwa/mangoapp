@@ -15,6 +15,7 @@ import 'paychangu_visa_webview.dart';
 import '../../theme/design_system/app_text_field.dart';
 import '../../utils/app_toast.dart';
 import '../../theme/design_system/app_spacing.dart';
+import '../../widgets/web_footer.dart';
 
 
 class PaymentCheckoutScreen extends ConsumerStatefulWidget {
@@ -528,8 +529,10 @@ class _PaymentCheckoutScreenState
               ],
             ),
           ),
-          
+          const SizedBox(height: 40),
 
+          // Web/Desktop Footer
+          const WebFooter(),
         ],
       ),
     );

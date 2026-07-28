@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../models/withdrawal_model.dart';
 import '../../providers/wallet_provider.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/web_footer.dart';
 
 
 class PayoutHistoryScreen extends ConsumerStatefulWidget {
@@ -91,11 +92,22 @@ class _PayoutHistoryScreenState extends ConsumerState<PayoutHistoryScreen> {
 
         data: (list) {
           if (list.isEmpty) {
-            return const Center(
-              child: Text(
-                'No cashout requests found.',
-                style: TextStyle(fontSize: 15, color: Colors.grey),
-              ),
+            return CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              slivers: [
+                const SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
+                    child: Text(
+                      'No cashout requests found.',
+                      style: TextStyle(fontSize: 15, color: Colors.grey),
+                    ),
+                  ),
+                ),
+                const SliverToBoxAdapter(
+                  child: WebFooter(),
+                ),
+              ],
             );
           }
 
@@ -120,7 +132,7 @@ class _PayoutHistoryScreenState extends ConsumerState<PayoutHistoryScreen> {
                       // ================= FOOTER LOADER =================
                       if (index == items.length) {
                         if (!_hasMore) {
-                          return const SizedBox(height: 80);
+                          return const SizedBox(height: 20);
                         }
 
                         return Padding(
@@ -142,8 +154,10 @@ class _PayoutHistoryScreenState extends ConsumerState<PayoutHistoryScreen> {
                 ),
               ),
 
-              const SliverToBoxAdapter(child: SizedBox(height: 30)),
-   
+              // Web/Desktop Footer
+              const SliverToBoxAdapter(
+                child: WebFooter(),
+              ),
             ],
           );
         },

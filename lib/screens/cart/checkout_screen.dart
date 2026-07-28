@@ -13,6 +13,7 @@ import '../../theme/design_system/app_text_field.dart';
 import '../../utils/app_toast.dart';
 import '../payments/payment_checkout_screen.dart';
 import '../../theme/design_system/app_spacing.dart';
+import '../../widgets/web_footer.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   final List<CartItem> items;
@@ -107,7 +108,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ Scaffold, AppBar, and SafeArea completely removed to support nested tab layout
     return Form(
       key: _formKey,
       child: ListView(
@@ -420,6 +420,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             ),
           ),
 
+          const SizedBox(height: 40),
+
+          // Web/Desktop Footer
+          const WebFooter(),
         ],
       ),
     );
@@ -463,7 +467,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       final tabsScreen = MainTabsScreen.of(context);
 
       if (tabsScreen != null) {
-        // ✅ FIXED: Routes directly inside the tab slot view framework engine at index 42
         tabsScreen.navigateToPayment(
           transactionId: orderId,
           amount: widget.total,

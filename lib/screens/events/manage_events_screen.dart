@@ -8,6 +8,7 @@ import '../../providers/events_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/app_snackbar.dart';
 import '../../widgets/app_fab.dart';
+import '../../widgets/web_footer.dart';
 import '../main_tabs_screen.dart';
 import 'event_tickets_screen.dart';
 import 'create_event_screen.dart';
@@ -620,8 +621,9 @@ class _ManageEventsScreenState
                       ),
                     ),
 
+                  // Web/Desktop Footer
                   const SliverToBoxAdapter(
-                    child: SizedBox(height: 40),
+                    child: WebFooter(),
                   ),
                 ],
               ),

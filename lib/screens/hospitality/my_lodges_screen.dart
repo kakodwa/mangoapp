@@ -10,6 +10,7 @@ import '../../providers/api_provider.dart';
 import '../../models/lodge_model.dart';
 import '../../widgets/hospitality/lodge_card.dart';
 import '../../theme/design_system/app_spacing.dart';
+import '../../widgets/web_footer.dart';
 
 import '../main_tabs_screen.dart';
 import '../../theme/app_colors.dart';
@@ -135,8 +136,11 @@ class _MyLodgesScreenState extends ConsumerState<MyLodgesScreen> {
                     ),
                   ),
           ),
-          const SliverToBoxAdapter(child: SizedBox(height: 40)),
-
+          
+          // Web/Desktop Footer
+          const SliverToBoxAdapter(
+            child: WebFooter(),
+          ),
         ],
       ),
     );

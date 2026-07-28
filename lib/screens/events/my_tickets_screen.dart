@@ -12,6 +12,7 @@ import 'package:path/path.dart' as path;
 import '../../utils/download_permissions.dart';
 import '../../providers/tickets_provider.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/web_footer.dart';
 import 'ticket_detail_screen.dart';
 import '../main_tabs_screen.dart';
 
@@ -176,9 +177,13 @@ class _MyTicketsScreenState extends ConsumerState<MyTicketsScreen> {
                       ),
                     ),
                     const Spacer(),
-               
                   ],
                 ),
+              ),
+
+              // Web/Desktop Footer
+              const SliverToBoxAdapter(
+                child: WebFooter(),
               ),
             ],
           );
@@ -359,10 +364,11 @@ class _MyTicketsScreenState extends ConsumerState<MyTicketsScreen> {
                 },
               ),
             ),
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 40),
-            ),
 
+            // Web/Desktop Footer
+            const SliverToBoxAdapter(
+              child: WebFooter(),
+            ),
           ],
         );
       },

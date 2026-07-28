@@ -16,6 +16,7 @@ import '../../widgets/main_app_bar.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../main_tabs_screen.dart'; 
 import '../../widgets/image_crop_picker.dart';
+import '../../widgets/web_footer.dart';
 
 class AddEventScreen extends ConsumerStatefulWidget {
   const AddEventScreen({super.key});
@@ -579,6 +580,11 @@ class _AddEventScreenState extends ConsumerState<AddEventScreen> {
                   )
                 : const Text("Create Event"),
           ),
+
+          const SizedBox(height: 40),
+
+          // Web/Desktop Footer
+          const WebFooter(),
         ],
       ),
     );

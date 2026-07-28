@@ -6,6 +6,7 @@ import '../../providers/products_provider.dart';
 import '../../theme/design_system/app_button.dart';
 import '../../providers/api_provider.dart';
 import '../../utils/app_toast.dart';
+import '../../widgets/web_footer.dart';
 import '../main_tabs_screen.dart'; 
 import 'checkout_screen.dart';
 
@@ -25,44 +26,56 @@ class CartScreen extends ConsumerWidget {
     return Material(
       color: const Color(0xFFF5F7FA),
       child: cart.isEmpty
-          ? Center(
-              child: Container(
-                padding: const EdgeInsets.all(24),
-                margin: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
-                      blurRadius: 10,
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.shopping_cart_outlined, size: 80, color: Colors.grey[400]),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Your cart is empty',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+          ? CustomScrollView(
+              slivers: [
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(24),
+                      margin: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.05),
+                            blurRadius: 10,
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.shopping_cart_outlined, size: 80, color: Colors.grey[400]),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Your cart is empty',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Add items to get started',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Add items to get started',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
+
+                // Web/Desktop Footer
+                const SliverToBoxAdapter(
+                  child: WebFooter(),
+                ),
+              ],
             )
-          : CustomScrollView( // ✅ FIXED: Whole body is now a single unified scroll canvas
+          : CustomScrollView(
               slivers: [
                 // ========================================================
                 // 1. LIST OF CART ITEMS
@@ -240,7 +253,7 @@ class CartScreen extends ConsumerWidget {
                 ),
 
                 // ========================================================
-                // 2. CHECKOUT SUMMARY (NOW INLINE SCROLLABLE FOR FOOTER)
+                // 2. CHECKOUT SUMMARY
                 // ========================================================
                 SliverToBoxAdapter(
                   child: Container(
@@ -287,33 +300,32 @@ class CartScreen extends ConsumerWidget {
                           ],
                         ),
                         const SizedBox(height: 14),
-                        // lib/screens/cart/cart_screen.dart
-
-AppButton(
-  text: "Checkout",
-  fullWidth: true,
-  onPressed: () {
-    // Look up the parent MainTabsScreen instance context safely
-    final tabsScreen = MainTabsScreen.of(context);
-    
-    if (tabsScreen != null) {
-      // ✅ Triggers seamless tab shifting to index 41 inline!
-      tabsScreen.navigateToCheckout(cart, total);
-    } else {
-      // Fallback route push to ensure it doesn't break if loaded standalone
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => CheckoutScreen(items: cart, total: total),
-        ),
-      );
-    }
-  },
-),
+                        AppButton(
+                          text: "Checkout",
+                          fullWidth: true,
+                          onPressed: () {
+                            final tabsScreen = MainTabsScreen.of(context);
+                            
+                            if (tabsScreen != null) {
+                              tabsScreen.navigateToCheckout(cart, total);
+                            } else {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => CheckoutScreen(items: cart, total: total),
+                                ),
+                              );
+                            }
+                          },
+                        ),
                       ],
                     ),
                   ),
                 ),
 
+                // Web/Desktop Footer
+                const SliverToBoxAdapter(
+                  child: WebFooter(),
+                ),
               ],
             ),
     );

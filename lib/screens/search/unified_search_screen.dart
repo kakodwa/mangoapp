@@ -22,6 +22,7 @@ import '../../screens/shops/shop_card.dart';
 import '../../screens/properties/property_card.dart';
 import '../../widgets/hospitality/lodge_card.dart';
 import '../../widgets/events/event_card.dart';
+import '../../widgets/web_footer.dart';
 
 
 class UnifiedSearchScreen extends StatefulWidget {
@@ -168,68 +169,79 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.mangoOrange.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.search_off_rounded,
-                size: 64,
-                color: AppColors.mangoOrange,
+    return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: [
+        SliverFillRemaining(
+          hasScrollBody: false,
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: AppColors.mangoOrange.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.search_off_rounded,
+                      size: 64,
+                      color: AppColors.mangoOrange,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'No Matching Results Found 🔍',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.darkText,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'We couldn\'t find anything matching your search query or filters. Try searching for something else or clearing active filters.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.mangoOrange,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    icon: const Icon(Icons.refresh_rounded, size: 18),
+                    label: const Text('Reset Search & Filters'),
+                    onPressed: () {
+                      _searchController.clear();
+                      setState(() {
+                        _selectedSubCategory = null;
+                        _selectedBrand = null;
+                      });
+                      _provider.resetSearch();
+                    },
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-            const Text(
-              'No Matching Results Found 🔍',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: AppColors.darkText,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'We couldn\'t find anything matching your search query or filters. Try searching for something else or clearing active filters.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade600,
-                height: 1.4,
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton.icon(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.mangoOrange,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text('Reset Search & Filters'),
-              onPressed: () {
-                _searchController.clear();
-                setState(() {
-                  _selectedSubCategory = null;
-                  _selectedBrand = null;
-                });
-                _provider.resetSearch();
-              },
-            ),
-          ],
+          ),
         ),
-      ),
+        const SliverToBoxAdapter(
+          child: WebFooter(),
+        ),
+      ],
     );
   }
 
@@ -593,6 +605,11 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
                                             child: Center(child: CircularProgressIndicator(color: AppColors.mangoOrange)),
                                           ),
                                         ),
+
+                                      // Web/Desktop Footer
+                                      const SliverToBoxAdapter(
+                                        child: WebFooter(),
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -624,7 +641,7 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
           image: fallbackImage.isNotEmpty ? fallbackImage : null,
           category: item.details['category'] ?? '',
           subCategory: item.details['sub_category'] ?? '', 
-          brand: item.details['brand'] ?? '',             
+          brand: item.details['brand'] ?? '',              
           price: double.tryParse(item.price?.toString() ?? '0') ?? 0.0,
           originalPrice: item.details['original_price'] != null 
               ? double.tryParse(item.details['original_price'].toString()) 

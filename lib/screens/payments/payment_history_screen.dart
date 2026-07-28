@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/payment_model.dart';
 import '../../providers/payment_provider.dart';
 import '../../theme/app_colors.dart';
+import '../../widgets/web_footer.dart';
 
 // Design System Imports
 import '../../theme/design_system/app_card.dart';
@@ -81,10 +82,12 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                           style: const TextStyle(fontSize: 15, color: Colors.grey),
                         ),
                         const Spacer(),
-             
                       ],
                     ),
                   ),
+                ),
+                const SliverToBoxAdapter(
+                  child: WebFooter(),
                 ),
               ],
             );
@@ -196,8 +199,11 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                     ),
                   ),
                 ),
-                const SliverToBoxAdapter(child: SizedBox(height: 30)),
- 
+                
+                // Web/Desktop Footer
+                const SliverToBoxAdapter(
+                  child: WebFooter(),
+                ),
               ],
             ),
           );
@@ -229,10 +235,12 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                       style: AppTypography.bodySmall.copyWith(color: Colors.grey.shade400),
                     ),
                     const Spacer(),
-      
                   ],
                 ),
               ),
+            ),
+            const SliverToBoxAdapter(
+              child: WebFooter(),
             ),
           ],
         ),

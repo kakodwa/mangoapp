@@ -31,6 +31,7 @@ import '../hospitality/my_bookings_screen.dart';
 
 import '../../theme/design_system/app_spacing.dart';
 import '../../services/analytics_service.dart';
+import '../../widgets/web_footer.dart';
 
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -355,6 +356,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           
           const SizedBox(height: 40),
+
+          // Web/Desktop Footer
+          const WebFooter(),
         ],
       ),
     );

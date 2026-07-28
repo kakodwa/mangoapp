@@ -7,12 +7,11 @@ import '../../providers/products_provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/shops_provider.dart';
 
-import '../../screens/products/product_constants.dart';
 import '../../theme/design_system/app_spacing.dart';
 
 import '../../widgets/feed/feed_list_widget.dart';
+import '../../widgets/web_footer.dart';
 
-import '../../screens/search/unified_search_screen.dart';
 import '../../screens/search/global_search_input_bar.dart';
 
 import '../../screens/shops/shop_qr_advert.dart';
@@ -41,9 +40,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   final AnalyticsService _analytics = AnalyticsService(); 
   int bannerIndex = 0;
 
-  // Selected Category State for Desktop Sidebar
-  String? _selectedCategory;
-
   // Bounce animation controllers
   late AnimationController _bounceController;
   late Animation<double> _bounceScale;
@@ -52,7 +48,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     {'key': 'all', 'label': 'All items', 'image': 'assets/images/all.png'},
     {'key': 'electronics', 'label': 'Electronics', 'image': 'assets/images/Electronics.png'},
     {'key': 'groceries', 'label': 'Groceries', 'image': 'assets/images/Oil.png'},
-    {'key': 'fashion', 'label': 'Fashion', 'image': 'assets/images/fashion.png'},
+    {'key': 'fashion', 'label': 'Fashion & Clothing', 'image': 'assets/images/fashion.png'},
     {'key': 'home_living', 'label': 'Home & Living', 'image': 'assets/images/Home.png'},
     {'key': 'beauty_care', 'label': 'Beauty & Personal Care', 'image': 'assets/images/Beauty.png'},
     {'key': 'health_wellness', 'label': 'Health & Wellness', 'image': 'assets/images/food.png'},
@@ -186,7 +182,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             /// 0. SEARCH BAR SECTION
             GlobalSearchInputBar.sliver(),
 
-            /// 1. BANNER & CATEGORY SECTION
+            /// 1. PROMO BANNER SECTION
             SliverToBoxAdapter(
               child: bannersAsync.when(
                 data: (banners) {
@@ -197,10 +193,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
                   final displayLength = validBanners.length + 1;
 
+                  // Main Interactive Slider Banner
                   Widget bannerSlider = Column(
                     children: [
                       AspectRatio(
-                        aspectRatio: isDesktop ? (16 / 7) : (2560 / 1440),
+                        aspectRatio: isDesktop ? (16 / 9) : (2560 / 1440),
                         child: PageView.builder(
                           controller: bannerController,
                           itemCount: displayLength,
@@ -251,6 +248,53 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     ],
                   );
 
+                  // Right Side Vertical Banner List for Desktop
+                  Widget rightBannersList = Column(
+                    children: [
+                      if (validBanners.isNotEmpty) ...[
+                        Expanded(
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(14),
+                            onTap: () {
+                              _analytics.logEvent('right_banner_click_0');
+                            },
+                            child: _buildBanner(
+                              context,
+                              image: validBanners[0].imageUrl,
+                              title: validBanners[0].title,
+                              subtitle: validBanners[0].subtitle,
+                              screenWidth: screenWidth,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                      if (validBanners.length > 1) ...[
+                        Expanded(
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(14),
+                            onTap: () {
+                              _analytics.logEvent('right_banner_click_1');
+                            },
+                            child: _buildBanner(
+                              context,
+                              image: validBanners[1].imageUrl,
+                              title: validBanners[1].title,
+                              subtitle: validBanners[1].subtitle,
+                              screenWidth: screenWidth,
+                            ),
+                          ),
+                        ),
+                      ] else ...[
+                        Expanded(
+                          child: ShopQrBanner(
+                            onTap: _handleDefaultBannerTap,
+                          ),
+                        ),
+                      ],
+                    ],
+                  );
+
                   return Align(
                     alignment: Alignment.topCenter,
                     child: Container(
@@ -260,33 +304,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           ? Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Left Categories & Subcategories Panel for Desktop
+                                // Left Main Banner Slider
+                                Expanded(child: bannerSlider),
+
+                                // Right Vertical Banner Column
                                 Container(
                                   width: 280,
                                   height: 380,
-                                  margin: const EdgeInsets.only(right: 16),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(14),
-                                    border: Border.all(color: Colors.grey.shade200),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.03),
-                                        blurRadius: 8,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(14),
-                                    child: _selectedCategory == null
-                                        ? _buildPrimaryCategoriesList()
-                                        : _buildSubCategoriesList(_selectedCategory!),
-                                  ),
+                                  margin: const EdgeInsets.only(left: 16),
+                                  child: rightBannersList,
                                 ),
-
-                                // Right Promo Banner Slider
-                                Expanded(child: bannerSlider),
                               ],
                             )
                           : bannerSlider,
@@ -415,143 +442,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             ),
 
             const SliverToBoxAdapter(
-              child: SizedBox(height: 40),
+              child: SizedBox(height: 24),
+            ),
+
+            /// 3. WEB/DESKTOP FOOTER (NEATLY ATTACHED BELOW ALL CONTENT)
+            SliverToBoxAdapter(
+              child: WebFooter(
+                onDeliveryTap: widget.onDeliveryTap,
+              ),
             ),
           ],
         );
       },
-    );
-  }
-
-  // Desktop Primary Categories List Widget
-  Widget _buildPrimaryCategoriesList() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
-          child: Row(
-            children: [
-              Icon(Icons.category, size: 18, color: Theme.of(context).colorScheme.primary),
-              const SizedBox(width: 8),
-              Text(
-                'Categories',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: ListView.separated(
-            itemCount: ProductConstants.categories.length,
-            separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey.shade100),
-            itemBuilder: (context, index) {
-              final category = ProductConstants.categories[index];
-              return ListTile(
-                dense: true,
-                visualDensity: VisualDensity.compact,
-                title: Text(
-                  category,
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-                ),
-                trailing: const Icon(Icons.chevron_right, size: 18, color: Colors.grey),
-                onTap: () {
-                  setState(() {
-                    _selectedCategory = category;
-                  });
-                },
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Desktop Subcategories List Widget
-  Widget _buildSubCategoriesList(String parentCategory) {
-    final subCategoryMap = ProductConstants.categorySubCategoryBrands[parentCategory] ?? {};
-    final subCategories = subCategoryMap.keys.toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-          child: Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back, size: 18),
-                onPressed: () {
-                  setState(() {
-                    _selectedCategory = null;
-                  });
-                },
-              ),
-              Expanded(
-                child: Text(
-                  parentCategory,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: subCategories.isEmpty
-              ? Center(
-                  child: TextButton(
-                    onPressed: () {
-                      MainTabsScreen.of(context)?.setSelectedIndex(
-                        7,
-                        searchType: 'product',
-                        category: parentCategory,
-                      );
-                    },
-                    child: Text("Explore $parentCategory"),
-                  ),
-                )
-              : ListView.separated(
-                  itemCount: subCategories.length,
-                  separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey.shade100),
-                  itemBuilder: (context, index) {
-                    final subCategory = subCategories[index];
-                    return ListTile(
-                      dense: true,
-                      visualDensity: VisualDensity.compact,
-                      title: Text(
-                        subCategory,
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
-                      ),
-                      trailing: const Icon(Icons.arrow_forward_ios, size: 12, color: Colors.grey),
-                      onTap: () {
-                        _analytics.logEvent('click_desktop_subcategory_$subCategory');
-                        
-                        // Pass subcategory as query & parent category to search view
-                        MainTabsScreen.of(context)?.setSelectedIndex(
-                          7,
-                          searchType: 'product',
-                          searchQuery: subCategory,
-                          category: parentCategory,
-                        );
-                      },
-                    );
-                  },
-                ),
-        ),
-      ],
     );
   }
 
@@ -566,24 +468,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     bool isAssetImage = false,
     bool showJoinButton = false,
   }) {
-    double titleSize = 16.0;
-    double subtitleSize = 12.0;
-    double innerPadding = 16.0;
-    double buttonPaddingHorizontal = 20.0;
-    double buttonPaddingVertical = 8.0;
+    double titleSize = 15.0;
+    double subtitleSize = 11.0;
+    double innerPadding = 12.0;
+    double buttonPaddingHorizontal = 18.0;
+    double buttonPaddingVertical = 6.0;
 
     if (screenWidth >= 1200) {
-      titleSize = 22.0;
-      subtitleSize = 14.0;
-      innerPadding = 24.0;
-      buttonPaddingHorizontal = 28.0;
-      buttonPaddingVertical = 12.0;
-    } else if (screenWidth >= 800) {
       titleSize = 18.0;
       subtitleSize = 13.0;
-      innerPadding = 20.0;
+      innerPadding = 18.0;
       buttonPaddingHorizontal = 24.0;
       buttonPaddingVertical = 10.0;
+    } else if (screenWidth >= 800) {
+      titleSize = 16.0;
+      subtitleSize = 12.0;
+      innerPadding = 14.0;
+      buttonPaddingHorizontal = 20.0;
+      buttonPaddingVertical = 8.0;
     }
 
     return ScaleTransition(
@@ -598,12 +500,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               isAssetImage
                   ? Image.asset(
                       image,
-                      fit: BoxFit.fill,
+                      fit: BoxFit.cover,
                       alignment: Alignment.center,
                     )
                   : Image.network(
                       image,
-                      fit: BoxFit.fill,
+                      fit: BoxFit.cover,
                       alignment: Alignment.center,
                       errorBuilder: (context, error, stackTrace) => Container(
                         color: Colors.grey.shade200,
@@ -612,7 +514,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     ),
               if (title.isNotEmpty || subtitle.isNotEmpty || showJoinButton) ...[
                 Container(
-                  color: Colors.black.withOpacity(0.4),
+                  color: Colors.black.withOpacity(0.35),
                 ),
                 Padding(
                   padding: EdgeInsets.all(innerPadding),
@@ -647,7 +549,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                               ),
                             ],
                             if (showJoinButton) ...[
-                              SizedBox(height: screenWidth >= 800 ? 12 : 8),
+                              SizedBox(height: screenWidth >= 800 ? 10 : 6),
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Theme.of(context).colorScheme.primary,
@@ -673,7 +575,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           ],
                         ),
                       ),
-                      const Spacer(),
                     ],
                   ),
                 ),

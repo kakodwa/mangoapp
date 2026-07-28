@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/event_model.dart';
 import '../events/event_card.dart';
 
-class HorizontalEvents extends StatelessWidget {
+class HorizontalEvents extends StatefulWidget {
   final List<EventModel> events;
   final bool showHeader;
 
@@ -14,42 +14,154 @@ class HorizontalEvents extends StatelessWidget {
   });
 
   @override
+  State<HorizontalEvents> createState() => _HorizontalEventsState();
+}
+
+class _HorizontalEventsState extends State<HorizontalEvents> {
+  final ScrollController _scrollController = ScrollController();
+
+  void _scrollLeft() {
+    _scrollController.animateTo(
+      _scrollController.offset - 320, // Scrolls one card width
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _scrollRight() {
+    _scrollController.animateTo(
+      _scrollController.offset + 320, // Scrolls one card width
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (events.isEmpty) {
+    if (widget.events.isEmpty) {
       return const SizedBox();
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (showHeader)
-          const Padding(
-            padding: EdgeInsets.all(12),
-            child: Text(
-              "Upcoming Events",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+    final bool isDesktop = MediaQuery.of(context).size.width >= 900;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (widget.showHeader)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Upcoming Events",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  if (isDesktop)
+                    Row(
+                      children: [
+                        IconButton(
+                          splashRadius: 24,
+                          icon: const Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            size: 28,
+                            color: Colors.orange,
+                          ),
+                          onPressed: _scrollLeft,
+                          tooltip: 'Scroll Left',
+                        ),
+                        const SizedBox(width: 4),
+                        IconButton(
+                          splashRadius: 24,
+                          icon: const Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 28,
+                            color: Colors.orange,
+                          ),
+                          onPressed: _scrollRight,
+                          tooltip: 'Scroll Right',
+                        ),
+                      ],
+                    ),
+                ],
               ),
             ),
-          ),
 
-        SizedBox(
-          height: 375,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: events.length,
-            itemBuilder: (_, index) {
-              return SizedBox(
-                width:320,
-                child: EventCard(
-                  event: events[index],
+          SizedBox(
+            height: 375,
+            child: Stack(
+              children: [
+                ListView.builder(
+                  controller: _scrollController,
+                  scrollDirection: Axis.horizontal,
+                  itemCount: widget.events.length,
+                  itemBuilder: (_, index) {
+                    return SizedBox(
+                      width: 320,
+                      child: EventCard(
+                        event: widget.events[index],
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
+
+                // Floating Extra-Bold Orange Arrows (when section header is hidden)
+                if (isDesktop && !widget.showHeader) ...[
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        splashRadius: 24,
+                        icon: const Icon(
+                          Icons.chevron_left_rounded,
+                          color: Colors.orange,
+                          size: 36,
+                        ),
+                        onPressed: _scrollLeft,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    right: 0,
+                    top: 0,
+                    bottom: 0,
+                    child: Center(
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        splashRadius: 24,
+                        icon: const Icon(
+                          Icons.chevron_right_rounded,
+                          color: Colors.orange,
+                          size: 36,
+                        ),
+                        onPressed: _scrollRight,
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

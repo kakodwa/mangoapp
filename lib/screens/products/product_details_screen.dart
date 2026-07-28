@@ -31,6 +31,7 @@ import '../shops/shop_details_screen.dart';
 import '../../widgets/app_fab.dart';
 import '../../widgets/reviews/review_section_widget.dart';
 import '../../widgets/update.dart';
+import '../../widgets/web_footer.dart';
 
 import '../../services/analytics_service.dart';
 import '../../utils/app_snackbar.dart';
@@ -408,7 +409,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                 ),
               ),
 
-              // 🌟 Image Previews (Thumbnails) for Mobile and Desktop
+              // Image Previews (Thumbnails) for Mobile and Desktop
               if (images.length > 1) ...[
                 const SizedBox(height: AppSpacing.sm),
                 SizedBox(
@@ -791,12 +792,15 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                     child: buildRelatedProducts(),
                   ),
                 ),
-                const SizedBox(height: 60), 
+                const SizedBox(height: 40),
+
+                // Web/Desktop Footer (Visible across Web and Responsive viewports)
+                const WebFooter(),
               ],
             ),
           ),
 
-          // 🌟 Dynamic Action Bottom Bar
+          // Dynamic Action Bottom Bar
           bottomNavigationBar: SafeArea(
             child: Container(
               padding: const EdgeInsets.symmetric(
