@@ -2,12 +2,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/products_provider.dart'; // Imported to invalidate cached product state
 import '../../theme/design_system/app_text_field.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_button.dart';
+import '../../providers/shops_provider.dart';
 import '../../theme/app_colors.dart';
 import 'register_screen.dart';
-import 'forgot_password_screen.dart'; // Ensure you import your new reset screen here
+import 'forgot_password_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -83,6 +85,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final authState = ref.read(authProvider);
 
       if (authState.isAuthenticated) {
+        ref.invalidate(userShopsProvider);
+        ref.invalidate(shopsProvider);
+        ref.invalidate(productsProvider);
+
         Navigator.of(context).pushReplacementNamed('/home');
       } else {
         _showError(
@@ -204,7 +210,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               isRequired: true,
                             ),
                             
-                            // 🌟 Beautiful Forgot Password Redirection Link
+                            // Forgot Password Link
                             Align(
                               alignment: Alignment.centerRight,
                               child: TextButton(

@@ -27,11 +27,13 @@ import '../../widgets/web_footer.dart';
 class UnifiedSearchScreen extends StatefulWidget {
   final String? initialQuery;
   final String? initialType;
+  final String? initialCategory; // <--- ACCEPTS INITIAL CATEGORY
 
   const UnifiedSearchScreen({
     Key? key,
     this.initialQuery,
     this.initialType,
+    this.initialCategory, // <--- ACCEPTS INITIAL CATEGORY
   }) : super(key: key);
 
   @override
@@ -44,7 +46,6 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
   late final TextEditingController _searchController;
   Timer? _debounce;
 
-  // Toggle state for Amazon-style filter toolbar
   bool _isFilterPanelExpanded = false;
 
   String? _selectedSubCategory;
@@ -127,10 +128,14 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
   void initState() {
     super.initState();
     _searchController = TextEditingController(text: widget.initialQuery ?? '');
+    
+    // Pass initial query, type, and category filters together
     _provider.updateFilters(
       query: widget.initialQuery,
       type: widget.initialType,
+      category: widget.initialCategory,
     );
+    
     _scrollController.addListener(_onScroll);
   }
 
@@ -155,7 +160,6 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
     super.dispose();
   }
 
-  // --- EMPTY STATE UI WIDGET WITH EMOJI & ICON ---
   Widget _buildEmptyState() {
     return Center(
       child: SingleChildScrollView(
@@ -240,7 +244,6 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
         final List<SearchResultItem> productItems = _provider.results.where((e) => e.resultType == 'product').toList();
         final List<SearchResultItem> bannerItems = _provider.results.where((e) => e.resultType != 'product').toList();
 
-        // Responsive grid aspect ratios to prevent card bottom overflow
         double cardAspectRatio = screenWidth >= 900 ? 0.72 : 0.62;
 
         int productColumns = 2;
@@ -267,7 +270,6 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
           body: SafeArea(
             child: Column(
               children: [
-                // 1. AMAZON-STYLE TOP BAR WITH SEARCH & FILTER TOGGLE BUTTON
                 Padding(
                   padding: const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 8.0),
                   child: Row(
@@ -307,7 +309,6 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      // Amazon Filter Button Toggle
                       InkWell(
                         onTap: () {
                           setState(() {
@@ -358,7 +359,6 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
                   ),
                 ),
 
-                // 2. HORIZONTAL SCROLL TYPE CHIPS
                 SizedBox(
                   height: 40,
                   child: ListView.builder(
@@ -398,7 +398,6 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
                   ),
                 ),
 
-                // 3. AMAZON-STYLE INLINE DROPDOWN FILTER BAR (Expands horizontally under query bar)
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 250),
                   height: _isFilterPanelExpanded ? null : 0,
@@ -417,7 +416,6 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
                             runSpacing: 12,
                             alignment: WrapAlignment.start,
                             children: [
-                              // District Dropdown
                               SizedBox(
                                 width: screenWidth >= 600 ? 220 : double.infinity,
                                 child: AppDropdown<String>(
@@ -437,7 +435,6 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
                                 ),
                               ),
 
-                              // Category Dropdown
                               if (typeWithSubFilters)
                                 SizedBox(
                                   width: screenWidth >= 600 ? 220 : double.infinity,
@@ -467,7 +464,6 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
                                   ),
                                 ),
 
-                              // Subcategory Dropdown
                               if (_provider.selectedType == 'product' && _provider.selectedCategory != null && availableSubCategories.isNotEmpty)
                                 SizedBox(
                                   width: screenWidth >= 600 ? 220 : double.infinity,
@@ -487,7 +483,6 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
                                   ),
                                 ),
 
-                              // Brand Dropdown
                               if (_provider.selectedType == 'product' && _selectedSubCategory != null && availableBrands.isNotEmpty)
                                 SizedBox(
                                   width: screenWidth >= 600 ? 220 : double.infinity,
@@ -506,7 +501,6 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
                                   ),
                                 ),
 
-                              // Listing Purpose (Properties)
                               if (_provider.selectedType == 'property')
                                 SizedBox(
                                   width: screenWidth >= 600 ? 220 : double.infinity,
@@ -534,14 +528,13 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
                 ),
                 const SizedBox(height: 8),
 
-                // 4. MAIN FEED GRID OR EMPTY STATE
                 Expanded(
                   child: _provider.isLoading
                       ? const Center(child: CircularProgressIndicator(color: AppColors.mangoOrange))
                       : _provider.errorMessage.isNotEmpty
                           ? Center(child: Text(_provider.errorMessage, style: const TextStyle(color: Colors.red)))
                           : _provider.results.isEmpty
-                              ? _buildEmptyState() // <--- Renders custom empty state UI with icon & emoji
+                              ? _buildEmptyState()
                               : RefreshIndicator(
                                   onRefresh: () async => _provider.resetSearch(),
                                   color: AppColors.mangoOrange,

@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
-import '../screens/about/about_screen.dart';
-import '../screens/help/help_screen.dart';
+import '../screens/main_tabs_screen.dart';
 import '../theme/app_colors.dart';
 import '../theme/design_system/app_spacing.dart';
-import '../services/analytics_service.dart'; 
+import '../services/analytics_service.dart';
 
 class MainDrawer extends StatelessWidget {
   final VoidCallback? onAboutTap;
   final VoidCallback? onHelpTap;
+  final VoidCallback? onDeliveryTap;
 
-  // Change this to a static final (or static const) variable
   static final AnalyticsService _analyticsService = AnalyticsService();
 
-  // Now you can restore the const keyword on the constructor
   const MainDrawer({
     super.key,
     this.onAboutTap,
     this.onHelpTap,
+    this.onDeliveryTap,
   });
 
   Widget _menuItem({
@@ -88,117 +87,154 @@ class MainDrawer extends StatelessWidget {
 
     return Drawer(
       backgroundColor: const Color(0xFFF6F7FB),
-      child: Column(
-        children: [
-          // HEADER
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.lg,
-              60,
-              AppSpacing.lg,
-              AppSpacing.lg,
-            ),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.mangoOrange,
-                  AppColors.mangoLight,
+      child: SafeArea(
+        top: false,
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  // HEADER
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.fromLTRB(
+                      AppSpacing.lg,
+                      60,
+                      AppSpacing.lg,
+                      AppSpacing.lg,
+                    ),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          AppColors.mangoOrange,
+                          AppColors.mangoLight,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Image.asset(
+                          'assets/images/logo.png',
+                          height: 56,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: AppSpacing.md),
+
+                  // =========================
+                  // MENU ITEMS
+                  // =========================
+                  _menuItem(
+                    context: context,
+                    icon: Icons.map_outlined,
+                    title: "Guide",
+                    color: Colors.blue,
+                    onTap: () {
+                      _analyticsService.logEvent('drawer_guide_click');
+                      Navigator.pop(context); // Close Drawer
+                      MainTabsScreen.of(context)?.setSelectedIndex(43); // MangoHub / Guide
+                    },
+                  ),
+
+                  _menuItem(
+                    context: context,
+                    icon: Icons.local_shipping,
+                    title: "Delivery",
+                    color: Colors.orange,
+                    onTap: () {
+                      _analyticsService.logEvent('drawer_delivery_click');
+                      Navigator.pop(context); // Close Drawer
+                      if (onDeliveryTap != null) {
+                        onDeliveryTap!();
+                      } else {
+                        MainTabsScreen.of(context)?.setSelectedIndex(9); // Delivery Code Screen Index
+                      }
+                    },
+                  ),
+
+                  _menuItem(
+                    context: context,
+                    icon: Icons.qr_code_scanner,
+                    title: "Scan Ticket",
+                    color: Colors.purple,
+                    onTap: () {
+                      _analyticsService.logEvent('drawer_scan_ticket_click');
+                      Navigator.pop(context); // Close Drawer
+                      MainTabsScreen.of(context)?.setSelectedIndex(44); // Scan Ticket Panel Index
+                    },
+                  ),
+
+                  const Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: 8,
+                    ),
+                    child: Divider(height: 1),
+                  ),
+
+                  _menuItem(
+                    context: context,
+                    icon: Icons.info,
+                    title: "About App",
+                    color: AppColors.mangoOrange,
+                    onTap: () {
+                      _analyticsService.logEvent('drawer_about_click');
+                      Navigator.pop(context);
+                      if (onAboutTap != null) {
+                        onAboutTap!();
+                      } else {
+                        MainTabsScreen.of(context)?.setSelectedIndex(10);
+                      }
+                    },
+                  ),
+
+                  _menuItem(
+                    context: context,
+                    icon: Icons.help,
+                    title: "Help & Support",
+                    color: AppColors.leafGreen,
+                    onTap: () {
+                      _analyticsService.logEvent('drawer_help_click');
+                      Navigator.pop(context);
+                      if (onHelpTap != null) {
+                        onHelpTap!();
+                      } else {
+                        MainTabsScreen.of(context)?.setSelectedIndex(11);
+                      }
+                    },
+                  ),
                 ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
               ),
             ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Image.asset(
-                    'assets/images/logo.png',
-                    height: 40,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'MalaTrade',
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineSmall
-                          ?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
+
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Text(
+                "Version 1.0.0",
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: colorScheme.onSurface.withOpacity(0.5),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Everything Local.One Hub.',
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: Colors.white70,
-                          ),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
-          ),
-
-          const SizedBox(height: AppSpacing.lg),
-
-          // =========================
-          // MENU ITEMS
-          // =========================
-          _menuItem(
-            context: context,
-            icon: Icons.info,
-            title: "About App",
-            color: AppColors.mangoOrange,
-            onTap: () {
-              // Trigger analytics event safely in the background
-              _analyticsService.logEvent('drawer_about_click');
-              
-              Navigator.pop(context);
-              if (onAboutTap != null) {
-                onAboutTap!();
-              }
-            },
-          ),
-
-          _menuItem(
-            context: context,
-            icon: Icons.help,
-            title: "Help & Support",
-            color: AppColors.leafGreen,
-            onTap: () {
-              // Trigger analytics event safely in the background
-              _analyticsService.logEvent('drawer_help_click');
-              
-              Navigator.pop(context);
-              if (onHelpTap != null) {
-                onHelpTap!();
-              }
-            },
-          ),
-
-          const Spacer(),
-
-          // VERSION FOOTER
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Text(
-              "Version 1.0.0",
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: colorScheme.onSurface.withOpacity(0.5),
-                  ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -1,7 +1,6 @@
 // lib/widgets/web_footer.dart
 
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../screens/main_tabs_screen.dart'; 
 import '../services/analytics_service.dart';
 
@@ -16,7 +15,6 @@ class WebFooter extends StatelessWidget {
     this.onAboutTap,
     this.onHelpTap,
   });
-
 
   @override
   Widget build(BuildContext context) {
@@ -62,16 +60,16 @@ class WebFooter extends StatelessWidget {
                 child: Divider(thickness: 0.5, height: 1, color: Colors.white30),
               ),
               
-              Center(
-  child: const Text(
-    '© 2026 MalaTrade Marketplace. All rights reserved.',
-    textAlign: TextAlign.center,
-    style: TextStyle(
-      color: Colors.white70,
-      fontSize: 13,
-    ),
-  ),
-),
+              const Center(
+                child: Text(
+                  '© 2026 MalaTrade Marketplace. All rights reserved.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
             ],
           ),
         ),
@@ -110,18 +108,6 @@ class WebFooter extends StatelessWidget {
         const Text(
           'Everything Local. One Hub.',
           style: TextStyle(color: Colors.white70, fontSize: 13),
-        ),
-        const SizedBox(height: 16),
-        ElevatedButton.icon(
-          onPressed: () => _showAppInstallDialog(context),
-          icon: const Icon(Icons.phone_android_rounded, size: 18, color: Color(0xFFF57C00)),
-          label: const Text('Install Mobile App'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.white,
-            foregroundColor: const Color(0xFFF57C00),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-          ),
         ),
       ],
     );
@@ -209,50 +195,30 @@ class WebFooter extends StatelessWidget {
     return Tooltip(
       message: tooltip,
       child: Container(
-        width: 64,
-        height: 40,
-        padding: const EdgeInsets.all(6),
+        width: 84,  // Larger width
+        height: 52, // Larger height
+        padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(color: Colors.white24, width: 1),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Image.asset(
           assetPath,
           fit: BoxFit.contain,
           errorBuilder: (context, error, stackTrace) {
             return Center(
-              child: Icon(Icons.credit_card, size: 18, color: Colors.grey[400]),
+              child: Icon(Icons.credit_card, size: 24, color: Colors.grey[400]),
             );
           },
         ),
-      ),
-    );
-  }
-
-  void _showAppInstallDialog(BuildContext context) {
-    _analyticsService.logEvent('footer_install_app_click');
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Get the Malatrade App'),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Scan or access via your phone mobile store provider to experience seamless push updates, orders, and geolocation tools.'),
-            SizedBox(height: 16),
-            Center(
-              child: Icon(Icons.qr_code_2_rounded, size: 140, color: Colors.black87),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
       ),
     );
   }

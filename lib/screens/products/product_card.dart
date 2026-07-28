@@ -211,7 +211,8 @@ class ProductCard extends ConsumerWidget {
                             children: [
                               if (product.hasDiscount)
                                 Text(
-                                  "MWK ${formatPrice(product.originalPrice ?? 0)}",
+                                  //"MWK ${formatPrice(product.originalPrice ?? 0)}",
+                                  "MWK ${product.originalPrice ?? 0}",
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: AppTypography.bodySmall.copyWith(
@@ -224,7 +225,8 @@ class ProductCard extends ConsumerWidget {
                                 fit: BoxFit.scaleDown,
                                 alignment: Alignment.centerLeft,
                                 child: Text(
-                                  "MWK ${formatPrice(product.price)}",
+                                  //"MWK ${formatPrice(product.price)}",
+                                  "MWK ${product.price}",
                                   maxLines: 1,
                                   style: AppTypography.titleMedium.copyWith(
                                     fontWeight: FontWeight.bold,

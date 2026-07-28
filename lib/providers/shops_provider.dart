@@ -1,7 +1,8 @@
+// lib/providers/shops_provider.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/api/api_client.dart';
 import '../models/shop_model.dart';
-import 'api_provider.dart';
+import 'auth_provider.dart'; // Handles auth state and provides apiClientProvider
 
 final shopsProvider = FutureProvider.autoDispose<List<Shop>>((ref) async {
   final apiClient = ref.watch(apiClientProvider);
@@ -10,7 +11,6 @@ final shopsProvider = FutureProvider.autoDispose<List<Shop>>((ref) async {
     fromJson: (json) => Shop.fromJson(json),
   );
 });
-
 
 final relatedShopsProvider =
     FutureProvider.family<List<Shop>, int>((ref, shopId) async {
@@ -23,7 +23,6 @@ final relatedShopsProvider =
 
   return res;
 });
-
 
 final shopActionsProvider = Provider((ref) {
   final api = ref.watch(apiClientProvider);
@@ -46,7 +45,6 @@ class ShopActions {
   }
 }
 
-
 final shopsByCategoryProvider = FutureProvider.autoDispose
     .family<List<Shop>, String>((ref, category) async {
   final apiClient = ref.watch(apiClientProvider);
@@ -66,7 +64,14 @@ final shopDetailsProvider = FutureProvider.autoDispose
   );
 });
 
+// 🌟 Reacts to authProvider changes automatically
 final userShopsProvider = FutureProvider.autoDispose<List<Shop>>((ref) async {
+  final authState = ref.watch(authProvider);
+
+  if (!authState.isAuthenticated) {
+    return [];
+  }
+
   final apiClient = ref.watch(apiClientProvider);
   return apiClient.getList(
     'shops/my_shops/',
@@ -97,9 +102,6 @@ class ShopsNotifier extends StateNotifier<AsyncValue<List<Shop>>> {
     await _loadShops();
   }
 }
-
-
-
 
 final shopsNotifierProvider =
     StateNotifierProvider<ShopsNotifier, AsyncValue<List<Shop>>>((ref) {

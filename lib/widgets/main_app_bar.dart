@@ -12,23 +12,22 @@ import '../screens/auth/register_screen.dart';
 import '../screens/search/unified_search_screen.dart'; 
 import '../services/analytics_service.dart';
 
-
 class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final VoidCallback? onProfileTap; 
   final VoidCallback? onSearchTap;
   final VoidCallback? onCartTap;
-  final String title;
-  final Widget? leading; // 👈 ADDED: Explicit property to inject dynamic back buttons
+  final Widget? title; 
+  final Widget? leading;
 
   static final AnalyticsService _analyticsService = AnalyticsService();
 
   const MainAppBar({
     super.key,
-    required this.title,
+    this.title, 
     this.onProfileTap, 
     this.onSearchTap,
     this.onCartTap, 
-    this.leading, // 👈 ADDED to constructor
+    this.leading,
   });
 
   @override
@@ -41,159 +40,199 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
 
     return AppBar(
       centerTitle: false,
-      titleSpacing: isDesktop ? AppSpacing.xl : AppSpacing.md,
-      // 👈 MODIFIED: Show drawer toggle ONLY on mobile AND when no custom leading widget (like our back button) is passed
+      titleSpacing: 4.0, 
       automaticallyImplyLeading: leading == null ? !isDesktop : false,
-      leading: leading, // 👈 ADDED: Binds our custom back button action directly to the AppBar layout
-      title: Center(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 1200),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Logo/Title Brand Layer
-              ShaderMask(
-                blendMode: BlendMode.srcIn,
-                shaderCallback: (bounds) => const LinearGradient(
-                  colors: [
-                    Colors.orange,       
-                    Colors.deepOrange,   
-                    Colors.green,        
-                  ],
-                  stops: [0.0, 0.6, 1.0], 
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                ).createShader(bounds),
-                child: Text(
-                  title,
-                  style: (isDesktop 
-                      ? Theme.of(context).textTheme.headlineSmall 
-                      : Theme.of(context).textTheme.titleLarge)?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.5,
-                        color: Colors.white, 
-                      ),
+      leading: leading,
+      
+      title: Align(
+        alignment: Alignment.centerLeft,
+        child: title ??
+            Image.asset(
+              'assets/images/logo.png',
+              height: 28,
+              fit: BoxFit.contain,
+            ),
+      ),
+
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.search_rounded),
+          tooltip: 'Search Platform',
+          onPressed: () {
+            _analyticsService.logEvent('appbar_search_click');
+            if (onSearchTap != null) {
+              onSearchTap!();
+            }
+          },
+        ),
+
+        // CART BUTTON WITH BADGE
+        Stack(
+          clipBehavior: Clip.none,
+          alignment: Alignment.center,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.shopping_cart_outlined),
+              onPressed: () {
+                _analyticsService.logEvent('appbar_cart_click');
+                if (onCartTap != null) {
+                  onCartTap!();
+                }
+              },
+              tooltip: 'Shopping Cart',
+            ),
+            if (cartItems.isNotEmpty)
+              Positioned(
+                right: 4,
+                top: 4,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    '${cartItems.length}',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 9,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
+          ],
+        ),
+        const SizedBox(width: 4),
 
-              // Actions Utility Panel
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // 🔍 GLOBAL UNIFIED SEARCH BUTTON
-                  //const InstallAppButton(),
-                  IconButton(
-                    icon: const Icon(Icons.search_rounded),
-                    tooltip: 'Search Platform',
-                    onPressed: () {
-                      _analyticsService.logEvent('appbar_search_click');
-                      if (onSearchTap != null) {
-                        onSearchTap!();
-                      }
-                    },
-                  ),
-
-                  // CART BUTTON
-                  Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.shopping_cart_outlined),
-                        onPressed: () {
-                          _analyticsService.logEvent('appbar_cart_click');
-                          if (onCartTap != null) {
-                            onCartTap!();
-                          }
-                        },
-                        tooltip: 'Shopping Cart',
+        // AUTHENTICATION / PROFILE BUTTONS
+        if (isDesktop) ...[
+          if (!isLoggedIn) ...[
+            TextButton(
+              onPressed: () => _handleAuthNavigation(context, 'login'),
+              child: const Text('Login', style: TextStyle(fontWeight: FontWeight.w600)),
+            ),
+            const SizedBox(width: 4),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              ),
+              onPressed: () => _handleAuthNavigation(context, 'register'),
+              child: const Text('Register', style: TextStyle(fontWeight: FontWeight.bold)),
+            ),
+          ] else ...[
+            TextButton.icon(
+              icon: const Icon(Icons.account_circle, size: 22),
+              label: const Text('Profile', style: TextStyle(fontWeight: FontWeight.w600)),
+              onPressed: () => _handleAuthNavigation(context, 'profile'),
+            ),
+            const SizedBox(width: 8),
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              ),
+              onPressed: () => _handleAuthNavigation(context, 'logout', ref: ref),
+              child: const Text('Logout'),
+            ),
+          ],
+        ] else ...[
+          // 👈 MOBILE AUTH POPUP MENU BUTTON
+          PopupMenuButton<String>(
+            offset: const Offset(0, 45), // Drops menu right below the button
+            onSelected: (value) => _handleAuthNavigation(context, value, ref: ref),
+            
+            // 👈 If logged out: Shows explicit "Login" text button with icon instead of three dots
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+              child: isLoggedIn
+                  ? const Icon(Icons.account_circle, size: 28)
+                  : Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                        ),
                       ),
-                      if (cartItems.isNotEmpty)
-                        Positioned(
-                          right: 4,
-                          top: 4,
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Text(
-                              '${cartItems.length}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold,
-                              ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.person_outline_rounded,
+                            size: 16,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Login',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                           ),
-                        ),
+                        ],
+                      ),
+                    ),
+            ),
+            
+            itemBuilder: (_) {
+              if (!isLoggedIn) {
+                return const [
+                  PopupMenuItem(
+                    value: 'login',
+                    child: Row(
+                      children: [
+                        Icon(Icons.login, size: 18),
+                        SizedBox(width: 8),
+                        Text('Login'),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'register',
+                    child: Row(
+                      children: [
+                        Icon(Icons.person_add_outlined, size: 18),
+                        SizedBox(width: 8),
+                        Text('Register'),
+                      ],
+                    ),
+                  ),
+                ];
+              }
+              return const [
+                PopupMenuItem(
+                  value: 'profile',
+                  child: Row(
+                    children: [
+                      Icon(Icons.person_outline, size: 18),
+                      SizedBox(width: 8),
+                      Text('Profile'),
                     ],
                   ),
-                  const SizedBox(width: 8),
-
-                  // 🔘 ADAPTIVE AUTH WEB DIRECT LINK ENTRIES / DROP-DOWN ACTIONS
-                  if (isDesktop) ...[
-                    if (!isLoggedIn) ...[
-                      TextButton(
-                        onPressed: () => _handleAuthNavigation(context, 'login'),
-                        child: const Text('Login', style: TextStyle(fontWeight: FontWeight.w600)),
-                      ),
-                      const SizedBox(width: 4),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        ),
-                        onPressed: () => _handleAuthNavigation(context, 'register'),
-                        child: const Text('Register', style: TextStyle(fontWeight: FontWeight.bold)),
-                      ),
-                    ] else ...[
-                      TextButton.icon(
-                        icon: const Icon(Icons.account_circle, size: 22),
-                        label: const Text('Profile', style: TextStyle(fontWeight: FontWeight.w600)),
-                        onPressed: () => _handleAuthNavigation(context, 'profile'),
-                      ),
-                      const SizedBox(width: 8),
-                      OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                        ),
-                        onPressed: () => _handleAuthNavigation(context, 'logout', ref: ref),
-                        child: const Text('Logout'),
-                      ),
+                ),
+                PopupMenuDivider(),
+                PopupMenuItem(
+                  value: 'logout',
+                  child: Row(
+                    children: [
+                      Icon(Icons.logout, size: 18, color: Colors.red),
+                      SizedBox(width: 8),
+                      Text('Logout', style: TextStyle(color: Colors.red)),
                     ],
-                  ] else ...[
-                    // Standard fallback icons interface menu block for phone form factors
-                    PopupMenuButton<String>(
-                      icon: Icon(
-                        isLoggedIn ? Icons.account_circle : Icons.more_vert,
-                        size: isLoggedIn ? 28.0 : null,
-                      ),
-                      onSelected: (value) => _handleAuthNavigation(context, value, ref: ref),
-                      itemBuilder: (_) {
-                        if (!isLoggedIn) {
-                          return const [
-                            PopupMenuItem(value: 'login', child: Text('Login')),
-                            PopupMenuItem(value: 'register', child: Text('Register')),
-                          ];
-                        }
-                        return const [
-                          PopupMenuItem(value: 'profile', child: Text('Profile')),
-                          PopupMenuDivider(),
-                          PopupMenuItem(value: 'logout', child: Text('Logout')),
-                        ];
-                      },
-                    ),
-                  ],
-                ],
-              ),
-            ],
+                  ),
+                ),
+              ];
+            },
           ),
-        ),
-      ),
+        ],
+        const SizedBox(width: 8),
+      ],
     );
   }
 
-  // Unified controller to process auth clicks natively across both view modes
   void _handleAuthNavigation(BuildContext context, String destination, {WidgetRef? ref}) async {
     _analyticsService.logEvent('appbar_${destination}_click');
 

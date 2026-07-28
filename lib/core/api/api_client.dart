@@ -39,16 +39,19 @@ class ApiClient {
       InterceptorsWrapper(
         onRequest: (options, handler) async {
           final token = await _getAccessToken();
-          if (token != null) {
+          if (token != null && token.isNotEmpty) {
             options.headers['Authorization'] = 'Bearer $token';
           }
           return handler.next(options);
         },
         onError: (error, handler) async {
-          if (error.response?.statusCode == 401) {
-            // Token expired, try to refresh
+          if (error.response?.statusCode == 401 &&
+              !error.requestOptions.path.contains('token/refresh/')) {
+            // Token expired, try to refresh (and avoid infinite loops)
             if (await _refreshToken()) {
               return handler.resolve(await _retry(error.requestOptions));
+            } else {
+              await logout(); // Clear local invalid tokens
             }
           }
           return handler.next(error);
@@ -233,32 +236,29 @@ class ApiClient {
     }
   }
 
+  /// Sends password reset request with email (Django Rest Password Reset)
+  Future<Map<String, dynamic>> requestPasswordReset(String email) async {
+    return await post(
+      'password_reset/', // Matches Django endpoint POST /api/password_reset/
+      data: {'email': email},
+      fromJson: (json) => json,
+    );
+  }
 
-
-
-/// Sends password reset request with email (Django Rest Password Reset)
-Future<Map<String, dynamic>> requestPasswordReset(String email) async {
-  return await post(
-    'password_reset/', // Matches Django endpoint POST /api/password_reset/
-    data: {'email': email},
-    fromJson: (json) => json,
-  );
-}
-
-/// Submits verification token and the new password choice
-Future<Map<String, dynamic>> confirmPasswordReset({
-  required String otpCode,
-  required String newPassword,
-}) async {
-  return await post(
-    'password_reset/confirm/', // Matches Django endpoint POST /api/password_reset/confirm/
-    data: {
-      'token': otpCode,        // Django expects 'token' for the OTP code
-      'password': newPassword, // Django expects 'password' for the new password
-    },
-    fromJson: (json) => json,
-  );
-}
+  /// Submits verification token and the new password choice
+  Future<Map<String, dynamic>> confirmPasswordReset({
+    required String otpCode,
+    required String newPassword,
+  }) async {
+    return await post(
+      'password_reset/confirm/', // Matches Django endpoint POST /api/password_reset/confirm/
+      data: {
+        'token': otpCode,        // Django expects 'token' for the OTP code
+        'password': newPassword, // Django expects 'password' for the new password
+      },
+      fromJson: (json) => json,
+    );
+  }
 
   Future<Map<String, dynamic>> getAppVersion() async {
     final String cacheKey = _generateCacheKey('products/app_version/', null);
@@ -335,18 +335,18 @@ Future<Map<String, dynamic>> confirmPasswordReset({
   Future<bool> _refreshToken() async {
     try {
       final refreshToken = await _secureStorage.read(key: 'refresh_token');
-      if (refreshToken == null) return false;
+      if (refreshToken == null || refreshToken.isEmpty) return false;
 
       final response = await _dio.post(
         'token/refresh/',
         data: {'refresh': refreshToken},
       );
 
-      await _secureStorage.write(
-        key: 'access_token',
-        value: response.data['access'],
-      );
-      return true;
+      if (response.data != null && response.data['access'] != null) {
+        await saveTokens(response.data['access'], refreshToken);
+        return true;
+      }
+      return false;
     } catch (e) {
       logger.e('Token refresh failed: $e');
       return false;
@@ -972,7 +972,7 @@ Future<Map<String, dynamic>> confirmPasswordReset({
   }) async {
     try {
       final response = await _dio.post(
-        '/payments/initiate_payment/',
+        'payments/initiate_payment/', // 👈 Removed leading slash
         data: {
           "property_id": propertyId,
           "amount": amount,
