@@ -13,6 +13,7 @@ import '../../theme/design_system/app_text_field.dart';
 import '../../utils/app_toast.dart';
 import '../payments/payment_checkout_screen.dart';
 import '../../theme/design_system/app_spacing.dart';
+import '../../theme/app_colors.dart';
 import '../../widgets/web_footer.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
@@ -42,7 +43,21 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   String _formatAttributes(Map<String, dynamic>? attributes) {
     if (attributes == null || attributes.isEmpty) return "";
-    return attributes.entries.map((e) => "${e.key}: ${e.value}").join(", ");
+
+    final validEntries = attributes.entries.where((e) {
+      final key = e.key.toString().trim().toUpperCase();
+      final val = e.value?.toString().trim().toUpperCase() ?? '';
+
+      if (val.isEmpty || val == "N/A" || val == "NONE" || val == "NULL") {
+        return false;
+      }
+      if (key == "N/A" || key.isEmpty) {
+        return false;
+      }
+      return true;
+    }).map((e) => "${e.key}: ${e.value}").toList();
+
+    return validEntries.join(", ");
   }
 
   @override
@@ -104,310 +119,307 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     }
   }
 
-  // ================= UI =================
+  // ================= HELPER BUILDERS =================
 
-  @override
-  Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: ListView(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        children: [
-          // ======================
-          // ORDER SUMMARY HEADER
-          // ======================
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              gradient: LinearGradient(
-                colors: [
-                  Theme.of(context).primaryColor,
-                  Theme.of(context).primaryColor.withOpacity(0.8),
-                ],
+  /// Wide rounded card header spanning full width of the container
+  Widget _buildOrderHeaderCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 24),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: [
+            AppColors.mangoOrange,
+            AppColors.mangoOrange.withOpacity(0.85),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.mangoOrange.withOpacity(0.2),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: const [
+          Icon(
+            Icons.shopping_bag_outlined,
+            color: Colors.white,
+            size: 44,
+          ),
+          SizedBox(height: 10),
+          Text(
+            "Order Checkout",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
+            ),
+          ),
+          SizedBox(height: 6),
+          Text(
+            "Complete your order payment securely",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOrderSummaryItems() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Order Summary",
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 14),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.03),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
-            ),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.shopping_bag_outlined,
-                  color: Theme.of(context).colorScheme.surface,
-                  size: 38,
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  "Order Checkout",
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.surface,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  "Complete your order payment securely",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
-                  ),
-                ),
-              ],
-            ),
+            ],
           ),
+          child: Column(
+            children: widget.items.map((item) {
+              final variantText = _formatAttributes(item.variant?.attributes);
 
-          const SizedBox(height: AppSpacing.lg),
-
-          // ======================
-          // ORDER ITEMS
-          // ======================
-          const Text(
-            "Order Summary",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-          ),
-
-          const SizedBox(height: 14),
-
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.03),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Column(
-              children: widget.items.map((item) {
-                final variantText = _formatAttributes(item.variant?.attributes);
-
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "${item.product.name} x${item.quantity}",
+                            style: const TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                          if (variantText.isNotEmpty) ...[
+                            const SizedBox(height: 2),
                             Text(
-                              "${item.product.name} x${item.quantity}",
-                              style: const TextStyle(fontWeight: FontWeight.w500),
-                            ),
-                            if (variantText.isNotEmpty) ...[
-                              const SizedBox(height: 2),
-                              Text(
-                                variantText,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.orange.shade800,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                              variantText,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.orange.shade800,
+                                fontWeight: FontWeight.w500,
                               ),
-                            ],
+                            ),
                           ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      "MWK ${item.totalPrice.toStringAsFixed(2)}",
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDeliveryForm() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Delivery Details",
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 14),
+        AppTextField(
+          label: 'Delivery Address',
+          hint: 'Enter delivery address',
+          controller: _deliveryAddressController,
+          type: TextFieldType.multiline,
+          maxLines: 3,
+          isRequired: true,
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return 'Delivery address required';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: AppSpacing.md),
+        AppTextField(
+          label: 'Delivery Phone Number',
+          hint: 'e.g 0881234567',
+          controller: _deliveryPhoneController,
+          type: TextFieldType.phone,
+          isRequired: true,
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return 'Phone number required';
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 18),
+        SizedBox(
+          height: 54,
+          width: double.infinity,
+          child: OutlinedButton(
+            onPressed: _gettingLocation ? null : _getLocation,
+            style: OutlinedButton.styleFrom(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            ),
+            child: _gettingLocation
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.4,
+                          color: AppColors.mangoOrange,
                         ),
                       ),
                       const SizedBox(width: 12),
+                      const Text(
+                        "Getting location...",
+                        style: TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.gps_fixed),
+                      SizedBox(width: 8),
                       Text(
-                        "MWK ${item.totalPrice.toStringAsFixed(2)}",
-                        style: const TextStyle(fontWeight: FontWeight.w700),
+                        "Get My Location",
+                        style: TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ],
                   ),
-                );
-              }).toList(),
-            ),
           ),
-
-          const SizedBox(height: AppSpacing.lg),
-
-          // ======================
-          // DELIVERY DETAILS
-          // ======================
-          const Text(
-            "Delivery Details",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-          ),
-
-          const SizedBox(height: 14),
-
-          AppTextField(
-            label: 'Delivery Address',
-            hint: 'Enter delivery address',
-            controller: _deliveryAddressController,
-            type: TextFieldType.multiline,
-            maxLines: 3,
-            isRequired: true,
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return 'Delivery address required';
-              }
-              return null;
-            },
-          ),
-
-          const SizedBox(height: AppSpacing.md),
-
-          AppTextField(
-            label: 'Delivery Phone Number',
-            hint: 'e.g 0881234567',
-            controller: _deliveryPhoneController,
-            type: TextFieldType.phone,
-            isRequired: true,
-            validator: (value) {
-              if (value == null || value.trim().isEmpty) {
-                return 'Phone number required';
-              }
-              return null;
-            },
-          ),
-
-          const SizedBox(height: 18),
-
-          // ======================
-          // GPS BUTTON
-          // ======================
-          SizedBox(
-            height: 54,
-            child: OutlinedButton(
-              onPressed: _gettingLocation ? null : _getLocation,
-              style: OutlinedButton.styleFrom(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              ),
-              child: _gettingLocation
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.4,
-                            color: Theme.of(context).primaryColor,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        const Text(
-                          "Getting location...",
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    )
-                  : Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(Icons.gps_fixed),
-                        SizedBox(width: 8),
-                        Text(
-                          "Get My Location",
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                      ],
-                    ),
-            ),
-          ),
-
-          if (_latitude != null) ...[
-            const SizedBox(height: AppSpacing.sm),
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.secondary.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.green.withOpacity(0.12)),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Icon(Icons.check_circle, color: Theme.of(context).colorScheme.secondary, size: 18),
-                      const SizedBox(width: 8),
-                      const Expanded(
-                        child: Text(
-                          "GPS location captured successfully",
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    "Lat: $_latitude\nLng: $_longitude",
-                    style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.outline),
-                  ),
-                ],
-              ),
-            ),
-          ],
-
-          const SizedBox(height: AppSpacing.lg),
-
-          // ======================
-          // PRICING SUMMARY TOTAL
-          // ======================
+        ),
+        if (_latitude != null) ...[
+          const SizedBox(height: AppSpacing.sm),
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.03),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              color: Theme.of(context).colorScheme.secondary.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: Colors.green.withOpacity(0.12)),
             ),
             child: Column(
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text("Subtotal"),
-                    Text("MWK ${widget.total.toStringAsFixed(2)}"),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: const [
-                    Text("Shipping"),
-                    Text("MWK 0.00"),
-                  ],
-                ),
-                const Divider(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text("Total", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    Text(
-                      "MWK ${widget.total.toStringAsFixed(2)}",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.secondary,
+                    Icon(Icons.check_circle, color: Theme.of(context).colorScheme.secondary, size: 18),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        "GPS location captured successfully",
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                       ),
                     ),
                   ],
                 ),
+                const SizedBox(height: 8),
+                Text(
+                  "Lat: $_latitude\nLng: $_longitude",
+                  style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.outline),
+                ),
               ],
             ),
           ),
+        ],
+      ],
+    );
+  }
 
-          const SizedBox(height: 30),
-
-          // ======================
-          // BUTTON PLACE ORDER
-          // ======================
+  Widget _buildPricingAndActionCard() {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+            "Payment Summary",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text("Subtotal"),
+              Text("MWK ${widget.total.toStringAsFixed(2)}"),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: const [
+              Text("Shipping"),
+              Text("MWK 0.00"),
+            ],
+          ),
+          const Divider(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text("Total", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              Text(
+                "MWK ${widget.total.toStringAsFixed(2)}",
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
           SizedBox(
             height: 56,
+            width: double.infinity,
             child: ElevatedButton(
               onPressed: _isProcessing ? null : _placeOrder,
               style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.mangoOrange,
+                foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               ),
               child: _isProcessing
@@ -419,12 +431,81 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   : const Text('Place Order', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
             ),
           ),
-
-          const SizedBox(height: 40),
-
-          // Web/Desktop Footer
-          const WebFooter(),
         ],
+      ),
+    );
+  }
+
+  // ================= UI BUILD =================
+
+  @override
+  Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool isDesktop = screenWidth >= 900;
+
+    return Form(
+      key: _formKey,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+        child: Column(
+          children: [
+            Center(
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                child: Column(
+                  children: [
+                    // Wide rounded card spanning the full width
+                    _buildOrderHeaderCard(),
+
+                    const SizedBox(height: AppSpacing.lg),
+
+                    if (isDesktop)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // LEFT COLUMN: Items Summary & Delivery Form
+                          Expanded(
+                            flex: 7,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildOrderSummaryItems(),
+                                const SizedBox(height: AppSpacing.lg),
+                                _buildDeliveryForm(),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 24),
+
+                          // RIGHT COLUMN: Payment Summary & Place Order Button
+                          Expanded(
+                            flex: 5,
+                            child: _buildPricingAndActionCard(),
+                          ),
+                        ],
+                      )
+                    else
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildOrderSummaryItems(),
+                          const SizedBox(height: AppSpacing.lg),
+                          _buildDeliveryForm(),
+                          const SizedBox(height: AppSpacing.lg),
+                          _buildPricingAndActionCard(),
+                        ],
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 40),
+
+            // Web/Desktop Footer
+            const WebFooter(),
+          ],
+        ),
       ),
     );
   }
@@ -463,7 +544,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
       AppToast.success(context, "Order created successfully");
 
-      // Look up the tabs manager system context
       final tabsScreen = MainTabsScreen.of(context);
 
       if (tabsScreen != null) {
@@ -478,7 +558,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           },
         );
       } else {
-        // Standard context route stack fallback execution
         Navigator.push(
           context,
           MaterialPageRoute(

@@ -35,7 +35,7 @@ class ProductConstants {
 
   /// Category Dynamic Attribute Fields Mapping
   static const Map<String, List<String>> categoryFields = {
-    'Fashion': ['Color', 'Size', 'Material'],
+    'Fashion & Clothing': ['Color', 'Size', 'Material'],
     'Electronics': ['Color', 'Storage', 'RAM'],
     'Groceries': ['Weight', 'Pack Size'],
     'Vehicles': ['Color', 'Transmission', 'Engine'],
@@ -92,7 +92,7 @@ class ProductConstants {
       'Household Essentials': ['Procter & Gamble (P&G)', 'Kimberly-Clark', 'Unilever', 'Colgate-Palmolive', 'Other'],
       'Other': ['Other'],
     },
-    'Fashion': {
+    'Fashion & Clothing': {
       'Shirts': ['Ralph Lauren', 'Tommy Hilfiger', 'Calvin Klein', 'Brooks Brothers', 'Lacoste', 'Arrow', 'H&M', 'Zara', 'Other'],
       'T-Shirts': ['Hanes', 'Gildan', 'Fruit of the Loom', 'Champion', 'Nike', 'Adidas', 'Uniqlo', 'Levi\'s', 'Other'],
       'Trousers': ['Dockers', 'Levi\'s', 'H&M', 'Zara', 'Wrangler', 'Dickies', 'Chinos', 'Other'],

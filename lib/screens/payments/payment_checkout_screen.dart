@@ -15,8 +15,8 @@ import 'paychangu_visa_webview.dart';
 import '../../theme/design_system/app_text_field.dart';
 import '../../utils/app_toast.dart';
 import '../../theme/design_system/app_spacing.dart';
+import '../../theme/app_colors.dart';
 import '../../widgets/web_footer.dart';
-
 
 class PaymentCheckoutScreen extends ConsumerStatefulWidget {
   final int transactionId;
@@ -82,6 +82,18 @@ class _PaymentCheckoutScreenState
       "image": "assets/images/visa.png",
     },
   ];
+
+  @override
+  void dispose() {
+    phoneController.dispose();
+    nameController.dispose();
+    cardName.dispose();
+    cardNumber.dispose();
+    expiry.dispose();
+    cvv.dispose();
+    _timer?.cancel();
+    super.dispose();
+  }
 
   // ======================
   // PROCESSING DIALOG
@@ -290,15 +302,65 @@ class _PaymentCheckoutScreenState
             );
           }
         } catch (e) {
-          print("Polling error: $e");
+          debugPrint("Polling error: $e");
         }
       },
     );
   }
 
   // ======================
-  // PAYMENT METHOD CARD
+  // HELPER BUILDERS
   // ======================
+
+  Widget _buildHeaderCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: [
+            AppColors.mangoOrange,
+            AppColors.mangoOrange.withOpacity(0.85),
+          ],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.mangoOrange.withOpacity(0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          const Icon(
+            Icons.lock_outline,
+            color: Colors.white,
+            size: 42,
+          ),
+          const SizedBox(height: 10),
+          Text(
+            "Pay MWK ${widget.amount}",
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            widget.purpose,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget paymentMethodCard(Map<String, dynamic> method) {
     final isSelected = selectedMethod == method['value'];
@@ -317,7 +379,7 @@ class _PaymentCheckoutScreenState
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
-                ? Theme.of(context).primaryColor
+                ? AppColors.mangoOrange
                 : Theme.of(context).colorScheme.outline.withOpacity(0.38),
             width: isSelected ? 2 : 1,
           ),
@@ -357,7 +419,7 @@ class _PaymentCheckoutScreenState
             Icon(
               isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
               color: isSelected
-                  ? Theme.of(context).primaryColor
+                  ? AppColors.mangoOrange
                   : Theme.of(context).colorScheme.outline,
             ),
           ],
@@ -366,174 +428,205 @@ class _PaymentCheckoutScreenState
     );
   }
 
+  Widget _buildMethodsList() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Select Payment Method",
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 14),
+        ...paymentMethods.map(
+          (method) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: paymentMethodCard(method),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPaymentFormControls() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (isMobile) ...[
+          AppTextField(
+            label: 'Full Name',
+            hint: 'Enter full name',
+            controller: nameController,
+            type: TextFieldType.text,
+            isRequired: true,
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Full name required';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 16),
+          AppTextField(
+            label: 'Phone Number',
+            hint: 'e.g 0881234567',
+            controller: phoneController,
+            type: TextFieldType.phone,
+            isRequired: true,
+            validator: (value) {
+              if (value == null || value.trim().isEmpty) {
+                return 'Phone number required';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 24),
+        ],
+        if (isVisa) ...[
+          const AppInfoBox(
+            type: AppInfoType.info,
+            icon: Icons.info_outline,
+            message: "You will be redirected to secure PayChangu checkout.",
+          ),
+          const SizedBox(height: 24),
+        ],
+        SizedBox(
+          height: 56,
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: loading ? null : initiatePayment,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.mangoOrange,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            child: loading
+                ? const SizedBox(
+                    height: 24,
+                    width: 24,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 2.5,
+                    ),
+                  )
+                : const Text(
+                    "Pay Now",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        Center(
+          child: Column(
+            children: [
+              Text(
+                "Powered by",
+                style: TextStyle(
+                  color: Colors.grey.withOpacity(0.7),
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: Colors.grey.withOpacity(0.25),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Image.asset(
+                      'assets/images/changu.png',
+                      height: 30,
+                    ),
+                    const SizedBox(width: 10),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ======================
+  // BUILD
+  // ======================
+
   @override
   Widget build(BuildContext context) {
-    // ✅ Scaffold, AppBar, and SafeArea removed to allow smooth rendering within MainTabsScreen
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool isDesktop = screenWidth >= 900;
+
     return Form(
       key: _formKey,
-      child: ListView(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        children: [
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              gradient: LinearGradient(
-                colors: [
-                  Theme.of(context).primaryColor,
-                  Theme.of(context).primaryColor.withOpacity(0.8),
-                ],
-              ),
-            ),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.lock_outline,
-                  color: Theme.of(context).colorScheme.surface,
-                  size: 38,
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  "Pay MWK ${widget.amount}",
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.surface,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  widget.purpose,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          const Text(
-            "Select Payment Method",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 14),
-          ...paymentMethods.map(
-            (method) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: paymentMethodCard(method),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          if (isMobile) ...[
-            AppTextField(
-              label: 'Full Name',
-              hint: 'Enter full name',
-              controller: nameController,
-              type: TextFieldType.text,
-              isRequired: true,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Full name required';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 16),
-            AppTextField(
-              label: 'Phone Number',
-              hint: 'e.g 0881234567',
-              controller: phoneController,
-              type: TextFieldType.phone,
-              isRequired: true,
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Phone number required';
-                }
-                return null;
-              },
-            ),
-          ],
-          if (isVisa)
-            const AppInfoBox(
-              type: AppInfoType.info,
-              icon: Icons.info_outline,
-              message: "You will be redirected to secure PayChangu checkout.",
-            ),
-          const SizedBox(height: 30),
-          SizedBox(
-            height: 56,
-            child: ElevatedButton(
-              onPressed: loading ? null : initiatePayment,
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-              child: loading
-                  ? const SizedBox(
-                      height: 24,
-                      width: 24,
-                      child: CircularProgressIndicator(
-                        color: Colors.white,
-                        strokeWidth: 2.5,
-                      ),
-                    )
-                  : const Text(
-                      "Pay Now",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Center(
-            child: Column(
-              children: [
-                Text(
-                  "Powered by",
-                  style: TextStyle(
-                    color: Colors.grey.withOpacity(0.7),
-                    fontSize: 13,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surface,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(
-                      color: Colors.grey.withOpacity(0.25),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Image.asset(
-                        'assets/images/changu.png',
-                        height: 30,
-                      ),
-                      const SizedBox(width: 10),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 40),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+        child: Column(
+          children: [
+            Center(
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                child: Column(
+                  children: [
+                    // Top Header Card
+                    _buildHeaderCard(),
 
-          // Web/Desktop Footer
-          const WebFooter(),
-        ],
+                    const SizedBox(height: AppSpacing.lg),
+
+                    if (isDesktop)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // LEFT COLUMN: Payment Methods Selection
+                          Expanded(
+                            flex: 6,
+                            child: _buildMethodsList(),
+                          ),
+                          const SizedBox(width: 32),
+
+                          // RIGHT COLUMN: Input Form & Pay Action Button
+                          Expanded(
+                            flex: 5,
+                            child: _buildPaymentFormControls(),
+                          ),
+                        ],
+                      )
+                    else
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildMethodsList(),
+                          const SizedBox(height: AppSpacing.lg),
+                          _buildPaymentFormControls(),
+                        ],
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 40),
+
+            // Web/Desktop Footer
+            const WebFooter(),
+          ],
+        ),
       ),
     );
   }

@@ -48,7 +48,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     {'key': 'all', 'label': 'All items', 'image': 'assets/images/all.png'},
     {'key': 'electronics', 'label': 'Electronics', 'image': 'assets/images/Electronics.png'},
     {'key': 'groceries', 'label': 'Groceries', 'image': 'assets/images/Oil.png'},
-    {'key': 'fashion', 'label': 'Fashion & Clothing', 'image': 'assets/images/fashion.png'},
+    {'key': 'Fashion_Clothing', 'label': 'Fashion & Clothing', 'image': 'assets/images/fashion.png'},
     {'key': 'home_living', 'label': 'Home & Living', 'image': 'assets/images/Home.png'},
     {'key': 'beauty_care', 'label': 'Beauty & Personal Care', 'image': 'assets/images/Beauty.png'},
     {'key': 'health_wellness', 'label': 'Health & Wellness', 'image': 'assets/images/food.png'},

@@ -241,14 +241,20 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
             style: AppTypography.titleMedium.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: AppSpacing.xs),
-          ChoiceChip(
-            label: const Text("Standard Option"),
-            selected: true,
-            selectedColor: AppColors.mangoOrange,
-            backgroundColor: Colors.grey.shade100,
-            checkmarkColor: Colors.white,
-            labelStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-            onSelected: (_) {},
+          Container(
+            padding: const EdgeInsets.all(AppSpacing.sm),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey.shade300),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text("Standard Option", style: TextStyle(fontWeight: FontWeight.w600)),
+                AppBadge(text: "In Stock", type: BadgeType.success),
+              ],
+            ),
           ),
           const SizedBox(height: AppSpacing.md),
         ],
@@ -263,53 +269,117 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
           style: AppTypography.titleMedium.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: AppSpacing.xs),
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.xs,
-          children: variants.map((variant) {
-            final isSelected = _selectedVariant == variant;
-            final bool isOutOfStock = variant.stock <= 0;
-
-            final attrText = formatAttributes(variant.attributes);
-
-            return ChoiceChip(
-              label: Text(
-                attrText + (isOutOfStock ? " (Out of Stock)" : ""),
-                style: TextStyle(
-                  color: isSelected
-                      ? Colors.white
-                      : (isOutOfStock ? Colors.grey.shade400 : Colors.black87),
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  decoration: isOutOfStock ? TextDecoration.lineThrough : null,
-                ),
-              ),
-              selected: isSelected,
-              selectedColor: AppColors.mangoOrange,
-              backgroundColor: Colors.grey.shade100,
-              checkmarkColor: Colors.white,
-              onSelected: isOutOfStock
-                  ? null
-                  : (bool selected) {
-                      setState(() {
-                        _selectedVariant = selected ? variant : null;
-                      });
-                    },
-            );
-          }).toList(),
-        ),
-        if (_selectedVariant != null) ...[
-          const SizedBox(height: AppSpacing.sm),
-          Row(
+        
+        Container(
+          clipBehavior: Clip.antiAlias,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+          child: Table(
+            columnWidths: const {
+              0: FlexColumnWidth(1),
+              1: FlexColumnWidth(4),
+              2: FlexColumnWidth(2),
+              3: FlexColumnWidth(2),
+            },
+            defaultVerticalAlignment: TableCellVerticalAlignment.middle,
             children: [
-              Icon(Icons.inventory_2_outlined, size: 14, color: Colors.grey.shade600),
-              const SizedBox(width: 4),
-              Text(
-                "Stock for this option: ${_selectedVariant!.stock} items left",
-                style: AppTypography.bodySmall.copyWith(color: Colors.grey.shade600),
+              TableRow(
+                decoration: BoxDecoration(color: Colors.grey.shade100),
+                children: [
+                  const SizedBox.shrink(),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                    child: Text("Option", style: AppTypography.bodySmall.copyWith(fontWeight: FontWeight.bold)),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                    child: Text("Stock", style: AppTypography.bodySmall.copyWith(fontWeight: FontWeight.bold)),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                    child: Text("Status", style: AppTypography.bodySmall.copyWith(fontWeight: FontWeight.bold)),
+                  ),
+                ],
               ),
+              ...variants.map((variant) {
+                final isSelected = _selectedVariant == variant;
+                final bool isOutOfStock = variant.stock <= 0;
+                final attrText = formatAttributes(variant.attributes);
+
+                return TableRow(
+                  decoration: BoxDecoration(
+                    color: isSelected 
+                        ? AppColors.mangoOrange.withOpacity(0.08) 
+                        : (isOutOfStock ? Colors.grey.shade50 : Colors.white),
+                    border: Border(
+                      top: BorderSide(color: Colors.grey.shade200),
+                    ),
+                  ),
+                  children: [
+                    TableCell(
+                      child: Radio<LocalProductVariant>(
+                        value: variant,
+                        groupValue: _selectedVariant,
+                        activeColor: AppColors.mangoOrange,
+                        onChanged: isOutOfStock
+                            ? null
+                            : (LocalProductVariant? val) {
+                                setState(() {
+                                  _selectedVariant = val;
+                                });
+                              },
+                      ),
+                    ),
+                    TableCell(
+                      child: InkWell(
+                        onTap: isOutOfStock 
+                            ? null 
+                            : () => setState(() => _selectedVariant = variant),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                          child: Text(
+                            attrText,
+                            style: TextStyle(
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                              color: isOutOfStock ? Colors.grey.shade400 : Colors.black87,
+                              decoration: isOutOfStock ? TextDecoration.lineThrough : null,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    TableCell(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                        child: Text(
+                          "${variant.stock}",
+                          style: TextStyle(
+                            color: isOutOfStock ? Colors.grey.shade400 : Colors.black87,
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
+                      ),
+                    ),
+                    TableCell(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: AppBadge(
+                            text: isOutOfStock ? "Out of Stock" : "Available",
+                            type: isOutOfStock ? BadgeType.error : BadgeType.success,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }).toList(),
             ],
           ),
-        ],
+        ),
         const SizedBox(height: AppSpacing.md),
       ],
     );
@@ -355,6 +425,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               SizedBox(
                 height: carouselHeight,
@@ -384,8 +455,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                         );
                       },
                     ),
-
-                    // Active Index Indicator Pill
                     if (images.length > 1)
                       Positioned(
                         bottom: AppSpacing.md,
@@ -408,8 +477,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                   ],
                 ),
               ),
-
-              // Image Previews (Thumbnails) for Mobile and Desktop
               if (images.length > 1) ...[
                 const SizedBox(height: AppSpacing.sm),
                 SizedBox(
@@ -462,9 +529,10 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
           );
         }
 
-        Widget buildProductInfo() {
+        Widget buildProductHeaderInfo() {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 product.name,
@@ -658,53 +726,53 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.lg),
+            ],
+          );
+        }
 
-              DefaultTabController(
-                length: 2,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TabBar(
-                      labelColor: AppColors.primary(context),
-                      unselectedLabelColor: Colors.grey,
-                      indicatorColor: AppColors.primary(context),
-                      tabs: const [
-                        Tab(text: "Description"),
-                        Tab(text: "Reviews"),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Builder(
-                      builder: (context) {
-                        final tabController =
-                            DefaultTabController.of(context);
-                        return AnimatedBuilder(
-                          animation: tabController,
-                          builder: (context, child) {
-                            if (tabController.index == 0) {
-                              return Text(
-                                product.description,
-                                style: AppTypography.bodyMedium.copyWith(
-                                  color: Colors.grey.shade700,
-                                  height: 1.5,
-                                ),
-                              );
-                            } else {
-                              return ReviewSectionWidget(
-                                targetType: 'product',
-                                targetId: product.id,
-                                isOwner: isOwner,
-                              );
-                            }
-                          },
-                        );
-                      },
-                    ),
+        Widget buildDescriptionAndReviewsTabs() {
+          return DefaultTabController(
+            length: 2,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TabBar(
+                  labelColor: AppColors.primary(context),
+                  unselectedLabelColor: Colors.grey,
+                  indicatorColor: AppColors.primary(context),
+                  tabs: const [
+                    Tab(text: "Description"),
+                    Tab(text: "Reviews"),
                   ],
                 ),
-              ),
-            ],
+                const SizedBox(height: AppSpacing.md),
+                Builder(
+                  builder: (context) {
+                    final tabController = DefaultTabController.of(context);
+                    return AnimatedBuilder(
+                      animation: tabController,
+                      builder: (context, child) {
+                        if (tabController.index == 0) {
+                          return Text(
+                            product.description,
+                            style: AppTypography.bodyMedium.copyWith(
+                              color: Colors.grey.shade700,
+                              height: 1.5,
+                            ),
+                          );
+                        } else {
+                          return ReviewSectionWidget(
+                            targetType: 'product',
+                            targetId: product.id,
+                            isOwner: isOwner,
+                          );
+                        }
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
           );
         }
 
@@ -757,18 +825,29 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                             horizontal: 24, vertical: 32)
                         : EdgeInsets.zero,
                     child: isDesktop
-                        ? Row(
+                        ? Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Expanded(
-                                flex: 5,
-                                child: buildImageCarousel(500),
+                              // Top Split View: Images & Purchase Info
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    flex: 5,
+                                    child: buildImageCarousel(480),
+                                  ),
+                                  const SizedBox(width: 40),
+                                  Expanded(
+                                    flex: 6,
+                                    child: buildProductHeaderInfo(),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 40),
-                              Expanded(
-                                flex: 6,
-                                child: buildProductInfo(),
-                              ),
+                              const SizedBox(height: AppSpacing.xl),
+                              const Divider(),
+                              const SizedBox(height: AppSpacing.md),
+                              // Bottom Wide Tabs View
+                              buildDescriptionAndReviewsTabs(),
                             ],
                           )
                         : Column(
@@ -777,7 +856,13 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                               buildImageCarousel(340),
                               Padding(
                                 padding: const EdgeInsets.all(AppSpacing.md),
-                                child: buildProductInfo(),
+                                child: Column(
+                                  children: [
+                                    buildProductHeaderInfo(),
+                                    const SizedBox(height: AppSpacing.lg),
+                                    buildDescriptionAndReviewsTabs(),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
@@ -793,14 +878,10 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                   ),
                 ),
                 const SizedBox(height: 40),
-
-                // Web/Desktop Footer (Visible across Web and Responsive viewports)
                 const WebFooter(),
               ],
             ),
           ),
-
-          // Dynamic Action Bottom Bar
           bottomNavigationBar: SafeArea(
             child: Container(
               padding: const EdgeInsets.symmetric(
@@ -819,7 +900,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
               ),
               child: Row(
                 children: [
-                  // 1. Favorite (Shoppers Only)
                   if (!isOwner) ...[
                     IconButton(
                       visualDensity: VisualDensity.compact,
@@ -833,8 +913,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                       },
                     ),
                   ],
-
-                  // 2. WhatsApp
                   IconButton(
                     visualDensity: VisualDensity.compact,
                     padding: EdgeInsets.zero,
@@ -850,8 +928,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                       }
                     },
                   ),
-
-                  // 3. Share
                   IconButton(
                     visualDensity: VisualDensity.compact,
                     padding: EdgeInsets.zero,
@@ -860,8 +936,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                     tooltip: "Share Product",
                     onPressed: () => _shareProduct(product, analytics),
                   ),
-
-                  // 4. View Shop
                   IconButton(
                     visualDensity: VisualDensity.compact,
                     padding: EdgeInsets.zero,
@@ -870,10 +944,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                     tooltip: "View Shop",
                     onPressed: () => _navigateToShop(product.shopId, analytics),
                   ),
-
                   const SizedBox(width: AppSpacing.xs),
-
-                  // 5. Dynamic Action Button: "Edit Item" for Owner OR "Add to Cart" for Shoppers
                   Expanded(
                     child: SizedBox(
                       height: 42,

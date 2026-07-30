@@ -51,6 +51,7 @@ import 'hospitality/owner_bookings_screen.dart';
 import 'hospitality/bookings_scanner_screen.dart'; 
 
 import 'delivery/delivery_code_entry_screen.dart'; 
+import 'delivery/rider_delivery_screen.dart';
 import 'delivery/seller_delivery_screen.dart'; 
 
 import 'products/product_details_screen.dart'; 
@@ -119,6 +120,7 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
   int? _activePropertyId; 
   EventModel? _activeEvent; 
   dynamic _activeTicket; 
+  dynamic _activeRiderDelivery;
 
   int? _unlockPropertyId; 
   String? _unlockPropertyTitle; 
@@ -274,7 +276,7 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
       8, 12, 13, 14, 15, 16, 
       17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 
       31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 
-      41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54 
+      41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55 
     };
     return detailIndices.contains(_currentIndex);
   }
@@ -295,10 +297,18 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
           case 47: _currentIndex = 14; break; 
           case 48: _currentIndex = 47; break; 
           case 54: _currentIndex = 13; break; 
+          case 55: _currentIndex = 9; break;
           default: _currentIndex = 0; 
         }
       });
     }
+  }
+
+  void navigateToRiderDelivery(dynamic delivery) {
+    setState(() {
+      _activeRiderDelivery = delivery;
+      _changeTab(55);
+    });
   }
 
   void navigateToProductDetails(int productId) {
@@ -466,7 +476,6 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
     });
   }
 
-  // Restored missing method
   void navigateToCreateShop() { _changeTab(32); }
 
   Product? _activeEditProduct;
@@ -576,6 +585,7 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
         case 52: return "Scan Booking QR";
         case 53: return "Sold Tickets";
         case 54: return "Shop Navigation";
+        case 55: return "Rider Delivery Details";
         default: return "Post.Sell.Grow";
       }
     }
@@ -833,6 +843,7 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
     if (_currentIndex == 52) displayIndex = 6; 
     if (_currentIndex == 53) displayIndex = 4; 
     if (_currentIndex == 54) displayIndex = 1; 
+    if (_currentIndex == 55) displayIndex = 9;
 
     return AppScaffold(
       currentIndex: displayIndex, 
@@ -902,7 +913,7 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
                     const ManageEventsScreen(), 
                     const LodgeOwnerDashboard(), 
                     _activeEditShop != null ? EditShopScreen(key: ValueKey('edit_shop_${_activeEditShop!.id}'), shop: _activeEditShop!) : const Center(child: Text("No shop selected")), 
-                    const CreateShopScreen(), // Restored missing screen route
+                    const CreateShopScreen(), 
                     _activeEditProduct != null ? EditProductScreen(key: ValueKey('edit_product_${_activeEditProduct!.id}'), product: _activeEditProduct!) : const Center(child: Text("No product selected")), 
                     const AddPropertyScreen(), 
                     PropertyFormScreen(key: ValueKey('prop_form_${_activeFormProperty?.id ?? 0}'), property: _activeFormProperty), 
@@ -966,6 +977,13 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
                             shopLng: _shopMapLng!,
                           )
                         : const Center(child: Text("No shop location selected")),
+
+                    _activeRiderDelivery != null 
+                        ? RiderDeliveryScreen(
+                            key: ValueKey('rider_del_${_activeRiderDelivery.id}'), 
+                            delivery: _activeRiderDelivery!,
+                          ) 
+                        : const Center(child: Text("No active rider delivery selected")),
                   ],
                 ),
               ),

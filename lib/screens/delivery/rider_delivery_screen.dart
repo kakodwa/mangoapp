@@ -1,3 +1,5 @@
+// lib/screens/delivery/rider_delivery_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -7,6 +9,7 @@ import '../../providers/api_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../services/analytics_service.dart';
+import '../main_tabs_screen.dart'; 
 import '../../widgets/web_footer.dart';
 
 class RiderDeliveryScreen extends ConsumerStatefulWidget {
@@ -124,102 +127,150 @@ class _RiderDeliveryScreenState extends ConsumerState<RiderDeliveryScreen> {
   Widget build(BuildContext context) {
     final d = widget.delivery;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
-      appBar: AppBar(
-        elevation: 0,
-        centerTitle: true,
-        backgroundColor: AppColors.primary(context),
-        title: Text(
-          "Order #${d.orderNumber}",
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.surface,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          // Breakpoint setup: screens wider than 800px get a split 2-column view
-          final bool isWideScreen = constraints.maxWidth > 800;
+    return SelectionArea(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.zero,
+        child: Column(
+          children: [
+            Center(
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 1200),
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final bool isWideScreen = constraints.maxWidth > 800;
 
-          return SelectionArea(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  Center(
-                    child: Container(
-                      constraints: const BoxConstraints(maxWidth: 1200),
-                      padding: const EdgeInsets.all(AppSpacing.md),
-                      child: isWideScreen 
-                          ? Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Left Side: Core Order details
-                                Expanded(
-                                  flex: 6,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      _buildStatusCard(d),
-                                      const SizedBox(height: AppSpacing.md),
-                                      _buildCustomerInfoCard(d),
-                                      const SizedBox(height: AppSpacing.md),
-                                      _buildInfoMessage(),
-                                      const SizedBox(height: AppSpacing.md),
-                                      _buildItemsCard(d),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: AppSpacing.md),
-                                // Right Side: Interactive delivery workflow cards
-                                Expanded(
-                                  flex: 5,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      _buildActionsCard(),
-                                      _buildVerificationCard(),
-                                      const SizedBox(height: AppSpacing.md),
-                                      _buildCommunicationButtons(d),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            )
-                          : Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                _buildStatusCard(d),
-                                const SizedBox(height: AppSpacing.md),
-                                _buildCustomerInfoCard(d),
-                                const SizedBox(height: AppSpacing.md),
-                                _buildInfoMessage(),
-                                const SizedBox(height: AppSpacing.lg),
-                                _buildItemsCard(d),
-                                const SizedBox(height: AppSpacing.lg),
-                                _buildActionsCard(),
-                                _buildVerificationCard(),
-                                const SizedBox(height: AppSpacing.lg),
-                                _buildCommunicationButtons(d),
-                              ],
-                            ),
-                    ),
-                  ),
-                  const SizedBox(height: 40),
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // ================= INLINE ORDER TITLE HEADER CARD =================
+                        _buildOrderTitleHeader(d),
 
-                  // Web/Desktop Footer
-                  const WebFooter(),
-                ],
+                        const SizedBox(height: AppSpacing.md),
+
+                        if (isWideScreen)
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Left Side: Core Order details
+                              Expanded(
+                                flex: 6,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildStatusCard(d),
+                                    const SizedBox(height: AppSpacing.md),
+                                    _buildCustomerInfoCard(d),
+                                    const SizedBox(height: AppSpacing.md),
+                                    _buildInfoMessage(),
+                                    const SizedBox(height: AppSpacing.md),
+                                    _buildItemsCard(d),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.md),
+                              // Right Side: Interactive delivery workflow cards
+                              Expanded(
+                                flex: 5,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildActionsCard(),
+                                    _buildVerificationCard(),
+                                    const SizedBox(height: AppSpacing.md),
+                                    _buildCommunicationButtons(d),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          )
+                        else
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildStatusCard(d),
+                              const SizedBox(height: AppSpacing.md),
+                              _buildCustomerInfoCard(d),
+                              const SizedBox(height: AppSpacing.md),
+                              _buildInfoMessage(),
+                              const SizedBox(height: AppSpacing.lg),
+                              _buildItemsCard(d),
+                              const SizedBox(height: AppSpacing.lg),
+                              _buildActionsCard(),
+                              _buildVerificationCard(),
+                              const SizedBox(height: AppSpacing.lg),
+                              _buildCommunicationButtons(d),
+                            ],
+                          ),
+                      ],
+                    );
+                  },
+                ),
               ),
             ),
-          );
-        },
+            const SizedBox(height: 40),
+
+            // Web/Desktop Footer
+            const WebFooter(),
+          ],
+        ),
       ),
     );
   }
 
   // ================= UI BUILDER METHODS =================
+
+  /// Top Rounded Header displaying the Order Name / Number on Screen
+  Widget _buildOrderTitleHeader(dynamic d) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: BoxDecoration(
+        color: AppColors.mangoOrange,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.mangoOrange.withOpacity(0.25),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.receipt_long_rounded,
+            color: Colors.white,
+            size: 26,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Order #${d.orderNumber}",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  "Rider Delivery & Verification Management",
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.9),
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildStatusCard(dynamic d) {
     return Container(
@@ -587,14 +638,10 @@ class _RiderDeliveryScreenState extends ConsumerState<RiderDeliveryScreen> {
               ),
               onPressed: () {
                 analyticsService.logEvent('click_navigate_to_customer_id_${d.id}');
-                showModalBottomSheet(
-                  context: context,
-                  isScrollControlled: true,
-                  builder: (_) => ShopMapModal(
-                    shopLat: d.customerLat!,
-                    shopLng: d.customerLng!,
-                  ),
-                );
+                MainTabsScreen.of(context)?.navigateToShopMap(
+                            d.customerLat!,
+                            d.customerLng!,
+                          );
               },
             ),
           ),

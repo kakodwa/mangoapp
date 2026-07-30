@@ -12,6 +12,7 @@ import '../../core/api/api_client.dart';
 import '../../providers/api_provider.dart';
 import '../../models/delivery.dart';
 import '../../theme/app_colors.dart';
+import '../main_tabs_screen.dart';
 import '../../theme/design_system/app_spacing.dart';
 
 
@@ -56,7 +57,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
                         crossAxisCount: 2,
                         crossAxisSpacing: 18,
                         mainAxisSpacing: 18,
-                        mainAxisExtent: 560,
+                        mainAxisExtent: 680, // Fixed: Increased mainAxisExtent from 560 to 680 to fit dynamic fields
                       ),
                       itemCount: deliveries.length,
                       itemBuilder: (context, index) => _DeliveryCard(d: deliveries[index]),
@@ -470,7 +471,6 @@ class _DeliveryCard extends ConsumerWidget {
   final Delivery d;
   const _DeliveryCard({required this.d});
 
-  // Helper inside card to safely format variation string layout values
   String _formatAttributes(Map<String, dynamic>? attributes) {
     if (attributes == null || attributes.isEmpty) return "";
     return attributes.entries.map((e) => "${e.key}: ${e.value}").join(", ");
@@ -495,6 +495,7 @@ class _DeliveryCard extends ConsumerWidget {
         padding: const EdgeInsets.all(18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min, // Fixed: keeps column strictly bounded
           children: [
             Row(
               children: [
@@ -542,7 +543,7 @@ class _DeliveryCard extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 width: double.infinity,
-                margin: const EdgeInsets.only(top: 10),
+                margin: const EdgeInsets.only(bottom: 10),
                 decoration: BoxDecoration(
                   color: Colors.blue.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(12),
@@ -559,12 +560,12 @@ class _DeliveryCard extends ConsumerWidget {
                   ],
                 ),
               ),
-            const SizedBox(height: AppSpacing.md),
 
             if (d.items != null && d.items!.isNotEmpty)
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(14),
+                margin: const EdgeInsets.only(bottom: 10),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.outline.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(14),
@@ -617,11 +618,11 @@ class _DeliveryCard extends ConsumerWidget {
                   ],
                 ),
               ),
-            const SizedBox(height: AppSpacing.md),
 
             if (d.deliveryCode != null) DeliveryCodeCard(code: d.deliveryCode!),
             
-            const Spacer(),
+            const SizedBox(height: AppSpacing.sm), // Fixed: Replaced `const Spacer()` with SizedBox
+
             Row(
               children: [
                 Expanded(
@@ -669,11 +670,11 @@ class _DeliveryCard extends ConsumerWidget {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   onPressed: () {
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      builder: (_) => ShopMapModal(shopLat: d.customerLat!, shopLng: d.customerLng!),
-                    );
+
+                    MainTabsScreen.of(context)?.navigateToShopMap(
+                            d.customerLat!,
+                            d.customerLng!,
+                          );
                   },
                 ),
               ),
@@ -735,8 +736,8 @@ class _DeliveryCodeCardState extends State<DeliveryCodeCard> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(14),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.onSurface.withOpacity(0.04),
         borderRadius: BorderRadius.circular(14),
@@ -754,25 +755,33 @@ class _DeliveryCodeCardState extends State<DeliveryCodeCard> {
               ),
               Row(
                 children: [
-                  IconButton(icon: const Icon(Icons.copy, size: 18), onPressed: isVisible ? _copy : null),
+                  IconButton(
+                    icon: const Icon(Icons.copy, size: 18),
+                    constraints: const BoxConstraints(),
+                    padding: const EdgeInsets.all(4),
+                    onPressed: isVisible ? _copy : null,
+                  ),
+                  const SizedBox(width: 8),
                   IconButton(
                     icon: Icon(isVisible ? Icons.visibility_off : Icons.visibility, size: 18),
+                    constraints: const BoxConstraints(),
+                    padding: const EdgeInsets.all(4),
                     onPressed: () => setState(() => isVisible = !isVisible),
                   ),
                 ],
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           GestureDetector(
             onTap: () => setState(() => isVisible = !isVisible),
             child: Text(
               isVisible ? widget.code : "••••••••",
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 3),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 3),
             ),
           ),
-          const SizedBox(height: 6),
-          Text("Tap to reveal • Copy & share with rider", style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.outline)),
+          const SizedBox(height: 4),
+          Text("Tap to reveal • Copy & share with rider", style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.outline)),
         ],
       ),
     );
