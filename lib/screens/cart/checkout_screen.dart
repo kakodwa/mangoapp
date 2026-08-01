@@ -15,6 +15,7 @@ import '../payments/payment_checkout_screen.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/web_footer.dart';
+import '../../utils/price_helper.dart';
 
 class CheckoutScreen extends ConsumerStatefulWidget {
   final List<CartItem> items;
@@ -231,7 +232,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      "MWK ${item.totalPrice.toStringAsFixed(2)}",
+                      formatWithCommas(item.totalPrice),
                       style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
                   ],
@@ -385,7 +386,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text("Subtotal"),
-              Text("MWK ${widget.total.toStringAsFixed(2)}"),
+              Text(formatWithCommas(widget.total)),
             ],
           ),
           const SizedBox(height: 10),
@@ -402,7 +403,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
             children: [
               const Text("Total", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               Text(
-                "MWK ${widget.total.toStringAsFixed(2)}",
+                formatWithCommas(widget.total),
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,

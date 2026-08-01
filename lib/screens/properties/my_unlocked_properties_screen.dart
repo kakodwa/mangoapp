@@ -6,7 +6,8 @@ import '../../providers/properties_provider.dart';
 import 'property_card.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_spacing.dart';
-
+import '../../theme/design_system/app_typography.dart';
+import '../../widgets/web_footer.dart';
 
 class MyUnlockedPropertiesScreen extends ConsumerStatefulWidget {
   const MyUnlockedPropertiesScreen({super.key});
@@ -56,8 +57,10 @@ class _MyUnlockedPropertiesScreenState extends ConsumerState<MyUnlockedPropertie
 
     return RefreshIndicator(
       onRefresh: () async => ref.refresh(userUnlockedPropertiesProvider),
+      color: AppColors.mangoOrange,
       child: unlockedAsync.when(
         data: (propertiesList) {
+          // ================= CENTERED RECTANGLE EMPTY STATE =================
           if (propertiesList.isEmpty) {
             return CustomScrollView(
               controller: _scrollController,
@@ -65,41 +68,71 @@ class _MyUnlockedPropertiesScreenState extends ConsumerState<MyUnlockedPropertie
               slivers: [
                 SliverFillRemaining(
                   hasScrollBody: false,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const Spacer(),
-                      // Centered Empty State Layout with context-specific Premium Unlock Icon
-                      Icon(
-                        Icons.lock_open_outlined,
-                        size: 80,
-                        color: Theme.of(context).colorScheme.outline.withOpacity(0.4),
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      Text(
-                        'No premium properties unlocked',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      child: Container(
+                        constraints: const BoxConstraints(maxWidth: 360),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppSpacing.lg,
+                          horizontal: AppSpacing.md,
                         ),
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                        child: Text(
-                          "You haven't unlocked any premium properties yet. Contact support or use credits to reveal premium listings.",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Theme.of(context).colorScheme.outline,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(
+                            color: Colors.grey.withOpacity(0.12),
+                            width: 1,
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.02),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 52,
+                              height: 52,
+                              decoration: BoxDecoration(
+                                color: AppColors.mangoOrange.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.lock_open_outlined,
+                                size: 26,
+                                color: AppColors.mangoOrange,
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            Text(
+                              "No Properties Unlocked",
+                              style: AppTypography.titleMedium.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.xxs),
+                            Text(
+                              "You haven't unlocked any premium property details yet. Contact support or use credits to reveal exclusive listings.",
+                              textAlign: TextAlign.center,
+                              style: AppTypography.bodySmall.copyWith(
+                                color: Colors.grey.shade600,
+                                height: 1.3,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
+                ),
+                const SliverToBoxAdapter(
+                  child: WebFooter(),
                 ),
               ],
             );
@@ -128,9 +161,8 @@ class _MyUnlockedPropertiesScreenState extends ConsumerState<MyUnlockedPropertie
                 ),
               ),
 
-              // Layout spacer bridge ensuring nice visual padding before footer bounds appear
               const SliverToBoxAdapter(
-                child: SizedBox(height: 40),
+                child: WebFooter(),
               ),
             ],
           );
@@ -143,27 +175,71 @@ class _MyUnlockedPropertiesScreenState extends ConsumerState<MyUnlockedPropertie
           slivers: [
             SliverFillRemaining(
               hasScrollBody: false,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Spacer(),
-                  Icon(
-                    Icons.error_outline_rounded,
-                    size: 64,
-                    color: Theme.of(context).colorScheme.error.withOpacity(0.7),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Padding(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    child: Text(
-                      'Failed to load listings: $exception',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Theme.of(context).colorScheme.error),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 360),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: AppSpacing.lg,
+                      horizontal: AppSpacing.md,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.error.withOpacity(0.2),
+                        width: 1,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.02),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 52,
+                          height: 52,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.error.withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.error_outline_rounded,
+                            size: 26,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        Text(
+                          "Failed to Load Listings",
+                          style: AppTypography.titleMedium.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.xxs),
+                        Text(
+                          exception.toString(),
+                          textAlign: TextAlign.center,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: Colors.grey.shade600,
+                            height: 1.3,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-
-                ],
+                ),
               ),
+            ),
+            const SliverToBoxAdapter(
+              child: WebFooter(),
             ),
           ],
         ),

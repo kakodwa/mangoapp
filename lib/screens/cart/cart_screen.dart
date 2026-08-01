@@ -8,6 +8,7 @@ import '../../providers/api_provider.dart';
 import '../../utils/app_toast.dart';
 import '../../widgets/web_footer.dart';
 import '../main_tabs_screen.dart'; 
+import '../../utils/price_helper.dart';
 import 'checkout_screen.dart';
 
 class CartScreen extends ConsumerWidget {
@@ -190,7 +191,7 @@ class CartScreen extends ConsumerWidget {
                     const SizedBox(height: 6),
 
                     Text(
-                      "MWK ${item.product.price.toStringAsFixed(2)}",
+                      formatWithCommas(item.product.price),
                       style: const TextStyle(color: Colors.green, fontWeight: FontWeight.w600),
                     ),
                     const SizedBox(height: 10),
@@ -276,7 +277,7 @@ class CartScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text("Items (${cart.length})", style: const TextStyle(fontWeight: FontWeight.w500)),
-                Text("MWK ${total.toStringAsFixed(2)}", style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(formatWithCommas(total), style: const TextStyle(fontWeight: FontWeight.bold)),
               ],
             ),
             const SizedBox(height: 8),
@@ -293,7 +294,7 @@ class CartScreen extends ConsumerWidget {
               children: [
                 const Text("Total", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 Text(
-                  "MWK ${total.toStringAsFixed(2)}",
+                  formatWithCommas(total),
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green),
                 ),
               ],

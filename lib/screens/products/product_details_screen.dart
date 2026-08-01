@@ -1,3 +1,5 @@
+// lib/screens/products/product_details_screen.dart
+
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
@@ -36,6 +38,7 @@ import '../../widgets/web_footer.dart';
 import '../../services/analytics_service.dart';
 import '../../utils/app_snackbar.dart';
 import '../../utils/app_toast.dart';
+import '../../utils/price_helper.dart';
 
 import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_badge.dart';
@@ -61,12 +64,14 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
   final PageController _imagePageController = PageController();
 
   final ScrollController _scrollController = ScrollController();
+  final ScrollController _relatedScrollController = ScrollController();
   final List<Product> _related = [];
   bool _loadingMore = false;
   
   bool _hasLoggedView = false;
   LocalProductVariant? _selectedVariant;
   int? _lastInitializedProductId;
+  bool _showAllVariants = false;
 
   void _openWhatsApp(String phone) async {
     final uri = Uri.parse("https://wa.me/$phone");
@@ -110,6 +115,20 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
       debugPrint("❌ RELATED ERROR: $e");
       setState(() => _loadingMore = false);
     }
+  }
+
+  void _scrollRelated(bool left) {
+    if (!_relatedScrollController.hasClients) return;
+    final double scrollAmount = 360.0;
+    final double targetOffset = left
+        ? (_relatedScrollController.offset - scrollAmount).clamp(0.0, _relatedScrollController.position.maxScrollExtent)
+        : (_relatedScrollController.offset + scrollAmount).clamp(0.0, _relatedScrollController.position.maxScrollExtent);
+
+    _relatedScrollController.animateTo(
+      targetOffset,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   void _openFullScreenGallery(List<String> images, int initialIndex) {
@@ -207,6 +226,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _relatedScrollController.dispose();
     _imagePageController.dispose();
     super.dispose();
   }
@@ -252,7 +272,20 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text("Standard Option", style: TextStyle(fontWeight: FontWeight.w600)),
-                AppBadge(text: "In Stock", type: BadgeType.success),
+                Row(
+                  children: const [
+                    Icon(Icons.check_circle_rounded, color: Colors.green, size: 14),
+                    SizedBox(width: 4),
+                    Text(
+                      "In Stock",
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -261,12 +294,26 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
       );
     }
 
+    final bool hasMoreThanFive = variants.length > 5;
+    final List<LocalProductVariant> displayedVariants =
+        (hasMoreThanFive && !_showAllVariants) ? variants.take(5).toList() : variants;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          "Available Options",
-          style: AppTypography.titleMedium.copyWith(fontWeight: FontWeight.bold),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              "Available Options",
+              style: AppTypography.titleMedium.copyWith(fontWeight: FontWeight.bold),
+            ),
+            if (hasMoreThanFive)
+              Text(
+                "${variants.length} options",
+                style: AppTypography.bodySmall.copyWith(color: Colors.grey.shade600, fontSize: 11),
+              ),
+          ],
         ),
         const SizedBox(height: AppSpacing.xs),
         
@@ -280,8 +327,8 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
             columnWidths: const {
               0: FlexColumnWidth(1),
               1: FlexColumnWidth(4),
-              2: FlexColumnWidth(2),
-              3: FlexColumnWidth(2),
+              2: FlexColumnWidth(1.5),
+              3: FlexColumnWidth(1.5),
             },
             defaultVerticalAlignment: TableCellVerticalAlignment.middle,
             children: [
@@ -303,7 +350,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                   ),
                 ],
               ),
-              ...variants.map((variant) {
+              ...displayedVariants.map((variant) {
                 final isSelected = _selectedVariant == variant;
                 final bool isOutOfStock = variant.stock <= 0;
                 final attrText = formatAttributes(variant.attributes);
@@ -338,10 +385,11 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                             ? null 
                             : () => setState(() => _selectedVariant = variant),
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
                           child: Text(
                             attrText,
                             style: TextStyle(
+                              fontSize: 12,
                               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                               color: isOutOfStock ? Colors.grey.shade400 : Colors.black87,
                               decoration: isOutOfStock ? TextDecoration.lineThrough : null,
@@ -352,10 +400,11 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                     ),
                     TableCell(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
                         child: Text(
                           "${variant.stock}",
                           style: TextStyle(
+                            fontSize: 12,
                             color: isOutOfStock ? Colors.grey.shade400 : Colors.black87,
                             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                           ),
@@ -364,13 +413,28 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                     ),
                     TableCell(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: AppBadge(
-                            text: isOutOfStock ? "Out of Stock" : "Available",
-                            type: isOutOfStock ? BadgeType.error : BadgeType.success,
-                          ),
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              isOutOfStock ? Icons.cancel_rounded : Icons.check_circle_rounded,
+                              size: 14,
+                              color: isOutOfStock ? Colors.red.shade400 : Colors.green.shade600,
+                            ),
+                            const SizedBox(width: 3),
+                            Expanded(
+                              child: Text(
+                                isOutOfStock ? "Out" : "In",
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: isOutOfStock ? Colors.red.shade600 : Colors.green.shade700,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -380,6 +444,42 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
             ],
           ),
         ),
+        if (hasMoreThanFive) ...[
+          const SizedBox(height: AppSpacing.xs),
+          InkWell(
+            borderRadius: BorderRadius.circular(6),
+            onTap: () {
+              setState(() {
+                _showAllVariants = !_showAllVariants;
+              });
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    _showAllVariants 
+                        ? "Show Less" 
+                        : "Show More Options (${variants.length - 5} remaining)",
+                    style: TextStyle(
+                      color: AppColors.mangoOrange,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
+                  Icon(
+                    _showAllVariants 
+                        ? Icons.keyboard_arrow_up_rounded 
+                        : Icons.keyboard_arrow_down_rounded,
+                    color: AppColors.mangoOrange,
+                    size: 18,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
         const SizedBox(height: AppSpacing.md),
       ],
     );
@@ -638,7 +738,7 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
               ],
 
               Text(
-                "MWK ${product.price}",
+                formatWithCommas(product.price),
                 style: AppTypography.displaySmall.copyWith(
                   color: AppColors.mangoOrange,
                   fontWeight: FontWeight.w800,
@@ -647,19 +747,22 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
               ),
               const SizedBox(height: AppSpacing.sm),
 
-              Row(
-                children: [
-                  AppBadge(
-                    text: product.stock > 0
-                        ? "${product.stock} items in stock"
-                        : "Out of stock",
-                    type: product.stock > 0
-                        ? BadgeType.success
-                        : BadgeType.error,
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.sm),
+              // Hide global stock badge if variants exist to avoid confusing users
+              if (product.variants.isEmpty) ...[
+                Row(
+                  children: [
+                    AppBadge(
+                      text: product.stock > 0
+                          ? "${product.stock} items in stock"
+                          : "Out of stock",
+                      type: product.stock > 0
+                          ? BadgeType.success
+                          : BadgeType.error,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.sm),
+              ],
 
               Row(
                 children: [
@@ -791,21 +894,76 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                   style: AppTypography.headlineMedium,
                 ),
                 const SizedBox(height: AppSpacing.md),
-                SizedBox(
-                  height: 280,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: _related.length,
-                    separatorBuilder: (_, __) =>
-                        const SizedBox(width: AppSpacing.sm),
-                    itemBuilder: (context, index) {
-                      final p = _related[index];
-                      return SizedBox(
-                        width: 170,
-                        child: ProductCard(product: p),
-                      );
-                    },
-                  ),
+                
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SizedBox(
+                      height: 280,
+                      child: ListView.separated(
+                        controller: _relatedScrollController,
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _related.length,
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(width: AppSpacing.sm),
+                        itemBuilder: (context, index) {
+                          final p = _related[index];
+                          return SizedBox(
+                            width: 170,
+                            child: ProductCard(product: p),
+                          );
+                        },
+                      ),
+                    ),
+
+                    // Left/Right Navigation Arrows for Desktop
+                    if (isDesktop) ...[
+                      Positioned(
+                        left: 0,
+                        child: Material(
+                          color: Colors.white,
+                          elevation: 4,
+                          shape: const CircleBorder(),
+                          clipBehavior: Clip.antiAlias,
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.arrow_back_ios_new_rounded,
+                              color: AppColors.mangoOrange,
+                              size: 20,
+                            ),
+                            style: IconButton.styleFrom(
+                              hoverColor: AppColors.mangoOrange.withOpacity(0.12),
+                              padding: const EdgeInsets.all(12),
+                            ),
+                            tooltip: "Previous Products",
+                            onPressed: () => _scrollRelated(true),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        right: 0,
+                        child: Material(
+                          color: Colors.white,
+                          elevation: 4,
+                          shape: const CircleBorder(),
+                          clipBehavior: Clip.antiAlias,
+                          child: IconButton(
+                            icon: Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              color: AppColors.mangoOrange,
+                              size: 20,
+                            ),
+                            style: IconButton.styleFrom(
+                              hoverColor: AppColors.mangoOrange.withOpacity(0.12),
+                              padding: const EdgeInsets.all(12),
+                            ),
+                            tooltip: "Next Products",
+                            onPressed: () => _scrollRelated(false),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),
@@ -828,7 +986,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                         ? Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Top Split View: Images & Purchase Info
                               Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -846,7 +1003,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                               const SizedBox(height: AppSpacing.xl),
                               const Divider(),
                               const SizedBox(height: AppSpacing.md),
-                              // Bottom Wide Tabs View
                               buildDescriptionAndReviewsTabs(),
                             ],
                           )

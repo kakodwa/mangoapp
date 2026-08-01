@@ -7,8 +7,9 @@ import 'package:intl/intl.dart';
 import '../../models/withdrawal_model.dart';
 import '../../providers/wallet_provider.dart';
 import '../../theme/app_colors.dart';
+import '../../theme/design_system/app_spacing.dart';
+import '../../theme/design_system/app_typography.dart';
 import '../../widgets/web_footer.dart';
-
 
 class PayoutHistoryScreen extends ConsumerStatefulWidget {
   const PayoutHistoryScreen({super.key});
@@ -45,7 +46,6 @@ class _PayoutHistoryScreenState extends ConsumerState<PayoutHistoryScreen> {
     _page++;
 
     try {
-      // ⚠️ Currently refreshes full list (until backend paging exists)
       final data =
           await ref.refresh(historicalWithdrawalsProvider.future);
 
@@ -91,16 +91,73 @@ class _PayoutHistoryScreenState extends ConsumerState<PayoutHistoryScreen> {
         ),
 
         data: (list) {
+          // ================= CENTERED RECTANGLE EMPTY STATE =================
           if (list.isEmpty) {
             return CustomScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
-                const SliverFillRemaining(
+                SliverFillRemaining(
                   hasScrollBody: false,
                   child: Center(
-                    child: Text(
-                      'No cashout requests found.',
-                      style: TextStyle(fontSize: 15, color: Colors.grey),
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      child: Container(
+                        constraints: const BoxConstraints(maxWidth: 360),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppSpacing.lg,
+                          horizontal: AppSpacing.md,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(
+                            color: Colors.grey.withOpacity(0.12),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.02),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 52,
+                              height: 52,
+                              decoration: BoxDecoration(
+                                color: AppColors.mangoOrange.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.account_balance_wallet_outlined,
+                                size: 26,
+                                color: AppColors.mangoOrange,
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            Text(
+                              "No Cashout Requests",
+                              style: AppTypography.titleMedium.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.xxs),
+                            Text(
+                              "You haven't submitted any payout requests yet. Your cashout history and payout updates will show up here.",
+                              textAlign: TextAlign.center,
+                              style: AppTypography.bodySmall.copyWith(
+                                color: Colors.grey.shade600,
+                                height: 1.3,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -111,7 +168,7 @@ class _PayoutHistoryScreenState extends ConsumerState<PayoutHistoryScreen> {
             );
           }
 
-          // ================= FLATTEN (for lazy rendering) =================
+          // ================= LIST VIEW =================
           final List items = [];
           for (var item in list) {
             items.add(item);
@@ -129,7 +186,6 @@ class _PayoutHistoryScreenState extends ConsumerState<PayoutHistoryScreen> {
                 sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
-                      // ================= FOOTER LOADER =================
                       if (index == items.length) {
                         if (!_hasMore) {
                           return const SizedBox(height: 20);
@@ -139,7 +195,7 @@ class _PayoutHistoryScreenState extends ConsumerState<PayoutHistoryScreen> {
                           padding: const EdgeInsets.all(16),
                           child: Center(
                             child: _isLoadingMore
-                                ? const CircularProgressIndicator()
+                                ? const CircularProgressIndicator(color: AppColors.mangoOrange)
                                 : const SizedBox.shrink(),
                           ),
                         );
@@ -154,7 +210,6 @@ class _PayoutHistoryScreenState extends ConsumerState<PayoutHistoryScreen> {
                 ),
               ),
 
-              // Web/Desktop Footer
               const SliverToBoxAdapter(
                 child: WebFooter(),
               ),

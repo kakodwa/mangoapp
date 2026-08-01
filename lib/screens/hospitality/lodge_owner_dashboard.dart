@@ -6,6 +6,7 @@ import '../../theme/app_colors.dart';
 import '../../widgets/web_footer.dart';
 import 'bookings_scanner_screen.dart';
 import '../main_tabs_screen.dart';
+import '../../utils/price_helper.dart';
 
 class LodgeOwnerDashboard extends StatelessWidget {
   const LodgeOwnerDashboard({super.key});

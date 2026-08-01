@@ -1,3 +1,5 @@
+// lib/screens/property/my_properties_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,7 +13,11 @@ import '../../utils/app_snackbar.dart';
 import '../../utils/app_toast.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/app_fab.dart';
+import '../../widgets/web_footer.dart';
 
+// Design System Imports
+import '../../theme/design_system/app_spacing.dart';
+import '../../theme/design_system/app_typography.dart';
 
 class MyPropertiesScreen extends ConsumerWidget {
   const MyPropertiesScreen({super.key});
@@ -36,9 +42,79 @@ class MyPropertiesScreen extends ConsumerWidget {
       children: [
         asyncProps.when(
           data: (properties) {
+            // ================= CENTERED RECTANGLE EMPTY STATE =================
             if (properties.isEmpty) {
-              return const Center(
-                child: Text("No properties found"),
+              return CustomScrollView(
+                slivers: [
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        child: Container(
+                          constraints: const BoxConstraints(maxWidth: 360),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: AppSpacing.lg,
+                            horizontal: AppSpacing.md,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surface,
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(
+                              color: Colors.grey.withOpacity(0.12),
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.02),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 52,
+                                height: 52,
+                                decoration: BoxDecoration(
+                                  color: AppColors.mangoOrange.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.home_work_outlined,
+                                  size: 26,
+                                  color: AppColors.mangoOrange,
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.sm),
+                              Text(
+                                "No Properties Found",
+                                style: AppTypography.titleMedium.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.onSurface,
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.xxs),
+                              Text(
+                                "You haven't listed any real estate properties yet. Tap the '+' button below to add your first property listing.",
+                                textAlign: TextAlign.center,
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: Colors.grey.shade600,
+                                  height: 1.3,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SliverToBoxAdapter(
+                    child: WebFooter(),
+                  ),
+                ],
               );
             }
 
@@ -176,11 +252,32 @@ class MyPropertiesScreen extends ConsumerWidget {
                 const SliverToBoxAdapter(
                   child: SizedBox(height: 60),
                 ),
+                const SliverToBoxAdapter(
+                  child: WebFooter(),
+                ),
               ],
             );
           },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(child: Text("Error: $e")),
+          loading: () => const Center(child: CircularProgressIndicator(color: AppColors.mangoOrange)),
+          error: (e, _) => CustomScrollView(
+            slivers: [
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    child: Text(
+                      "Error loading properties: $e",
+                      style: TextStyle(color: Colors.grey.shade600),
+                    ),
+                  ),
+                ),
+              ),
+              const SliverToBoxAdapter(
+                child: WebFooter(),
+              ),
+            ],
+          ),
         ),
 
         // ================= FLOATING ACTION LAYOUT OVERLAY =================

@@ -18,6 +18,7 @@ import '../../theme/design_system/app_image_card.dart';
 import '../../theme/design_system/app_badge.dart';
 import '../../theme/design_system/app_typography.dart';
 import '../../theme/design_system/app_spacing.dart';
+import '../../utils/price_helper.dart';
 
 class LodgeCard extends StatefulWidget {
   final Lodge lodge;

@@ -12,6 +12,9 @@ import '../../models/delivery.dart';
 import '../../providers/api_provider.dart';
 import '../../widgets/web_footer.dart';
 
+// Navigation Shell Import
+import '../main_tabs_screen.dart';
+
 // Design System Imports
 import '../../theme/design_system/app_card.dart';
 import '../../theme/design_system/app_badge.dart';
@@ -20,6 +23,7 @@ import '../../theme/design_system/app_info_box.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_typography.dart';
 import '../../theme/app_colors.dart';
+import '../../utils/price_helper.dart';
 
 extension CapitalizeString on String {
   String toCapitalized() {
@@ -29,25 +33,28 @@ extension CapitalizeString on String {
   }
 }
 
-// Widget that fetches & renders masked customer delivery code with an eye toggle
-class CustomerDeliveryCodeWidget extends ConsumerStatefulWidget {
+// Widget that fetches & renders masked customer delivery code FOR A SPECIFIC SELLER
+class SellerDeliveryCodeWidget extends ConsumerStatefulWidget {
   final int orderId;
+  final int sellerId;
 
-  const CustomerDeliveryCodeWidget({
+  const SellerDeliveryCodeWidget({
     Key? key,
     required this.orderId,
+    required this.sellerId,
   }) : super(key: key);
 
   @override
-  ConsumerState<CustomerDeliveryCodeWidget> createState() =>
-      _CustomerDeliveryCodeWidgetState();
+  ConsumerState<SellerDeliveryCodeWidget> createState() =>
+      _SellerDeliveryCodeWidgetState();
 }
 
-class _CustomerDeliveryCodeWidgetState
-    extends ConsumerState<CustomerDeliveryCodeWidget> {
+class _SellerDeliveryCodeWidgetState
+    extends ConsumerState<SellerDeliveryCodeWidget> {
   bool _isLoading = true;
   bool _isObscured = true;
   String? _customerCode;
+  String? _deliveryStatus;
 
   @override
   void initState() {
@@ -59,15 +66,25 @@ class _CustomerDeliveryCodeWidgetState
     try {
       final apiClient = ref.read(apiClientProvider);
 
-      // Calls Django backend endpoint: /api/deliveries/by_order/?order_id=<id>
-      final delivery = await apiClient.get<Delivery>(
+      // Fetch list of deliveries for this order
+      final deliveries = await apiClient.getList<Delivery>(
         'deliveries/by_order/?order_id=${widget.orderId}',
         fromJson: (json) => Delivery.fromJson(json),
       );
 
+      // Find delivery that matches this specific seller
+      final sellerDelivery = deliveries.firstWhere(
+        (d) => d.sellerId == widget.sellerId,
+        orElse: () => deliveries.firstWhere(
+          (d) => d.customerDeliveryCode != null,
+          orElse: () => Delivery(id: 0, status: 'pending', orderNumber: ''),
+        ),
+      );
+
       if (mounted) {
         setState(() {
-          _customerCode = delivery?.customerDeliveryCode;
+          _customerCode = sellerDelivery.customerDeliveryCode;
+          _deliveryStatus = sellerDelivery.status;
           _isLoading = false;
         });
       }
@@ -84,45 +101,66 @@ class _CustomerDeliveryCodeWidgetState
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Container(
-        padding: const EdgeInsets.all(12),
-        margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+        margin: const EdgeInsets.only(top: AppSpacing.xs),
         decoration: BoxDecoration(
-          color: Colors.grey.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(12),
+          color: Colors.grey.withOpacity(0.04),
+          borderRadius: BorderRadius.circular(8),
         ),
         child: const Row(
           children: [
             SizedBox(
-              width: 14,
-              height: 14,
+              width: 12,
+              height: 12,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
                 color: AppColors.mangoOrange,
               ),
             ),
-            SizedBox(width: 10),
+            SizedBox(width: 8),
             Text(
-              "Fetching delivery code...",
-              style: TextStyle(fontSize: 12, color: Colors.grey),
+              "Loading verification code...",
+              style: TextStyle(fontSize: 11, color: Colors.grey),
             ),
           ],
         ),
       );
     }
 
-    // Do not display if no customer delivery code is generated yet
     if (_customerCode == null || _customerCode!.isEmpty) {
-      return const SizedBox.shrink();
+      return Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(top: AppSpacing.xs),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.grey.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.info_outline_rounded, size: 14, color: Colors.grey),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Text(
+                _deliveryStatus == 'in_transit' || _deliveryStatus == 'picked_up'
+                    ? "Code generated upon dispatch."
+                    : "Verification code will appear when package is in transit.",
+                style: const TextStyle(fontSize: 11, color: Colors.grey),
+              ),
+            ),
+          ],
+        ),
+      );
     }
 
     final maskedCode = '•' * _customerCode!.length;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      margin: const EdgeInsets.only(top: AppSpacing.xs),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: AppColors.mangoOrange.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         border: Border.all(color: AppColors.mangoOrange.withOpacity(0.2)),
       ),
       child: Row(
@@ -132,9 +170,9 @@ class _CustomerDeliveryCodeWidgetState
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                "CUSTOMER DELIVERY CODE",
+                "DELIVERY VERIFICATION CODE",
                 style: TextStyle(
-                  fontSize: 10,
+                  fontSize: 9,
                   fontWeight: FontWeight.w700,
                   color: Colors.grey,
                   letterSpacing: 0.5,
@@ -144,9 +182,9 @@ class _CustomerDeliveryCodeWidgetState
               Text(
                 _isObscured ? maskedCode : _customerCode!,
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 15,
                   fontWeight: FontWeight.bold,
-                  letterSpacing: 3.0,
+                  letterSpacing: 2.5,
                   color: Colors.black87,
                 ),
               ),
@@ -154,13 +192,14 @@ class _CustomerDeliveryCodeWidgetState
           ),
           Row(
             children: [
-              // Eye Icon Toggle Button
               IconButton(
+                constraints: const BoxConstraints(),
+                padding: const EdgeInsets.all(4),
                 icon: Icon(
                   _isObscured
                       ? Icons.visibility_outlined
                       : Icons.visibility_off_outlined,
-                  size: 20,
+                  size: 18,
                   color: AppColors.mangoOrange,
                 ),
                 tooltip: _isObscured ? 'Show Code' : 'Hide Code',
@@ -170,9 +209,10 @@ class _CustomerDeliveryCodeWidgetState
                   });
                 },
               ),
-              // Copy Button
               IconButton(
-                icon: const Icon(Icons.copy_rounded, size: 18, color: Colors.grey),
+                constraints: const BoxConstraints(),
+                padding: const EdgeInsets.all(4),
+                icon: const Icon(Icons.copy_rounded, size: 16, color: Colors.grey),
                 tooltip: 'Copy Code',
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: _customerCode!));
@@ -227,6 +267,7 @@ class OrdersNotifier extends AutoDisposeNotifier<OrdersPaginationState> {
 
   @override
   OrdersPaginationState build() {
+    _currentPage = 1;
     Future.microtask(() => fetchNextPage());
     return const OrdersPaginationState(
       orders: [],
@@ -236,9 +277,9 @@ class OrdersNotifier extends AutoDisposeNotifier<OrdersPaginationState> {
   }
 
   Future<void> fetchNextPage() async {
-    if (state.isLoading || !state.hasMore) return;
+    if (state.isLoading || !state.hasMore || _currentPage < 1) return;
 
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isLoading: true, errorMessage: null);
 
     try {
       final apiClient = ref.read(apiClientProvider);
@@ -272,6 +313,7 @@ class OrdersNotifier extends AutoDisposeNotifier<OrdersPaginationState> {
       orders: [],
       isLoading: false,
       hasMore: true,
+      errorMessage: null,
     );
     await fetchNextPage();
   }
@@ -458,16 +500,16 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
 
                 if (order.sellerOrders.isNotEmpty) ...[
                   pw.Text(
-                    "Sellers Breakdown",
+                    "Shops Breakdown",
                     style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold),
                   ),
                   pw.SizedBox(height: 8),
 
                   pw.TableHelper.fromTextArray(
-                    headers: ['Seller ID / Store', 'Status', 'Delivery', 'Subtotal (MWK)'],
+                    headers: ['Shop Name', 'Status', 'Delivery', 'Subtotal (MWK)'],
                     data: order.sellerOrders.map((seller) {
                       return [
-                        "Seller #${seller.sellerId}",
+                        seller.shopName,
                         seller.status.toUpperCase(),
                         (seller.deliveryStatus ?? 'pending').toUpperCase(),
                         seller.subtotal.toStringAsFixed(2),
@@ -572,7 +614,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                   const SizedBox(height: 2),
                   Text(
                     variantText,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 12,
                       color: AppColors.mangoOrange,
                       fontWeight: FontWeight.w600,
@@ -590,7 +632,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
             ),
           ),
           Text(
-            "MWK ${item.totalPrice.toStringAsFixed(2)}".toCapitalized(),
+            formatWithCommas(item.totalPrice),
             style: AppTypography.titleMedium.copyWith(
               fontWeight: FontWeight.w700,
             ),
@@ -600,9 +642,9 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
     );
   }
 
-  /// Soft Card Design UI
   Widget _buildOrderCard(Order order) {
     final isExpanded = expandedOrders.contains(order.id);
+    final isMultiVendor = order.sellerOrders.length > 1;
 
     return Container(
       decoration: BoxDecoration(
@@ -633,7 +675,6 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // ================= HEADER =================
                 Row(
                   children: [
                     Container(
@@ -671,13 +712,11 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                         ],
                       ),
                     ),
-
                     IconButton(
                       icon: const Icon(Icons.picture_as_pdf_outlined, color: AppColors.mangoOrange),
                       tooltip: "Download Invoice PDF",
                       onPressed: () => _generateAndDownloadPdf(order),
                     ),
-
                     Icon(
                       isExpanded
                           ? Icons.keyboard_arrow_up
@@ -686,10 +725,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: AppSpacing.md),
-
-                // ================= TOTAL & BADGE =================
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -708,17 +744,59 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                     ),
                   ],
                 ),
-
-                // ================= EXPANDED DETAILS SECTION =================
                 if (isExpanded) ...[
                   const SizedBox(height: AppSpacing.md),
                   Divider(color: Colors.grey.withOpacity(0.15)),
                   const SizedBox(height: AppSpacing.sm),
+                  
+                  // ℹ️ DYNAMIC MULTI-VENDOR INFORMATION BANNER
+                  if (isMultiVendor)
+                    Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withOpacity(0.06),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: Colors.blue.withOpacity(0.2)),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(
+                            Icons.local_shipping_outlined,
+                            color: Colors.blue,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "Multi-Vendor Shipment Notice",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12,
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                                const SizedBox(height: 3),
+                                Text(
+                                  "This order contains items from ${order.sellerOrders.length} different sellers. Deliveries will arrive separately, and each driver requires their own unique verification code upon arrival.",
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey.shade700,
+                                    height: 1.4,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
 
-                  // ================= CUSTOMER DELIVERY CODE =================
-                  CustomerDeliveryCodeWidget(orderId: order.id),
-
-                  // MALATRADE BRAND & TIMESTAMPS CONTAINER
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(12),
@@ -745,7 +823,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                                   ),
                                 ),
                                 const SizedBox(width: 8),
-                                Text(
+                                const Text(
                                   "Malatrade Order Details",
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
@@ -801,9 +879,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                       ],
                     ),
                   ),
-
                   const SizedBox(height: AppSpacing.md),
-
                   Text(
                     "Order items".toCapitalized(),
                     style: AppTypography.titleMedium.copyWith(
@@ -811,21 +887,17 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.sm),
-
-                  // ================= ITEMS =================
                   ...order.items.map(_buildItem).toList(),
-
                   const SizedBox(height: AppSpacing.md),
-
-                  // ================= SELLER BREAKDOWN =================
                   Text(
-                    "Seller breakdown".toCapitalized(),
+                    "Shops breakdown".toCapitalized(),
                     style: AppTypography.titleMedium.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
                   ),
                   const SizedBox(height: AppSpacing.sm),
-
+                  
+                  // 🎯 SHOPS BREAKDOWN CARDS WITH CLICKABLE SHOP HEADER & EMBEDDED VERIFICATION CODE
                   ...order.sellerOrders.map((sellerOrder) {
                     return Container(
                       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -838,48 +910,93 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.store, size: 18, color: AppColors.mangoOrange),
-                              const SizedBox(width: AppSpacing.xs),
-                              Expanded(
-                                child: Text(
-                                  "Seller ID / Store #${sellerOrder.sellerId}".toCapitalized(),
-                                  style: AppTypography.titleSmall.copyWith(
-                                    fontWeight: FontWeight.w700,
+                          // 🛍️ CLICKABLE SHOP HEADER
+                          InkWell(
+                            borderRadius: BorderRadius.circular(8),
+                            onTap: () {
+                              if (sellerOrder.shopId != null) {
+                                final tabsScreen = MainTabsScreen.of(context);
+                                if (tabsScreen != null) {
+                                  tabsScreen.navigateToShopDetails(sellerOrder.shopId!);
+                                }
+                              }
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 2.0),
+                              child: Row(
+                                children: [
+                                  if (sellerOrder.shopLogo != null && sellerOrder.shopLogo!.isNotEmpty)
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(6),
+                                      child: Image.network(
+                                        sellerOrder.shopLogo!,
+                                        width: 22,
+                                        height: 22,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) => const Icon(
+                                          Icons.store,
+                                          size: 18,
+                                          color: AppColors.mangoOrange,
+                                        ),
+                                      ),
+                                    )
+                                  else
+                                    const Icon(Icons.store, size: 18, color: AppColors.mangoOrange),
+
+                                  const SizedBox(width: AppSpacing.xs),
+
+                                  Expanded(
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Flexible(
+                                          child: Text(
+                                            sellerOrder.shopName,
+                                            style: AppTypography.titleSmall.copyWith(
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.black87,
+                                              decoration: TextDecoration.underline,
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 4),
+                                        const Icon(
+                                          Icons.arrow_forward_ios_rounded,
+                                          size: 10,
+                                          color: AppColors.mangoOrange,
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
+
+                                  AppBadge(
+                                    text: sellerOrder.status.toCapitalized(),
+                                    type: sellerOrder.status.toLowerCase() == 'completed'
+                                        ? BadgeType.success
+                                        : BadgeType.warning,
+                                  ),
+                                ],
                               ),
-                              Text(
-                                sellerOrder.status.toCapitalized(),
-                                style: AppTypography.labelSmall.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.mangoOrange,
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
+
                           const SizedBox(height: AppSpacing.xs),
                           Text(
                             "Subtotal: MWK ${sellerOrder.subtotal.toStringAsFixed(2)}",
                             style: AppTypography.bodyMedium,
                           ),
                           Text(
-                            "Commission: MWK ${sellerOrder.commission.toStringAsFixed(2)}".toCapitalized(),
-                            style: AppTypography.bodyMedium,
-                          ),
-                          Text(
-                            "To seller: MWK ${sellerOrder.sellerAmount.toStringAsFixed(2)}".toCapitalized(),
-                            style: AppTypography.bodyMedium.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: AppSpacing.xxs),
-                          Text(
-                            "Delivery: ${sellerOrder.deliveryStatus ?? 'pending'}".toCapitalized(),
+                            "Delivery Status: ${sellerOrder.deliveryStatus ?? 'pending'}".toCapitalized(),
                             style: AppTypography.bodySmall.copyWith(
                               color: Colors.grey,
                             ),
+                          ),
+                          
+                          // 🔑 EMBEDDED CODE WIDGET SPECIFIC TO THIS SELLER
+                          SellerDeliveryCodeWidget(
+                            orderId: order.id,
+                            sellerId: sellerOrder.sellerId,
                           ),
                         ],
                       ),
@@ -897,8 +1014,6 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
   @override
   Widget build(BuildContext context) {
     final paginationState = ref.watch(ordersPaginationProvider);
-    final double screenWidth = MediaQuery.of(context).size.width;
-    final bool isDesktop = screenWidth > 900;
 
     if (paginationState.orders.isEmpty && paginationState.isLoading) {
       return Center(child: AppLoader.inline());
@@ -912,9 +1027,29 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
             child: Center(
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.md),
-                child: AppInfoBox(
-                  type: AppInfoType.error,
-                  message: "Failed to load orders: ${paginationState.errorMessage}".toCapitalized(),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AppInfoBox(
+                      type: AppInfoType.error,
+                      message: "Failed to load orders: ${paginationState.errorMessage}".toCapitalized(),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        ref.read(ordersPaginationProvider.notifier).refresh();
+                      },
+                      icon: const Icon(Icons.refresh),
+                      label: const Text("Retry"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.mangoOrange,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -926,6 +1061,7 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
       );
     }
 
+    // ================= CENTERED RECTANGLE EMPTY STATE =================
     if (paginationState.orders.isEmpty && !paginationState.isLoading) {
       return CustomScrollView(
         slivers: [
@@ -934,9 +1070,62 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
             child: Center(
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.md),
-                child: AppInfoBox(
-                  type: AppInfoType.info,
-                  message: "No orders yet".toCapitalized(),
+                child: Container(
+                  constraints: const BoxConstraints(maxWidth: 360),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: AppSpacing.lg,
+                    horizontal: AppSpacing.md,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(
+                      color: Colors.grey.withOpacity(0.12),
+                      width: 1,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.02),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 52,
+                        height: 52,
+                        decoration: BoxDecoration(
+                          color: AppColors.mangoOrange.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.receipt_long_outlined,
+                          size: 26,
+                          color: AppColors.mangoOrange,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        "No Orders Found",
+                        style: AppTypography.titleMedium.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xxs),
+                      Text(
+                        "You haven't placed any marketplace orders yet. Items you purchase will appear here along with tracking and invoice info.",
+                        textAlign: TextAlign.center,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: Colors.grey.shade600,
+                          height: 1.3,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -963,33 +1152,16 @@ class _OrdersScreenState extends ConsumerState<OrdersScreen> {
             sliver: SliverToBoxAdapter(
               child: Center(
                 child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1200),
-                  child: isDesktop
-                      ? LayoutBuilder(
-                          builder: (context, constraints) {
-                            final double cardWidth = (constraints.maxWidth - 20) / 2;
-
-                            return Wrap(
-                              spacing: 20,
-                              runSpacing: 20,
-                              children: paginationState.orders.map((order) {
-                                return SizedBox(
-                                  width: cardWidth,
-                                  child: _buildOrderCard(order),
-                                );
-                              }).toList(),
-                            );
-                          },
-                        )
-                      : ListView.separated(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: paginationState.orders.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
-                          itemBuilder: (context, index) {
-                            return _buildOrderCard(paginationState.orders[index]);
-                          },
-                        ),
+                  constraints: const BoxConstraints(maxWidth: 800),
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: paginationState.orders.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+                    itemBuilder: (context, index) {
+                      return _buildOrderCard(paginationState.orders[index]);
+                    },
+                  ),
                 ),
               ),
             ),

@@ -190,15 +190,8 @@ class ProductCard extends ConsumerWidget {
                             return Icon(Icons.star_border_rounded, color: Colors.grey.shade400, size: 14);
                           }
                         }),
-                        const SizedBox(width: 4),
-                        Text(
-                          "(${product.totalReviews})",
-                          style: AppTypography.bodySmall.copyWith(
-                            color: Colors.grey.shade600,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+                 
+                       
                       ],
                     ),
 
@@ -214,7 +207,7 @@ class ProductCard extends ConsumerWidget {
                             children: [
                               if (product.hasDiscount)
                                 Text(
-                                  "MWK ${product.originalPrice ?? 0}",
+                                  formatWithCommas(product.originalPrice),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: AppTypography.bodySmall.copyWith(
@@ -227,7 +220,7 @@ class ProductCard extends ConsumerWidget {
                                 fit: BoxFit.scaleDown,
                                 alignment: Alignment.centerLeft,
                                 child: Text(
-                                  "MWK ${product.price}",
+                                  formatWithCommas(product.price),
                                   maxLines: 1,
                                   style: AppTypography.titleMedium.copyWith(
                                     fontWeight: FontWeight.bold,

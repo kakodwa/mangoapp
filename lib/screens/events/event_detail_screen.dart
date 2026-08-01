@@ -24,6 +24,7 @@ import '../../utils/app_snackbar.dart';
 import '../../widgets/app_fab.dart';
 import '../main_tabs_screen.dart';
 import '../../theme/design_system/app_spacing.dart';
+import '../../utils/price_helper.dart';
 
 // Analytics Import
 import '../../services/analytics_service.dart';

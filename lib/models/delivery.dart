@@ -12,8 +12,6 @@ class Escrow {
   }
 }
 
-
-
 class DeliveryPerson {
   final String fullName;
   final String phoneNumber;
@@ -37,10 +35,9 @@ class DeliveryPerson {
   }
 }
 
-
-
 class Delivery {
   final int id;
+  final int? sellerId; // 🔑 Tied to Seller
   final String status;
   final String orderNumber;
 
@@ -62,6 +59,7 @@ class Delivery {
 
   Delivery({
     required this.id,
+    this.sellerId,
     required this.status,
     required this.orderNumber,
     this.deliveryCode,
@@ -80,6 +78,7 @@ class Delivery {
   factory Delivery.fromJson(Map<String, dynamic> json) {
     return Delivery(
       id: json['id'],
+      sellerId: json['seller_id'] ?? (json['seller'] is Map ? json['seller']['id'] : json['seller']),
       status: json['status'] ?? '',
       orderNumber: json['order_number'] ?? '',
       deliveryCode: json['delivery_code'],

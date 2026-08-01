@@ -6,6 +6,7 @@ import '../../providers/tickets_provider.dart';
 import '../../theme/app_colors.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../widgets/web_footer.dart';
+import '../../utils/price_helper.dart';
 
 class EventTicketsScreen extends ConsumerStatefulWidget {
   final EventModel event;

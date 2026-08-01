@@ -12,6 +12,7 @@ import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_card.dart';
 import '../../services/analytics_service.dart';
 import '../../widgets/web_footer.dart';
+import '../../utils/price_helper.dart';
 
 class BookingCheckoutScreen extends ConsumerStatefulWidget {
   final Room room;

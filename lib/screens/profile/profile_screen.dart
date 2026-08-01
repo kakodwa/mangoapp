@@ -319,7 +319,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                       analytics.logEvent('profile_click_add_product');
                                       MainTabsScreen.of(context)?.navigateToAddProduct();
                                     }),
-                                    _gridCard(Icons.local_shipping_outlined, "Deliveries", () {
+                                    _gridCard(Icons.local_shipping_outlined, "Deliveries & Orders", () {
                                       analytics.logEvent('profile_click_deliveries');
                                       MainTabsScreen.of(context)?.navigateToSellerDeliveries();
                                     }),

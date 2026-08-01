@@ -7,6 +7,7 @@ import '../../providers/owner_bookings_provider.dart';
 import '../../widgets/hospitality/owner_booking_card.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../widgets/web_footer.dart';
+import '../../utils/price_helper.dart';
 
 class OwnerBookingsScreen extends ConsumerStatefulWidget {
   const OwnerBookingsScreen({super.key});

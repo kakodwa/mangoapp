@@ -1,3 +1,5 @@
+// lib/screens/events/my_tickets_screen.dart
+
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -15,6 +17,11 @@ import '../../theme/app_colors.dart';
 import '../../widgets/web_footer.dart';
 import 'ticket_detail_screen.dart';
 import '../main_tabs_screen.dart';
+import '../../utils/price_helper.dart';
+
+// Design System Imports
+import '../../theme/design_system/app_spacing.dart';
+import '../../theme/design_system/app_typography.dart';
 
 class MyTicketsScreen extends ConsumerStatefulWidget {
   const MyTicketsScreen({super.key});
@@ -140,44 +147,74 @@ class _MyTicketsScreenState extends ConsumerState<MyTicketsScreen> {
 
     return ticketsAsync.when(
       data: (tickets) {
+        // ================= CENTERED RECTANGLE EMPTY STATE =================
         if (tickets.isEmpty) {
           return CustomScrollView(
             controller: _scrollController,
             slivers: [
               SliverFillRemaining(
                 hasScrollBody: false,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Spacer(),
-                    // Centered Empty State Layout with context-specific Icon
-                    Icon(
-                      Icons.confirmation_number_outlined,
-                      size: 80,
-                      color: Theme.of(context).colorScheme.outline.withOpacity(0.4),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      "No tickets yet",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    child: Container(
+                      constraints: const BoxConstraints(maxWidth: 360),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.lg,
+                        horizontal: AppSpacing.md,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: Colors.grey.withOpacity(0.12),
+                          width: 1,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.02),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 52,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              color: AppColors.mangoOrange.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.confirmation_number_outlined,
+                              size: 26,
+                              color: AppColors.mangoOrange,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.sm),
+                          Text(
+                            "No Tickets Yet",
+                            style: AppTypography.titleMedium.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                          ),
+                          const SizedBox(height: AppSpacing.xxs),
+                          Text(
+                            "When you purchase tickets for upcoming events, your passes and QR codes will show up here.",
+                            textAlign: TextAlign.center,
+                            style: AppTypography.bodySmall.copyWith(
+                              color: Colors.grey.shade600,
+                              height: 1.3,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 6),
-                    Text(
-                      "When you purchase tickets for upcoming events, they will show up here.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Theme.of(context).colorScheme.outline,
-                      ),
-                    ),
-                    const Spacer(),
-                  ],
+                  ),
                 ),
               ),
 
@@ -372,8 +409,28 @@ class _MyTicketsScreenState extends ConsumerState<MyTicketsScreen> {
           ],
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text(e.toString())),
+      loading: () => const Center(
+        child: CircularProgressIndicator(color: AppColors.mangoOrange),
+      ),
+      error: (e, _) => CustomScrollView(
+        slivers: [
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Text(
+                  "Error loading tickets: $e",
+                  style: TextStyle(color: Colors.grey.shade600),
+                ),
+              ),
+            ),
+          ),
+          const SliverToBoxAdapter(
+            child: WebFooter(),
+          ),
+        ],
+      ),
     );
   }
 }

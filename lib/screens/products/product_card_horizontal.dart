@@ -28,6 +28,7 @@ import '../../widgets/capitalize_text.dart';
 // Utils & Services
 import '../../services/analytics_service.dart';
 import '../../utils/app_toast.dart';
+import '../../utils/price_helper.dart';
 
 // Design System & Theme
 import '../../theme/app_colors.dart';
@@ -258,15 +259,6 @@ class ProductCardHorizontal extends ConsumerWidget {
                                 return Icon(Icons.star_border_rounded, color: secondaryTextColor, size: 12);
                               }
                             }),
-                            const SizedBox(width: 4),
-                            Text(
-                              "(${product.totalReviews})",
-                              style: AppTypography.bodySmall.copyWith(
-                                color: secondaryTextColor,
-                                fontSize: 9,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
                           ],
                         ),
                         const SizedBox(height: 4),
@@ -282,7 +274,7 @@ class ProductCardHorizontal extends ConsumerWidget {
                                 children: [
                                   if (product.hasDiscount)
                                     Text(
-                                      "MWK ${product.originalPrice ?? 0}",
+                                      formatWithCommas(product.originalPrice),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                       style: AppTypography.bodySmall.copyWith(
@@ -292,7 +284,7 @@ class ProductCardHorizontal extends ConsumerWidget {
                                       ),
                                     ),
                                   Text(
-                                    "MWK ${product.price}",
+                                    formatWithCommas(product.price),
                                     maxLines: 1,
                                     style: AppTypography.titleMedium.copyWith(
                                       fontWeight: FontWeight.bold,

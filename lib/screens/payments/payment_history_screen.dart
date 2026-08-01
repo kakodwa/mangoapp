@@ -1,3 +1,5 @@
+// lib/screens/payment/payment_history_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/payment_model.dart';
@@ -11,9 +13,8 @@ import '../../theme/design_system/app_badge.dart';
 import '../../theme/design_system/app_loader.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_typography.dart';
+import '../../utils/price_helper.dart';
 
-
-// Safe first-letter-only capitalization extension (Preserved)
 extension CapitalizeString on String {
   String toCapitalized() {
     if (isEmpty) return this;
@@ -36,53 +37,124 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
   int _currentPage = 1;
 
   @override
+  void initState() {
+    super.initState();
+    // 🔑 Auto-refresh payment provider whenever the screen is opened
+    Future.microtask(() {
+      _resetLocalState();
+      ref.invalidate(myPaymentsProvider);
+    });
+  }
+
+  void _resetLocalState() {
+    _allPayments.clear();
+    _currentPage = 1;
+    _hasMore = true;
+    _isLoadingMore = false;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Sync state whenever provider fetches new data
+    ref.listen<AsyncValue<List<PaymentModel>>>(myPaymentsProvider, (previous, next) {
+      next.whenData((payments) {
+        if (mounted) {
+          setState(() {
+            _allPayments.clear();
+            _allPayments.addAll(payments);
+            if (payments.length < 15) {
+              _hasMore = false;
+            }
+          });
+        }
+      });
+    });
+
     final paymentsAsync = ref.watch(myPaymentsProvider);
     final double screenWidth = MediaQuery.of(context).size.width;
     final bool isLargeScreen = screenWidth > 900;
 
     return RefreshIndicator(
       onRefresh: () async {
-        setState(() {
-          _allPayments.clear();
-          _currentPage = 1;
-          _hasMore = true;
-          _isLoadingMore = false;
-        });
-        return ref.refresh(myPaymentsProvider);
+        _resetLocalState();
+        return ref.refresh(myPaymentsProvider.future);
       },
       child: paymentsAsync.when(
         data: (initialPayments) {
-          // Sync Riverpod data into local state array on initial load
+          // Sync data into local state if empty
           if (_currentPage == 1 && _allPayments.isEmpty) {
             _allPayments.addAll(initialPayments);
-            // If the initial response page returns fewer items than expected max capacity limits, 
-            // assume it's the last page. Adjust this threshold number (e.g., 15 or 20) as needed.
             if (initialPayments.length < 15) {
               _hasMore = false;
             }
           }
 
+          // ================= CENTERED RECTANGLE EMPTY STATE =================
           if (_allPayments.isEmpty) {
             return CustomScrollView(
               slivers: [
                 SliverFillRemaining(
                   hasScrollBody: false,
-                  child: Padding(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Spacer(),
-                        const Icon(Icons.receipt_long, size: 64, color: Colors.grey),
-                        const SizedBox(height: AppSpacing.md),
-                        Text(
-                          "No payments found".toCapitalized(),
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 15, color: Colors.grey),
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      child: Container(
+                        constraints: const BoxConstraints(maxWidth: 360),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppSpacing.lg,
+                          horizontal: AppSpacing.md,
                         ),
-                        const Spacer(),
-                      ],
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(
+                            color: Colors.grey.withOpacity(0.12),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.02),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 52,
+                              height: 52,
+                              decoration: BoxDecoration(
+                                color: AppColors.mangoOrange.withOpacity(0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.receipt_long_outlined,
+                                size: 26,
+                                color: AppColors.mangoOrange,
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            Text(
+                              "No Payments Found",
+                              style: AppTypography.titleMedium.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.xxs),
+                            Text(
+                              "Your completed and pending payment receipts will be displayed here once transactions are recorded.",
+                              textAlign: TextAlign.center,
+                              style: AppTypography.bodySmall.copyWith(
+                                color: Colors.grey.shade600,
+                                height: 1.3,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -93,6 +165,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
             );
           }
 
+          // ================= PAYMENT LIST =================
           return NotificationListener<ScrollNotification>(
             onNotification: (ScrollNotification scrollInfo) {
               if (!_isLoadingMore && _hasMore && 
@@ -142,7 +215,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            "MWK ${payment.amount}",
+                                            formatWithCommas(payment.amount),
                                             style: AppTypography.titleLarge.copyWith(
                                               fontWeight: FontWeight.bold,
                                             ),
@@ -194,13 +267,10 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
                           ),
                         );
                       },
-                      // childCount handles constraints properly inside SliverChildBuilderDelegate
                       childCount: _allPayments.length + (_isLoadingMore ? 1 : 0),
                     ),
                   ),
                 ),
-                
-                // Web/Desktop Footer
                 const SliverToBoxAdapter(
                   child: WebFooter(),
                 ),
@@ -248,7 +318,6 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
     );
   }
 
-  // Handle continuous data fetching
   Future<void> _loadMoreData() async {
     setState(() {
       _isLoadingMore = true;
@@ -256,10 +325,7 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
 
     try {
       _currentPage++;
-      
-      // Update this call to match your actual API pagination parameters if required, 
-      // e.g., ref.read(fetchMorePaymentsProvider(page: _currentPage))
-      final newPayments = await ref.read(myPaymentsProvider.future); 
+      final newPayments = await ref.read(myPaymentsProvider.future);
 
       if (mounted) {
         setState(() {
@@ -267,7 +333,11 @@ class _PaymentHistoryScreenState extends ConsumerState<PaymentHistoryScreen> {
           if (newPayments.isEmpty) {
             _hasMore = false;
           } else {
-            _allPayments.addAll(newPayments);
+            for (var p in newPayments) {
+              if (!_allPayments.any((existing) => existing.id == p.id)) {
+                _allPayments.add(p);
+              }
+            }
           }
         });
       }

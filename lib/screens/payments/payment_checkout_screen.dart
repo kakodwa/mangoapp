@@ -17,6 +17,8 @@ import '../../utils/app_toast.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/web_footer.dart';
+import '../../utils/price_helper.dart';
+import '../orders/orders_screen.dart';
 
 class PaymentCheckoutScreen extends ConsumerStatefulWidget {
   final int transactionId;
@@ -191,7 +193,11 @@ class _PaymentCheckoutScreenState
           throw Exception("PayChangu did not return a valid checkout session.");
         }
 
+        // 🌐 FLUTTER WEB FIX
         if (kIsWeb) {
+          _startPolling(paymentReference);
+          _showProcessingDialog();
+
           await launchUrl(
             Uri.parse(checkoutUrl),
             mode: LaunchMode.externalApplication,
@@ -199,6 +205,7 @@ class _PaymentCheckoutScreenState
           return;
         }
 
+        // 📱 MOBILE APP NATIVE WEBVIEW FLOW
         if (!mounted) return;
 
         await Navigator.push(
@@ -263,6 +270,7 @@ class _PaymentCheckoutScreenState
 
             final tabsShell = MainTabsScreen.of(context);
 
+            // 1. Close processing dialog safely
             if (Navigator.canPop(context)) {
               Navigator.pop(context);
             }
@@ -276,8 +284,10 @@ class _PaymentCheckoutScreenState
 
             if (!mounted) return;
 
-            Navigator.of(context).popUntil((route) => route.isFirst);
+            // 2. Refresh provider before navigating
+            ref.invalidate(ordersPaginationProvider);
 
+            // 3. Switch tab context directly without resetting route stack
             if (widget.referenceType == "booking") {
               tabsShell?.navigateToMyBookings();
             } else if (widget.referenceType == "order") {
@@ -341,7 +351,7 @@ class _PaymentCheckoutScreenState
           ),
           const SizedBox(height: 10),
           Text(
-            "Pay MWK ${widget.amount}",
+            formatWithCommas(widget.amount),
             style: const TextStyle(
               color: Colors.white,
               fontSize: 22,
@@ -585,23 +595,17 @@ class _PaymentCheckoutScreenState
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                 child: Column(
                   children: [
-                    // Top Header Card
                     _buildHeaderCard(),
-
                     const SizedBox(height: AppSpacing.lg),
-
                     if (isDesktop)
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // LEFT COLUMN: Payment Methods Selection
                           Expanded(
                             flex: 6,
                             child: _buildMethodsList(),
                           ),
                           const SizedBox(width: 32),
-
-                          // RIGHT COLUMN: Input Form & Pay Action Button
                           Expanded(
                             flex: 5,
                             child: _buildPaymentFormControls(),
@@ -622,8 +626,6 @@ class _PaymentCheckoutScreenState
               ),
             ),
             const SizedBox(height: 40),
-
-            // Web/Desktop Footer
             const WebFooter(),
           ],
         ),

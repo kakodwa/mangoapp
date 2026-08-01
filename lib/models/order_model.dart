@@ -17,7 +17,7 @@ class Order {
 
   final List<OrderItem> items;
 
-  /// ⭐ NEW: MULTI SELLER SUPPORT
+  /// ⭐ MULTI SELLER SUPPORT
   final List<SellerOrder> sellerOrders;
 
   final DateTime createdAt;
@@ -80,6 +80,11 @@ class SellerOrder {
   final int orderId;
   final int sellerId;
 
+  // 🛍️ SHOP FIELDS FOR CLICKABLE SHOP HEADER
+  final int? shopId;
+  final String shopName;
+  final String? shopLogo;
+
   final double subtotal;
   final double commission;
   final double sellerAmount;
@@ -99,6 +104,9 @@ class SellerOrder {
     required this.id,
     required this.orderId,
     required this.sellerId,
+    this.shopId,
+    required this.shopName,
+    this.shopLogo,
     required this.subtotal,
     required this.commission,
     required this.sellerAmount,
@@ -116,6 +124,11 @@ class SellerOrder {
       id: json['id'] ?? 0,
       orderId: json['order'] ?? 0,
       sellerId: json['seller'] ?? 0,
+
+      // Parse Shop properties sent from Django SellerOrderSerializer
+      shopId: json['shop_id'],
+      shopName: json['shop_name'] ?? 'Unknown Shop',
+      shopLogo: json['shop_logo'],
 
       subtotal: double.tryParse(json['subtotal'].toString()) ?? 0,
       commission: double.tryParse(json['commission'].toString()) ?? 0,
@@ -146,7 +159,7 @@ class OrderItem {
   final int productId;
   final String productName;
   final String productImage;
-  final Map<String, dynamic>? variantAttributes; // ✅ Added to capture variant properties mappings
+  final Map<String, dynamic>? variantAttributes;
   final int quantity;
   final double unitPrice;
   final double totalPrice;
@@ -156,7 +169,7 @@ class OrderItem {
     required this.productId,
     required this.productName,
     required this.productImage,
-    this.variantAttributes, // ✅ Make choice context option properties optional
+    this.variantAttributes,
     required this.quantity,
     required this.unitPrice,
     required this.totalPrice,
@@ -170,7 +183,6 @@ class OrderItem {
       productId: product['id'] ?? 0,
       productName: json['product_name'] ?? product['name'] ?? '',
       productImage: json['product_image'] ?? product['image'] ?? '',
-      // ✅ Dynamically check for attributes sent directly on item object root or under sub-variant keys
       variantAttributes: json['product_variant'] ?? json['variant_attributes'],
       quantity: json['quantity'] ?? 0,
       unitPrice: double.tryParse(json['unit_price'].toString()) ?? 0,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import '../../utils/price_helper.dart';
 
 class VisaPaymentWebView extends StatefulWidget {
   final String checkoutUrl; // Simply pass the URL returned from backend

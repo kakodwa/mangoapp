@@ -15,6 +15,7 @@ import '../../theme/design_system/app_image_card.dart';
 import '../../theme/design_system/app_badge.dart';
 import '../../theme/design_system/app_typography.dart';
 import '../../theme/design_system/app_spacing.dart';
+import '../../utils/price_helper.dart';
 
 class EventCard extends StatelessWidget {
   final EventModel event;
@@ -137,7 +138,7 @@ class EventCard extends StatelessWidget {
                     const SizedBox.shrink(),
                     
                   AppBadge(
-                    text: "MWK ${lowestPrice.toStringAsFixed(0)}",
+                    text:formatWithCommas(lowestPrice),
                     type: BadgeType.success,
                     fontSize: 9,
                   ),

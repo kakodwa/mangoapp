@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../../utils/price_helper.dart';
 import '../../models/room_model.dart';
 import '../../screens/main_tabs_screen.dart'; // ✅ Added to access master tab state manager lookups
 
@@ -257,7 +257,7 @@ class _RoomCardState extends State<RoomCard> {
                       Row(
                         children: [
                           Text(
-                            "MWK ${room.pricePerNight}",
+                            formatWithCommas(room.pricePerNight),
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 22,

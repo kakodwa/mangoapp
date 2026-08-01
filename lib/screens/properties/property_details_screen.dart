@@ -22,6 +22,7 @@ import 'property_card.dart';
 import '../../widgets/app_fab.dart';
 import '../../providers/auth_provider.dart';
 import '../../theme/design_system/app_spacing.dart';
+import '../../utils/price_helper.dart';
 
 
 // Analytics Import
@@ -207,7 +208,7 @@ class _PropertyDetailsScreenState extends ConsumerState<PropertyDetailsScreen> {
             ),
             const SizedBox(height: AppSpacing.md),
             Text(
-              '${property.currency} ${property.price.toStringAsFixed(0)}',
+              formatWithCommas(property.price),
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: AppColors.mangoOrange,

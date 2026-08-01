@@ -19,6 +19,7 @@ import '../../screens/properties/property_details_screen.dart';
 
 // Analytics Import
 import '../../services/analytics_service.dart';
+import '../../utils/price_helper.dart';
 
 class PropertyCard extends StatelessWidget {
   final Property property;
@@ -121,7 +122,7 @@ class PropertyCard extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          '${property.currency.toUpperCase()} ${property.price.toStringAsFixed(0)}',
+                          formatWithCommas(property.price),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: AppTypography.titleMedium.copyWith(

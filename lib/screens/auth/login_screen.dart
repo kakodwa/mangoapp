@@ -152,7 +152,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             // Logo Wrapper
                             Center(
                               child: Image.asset(
-                                'assets/images/logo2.png',
+                                'assets/images/logo.png',
                                 height: 90,
                                 fit: BoxFit.contain,
                                 errorBuilder: (context, error, stackTrace) {

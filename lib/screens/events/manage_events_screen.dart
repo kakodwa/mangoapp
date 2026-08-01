@@ -13,6 +13,8 @@ import '../main_tabs_screen.dart';
 import 'event_tickets_screen.dart';
 import 'create_event_screen.dart';
 import '../../theme/design_system/app_spacing.dart';
+import '../../theme/design_system/app_typography.dart';
+import '../../utils/price_helper.dart';
 
 class ManageEventsScreen extends ConsumerStatefulWidget {
   const ManageEventsScreen({super.key});
@@ -385,7 +387,7 @@ class _ManageEventsScreenState
                       child: OutlinedButton.icon(
                         onPressed: () {
                           MainTabsScreen.of(context)?.setSelectedIndex(44);
-                          },
+                        },
                         icon: const Icon(Icons.qr_code_scanner),
                         label: const Text("Check-ins"),
                         style: OutlinedButton.styleFrom(
@@ -538,15 +540,85 @@ class _ManageEventsScreenState
       children: [
         eventsAsync.when(
           loading: () => const Center(
-            child: CircularProgressIndicator(),
+            child: CircularProgressIndicator(color: AppColors.mangoOrange),
           ),
           error: (e, _) => Center(
             child: Text(e.toString()),
           ),
           data: (allEvents) {
+            // ================= CENTERED RECTANGLE EMPTY STATE =================
             if (allEvents.isEmpty) {
-              return const Center(
-                child: Text("No events found"),
+              return CustomScrollView(
+                slivers: [
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        child: Container(
+                          constraints: const BoxConstraints(maxWidth: 360),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: AppSpacing.lg,
+                            horizontal: AppSpacing.md,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surface,
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(
+                              color: Colors.grey.withOpacity(0.12),
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.02),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 52,
+                                height: 52,
+                                decoration: BoxDecoration(
+                                  color: AppColors.mangoOrange.withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.event_note_outlined,
+                                  size: 26,
+                                  color: AppColors.mangoOrange,
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.sm),
+                              Text(
+                                "No Events Created",
+                                style: AppTypography.titleMedium.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.onSurface,
+                                ),
+                              ),
+                              const SizedBox(height: AppSpacing.xxs),
+                              Text(
+                                "You haven't published any events yet. Tap the '+' button below to host and publish your first event.",
+                                textAlign: TextAlign.center,
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: Colors.grey.shade600,
+                                  height: 1.3,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SliverToBoxAdapter(
+                    child: WebFooter(),
+                  ),
+                ],
               );
             }
 
@@ -615,7 +687,10 @@ class _ManageEventsScreenState
                           child: SizedBox(
                             width: 24,
                             height: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2.5),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: AppColors.mangoOrange,
+                            ),
                           ),
                         ),
                       ),
