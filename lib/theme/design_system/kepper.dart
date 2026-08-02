@@ -1,6 +1,7 @@
 // lib/theme/design_system/app_image_card.dart
 
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
 
 class AppImageCard extends StatelessWidget {
@@ -30,62 +31,40 @@ class AppImageCard extends StatelessWidget {
         ? imageUrl!.trim()
         : null;
 
-    // DEBUG: Show the exact URL reaching Flutter
-    debugPrint("🌍 FINAL IMAGE URL = $validUrl");
-
     return GestureDetector(
       onTap: onTap,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius),
         child: Stack(
           children: [
+            // ================= SHIMMER OPTIMIZED NETWORK IMAGE =================
             SizedBox(
               height: height,
               width: double.infinity,
-
               child: validUrl != null
-                  ? Image.network(
-  validUrl,
-  fit: BoxFit.cover,
-
-  // Helps servers like LiteSpeed identify Android requests correctly
-  headers: const {
-    'User-Agent':
-        'Mozilla/5.0 (Linux; Android 11) AppleWebKit/537.36 Chrome Mobile',
-    'Accept':
-        'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-  },
-
-  // Show shimmer while loading
-  loadingBuilder: (context, child, loadingProgress) {
-    if (loadingProgress == null) {
-      debugPrint("✅ IMAGE LOADED: $validUrl");
-      return child;
-    }
-
-    return Shimmer.fromColors(
-      baseColor: Colors.grey.shade300,
-      highlightColor: Colors.grey.shade100,
-      child: Container(
-        color: Colors.white,
-      ),
-    );
-  },
-
-  // Catch all image loading errors
-  errorBuilder: (context, error, stackTrace) {
-    debugPrint("❌ IMAGE ERROR URL: $validUrl");
-    debugPrint("❌ ERROR TYPE: ${error.runtimeType}");
-    debugPrint("❌ ERROR DETAILS: $error");
-    debugPrint("❌ STACK TRACE: $stackTrace");
-
-    return _buildPlaceholder();
-  },
-)
+                  ? CachedNetworkImage(
+                      imageUrl: validUrl,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Shimmer.fromColors(
+                        baseColor: Colors.grey.shade300,
+                        highlightColor: Colors.grey.shade100,
+                        child: Container(
+                          color: Colors.white,
+                          width: double.infinity,
+                          height: double.infinity,
+                        ),
+                      ),
+                      // 🔑 Print the EXACT error in debug terminal when loading fails
+                      errorWidget: (context, url, error) {
+  debugPrint('❌ APK Image Load Error for URL: $url');
+  debugPrint('❌ Exception details: $error');
+  return _buildPlaceholder();
+},
+                    )
                   : _buildPlaceholder(),
             ),
 
-            // Gradient overlay
+            // Gradient Overlay (subtle ambient drop text protection layer)
             Positioned.fill(
               child: Container(
                 decoration: BoxDecoration(
@@ -101,21 +80,17 @@ class AppImageCard extends StatelessWidget {
               ),
             ),
 
-            // Custom overlay
-            if (overlay != null)
-              Positioned.fill(
-                child: overlay!,
-              ),
+            // Custom Overlay
+            if (overlay != null) Positioned.fill(child: overlay!),
 
-            // Badges
+            // Badges Container (Pins favorite heart buttons and category text cleanly)
             if (badges != null && badges!.isNotEmpty)
               Positioned(
                 top: 10,
                 left: 10,
                 right: 10,
                 child: Row(
-                  mainAxisAlignment:
-                      MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: badges!,
                 ),
               ),
