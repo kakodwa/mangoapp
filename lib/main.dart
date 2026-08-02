@@ -1,5 +1,6 @@
 // lib/main.dart
 import 'dart:io'; // 🔑 Required for HttpOverrides and SecurityContext
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
@@ -43,6 +44,23 @@ class CustomHttpOverrides extends HttpOverrides {
         'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36';
 
     return client;
+  }
+}
+
+
+Future<void> testSsl() async {
+  try {
+    final response = await http.get(
+      Uri.parse(
+        "https://malatrade.com/media/product_images/scaled_WhatsApp_Image_2026-07-22_at_09.26.15.jpeg",
+      ),
+    );
+
+    print("✅ Status: ${response.statusCode}");
+    print("Body length: ${response.bodyBytes.length}");
+  } catch (e) {
+    print("❌ SSL Test Failed");
+    print(e);
   }
 }
 
