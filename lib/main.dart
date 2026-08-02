@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
@@ -27,8 +28,33 @@ import 'providers/auth_provider.dart';
 final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>();
 final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
+
+class MyHttpOverrides extends HttpOverrides {
+
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+
+    final client = super.createHttpClient(context);
+
+    client.badCertificateCallback =
+        (X509Certificate cert, String host, int port) {
+
+      if (host.contains("malatrade.com")) {
+        debugPrint("Ignoring SSL error for $host");
+        return true;
+      }
+
+      return false;
+    };
+
+    return client;
+  }
+}
+
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
+  HttpOverrides.global = MyHttpOverrides();
 
 
   if (WebViewPlatform.instance == null) {
@@ -42,6 +68,10 @@ void main() {
 
   runApp(const ProviderScope(child: MainApp()));
 }
+
+
+
+
 
 class MainApp extends ConsumerStatefulWidget {
   const MainApp({Key? key}) : super(key: key);
