@@ -45,13 +45,6 @@ class AppImageCard extends StatelessWidget {
                   ? CachedNetworkImage(
                       imageUrl: validUrl,
                       fit: BoxFit.cover,
-                      // 🔑 Pass headers so Apache / Namecheap does not block Dart native requests
-                      httpHeaders: const {
-                        'User-Agent':
-                            'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
-                        'Accept':
-                            'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-                      },
                       placeholder: (context, url) => Shimmer.fromColors(
                         baseColor: Colors.grey.shade300,
                         highlightColor: Colors.grey.shade100,
@@ -63,10 +56,10 @@ class AppImageCard extends StatelessWidget {
                       ),
                       // 🔑 Print the EXACT error in debug terminal when loading fails
                       errorWidget: (context, url, error) {
-                        debugPrint('❌ APK Image Load Error for URL: $url');
-                        debugPrint('❌ Exception details: $error');
-                        return _buildPlaceholder();
-                      },
+  debugPrint('❌ APK Image Load Error for URL: $url');
+  debugPrint('❌ Exception details: $error');
+  return _buildPlaceholder();
+},
                     )
                   : _buildPlaceholder(),
             ),
