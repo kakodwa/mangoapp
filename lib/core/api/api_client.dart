@@ -15,11 +15,11 @@ import '../errors/api_exception.dart';
 class ApiClient {
 
      static String get baseUrl {
-    if (kIsWeb) return "https://malatrade.com/api/";
-    return "https://malatrade.com/api/";
+    if (kIsWeb) return "https://www.malatrade.com/api/";
+    return "https://www.malatrade.com/api/";
   }
 
-  static const String host = "https://malatrade.com/api/";
+  static const String host = "https://www.malatrade.com/api/";
   
   late Dio _dio;
   final _secureStorage = const FlutterSecureStorage();
