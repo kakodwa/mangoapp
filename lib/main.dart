@@ -1,5 +1,3 @@
-import 'dart:io' as io;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
@@ -29,26 +27,9 @@ import 'providers/auth_provider.dart';
 final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>();
 final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
-
-
-
-
-class MyHttpOverrides extends io.HttpOverrides {
-  @override
-  io.HttpClient createHttpClient(io.SecurityContext? context) {
-    return super.createHttpClient(context)
-      ..badCertificateCallback =
-          (io.X509Certificate cert, String host, int port) {
-        debugPrint('CERT: $host');
-        return true;
-      };
-  }
-}
-
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  io.HttpOverrides.global = MyHttpOverrides();
 
   if (WebViewPlatform.instance == null) {
     WebViewPlatform.instance = AndroidWebViewPlatform();
