@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'package:flutter/services.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
@@ -27,8 +30,34 @@ import 'providers/auth_provider.dart';
 final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>();
 final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
-void main() {
+
+class CustomSecurityHttpOverrides extends HttpOverrides {
+  final List<int> certBytes;
+
+  CustomSecurityHttpOverrides(this.certBytes);
+
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    final SecurityContext secContext = context ?? SecurityContext(withTrustedRoots: true);
+    try {
+      secContext.setTrustedCertificatesBytes(certBytes);
+    } catch (e) {
+      debugPrint("Certificate loading exception: $e");
+    }
+    return super.createHttpClient(secContext);
+  }
+}
+
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    final ByteData certData = await rootBundle.load('assets/certs/ssl_com_root_2022.pem');
+    final List<int> certBytes = certData.buffer.asUint8List();
+    HttpOverrides.global = CustomSecurityHttpOverrides(certBytes);
+  } catch (e) {
+    debugPrint("Failed to load root certificate asset: $e");
+  }
 
 
   if (WebViewPlatform.instance == null) {

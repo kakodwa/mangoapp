@@ -137,6 +137,7 @@ flutter:
 
 
   assets:
+    - assets/certs/ssl_com_root_2022.pem
     - assets/images/logo.png
     - assets/images/logo3.png
     - assets/images/banner.png
