@@ -26,7 +26,12 @@ final walletProvider = FutureProvider.autoDispose<Wallet>((ref) async {
   }
 
   if (!authState.isAuthenticated) {
-    throw Exception("Authentication required. Please log in.");
+    return Wallet(
+      balance: 0.0,
+      currency: 'MWK',
+      totalEarnings: 0.0,
+      totalWithdrawn: 0.0,
+    );
   }
 
   final api = ref.watch(apiClientProvider);
@@ -95,8 +100,13 @@ class WalletTransactionsNotifier
     });
 
     final authState = _ref.read(authProvider);
-    if (!authState.isLoading) {
+    if (!authState.isLoading && authState.isAuthenticated) {
       fetchFirstPage();
+    } else {
+      state = state.copyWith(
+        isLoading: false,
+        isUnauthenticated: true,
+      );
     }
   }
 
@@ -112,7 +122,7 @@ class WalletTransactionsNotifier
       final token = await _secureStorage.read(key: 'access_token');
       final authState = _ref.read(authProvider);
 
-      if (token == null && !authState.isAuthenticated) {
+      if (token == null || !authState.isAuthenticated) {
         state = state.copyWith(
           isLoading: false,
           isUnauthenticated: true,
@@ -123,7 +133,6 @@ class WalletTransactionsNotifier
 
       final api = _ref.read(apiClientProvider);
       
-      // Hits GET /api/wallet/transactions/?page=1
       final response = await api.getList<WalletTransaction>(
         'wallet/transactions/?page=$_currentPage',
         fromJson: (json) => WalletTransaction.fromJson(json),
@@ -138,7 +147,6 @@ class WalletTransactionsNotifier
     } catch (e) {
       final errStr = e.toString().toLowerCase();
 
-      // Only flag authentication error if explicit HTTP 401 occurs
       final isAuthErr = errStr.contains("401") ||
           errStr.contains("invalid_token") ||
           errStr.contains("token_not_valid");
@@ -243,6 +251,13 @@ final withdrawalProvider =
 
 final historicalWithdrawalsProvider =
     FutureProvider.autoDispose<List<WithdrawalModel>>((ref) async {
+  final authState = ref.watch(authProvider);
+
+  // Guard Clause: Prevent API call if unauthenticated
+  if (!authState.isAuthenticated) {
+    return [];
+  }
+
   final api = ref.watch(apiClientProvider);
 
   final response = await api.getList(

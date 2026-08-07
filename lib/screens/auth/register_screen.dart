@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../providers/auth_provider.dart';
 import '../../theme/design_system/app_text_field.dart';
@@ -29,6 +30,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   // Defaults to "shop_owner" as requested (Hidden from user selection)
   final String _selectedUserType = 'shop_owner';
   bool _loading = false;
+  
+  // 🛡️ Terms & Privacy Policy Checkbox state
+  bool _acceptedTerms = false;
 
   @override
   void dispose() {
@@ -53,6 +57,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
+  Future<void> _launchUrl(String path) async {
+    final Uri uri = Uri.parse('https://www.malatrade.com/$path');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
   final List<String> _districts = [
     "Balaka","Blantyre","Chikwawa","Chiradzulu","Chitipa","Dedza",
     "Dowa","Karonga","Kasungu","Likoma","Lilongwe","Machinga",
@@ -63,6 +74,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
+
+    // 🛡️ Guard Clause: Block registration if terms & privacy checkbox is not checked
+    if (!_acceptedTerms) {
+      _showError("You must accept the Terms & Conditions and Privacy Policy to create an account.");
+      return;
+    }
 
     setState(() => _loading = true);
 
@@ -78,8 +95,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         lastName: _lastNameController.text.trim(),
         userType: _selectedUserType,
         district: _selectedDistrict,
-        gender: null, // Hidden as requested
-        dateOfBirth: null, // Hidden as requested
+        gender: null,
+        dateOfBirth: null,
       );
 
       final state = ref.read(authProvider);
@@ -103,7 +120,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     final screenWidth = mediaQuery.size.width;
     final isTabletOrWeb = screenWidth > 650;
 
-    // Responsive width computations for dual-column field display (on large screens)
     final double paddingValue = isTabletOrWeb ? 40.0 : 20.0;
     final double maxCardWidth = 720.0;
     final double availableFormWidth = (screenWidth > maxCardWidth ? maxCardWidth : screenWidth) - (paddingValue * 2);
@@ -115,7 +131,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        // 🌟 Matches the gorgeous orange gradient of LoginScreen
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
@@ -151,7 +166,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // 🌟 Header Typography
                           Text(
                             'Create Account',
                             textAlign: TextAlign.center,
@@ -171,7 +185,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           ),
                           const SizedBox(height: AppSpacing.xl),
 
-                          // 🌟 Responsive Grid Wrap Form Fields
                           Wrap(
                             spacing: AppSpacing.md,
                             runSpacing: AppSpacing.sm,
@@ -273,8 +286,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.stretch,
                                   children: [
                                     AppTextField(
-                                      label: "Phone Number (WhatsApp)",
-                                      hint: '+265993344416',
+                                      label: "Phone (WhatsApp)",
                                       controller: _phoneController,
                                       type: TextFieldType.phone,
                                       isRequired: true,
@@ -285,7 +297,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                         }
                                         final phone = value.trim().replaceAll(' ', '');
                                         if (!phone.startsWith('+')) {
-                                          return "Include country code (e.g. +265881234567)";
+                                          return "Must start with country code (e.g. +265)";
                                         }
                                         final regex = RegExp(r'^\+[1-9]\d{7,14}$');
                                         if (!regex.hasMatch(phone)) {
@@ -295,9 +307,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                       },
                                     ),
                                     const SizedBox(height: 4),
-                                    // 🌟 Informational Security & Trading communication Helper Label
                                     Text(
-                                      "⚠️ Used directly for customer/seller communication during trade transactions.",
+                                      "Include country code (e.g. +265)",
                                       style: TextStyle(
                                         color: Colors.grey.shade600,
                                         fontSize: 10.5,
@@ -348,9 +359,84 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             ],
                           ),
                           
-                          const SizedBox(height: AppSpacing.xl),
+                          const SizedBox(height: AppSpacing.md),
+
+                          // 🛡️ TERMS AND CONDITIONS & PRIVACY POLICY CHECKBOX
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: Checkbox(
+                                  value: _acceptedTerms,
+                                  activeColor: AppColors.mangoOrange,
+                                  onChanged: (bool? newValue) {
+                                    setState(() {
+                                      _acceptedTerms = newValue ?? false;
+                                    });
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Wrap(
+                                  crossAxisAlignment: WrapCrossAlignment.center,
+                                  children: [
+                                    Text(
+                                      "By creating an account, I agree to be bound by the platform's ",
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade700,
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () => _launchUrl('terms/'),
+                                      child: const Text(
+                                        "Terms & Conditions",
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.mangoOrange,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      " and ",
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade700,
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () => _launchUrl('privacy/'),
+                                      child: const Text(
+                                        "Privacy Policy",
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.mangoOrange,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      ".",
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: AppSpacing.lg),
                           
-                          // 🌟 Submit Registration Trigger Action Pipeline
+                          // Submit Registration
                           AppButton(
                             text: authState.isLoading || _loading
                                 ? "Registering..."
@@ -364,7 +450,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           
                           const SizedBox(height: AppSpacing.xl),
                           
-                          // 🌟 Footer redirection logic wrapper
+                          // Footer redirection
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [

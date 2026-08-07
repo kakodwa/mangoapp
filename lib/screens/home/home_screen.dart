@@ -16,6 +16,7 @@ import '../../screens/search/global_search_input_bar.dart';
 
 import '../../screens/shops/shop_qr_advert.dart';
 import '../../screens/auth/register_screen.dart';
+import '../../screens/products/product_constants.dart';
 
 import '../main_tabs_screen.dart';
 
@@ -39,35 +40,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   final PageController bannerController = PageController(); 
   final AnalyticsService _analytics = AnalyticsService(); 
   int bannerIndex = 0;
+  String? _selectedHomeCategory;
 
-  // Bounce animation controllers
   late AnimationController _bounceController;
   late Animation<double> _bounceScale;
 
   final List<Map<String, String>> _quickSearchTypes = [
-    {'key': 'all', 'label': 'All items', 'image': 'assets/images/all.png'},
-    {'key': 'electronics', 'label': 'Electronics', 'image': 'assets/images/Electronics.png'},
-    {'key': 'groceries', 'label': 'Groceries', 'image': 'assets/images/Oil.png'},
-    {'key': 'Fashion_Clothing', 'label': 'Fashion & Clothing', 'image': 'assets/images/fashion.png'},
-    {'key': 'home_living', 'label': 'Home & Living', 'image': 'assets/images/Home.png'},
-    {'key': 'beauty_care', 'label': 'Beauty & Personal Care', 'image': 'assets/images/Beauty.png'},
-    {'key': 'health_wellness', 'label': 'Health & Wellness', 'image': 'assets/images/food.png'},
-    {'key': 'agriculture', 'label': 'Agriculture', 'image': 'assets/images/Goat.png'},
-    {'key': 'vehicles', 'label': 'Vehicles', 'image': 'assets/images/Car.png'},
-    {'key': 'hardware', 'label': 'Construction & Hardware', 'image': 'assets/images/all.png'},
-    {'key': 'books_education', 'label': 'Books & Education', 'image': 'assets/images/all.png'},
-    {'key': 'sports_outdoors', 'label': 'Sports & Outdoors', 'image': 'assets/images/all.png'},
-    {'key': 'baby_kids', 'label': 'Baby & Kids', 'image': 'assets/images/all.png'},
-    {'key': 'food_beverages', 'label': 'Food & Beverages', 'image': 'assets/images/all.png'},
-    {'key': 'pets_animals', 'label': 'Pets & Animals', 'image': 'assets/images/all.png'},
-    {'key': 'office_supplies', 'label': 'Office Supplies', 'image': 'assets/images/all.png'},
-    {'key': 'entertainment', 'label': 'Entertainment', 'image': 'assets/images/all.png'},
-    {'key': 'services', 'label': 'Services', 'image': 'assets/images/alll.png'},
-    {'key': 'industrial', 'label': 'Industrial Equipment', 'image': 'assets/images/all.png'},
-    {'key': 'shop', 'label': 'Shops', 'image': 'assets/images/all.png'},
-    {'key': 'property', 'label': 'Properties', 'image': 'assets/images/all.png'},
-    {'key': 'lodge', 'label': 'Lodges', 'image': 'assets/images/all.png'},
-    {'key': 'event', 'label': 'Events', 'image': 'assets/images/all.png'},
+    {'key': 'all', 'label': 'All items', 'image': 'https://www.malatrade.com/media/mobile/all.png'},
+    {'key': 'electronics', 'label': 'Electronics', 'image': 'https://www.malatrade.com/media/mobile/Electronics.png'},
+    {'key': 'groceries', 'label': 'Groceries', 'image': 'https://www.malatrade.com/media/mobile/Oil.png'},
+    {'key': 'Fashion_Clothing', 'label': 'Fashion & Clothing', 'image': 'https://www.malatrade.com/media/mobile/fashion.png'},
+    {'key': 'home_living', 'label': 'Home & Living', 'image': 'https://www.malatrade.com/media/mobile/Home.png'},
+    {'key': 'beauty_care', 'label': 'Beauty & Personal Care', 'image': 'https://www.malatrade.com/media/mobile/Beauty.png'},
+    {'key': 'health_wellness', 'label': 'Health & Wellness', 'image': 'https://www.malatrade.com/media/mobile/food.png'},
+    {'key': 'agriculture', 'label': 'Agriculture', 'image': 'https://www.malatrade.com/media/mobile/Goat.png'},
+    {'key': 'vehicles', 'label': 'Vehicles', 'image': 'https://www.malatrade.com/media/mobile/Car.png'},
+    {'key': 'hardware', 'label': 'Construction & Hardware', 'image': 'https://www.malatrade.com/media/mobile/all.png'},
+    {'key': 'books_education', 'label': 'Books & Education', 'image': 'https://www.malatrade.com/media/mobile/all.png'},
+    {'key': 'sports_outdoors', 'label': 'Sports & Outdoors', 'image': 'https://www.malatrade.com/media/mobile/all.png'},
+    {'key': 'baby_kids', 'label': 'Baby & Kids', 'image': 'https://www.malatrade.com/media/mobile/all.png'},
+    {'key': 'food_beverages', 'label': 'Food & Beverages', 'image': 'https://www.malatrade.com/media/mobile/all.png'},
+    {'key': 'pets_animals', 'label': 'Pets & Animals', 'image': 'https://www.malatrade.com/media/mobile/all.png'},
+    {'key': 'office_supplies', 'label': 'Office Supplies', 'image': 'https://www.malatrade.com/media/mobile/all.png'},
+    {'key': 'entertainment', 'label': 'Entertainment', 'image': 'https://www.malatrade.com/media/mobile/all.png'},
+    {'key': 'services', 'label': 'Services', 'image': 'https://www.malatrade.com/media/mobile/alll.png'},
+    {'key': 'industrial', 'label': 'Industrial Equipment', 'image': 'https://www.malatrade.com/media/mobile/all.png'},
+    {'key': 'shop', 'label': 'Shops', 'image': 'https://www.malatrade.com/media/mobile/all.png'},
+    {'key': 'property', 'label': 'Properties', 'image': 'https://www.malatrade.com/media/mobile/all.png'},
+    {'key': 'lodge', 'label': 'Lodges', 'image': 'https://www.malatrade.com/media/mobile/all.png'},
+    {'key': 'event', 'label': 'Events', 'image': 'https://www.malatrade.com/media/mobile/all.png'},
   ];
 
   @override
@@ -161,6 +162,166 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     }
   }
 
+  Widget _buildLeftCategoriesWidget() {
+    if (_selectedHomeCategory == null) {
+      return Container(
+        width: 250,
+        height: 380,
+        margin: const EdgeInsets.only(right: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(14),
+                  topRight: Radius.circular(14),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.category_rounded, size: 18, color: Theme.of(context).colorScheme.primary),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Categories',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: ListView.separated(
+                itemCount: ProductConstants.categories.length,
+                separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey.shade100),
+                itemBuilder: (context, index) {
+                  final category = ProductConstants.categories[index];
+                  return ListTile(
+                    dense: true,
+                    visualDensity: VisualDensity.compact,
+                    title: Text(
+                      category,
+                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                    ),
+                    trailing: const Icon(Icons.chevron_right, size: 16, color: Colors.grey),
+                    onTap: () {
+                      setState(() {
+                        _selectedHomeCategory = category;
+                      });
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final subCategoryMap = ProductConstants.categorySubCategoryBrands[_selectedHomeCategory!] ?? {};
+    final subCategories = subCategoryMap.keys.toList();
+
+    return Container(
+      width: 250,
+      height: 380,
+      margin: const EdgeInsets.only(right: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(14),
+                topRight: Radius.circular(14),
+              ),
+            ),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back, size: 16),
+                  onPressed: () {
+                    setState(() {
+                      _selectedHomeCategory = null;
+                    });
+                  },
+                ),
+                Expanded(
+                  child: Text(
+                    _selectedHomeCategory!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: subCategories.isEmpty
+                ? Center(
+                    child: TextButton(
+                      onPressed: () {
+                        MainTabsScreen.of(context)?.setSelectedIndex(
+                          7,
+                          searchType: 'product',
+                          category: _selectedHomeCategory,
+                        );
+                      },
+                      child: Text("Explore $_selectedHomeCategory"),
+                    ),
+                  )
+                : ListView.separated(
+                    itemCount: subCategories.length,
+                    separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey.shade100),
+                    itemBuilder: (context, index) {
+                      final subCategory = subCategories[index];
+                      return ListTile(
+                        dense: true,
+                        visualDensity: VisualDensity.compact,
+                        title: Text(
+                          subCategory,
+                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w400),
+                        ),
+                        trailing: const Icon(Icons.arrow_forward_ios, size: 10, color: Colors.grey),
+                        onTap: () {
+                          _analytics.logEvent('click_home_left_subcategory_$subCategory');
+                          MainTabsScreen.of(context)?.setSelectedIndex(
+                            7,
+                            searchType: 'product',
+                            searchQuery: subCategory,
+                            category: _selectedHomeCategory,
+                          );
+                        },
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final feed = ref.watch(homeFeedProvider);
@@ -182,7 +343,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
             /// 0. SEARCH BAR SECTION
             GlobalSearchInputBar.sliver(),
 
-            /// 1. PROMO BANNER SECTION
+            /// 1. PROMO BANNER SECTION WITH LEFT CATEGORIES (DESKTOP)
             SliverToBoxAdapter(
               child: bannersAsync.when(
                 data: (banners) {
@@ -193,7 +354,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
                   final displayLength = validBanners.length + 1;
 
-                  // Main Interactive Slider Banner
                   Widget bannerSlider = Column(
                     children: [
                       AspectRatio(
@@ -248,7 +408,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     ],
                   );
 
-                  // Right Side Vertical Banner List for Desktop
                   Widget rightBannersList = Column(
                     children: [
                       if (validBanners.isNotEmpty) ...[
@@ -304,12 +463,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           ? Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Left Main Banner Slider
+                                // Left Categories Panel Beside Banner
+                                _buildLeftCategoriesWidget(),
+
+                                // Center Main Banner Slider
                                 Expanded(child: bannerSlider),
 
                                 // Right Vertical Banner Column
                                 Container(
-                                  width: 280,
+                                  width: 260,
                                   height: 380,
                                   margin: const EdgeInsets.only(left: 16),
                                   child: rightBannersList,
@@ -330,7 +492,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               ),
             ),
 
-            /// 2. DOMAIN & CATEGORY LIST
+            /// 2. DOMAIN & QUICK CATEGORY CHIPS
             SliverToBoxAdapter(
               child: Align(
                 alignment: Alignment.topCenter,
@@ -344,7 +506,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     itemCount: _quickSearchTypes.length,
                     itemBuilder: (context, index) {
                       final type = _quickSearchTypes[index];
-                      final String imagePath = type['image'] ?? 'assets/images/logo.png';
+                      final String imageUrl = type['image'] ?? 'https://www.malatrade.com/media/mobile/all.png';
 
                       return Padding(
                         padding: const EdgeInsets.only(right: 16.0),
@@ -394,8 +556,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                                   ),
                                 ),
                                 child: ClipOval(
-                                  child: Image.asset(
-                                    imagePath,
+                                  child: Image.network(
+                                    imageUrl,
                                     fit: BoxFit.cover,
                                     errorBuilder: (_, __, ___) => Icon(
                                       Icons.category_outlined,
@@ -436,7 +598,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               ),
             ),
 
-            /// Feed Content List
+            /// 3. SLIVER FEED LIST (DIRECT SLIVER IN SERVO VIEWPORT)
             FeedListWidget(
               items: items,
             ),
@@ -445,7 +607,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               child: SizedBox(height: 24),
             ),
 
-            /// 3. WEB/DESKTOP FOOTER (NEATLY ATTACHED BELOW ALL CONTENT)
+            /// 4. WEB/DESKTOP FOOTER
             SliverToBoxAdapter(
               child: WebFooter(
                 onDeliveryTap: widget.onDeliveryTap,

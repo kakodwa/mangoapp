@@ -137,22 +137,9 @@ flutter:
 
 
   assets:
-    - assets/certs/ssl_com_root_2022.pem
     - assets/images/logo.png
     - assets/images/logo3.png
-    - assets/images/banner.png
     - assets/images/tnm.png
     - assets/images/airtel.png
     - assets/images/changu.png
     - assets/images/visa.png
-    - assets/images/app_background.png
-    - assets/images/fashion.png
-    - assets/images/Home.png
-    - assets/images/Electronics.png
-    - assets/images/Car.png
-    - assets/images/Oil.png
-    - assets/images/Beauty.png
-    - assets/images/Goat.png
-    - assets/images/all.png
-    - assets/images/food.png
-    - assets/sounds/

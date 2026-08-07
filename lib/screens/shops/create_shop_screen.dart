@@ -269,7 +269,6 @@ class _CreateShopScreenState extends ConsumerState<CreateShopScreen> {
                             const SizedBox(height: AppSpacing.md),
                             AppTextField(
                               label: "Phone (WhatsApp)",
-                              hint: "+265993344416",
                               controller: phoneController,
                               type: TextFieldType.phone,
                               isRequired: true,
@@ -277,10 +276,13 @@ class _CreateShopScreenState extends ConsumerState<CreateShopScreen> {
                                 if (value == null || value.trim().isEmpty) {
                                   return 'Phone number is required';
                                 }
-                                final phone = value.trim();
+                                final phone = value.trim().replaceAll(' ', '');
+                                if (!phone.startsWith('+')) {
+                                  return 'Must start with country code';
+                                }
                                 final regex = RegExp(r'^\+[1-9]\d{7,14}$');
                                 if (!regex.hasMatch(phone)) {
-                                  return 'Use format like +265993344416';
+                                  return 'Enter a valid international number';
                                 }
                                 return null;
                               },

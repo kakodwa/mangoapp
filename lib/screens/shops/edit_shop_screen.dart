@@ -10,7 +10,7 @@ import '../../theme/design_system/app_spacing.dart';
 
 import '../../providers/shops_provider.dart';
 import '../../models/shop_model.dart';
-import '../main_tabs_screen.dart'; // Core structural coordinator layout
+import '../main_tabs_screen.dart'; 
 
 import '../../utils/app_toast.dart';
 import '../../widgets/image_crop_picker.dart';
@@ -289,7 +289,6 @@ class _EditShopScreenState extends ConsumerState<EditShopScreen> {
                             const SizedBox(height: AppSpacing.md),
                             AppTextField(
                               label: 'Phone (WhatsApp)',
-                              hint: '+265993344416',
                               controller: phoneController,
                               type: TextFieldType.phone,
                               isRequired: true,
@@ -297,10 +296,13 @@ class _EditShopScreenState extends ConsumerState<EditShopScreen> {
                                 if (value == null || value.trim().isEmpty) {
                                   return 'Phone number is required';
                                 }
-                                final phone = value.trim();
+                                final phone = value.trim().replaceAll(' ', '');
+                                if (!phone.startsWith('+')) {
+                                  return 'Must start with country code';
+                                }
                                 final regex = RegExp(r'^\+[1-9]\d{7,14}$');
                                 if (!regex.hasMatch(phone)) {
-                                  return 'Use format like +265993344416';
+                                  return 'Enter a valid international number';
                                 }
                                 return null;
                               },

@@ -51,7 +51,7 @@ class FeedListWidget extends ConsumerWidget {
   Property _property(dynamic data) => data is Property ? data : Property.fromJson(Map<String, dynamic>.from(data));
   Lodge _lodge(dynamic data) => data is Lodge ? data : Lodge.fromJson(Map<String, dynamic>.from(data));
 
-  // LAZY GRID BUILDER (Returns a Sliver)
+  // LAZY GRID BUILDER (Returns a Sliver aligned to 1200px max-width)
   Widget _buildResponsiveGrid({
     required BuildContext context,
     required int itemCount,
@@ -74,8 +74,11 @@ class FeedListWidget extends ConsumerWidget {
       else crossAxisCount = 1;
     }
 
+    // Dynamic horizontal padding to center and align grid within 1200px max-width
+    final double horizontalPadding = screenWidth > 1224 ? (screenWidth - 1200) / 2 : 12;
+
     return SliverPadding(
-      padding: const EdgeInsets.all(8),
+      padding: EdgeInsets.symmetric(horizontal: horizontalPadding, vertical: 8),
       sliver: SliverGrid(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: crossAxisCount,
@@ -91,12 +94,21 @@ class FeedListWidget extends ConsumerWidget {
     );
   }
 
+  Widget _buildAlignedSection(BuildContext context, Widget section) {
+    return SliverToBoxAdapter(
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 1200),
+          margin: const EdgeInsets.symmetric(horizontal: 12),
+          child: section,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Instead of rendering a SliverList containing Grids, 
-    // we use a MultiSliver-like structure using a SliverMainAxisGroup or a basic list mapping since it lives in a CustomScrollView.
-    // However, to natively feed it into the parent CustomScrollView, we can use SliverMainAxisGroup or turn this into a standard widget returning MultiSliver.
-    
     return SliverMainAxisGroup(
       slivers: List.generate(items.length, (index) {
         final item = items[index];
@@ -104,7 +116,7 @@ class FeedListWidget extends ConsumerWidget {
         try {
           switch (item.type) {
             // =========================
-            // TRUE LAZY GRIDS
+            // LAZY GRIDS
             // =========================
             case 'product_grid':
               final products = (item.data as List).map<Product>(_product).toList();
@@ -157,11 +169,12 @@ class FeedListWidget extends ConsumerWidget {
               );
 
             // =========================
-            // HORIZONTAL FEEDS (Wrapped in SliverToBoxAdapter)
+            // HORIZONTAL FEEDS (WRAPPED IN ALIGNED BOX CONTAINER)
             // =========================
             case 'horizontal_products':
-              return SliverToBoxAdapter(
-                child: SectionWrapper(
+              return _buildAlignedSection(
+                context,
+                SectionWrapper(
                   title: item.title ?? 'Products',
                   onViewAll: () => _openViewAll(context, item.viewAllType),
                   child: HorizontalProducts(
@@ -172,8 +185,9 @@ class FeedListWidget extends ConsumerWidget {
               );
 
             case 'horizontal_shops':
-              return SliverToBoxAdapter(
-                child: SectionWrapper(
+              return _buildAlignedSection(
+                context,
+                SectionWrapper(
                   title: item.title ?? 'Shops',
                   onViewAll: () => _openViewAll(context, item.viewAllType),
                   child: HorizontalShops(
@@ -184,8 +198,9 @@ class FeedListWidget extends ConsumerWidget {
               );
 
             case 'horizontal_events':
-              return SliverToBoxAdapter(
-                child: SectionWrapper(
+              return _buildAlignedSection(
+                context,
+                SectionWrapper(
                   title: item.title ?? 'Events',
                   onViewAll: () => _openViewAll(context, item.viewAllType),
                   child: HorizontalEvents(
@@ -196,8 +211,9 @@ class FeedListWidget extends ConsumerWidget {
               );
 
             case 'horizontal_properties':
-              return SliverToBoxAdapter(
-                child: SectionWrapper(
+              return _buildAlignedSection(
+                context,
+                SectionWrapper(
                   title: item.title ?? 'Properties',
                   onViewAll: () => _openViewAll(context, item.viewAllType),
                   child: HorizontalProperties(
@@ -208,8 +224,9 @@ class FeedListWidget extends ConsumerWidget {
               );
 
             case 'horizontal_lodges':
-              return SliverToBoxAdapter(
-                child: SectionWrapper(
+              return _buildAlignedSection(
+                context,
+                SectionWrapper(
                   title: item.title ?? 'Lodges',
                   onViewAll: () => _openViewAll(context, item.viewAllType),
                   child: HorizontalLodges(

@@ -3,14 +3,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:vibration/vibration.dart';
 
 import '../../providers/api_provider.dart';
 import '../../utils/app_toast.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../widgets/web_footer.dart';
-
 
 class BookingQrScannerScreen extends ConsumerStatefulWidget {
   const BookingQrScannerScreen({super.key});
@@ -21,8 +19,6 @@ class BookingQrScannerScreen extends ConsumerStatefulWidget {
 }
 
 class _BookingQrScannerScreenState extends ConsumerState<BookingQrScannerScreen> {
-  final AudioPlayer player = AudioPlayer();
-  
   // Controller to manually toggle camera hardware states
   late final MobileScannerController _scannerController;
 
@@ -43,7 +39,6 @@ class _BookingQrScannerScreenState extends ConsumerState<BookingQrScannerScreen>
   @override
   void dispose() {
     _scannerController.dispose();
-    player.dispose();
     super.dispose();
   }
 
@@ -62,17 +57,15 @@ class _BookingQrScannerScreenState extends ConsumerState<BookingQrScannerScreen>
   }
 
   // =========================
-  // SOUND + VIBRATION
+  // VIBRATION HELPERS
   // =========================
-  Future<void> playSuccess() async {
-    await player.play(AssetSource('sounds/success.mp3'));
+  Future<void> triggerSuccessVibration() async {
     if (await Vibration.hasVibrator() ?? false) {
       Vibration.vibrate(duration: 200);
     }
   }
 
-  Future<void> playError() async {
-    await player.play(AssetSource('sounds/error.mp3'));
+  Future<void> triggerErrorVibration() async {
     if (await Vibration.hasVibrator() ?? false) {
       Vibration.vibrate(duration: 400);
     }
@@ -101,7 +94,7 @@ class _BookingQrScannerScreenState extends ConsumerState<BookingQrScannerScreen>
         fromJson: (json) => json,
       );
 
-      await playSuccess();
+      await triggerSuccessVibration();
       await _scannerController.stop();
 
       setState(() {
@@ -114,7 +107,7 @@ class _BookingQrScannerScreenState extends ConsumerState<BookingQrScannerScreen>
         res['message'] ?? "Check-in successful",
       );
     } catch (e) {
-      await playError();
+      await triggerErrorVibration();
       AppToast.error(context, "Invalid QR or scan failed");
     }
     

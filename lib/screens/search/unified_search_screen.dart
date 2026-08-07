@@ -285,266 +285,284 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
             ? (subCategoryMap[_selectedSubCategory] ?? [])
             : [];
 
+        // Dynamic horizontal padding to align grid items to 1200px max-width container
+        final double gridHorizontalPadding = screenWidth > 1224 ? (screenWidth - 1200) / 2 : 12;
+
         return Scaffold(
           body: SafeArea(
             child: Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 8.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _searchController,
-                          onChanged: _onSearchChanged,
-                          decoration: InputDecoration(
-                            hintText: 'Search matching items...',
-                            prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                            suffixIcon: _searchController.text.isNotEmpty
-                                ? IconButton(
-                                    icon: const Icon(Icons.clear, color: Colors.grey),
-                                    onPressed: () {
-                                      _searchController.clear();
-                                      _provider.updateFilters(query: '');
-                                    },
-                                  )
-                                : null,
-                            filled: true,
-                            fillColor: Colors.white,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey.shade300),
+                // SEARCH BAR SECTION (ALIGNED TO 1200px MAX-WIDTH)
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 1200),
+                    padding: const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 8.0),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _searchController,
+                            onChanged: _onSearchChanged,
+                            decoration: InputDecoration(
+                              hintText: 'Search matching items...',
+                              prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                              suffixIcon: _searchController.text.isNotEmpty
+                                  ? IconButton(
+                                      icon: const Icon(Icons.clear, color: Colors.grey),
+                                      onPressed: () {
+                                        _searchController.clear();
+                                        _provider.updateFilters(query: '');
+                                      },
+                                    )
+                                  : null,
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: Colors.grey.shade300),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: Colors.grey.shade300),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: AppColors.primary(context), width: 2),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(vertical: 12),
                             ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.grey.shade300),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: AppColors.primary(context), width: 2),
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(vertical: 12),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      InkWell(
-                        onTap: () {
-                          setState(() {
-                            _isFilterPanelExpanded = !_isFilterPanelExpanded;
-                          });
-                        },
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          height: 48,
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          decoration: BoxDecoration(
-                            color: isFilterActive || _isFilterPanelExpanded
-                                ? AppColors.mangoOrange.withOpacity(0.15)
-                                : Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
+                        const SizedBox(width: 8),
+                        InkWell(
+                          onTap: () {
+                            setState(() {
+                              _isFilterPanelExpanded = !_isFilterPanelExpanded;
+                            });
+                          },
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            height: 48,
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            decoration: BoxDecoration(
                               color: isFilterActive || _isFilterPanelExpanded
-                                  ? AppColors.mangoOrange
-                                  : Colors.grey.shade300,
-                              width: isFilterActive || _isFilterPanelExpanded ? 1.6 : 1,
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.tune_rounded,
+                                  ? AppColors.mangoOrange.withOpacity(0.15)
+                                  : Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
                                 color: isFilterActive || _isFilterPanelExpanded
                                     ? AppColors.mangoOrange
-                                    : AppColors.darkText,
+                                    : Colors.grey.shade300,
+                                width: isFilterActive || _isFilterPanelExpanded ? 1.6 : 1,
                               ),
-                              if (screenWidth >= 600) ...[
-                                const SizedBox(width: 6),
-                                Text(
-                                  'Filters',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    color: isFilterActive || _isFilterPanelExpanded
-                                        ? AppColors.mangoOrange
-                                        : AppColors.darkText,
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.tune_rounded,
+                                  color: isFilterActive || _isFilterPanelExpanded
+                                      ? AppColors.mangoOrange
+                                      : AppColors.darkText,
+                                ),
+                                if (screenWidth >= 600) ...[
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Filters',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: isFilterActive || _isFilterPanelExpanded
+                                          ? AppColors.mangoOrange
+                                          : AppColors.darkText,
+                                    ),
                                   ),
-                                ),
-                              ]
-                            ],
+                                ]
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
 
-                SizedBox(
-                  height: 40,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    itemCount: _types.length,
-                    itemBuilder: (context, index) {
-                      final type = _types[index];
-                      final isSelected = _provider.selectedType == type['key'];
+                // TYPE CHIPS SECTION (ALIGNED TO 1200px MAX-WIDTH)
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 1200),
+                    height: 40,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      itemCount: _types.length,
+                      itemBuilder: (context, index) {
+                        final type = _types[index];
+                        final isSelected = _provider.selectedType == type['key'];
 
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: FilterChip(
-                          label: Text(type['label']!),
-                          selected: isSelected,
-                          selectedColor: AppColors.primary(context).withOpacity(0.2),
-                          checkmarkColor: AppColors.primary(context),
-                          labelStyle: TextStyle(
-                            color: isSelected ? AppColors.primary(context) : AppColors.darkText,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: FilterChip(
+                            label: Text(type['label']!),
+                            selected: isSelected,
+                            selectedColor: AppColors.primary(context).withOpacity(0.2),
+                            checkmarkColor: AppColors.primary(context),
+                            labelStyle: TextStyle(
+                              color: isSelected ? AppColors.primary(context) : AppColors.darkText,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                            ),
+                            onSelected: (bool selected) {
+                              setState(() {
+                                _selectedSubCategory = null;
+                                _selectedBrand = null;
+                              });
+                              _provider.updateFilters(
+                                type: type['key'],
+                                district: SearchProvider.isUnchanged,
+                                category: null,
+                                listingPurpose: null,
+                              );
+                            },
                           ),
-                          onSelected: (bool selected) {
-                            setState(() {
-                              _selectedSubCategory = null;
-                              _selectedBrand = null;
-                            });
-                            _provider.updateFilters(
-                              type: type['key'],
-                              district: SearchProvider.isUnchanged,
-                              category: null,
-                              listingPurpose: null,
-                            );
-                          },
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 ),
 
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
-                  height: _isFilterPanelExpanded ? null : 0,
-                  child: _isFilterPanelExpanded
-                      ? Container(
-                          width: double.infinity,
-                          margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade50,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade300),
-                          ),
-                          child: Wrap(
-                            spacing: 12,
-                            runSpacing: 12,
-                            alignment: WrapAlignment.start,
-                            children: [
-                              SizedBox(
-                                width: screenWidth >= 600 ? 220 : double.infinity,
-                                child: AppDropdown<String>(
-                                  label: 'District',
-                                  value: _provider.selectedDistrict,
-                                  items: [
-                                    const DropdownMenuItem(value: null, child: Text('All Districts')),
-                                    ..._malawiDistricts.map((d) => DropdownMenuItem(value: d, child: Text(d))),
-                                  ],
-                                  onChanged: (val) {
-                                    _provider.updateFilters(
-                                      district: val,
-                                      category: SearchProvider.isUnchanged,
-                                      listingPurpose: SearchProvider.isUnchanged,
-                                    );
-                                  },
-                                ),
-                              ),
-
-                              if (typeWithSubFilters)
+                // EXPANDABLE FILTER PANEL (ALIGNED TO 1200px MAX-WIDTH)
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    height: _isFilterPanelExpanded ? null : 0,
+                    child: _isFilterPanelExpanded
+                        ? Container(
+                            constraints: const BoxConstraints(maxWidth: 1200),
+                            width: double.infinity,
+                            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade50,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(color: Colors.grey.shade300),
+                            ),
+                            child: Wrap(
+                              spacing: 12,
+                              runSpacing: 12,
+                              alignment: WrapAlignment.start,
+                              children: [
                                 SizedBox(
                                   width: screenWidth >= 600 ? 220 : double.infinity,
                                   child: AppDropdown<String>(
-                                    label: 'Category',
-                                    value: _provider.selectedCategory,
+                                    label: 'District',
+                                    value: _provider.selectedDistrict,
                                     items: [
-                                      const DropdownMenuItem(value: null, child: Text('All Categories')),
-                                      if (_provider.selectedType == 'product')
-                                        ..._productCategories.map((c) => DropdownMenuItem(value: c['key'], child: Text(c['label']!))),
-                                      if (_provider.selectedType == 'property')
-                                        ..._propertyCategories.map((c) => DropdownMenuItem(value: c['key'], child: Text(c['label']!))),
-                                      if (_provider.selectedType == 'lodge')
-                                        ..._lodgeCategories.map((c) => DropdownMenuItem(value: c['key'], child: Text(c['label']!))),
+                                      const DropdownMenuItem(value: null, child: Text('All Districts')),
+                                      ..._malawiDistricts.map((d) => DropdownMenuItem(value: d, child: Text(d))),
                                     ],
                                     onChanged: (val) {
-                                      setState(() {
-                                        _selectedSubCategory = null;
-                                        _selectedBrand = null;
-                                      });
                                       _provider.updateFilters(
-                                        category: val,
-                                        district: SearchProvider.isUnchanged,
+                                        district: val,
+                                        category: SearchProvider.isUnchanged,
                                         listingPurpose: SearchProvider.isUnchanged,
                                       );
                                     },
                                   ),
                                 ),
 
-                              if (_provider.selectedType == 'product' && _provider.selectedCategory != null && availableSubCategories.isNotEmpty)
-                                SizedBox(
-                                  width: screenWidth >= 600 ? 220 : double.infinity,
-                                  child: AppDropdown<String>(
-                                    label: 'Subcategory',
-                                    value: availableSubCategories.contains(_selectedSubCategory) ? _selectedSubCategory : null,
-                                    items: [
-                                      const DropdownMenuItem(value: null, child: Text('All Subcategories')),
-                                      ...availableSubCategories.map((sub) => DropdownMenuItem(value: sub, child: Text(sub))),
-                                    ],
-                                    onChanged: (val) {
-                                      setState(() {
-                                        _selectedSubCategory = val;
-                                        _selectedBrand = null;
-                                      });
-                                      _provider.updateFilters(query: val ?? '');
-                                    },
+                                if (typeWithSubFilters)
+                                  SizedBox(
+                                    width: screenWidth >= 600 ? 220 : double.infinity,
+                                    child: AppDropdown<String>(
+                                      label: 'Category',
+                                      value: _provider.selectedCategory,
+                                      items: [
+                                        const DropdownMenuItem(value: null, child: Text('All Categories')),
+                                        if (_provider.selectedType == 'product')
+                                          ..._productCategories.map((c) => DropdownMenuItem(value: c['key'], child: Text(c['label']!))),
+                                        if (_provider.selectedType == 'property')
+                                          ..._propertyCategories.map((c) => DropdownMenuItem(value: c['key'], child: Text(c['label']!))),
+                                        if (_provider.selectedType == 'lodge')
+                                          ..._lodgeCategories.map((c) => DropdownMenuItem(value: c['key'], child: Text(c['label']!))),
+                                      ],
+                                      onChanged: (val) {
+                                        setState(() {
+                                          _selectedSubCategory = null;
+                                          _selectedBrand = null;
+                                        });
+                                        _provider.updateFilters(
+                                          category: val,
+                                          district: SearchProvider.isUnchanged,
+                                          listingPurpose: SearchProvider.isUnchanged,
+                                        );
+                                      },
+                                    ),
                                   ),
-                                ),
 
-                              if (_provider.selectedType == 'product' && _selectedSubCategory != null && availableBrands.isNotEmpty)
-                                SizedBox(
-                                  width: screenWidth >= 600 ? 220 : double.infinity,
-                                  child: AppDropdown<String>(
-                                    label: 'Brand',
-                                    value: availableBrands.contains(_selectedBrand) ? _selectedBrand : null,
-                                    items: [
-                                      const DropdownMenuItem(value: null, child: Text('All Brands')),
-                                      ...availableBrands.map((b) => DropdownMenuItem(value: b, child: Text(b))),
-                                    ],
-                                    onChanged: (val) {
-                                      setState(() {
-                                        _selectedBrand = val;
-                                      });
-                                    },
+                                if (_provider.selectedType == 'product' && _provider.selectedCategory != null && availableSubCategories.isNotEmpty)
+                                  SizedBox(
+                                    width: screenWidth >= 600 ? 220 : double.infinity,
+                                    child: AppDropdown<String>(
+                                      label: 'Subcategory',
+                                      value: availableSubCategories.contains(_selectedSubCategory) ? _selectedSubCategory : null,
+                                      items: [
+                                        const DropdownMenuItem(value: null, child: Text('All Subcategories')),
+                                        ...availableSubCategories.map((sub) => DropdownMenuItem(value: sub, child: Text(sub))),
+                                      ],
+                                      onChanged: (val) {
+                                        setState(() {
+                                          _selectedSubCategory = val;
+                                          _selectedBrand = null;
+                                        });
+                                        _provider.updateFilters(query: val ?? '');
+                                      },
+                                    ),
                                   ),
-                                ),
 
-                              if (_provider.selectedType == 'property')
-                                SizedBox(
-                                  width: screenWidth >= 600 ? 220 : double.infinity,
-                                  child: AppDropdown<String>(
-                                    label: 'Purpose',
-                                    value: _provider.selectedListingPurpose,
-                                    items: const [
-                                      DropdownMenuItem(value: null, child: Text('Any Purpose')),
-                                      DropdownMenuItem(value: 'sale', child: Text('For Sale')),
-                                      DropdownMenuItem(value: 'rent', child: Text('For Rent')),
-                                    ],
-                                    onChanged: (val) {
-                                      _provider.updateFilters(
-                                        listingPurpose: val,
-                                        district: SearchProvider.isUnchanged,
-                                        category: SearchProvider.isUnchanged,
-                                      );
-                                    },
+                                if (_provider.selectedType == 'product' && _selectedSubCategory != null && availableBrands.isNotEmpty)
+                                  SizedBox(
+                                    width: screenWidth >= 600 ? 220 : double.infinity,
+                                    child: AppDropdown<String>(
+                                      label: 'Brand',
+                                      value: availableBrands.contains(_selectedBrand) ? _selectedBrand : null,
+                                      items: [
+                                        const DropdownMenuItem(value: null, child: Text('All Brands')),
+                                        ...availableBrands.map((b) => DropdownMenuItem(value: b, child: Text(b))),
+                                      ],
+                                      onChanged: (val) {
+                                        setState(() {
+                                          _selectedBrand = val;
+                                        });
+                                      },
+                                    ),
                                   ),
-                                ),
-                            ],
-                          ),
-                        )
-                      : const SizedBox.shrink(),
+
+                                if (_provider.selectedType == 'property')
+                                  SizedBox(
+                                    width: screenWidth >= 600 ? 220 : double.infinity,
+                                    child: AppDropdown<String>(
+                                      label: 'Purpose',
+                                      value: _provider.selectedListingPurpose,
+                                      items: const [
+                                        DropdownMenuItem(value: null, child: Text('Any Purpose')),
+                                        DropdownMenuItem(value: 'sale', child: Text('For Sale')),
+                                        DropdownMenuItem(value: 'rent', child: Text('For Rent')),
+                                      ],
+                                      onChanged: (val) {
+                                        _provider.updateFilters(
+                                          listingPurpose: val,
+                                          district: SearchProvider.isUnchanged,
+                                          category: SearchProvider.isUnchanged,
+                                        );
+                                      },
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          )
+                        : const SizedBox.shrink(),
+                  ),
                 ),
                 const SizedBox(height: 8),
 
@@ -563,7 +581,7 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
                                     slivers: [
                                       if (isProductTabOnly || productItems.isNotEmpty)
                                         SliverPadding(
-                                          padding: const EdgeInsets.all(12.0),
+                                          padding: EdgeInsets.symmetric(horizontal: gridHorizontalPadding, vertical: 12.0),
                                           sliver: SliverGrid(
                                             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                                               crossAxisCount: productColumns,
@@ -583,7 +601,7 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
 
                                       if (!isProductTabOnly && bannerItems.isNotEmpty)
                                         SliverPadding(
-                                          padding: const EdgeInsets.all(12.0),
+                                          padding: EdgeInsets.symmetric(horizontal: gridHorizontalPadding, vertical: 12.0),
                                           sliver: SliverGrid(
                                             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                                               crossAxisCount: bannerColumns,

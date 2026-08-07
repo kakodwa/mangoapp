@@ -596,10 +596,20 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Image.asset(
-          'assets/images/logo.png',
-          height: 36,
-          fit: BoxFit.contain,
+        MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => _changeTab(0),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2.0),
+              child: Image.asset(
+                'assets/images/logo.png',
+                height: 36,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
         ),
         if (titleText.isNotEmpty) ...[
           const SizedBox(height: 2),
@@ -871,7 +881,7 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
         height: double.infinity, 
         decoration: const BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/app_background.png'), 
+            image: NetworkImage('https://www.malatrade.com/media/mobile/app_background.png'), 
             fit: BoxFit.cover, 
           ),
         ),

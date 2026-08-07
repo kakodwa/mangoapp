@@ -4,9 +4,10 @@ import 'package:image_picker/image_picker.dart';
 import '../core/api/api_client.dart';
 import '../models/property_model.dart';
 import 'api_provider.dart';
+import 'auth_provider.dart' hide apiClientProvider; // 👈 Prevents duplicate import
 
 /// ======================
-/// PROPERTIES LIST
+/// PROPERTIES LIST (PUBLIC)
 /// ======================
 final propertiesProvider =
     FutureProvider.autoDispose<List<Property>>((ref) async {
@@ -18,10 +19,8 @@ final propertiesProvider =
   );
 });
 
-
 final relatedPropertiesProvider =
     FutureProvider.family<List<Property>, int>((ref, propertyId) async {
-
   final apiClient = ref.watch(apiClientProvider);
 
   return apiClient.getList(
@@ -29,8 +28,9 @@ final relatedPropertiesProvider =
     fromJson: (json) => Property.fromJson(json),
   );
 });
+
 /// ======================
-/// FILTER BY CITY
+/// FILTER BY CITY (PUBLIC)
 /// ======================
 final propertiesByCityProvider =
     FutureProvider.autoDispose.family<List<Property>, String>(
@@ -46,7 +46,7 @@ final propertiesByCityProvider =
 );
 
 /// ======================
-/// PROPERTY DETAILS
+/// PROPERTY DETAILS (PUBLIC)
 /// ======================
 final propertyDetailsProvider =
     FutureProvider.autoDispose.family<Property, int>(
@@ -76,10 +76,17 @@ final propertyFullDetailsProvider =
 );
 
 /// ======================
-/// UNLOCKED PROPERTIES
+/// UNLOCKED PROPERTIES (PROTECTED)
 /// ======================
 final userUnlockedPropertiesProvider =
     FutureProvider.autoDispose<List<Property>>((ref) async {
+  final authState = ref.watch(authProvider);
+
+  // 🛡️ Guard Clause: Do not execute API request if user is not authenticated
+  if (!authState.isAuthenticated) {
+    return [];
+  }
+
   final apiClient = ref.watch(apiClientProvider);
 
   return apiClient.getList(
@@ -89,10 +96,17 @@ final userUnlockedPropertiesProvider =
 });
 
 /// ======================
-/// MY PROPERTIES (OWNER)
+/// MY PROPERTIES (OWNER - PROTECTED)
 /// ======================
 final myPropertiesProvider =
     FutureProvider.autoDispose<List<Property>>((ref) async {
+  final authState = ref.watch(authProvider);
+
+  // 🛡️ Guard Clause: Do not execute API request if user is not authenticated
+  if (!authState.isAuthenticated) {
+    return [];
+  }
+
   final apiClient = ref.watch(apiClientProvider);
 
   return apiClient.getList(
@@ -128,12 +142,10 @@ final filteredPropertiesProvider =
 /// ======================
 /// PROPERTY UNLOCK
 /// ======================
-class PropertyUnlockNotifier
-    extends StateNotifier<AsyncValue<void>> {
+class PropertyUnlockNotifier extends StateNotifier<AsyncValue<void>> {
   final ApiClient _apiClient;
 
-  PropertyUnlockNotifier(this._apiClient)
-      : super(const AsyncValue.data(null));
+  PropertyUnlockNotifier(this._apiClient) : super(const AsyncValue.data(null));
 
   Future<void> unlockProperty({
     required int propertyId,
@@ -150,13 +162,11 @@ class PropertyUnlockNotifier
     try {
       final data = {
         'payment_method': paymentMethod,
-
         if (paymentMethod == 'airtel_money' ||
             paymentMethod == 'tnm_mpamba') ...{
           'full_name': fullName,
           'phone_number': phoneNumber,
         },
-
         if (paymentMethod == 'visa_card') ...{
           'card_name': cardName,
           'card_number': cardNumber,
@@ -179,16 +189,14 @@ class PropertyUnlockNotifier
 }
 
 final propertyUnlockProvider =
-    StateNotifierProvider<PropertyUnlockNotifier,
-        AsyncValue<void>>((ref) {
+    StateNotifierProvider<PropertyUnlockNotifier, AsyncValue<void>>((ref) {
   return PropertyUnlockNotifier(ref.watch(apiClientProvider));
 });
 
 /// ======================
 /// PROPERTY ACTIONS
 /// ======================
-final propertyActionsProvider =
-    Provider<PropertyActions>((ref) {
+final propertyActionsProvider = Provider<PropertyActions>((ref) {
   final apiClient = ref.watch(apiClientProvider);
   return PropertyActions(apiClient);
 });
@@ -198,9 +206,6 @@ class PropertyActions {
 
   PropertyActions(this._apiClient);
 
-  /// ======================
-  /// CREATE PROPERTY
-  /// ======================
   Future<void> createProperty(
     Property property,
     List<XFile> images,
@@ -217,8 +222,7 @@ class PropertyActions {
       'district': property.district,
       'price': property.price.toString(),
       'size_sqm': property.sizeSqm.toString(),
-      'is_publicly_visible':
-          property.isPubliclyVisible.toString(),
+      'is_publicly_visible': property.isPubliclyVisible.toString(),
     };
 
     if (property.bedrooms != null) {
@@ -238,12 +242,9 @@ class PropertyActions {
   }
 
   Future<void> deleteProperty(int propertyId) async {
-  await _apiClient.delete('properties/$propertyId/');
-}
+    await _apiClient.delete('properties/$propertyId/');
+  }
 
-  /// ======================
-  /// UPDATE PROPERTY
-  /// ======================
   Future<void> updateProperty({
     required int propertyId,
     required Property property,
@@ -261,8 +262,7 @@ class PropertyActions {
       'district': property.district,
       'price': property.price.toString(),
       'size_sqm': property.sizeSqm.toString(),
-      'is_publicly_visible':
-          property.isPubliclyVisible.toString(),
+      'is_publicly_visible': property.isPubliclyVisible.toString(),
     };
 
     if (property.bedrooms != null) {

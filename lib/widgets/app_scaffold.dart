@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../services/analytics_service.dart';
-import '../../screens/products/product_constants.dart';
-import '../screens/main_tabs_screen.dart';
-import 'web_footer.dart';
 
 class AppScaffold extends StatefulWidget {
   final Widget? body;
@@ -31,9 +28,6 @@ class AppScaffold extends StatefulWidget {
 class _AppScaffoldState extends State<AppScaffold> {
   bool _isNavBarVisible = true;
   double _scrollDistance = 0.0;
-  
-  // Selected Category State for Desktop Left Categories Panel
-  String? _selectedCategory;
 
   String _getTabEventName(int index) {
     switch (index) {
@@ -110,32 +104,7 @@ class _AppScaffoldState extends State<AppScaffold> {
         body: SafeArea(
           bottom: false,
           child: isDesktop
-              ? Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // DESKTOP LEFT CATEGORIES SIDEBAR
-                    Container(
-                      width: 260,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border(
-                          right: BorderSide(
-                            color: Colors.grey.shade200,
-                            width: 1,
-                          ),
-                        ),
-                      ),
-                      child: _selectedCategory == null
-                          ? _buildPrimaryCategoriesList(context)
-                          : _buildSubCategoriesList(context, _selectedCategory!),
-                    ),
-
-                    // MAIN CONTENT AREA (DIRECT EXPANDED BODY)
-                    Expanded(
-                      child: widget.body ?? const SizedBox.shrink(),
-                    ),
-                  ],
-                )
+              ? (widget.body ?? const SizedBox.shrink())
               : Stack(
                   children: [
                     Positioned.fill(
@@ -165,138 +134,6 @@ class _AppScaffoldState extends State<AppScaffold> {
                 ),
         ),
       ),
-    );
-  }
-
-  // Desktop Primary Categories List Widget
-  Widget _buildPrimaryCategoriesList(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
-          child: Row(
-            children: [
-              Icon(Icons.category_rounded, size: 18, color: Theme.of(context).colorScheme.primary),
-              const SizedBox(width: 8),
-              Text(
-                'Categories',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: ListView.separated(
-            itemCount: ProductConstants.categories.length,
-            separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey.shade100),
-            itemBuilder: (context, index) {
-              final category = ProductConstants.categories[index];
-              return ListTile(
-                dense: true,
-                visualDensity: VisualDensity.compact,
-                title: Text(
-                  category,
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-                ),
-                trailing: const Icon(Icons.chevron_right, size: 18, color: Colors.grey),
-                onTap: () {
-                  setState(() {
-                    _selectedCategory = category;
-                  });
-                },
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  // Desktop Subcategories List Widget
-  Widget _buildSubCategoriesList(BuildContext context, String parentCategory) {
-    final subCategoryMap = ProductConstants.categorySubCategoryBrands[parentCategory] ?? {};
-    final subCategories = subCategoryMap.keys.toList();
-    final AnalyticsService analytics = AnalyticsService();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-          child: Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back, size: 18),
-                onPressed: () {
-                  setState(() {
-                    _selectedCategory = null;
-                  });
-                },
-              ),
-              Expanded(
-                child: Text(
-                  parentCategory,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                    color: Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        Expanded(
-          child: subCategories.isEmpty
-              ? Center(
-                  child: TextButton(
-                    onPressed: () {
-                      MainTabsScreen.of(context)?.setSelectedIndex(
-                        7,
-                        searchType: 'product',
-                        category: parentCategory,
-                      );
-                    },
-                    child: Text("Explore $parentCategory"),
-                  ),
-                )
-              : ListView.separated(
-                  itemCount: subCategories.length,
-                  separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey.shade100),
-                  itemBuilder: (context, index) {
-                    final subCategory = subCategories[index];
-                    return ListTile(
-                      dense: true,
-                      visualDensity: VisualDensity.compact,
-                      title: Text(
-                        subCategory,
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
-                      ),
-                      trailing: const Icon(Icons.arrow_forward_ios, size: 12, color: Colors.grey),
-                      onTap: () {
-                        analytics.logEvent('click_desktop_subcategory_$subCategory');
-                        
-                        MainTabsScreen.of(context)?.setSelectedIndex(
-                          7,
-                          searchType: 'product',
-                          searchQuery: subCategory,
-                          category: parentCategory,
-                        );
-                      },
-                    );
-                  },
-                ),
-        ),
-      ],
     );
   }
 

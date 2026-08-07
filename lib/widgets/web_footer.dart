@@ -1,6 +1,7 @@
 // lib/widgets/web_footer.dart
 
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../screens/main_tabs_screen.dart'; 
 import '../services/analytics_service.dart';
 
@@ -17,6 +18,13 @@ class WebFooter extends StatelessWidget {
     this.onHelpTap,
     this.onDeliveryTap,
   });
+
+  Future<void> _launchUrl(String path) async {
+    final Uri uri = Uri.parse('https://www.malatrade.com/$path');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -177,8 +185,20 @@ class WebFooter extends StatelessWidget {
               },
               child: const Text('Help & Support', style: linkStyle),
             ),
-            TextButton(onPressed: () {}, child: const Text('Terms of Service', style: linkStyle)),
-            TextButton(onPressed: () {}, child: const Text('Privacy Policy', style: linkStyle)),
+            TextButton(
+              onPressed: () {
+                _analyticsService.logEvent('footer_terms_click');
+                _launchUrl('terms/');
+              },
+              child: const Text('Terms of Service', style: linkStyle),
+            ),
+            TextButton(
+              onPressed: () {
+                _analyticsService.logEvent('footer_privacy_click');
+                _launchUrl('privacy/');
+              },
+              child: const Text('Privacy Policy', style: linkStyle),
+            ),
           ],
         ),
       ],

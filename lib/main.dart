@@ -29,44 +29,9 @@ import 'providers/auth_provider.dart';
 final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>();
 final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
-// ============================================================================
-// 🔒 PRODUCTION-SAFE SSL CERTIFICATE TRUST OVERRIDE (PLAY STORE COMPLIANT)
-// 
-// Injects the Root CA / CA Bundle into Dart's SecurityContext trust store.
-// Does NOT use badCertificateCallback, preserving full TLS security.
-// ============================================================================
-class CustomSecurityHttpOverrides extends HttpOverrides {
-  final List<int> certBytes;
 
-  CustomSecurityHttpOverrides(this.certBytes);
-
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    // Preserve default system trusted roots
-    final SecurityContext secContext = context ?? SecurityContext(withTrustedRoots: true);
-
-    try {
-      // Append the custom CA / bundle bytes to trusted certificate context
-      secContext.setTrustedCertificatesBytes(certBytes);
-    } catch (e) {
-      debugPrint("Certificate trust loading warning: $e");
-    }
-
-    return super.createHttpClient(secContext);
-  }
-}
-
-void main() async {
+void main(){
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Load CA Root / Bundle into HttpOverrides globally
-  try {
-    final ByteData certData = await rootBundle.load('assets/certs/ssl_com_root_2022.pem');
-    final List<int> certBytes = certData.buffer.asUint8List();
-    HttpOverrides.global = CustomSecurityHttpOverrides(certBytes);
-  } catch (e) {
-    debugPrint("Failed to load root certificate asset: $e");
-  }
 
   if (WebViewPlatform.instance == null) {
     WebViewPlatform.instance = AndroidWebViewPlatform();

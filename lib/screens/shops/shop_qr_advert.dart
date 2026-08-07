@@ -63,11 +63,26 @@ class _ShopQrBannerState extends State<ShopQrBanner>
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(14),
-            child: Image.asset(
-              'assets/images/banner.png', // Local background image asset
+            child: Image.network(
+              'https://www.malatrade.com/media/mobile/banner.png',
               fit: BoxFit.cover,
               width: double.infinity,
               height: double.infinity,
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                return Container(
+                  color: Colors.grey.shade200,
+                  child: const Center(
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                );
+              },
+              errorBuilder: (context, error, stackTrace) => Container(
+                color: Colors.grey.shade200,
+                child: const Center(
+                  child: Icon(Icons.broken_image, color: Colors.grey),
+                ),
+              ),
             ),
           ),
         ),

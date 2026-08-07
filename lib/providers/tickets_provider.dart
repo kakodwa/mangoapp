@@ -1,12 +1,18 @@
-// lib/providers/events/tickets_provider.dart
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/api/api_client.dart';
-import '../../models/ticket_model.dart';
-import 'events_provider.dart';
+import '../models/ticket_model.dart';
 
-final myTicketsProvider =
-    FutureProvider<List<TicketModel>>((ref) async {
+// Package imports avoid any relative folder path mismatches:
+import 'package:mangochi_marketplace/providers/api_provider.dart';
+import 'package:mangochi_marketplace/providers/auth_provider.dart' hide apiClientProvider;
+
+final myTicketsProvider = FutureProvider<List<TicketModel>>((ref) async {
+  final authState = ref.watch(authProvider);
+
+  // Guard Clause: Do not execute API request if user is not authenticated
+  if (!authState.isAuthenticated) {
+    return [];
+  }
 
   final api = ref.read(apiClientProvider);
 
@@ -16,10 +22,8 @@ final myTicketsProvider =
   );
 });
 
-
 final eventTicketsProvider =
     FutureProvider.family<List<TicketModel>, int>((ref, eventId) async {
-
   final api = ref.read(apiClientProvider);
 
   return api.getList(

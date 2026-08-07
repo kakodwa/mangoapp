@@ -1,7 +1,6 @@
 // lib/screens/events/scan_ticket_screen.dart
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:vibration/vibration.dart';
 import '../../core/api/api_client.dart';
 import '../../utils/app_toast.dart';
@@ -19,7 +18,6 @@ class ScanTicketScreen extends StatefulWidget {
 
 class _ScanTicketScreenState extends State<ScanTicketScreen> {
   final ApiClient api = ApiClient();
-  final AudioPlayer player = AudioPlayer();
   final AnalyticsService analyticsService = AnalyticsService();
 
   // Explicitly instantiating a controller to manually control camera states
@@ -49,7 +47,6 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
   @override
   void dispose() {
     _scannerController.dispose();
-    player.dispose();
     super.dispose();
   }
 
@@ -69,17 +66,15 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
   }
 
   // =========================
-  // SOUND HELPERS
+  // VIBRATION HELPERS
   // =========================
-  Future<void> playSuccess() async {
-    await player.play(AssetSource('sounds/success.mp3'));
+  Future<void> triggerSuccessVibration() async {
     if (await Vibration.hasVibrator() ?? false) {
       Vibration.vibrate(duration: 200);
     }
   }
 
-  Future<void> playError() async {
-    await player.play(AssetSource('sounds/error.mp3'));
+  Future<void> triggerErrorVibration() async {
     if (await Vibration.hasVibrator() ?? false) {
       Vibration.vibrate(duration: 400);
     }
@@ -107,7 +102,7 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
 
       if (!mounted) return;
 
-      await playSuccess();
+      await triggerSuccessVibration();
 
       AppToast.success(
         context,
@@ -127,7 +122,7 @@ class _ScanTicketScreenState extends State<ScanTicketScreen> {
       });
 
     } catch (e) {
-      await playError();
+      await triggerErrorVibration();
       String message = "Something went wrong";
 
       if (e is Exception) {
