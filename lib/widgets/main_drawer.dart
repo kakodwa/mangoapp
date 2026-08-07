@@ -8,8 +8,6 @@ import '../screens/main_tabs_screen.dart';
 import '../theme/app_colors.dart';
 import '../services/analytics_service.dart';
 import '../screens/products/product_constants.dart';
-import '../providers/products_provider.dart';
-import '../models/product_model.dart';
 
 class MainDrawer extends ConsumerStatefulWidget {
   final VoidCallback? onAboutTap;
@@ -80,50 +78,6 @@ class _MainDrawerState extends ConsumerState<MainDrawer> {
     }
   }
 
-  void _showCategoriesMegaMenu(BuildContext parentContext) {
-    _analyticsService.logEvent('drawer_mega_menu_open');
-    Navigator.pop(parentContext); // Close drawer first
-
-    showGeneralDialog(
-      context: parentContext,
-      barrierDismissible: true,
-      barrierLabel: 'CategoriesMegaMenu',
-      barrierColor: Colors.black54,
-      transitionDuration: const Duration(milliseconds: 200),
-      pageBuilder: (dialogContext, animation, secondaryAnimation) {
-        return Align(
-          alignment: Alignment.center,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 32),
-            child: Material(
-              color: Colors.transparent,
-              child: Container(
-                constraints: const BoxConstraints(maxWidth: 1100, maxHeight: 600),
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.25),
-                      blurRadius: 24,
-                      spreadRadius: 4,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: _DrawerCategoryMegaMenuView(parentContext: parentContext),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
   /// Compact Flat Navigation Tile
   Widget _menuTile({
     required BuildContext context,
@@ -168,7 +122,7 @@ class _MainDrawerState extends ConsumerState<MainDrawer> {
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
-                  // SLIM & TIGHT HEADER
+                  // SLIM HEADER
                   Container(
                     width: double.infinity,
                     padding: EdgeInsets.only(
@@ -196,7 +150,7 @@ class _MainDrawerState extends ConsumerState<MainDrawer> {
                     ),
                   ),
 
-                  // CATEGORIES ACCORDION & MEGA MENU TRIGGER
+                  // NATIVE CATEGORIES ACCORDION
                   Theme(
                     data: Theme.of(context).copyWith(
                       dividerColor: Colors.transparent,
@@ -220,114 +174,82 @@ class _MainDrawerState extends ConsumerState<MainDrawer> {
                           color: Color(0xFF1F2937),
                         ),
                       ),
-                      children: [
-                        // MEGA MENU POPUP TRIGGER BUTTON FOR MOBILE/DESKTOP
-                        InkWell(
-                          onTap: () => _showCategoriesMegaMenu(context),
-                          child: Container(
-                            width: double.infinity,
-                            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: AppColors.mangoOrange.withOpacity(0.12),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: AppColors.mangoOrange.withOpacity(0.3)),
-                            ),
-                            child: const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.auto_awesome, size: 16, color: AppColors.mangoOrange),
-                                SizedBox(width: 8),
-                                Text(
-                                  "Open Category Mega Menu",
-                                  style: TextStyle(
-                                    fontSize: 12.5,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.mangoOrange,
-                                  ),
-                                ),
-                              ],
+                      children: ProductConstants.categories.map((category) {
+                        final subCategoryMap =
+                            ProductConstants.categorySubCategoryBrands[category] ?? {};
+                        final subCategories = subCategoryMap.keys.toList();
+
+                        return ExpansionTile(
+                          dense: true,
+                          visualDensity: const VisualDensity(vertical: -3),
+                          tilePadding: const EdgeInsets.only(left: 28, right: 16),
+                          leading: Icon(
+                            _getCategoryIcon(category),
+                            size: 18,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          title: Text(
+                            category,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF374151),
                             ),
                           ),
-                        ),
+                          children: subCategories.map((subCategory) {
+                            return InkWell(
+                              onTap: () {
+                                _analyticsService.logEvent('drawer_subcategory_click_$subCategory');
+                                Navigator.pop(context);
 
-                        ...ProductConstants.categories.map((category) {
-                          final subCategoryMap =
-                              ProductConstants.categorySubCategoryBrands[category] ?? {};
-                          final subCategories = subCategoryMap.keys.toList();
-
-                          return ExpansionTile(
-                            dense: true,
-                            visualDensity: const VisualDensity(vertical: -3),
-                            tilePadding: const EdgeInsets.only(left: 28, right: 16),
-                            leading: Icon(
-                              _getCategoryIcon(category),
-                              size: 18,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                            title: Text(
-                              category,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF374151),
-                              ),
-                            ),
-                            children: subCategories.map((subCategory) {
-                              return InkWell(
-                                onTap: () {
-                                  _analyticsService.logEvent('drawer_subcategory_click_$subCategory');
-                                  Navigator.pop(context);
-
-                                  MainTabsScreen.of(context)?.setSelectedIndex(
-                                    7,
-                                    searchType: 'product',
-                                    searchQuery: subCategory,
-                                    category: category,
-                                  );
-                                },
-                                child: Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.only(
-                                    left: 54,
-                                    right: 16,
-                                    top: 8,
-                                    bottom: 8,
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      Container(
-                                        width: 4,
-                                        height: 4,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.grey.shade400,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Text(
-                                          subCategory,
-                                          style: TextStyle(
-                                            fontSize: 12.5,
-                                            color: Colors.grey.shade700,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                      Icon(
-                                        Icons.chevron_right,
-                                        size: 14,
+                                MainTabsScreen.of(context)?.setSelectedIndex(
+                                  7,
+                                  searchType: 'product',
+                                  searchQuery: subCategory,
+                                  category: category,
+                                );
+                              },
+                              child: Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.only(
+                                  left: 54,
+                                  right: 16,
+                                  top: 8,
+                                  bottom: 8,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 4,
+                                      height: 4,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
                                         color: Colors.grey.shade400,
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Text(
+                                        subCategory,
+                                        style: TextStyle(
+                                          fontSize: 12.5,
+                                          color: Colors.grey.shade700,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                    Icon(
+                                      Icons.chevron_right,
+                                      size: 14,
+                                      color: Colors.grey.shade400,
+                                    ),
+                                  ],
                                 ),
-                              );
-                            }).toList(),
-                          );
-                        }).toList(),
-                      ],
+                              ),
+                            );
+                          }).toList(),
+                        );
+                      }).toList(),
                     ),
                   ),
 
@@ -458,301 +380,6 @@ class _MainDrawerState extends ConsumerState<MainDrawer> {
           ],
         ),
       ),
-    );
-  }
-}
-
-/// MOBILE & DESKTOP RESPONSIVE CATEGORY MEGA MENU VIEW
-class _DrawerCategoryMegaMenuView extends ConsumerStatefulWidget {
-  final BuildContext parentContext;
-
-  const _DrawerCategoryMegaMenuView({required this.parentContext});
-
-  @override
-  ConsumerState<_DrawerCategoryMegaMenuView> createState() =>
-      _DrawerCategoryMegaMenuViewState();
-}
-
-class _DrawerCategoryMegaMenuViewState
-    extends ConsumerState<_DrawerCategoryMegaMenuView> {
-  late String _selectedCategory;
-  final AnalyticsService _analytics = AnalyticsService();
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedCategory = ProductConstants.categories.isNotEmpty
-        ? ProductConstants.categories.first
-        : '';
-  }
-
-  Map<String, String> _buildSubCategoryImageMap(List<Product> products) {
-    final Map<String, String> imageMap = {};
-
-    for (final product in products) {
-      final subCatKey = product.subCategory.trim().toLowerCase();
-      if (subCatKey.isNotEmpty && !imageMap.containsKey(subCatKey)) {
-        if (product.hasImage) {
-          imageMap[subCatKey] = product.safeImage;
-        } else if (product.images.isNotEmpty) {
-          imageMap[subCatKey] = product.images.first;
-        }
-      }
-    }
-    return imageMap;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final double screenWidth = MediaQuery.of(context).size.width;
-    final bool isMobile = screenWidth < 600;
-
-    final productsAsync = ref.watch(productsProvider);
-    final List<Product> availableProducts = productsAsync.valueOrNull ?? [];
-    final subCategoryImages = _buildSubCategoryImageMap(availableProducts);
-
-    final subCategoryMap =
-        ProductConstants.categorySubCategoryBrands[_selectedCategory] ?? {};
-    final subCategories = subCategoryMap.keys.toList();
-
-    Widget categoryList = ListView.builder(
-      itemCount: ProductConstants.categories.length,
-      itemBuilder: (context, index) {
-        final category = ProductConstants.categories[index];
-        final isSelected = category == _selectedCategory;
-
-        return InkWell(
-          onTap: () {
-            setState(() {
-              _selectedCategory = category;
-            });
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            color: isSelected ? Colors.white : Colors.transparent,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    category,
-                    style: TextStyle(
-                      fontSize: 12.5,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                      color: isSelected
-                          ? Theme.of(context).colorScheme.primary
-                          : Colors.black87,
-                    ),
-                  ),
-                ),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  size: 16,
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primary
-                      : Colors.grey,
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-
-    Widget subCategoryGrid = subCategories.isEmpty
-        ? Center(
-            child: ElevatedButton(
-              onPressed: () {
-                MainTabsScreen.of(widget.parentContext)?.setSelectedIndex(
-                  7,
-                  searchType: 'product',
-                  category: _selectedCategory,
-                );
-                Navigator.pop(context);
-              },
-              child: Text("Browse $_selectedCategory"),
-            ),
-          )
-        : GridView.builder(
-            padding: const EdgeInsets.all(12),
-            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: isMobile ? 110 : 140,
-              mainAxisSpacing: 12,
-              crossAxisSpacing: 12,
-              childAspectRatio: 0.82,
-            ),
-            itemCount: subCategories.length,
-            itemBuilder: (context, index) {
-              final subCategory = subCategories[index];
-              final imageUrl =
-                  subCategoryImages[subCategory.trim().toLowerCase()];
-
-              return InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: () {
-                  _analytics.logEvent(
-                      'click_megamenu_subcategory_$subCategory');
-                  MainTabsScreen.of(widget.parentContext)?.setSelectedIndex(
-                    7,
-                    searchType: 'product',
-                    searchQuery: subCategory,
-                    category: _selectedCategory,
-                  );
-                  Navigator.pop(context);
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade200),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: isMobile ? 46 : 56,
-                        height: isMobile ? 46 : 56,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.grey.shade100,
-                        ),
-                        child: ClipOval(
-                          child: imageUrl != null && imageUrl.isNotEmpty
-                              ? Image.network(
-                                  imageUrl,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => Icon(
-                                    Icons.grid_view_rounded,
-                                    size: 22,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .primary,
-                                  ),
-                                )
-                              : Icon(
-                                  Icons.grid_view_rounded,
-                                  size: 22,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        subCategory,
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          );
-
-    return Column(
-      children: [
-        // MODAL TOP HEADER BAR
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
-            border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Icon(Icons.category_rounded,
-                      size: 20, color: Theme.of(context).colorScheme.primary),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Category Mega Menu',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ),
-                ],
-              ),
-              IconButton(
-                icon: const Icon(Icons.close_rounded, size: 22),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ],
-          ),
-        ),
-
-        // CONTENT BODY (LAYOUT ADAPTS FOR MOBILE & DESKTOP)
-        Expanded(
-          child: isMobile
-              ? Column(
-                  children: [
-                    // TOP HORIZONTAL CATEGORY SCROLLER FOR MOBILE
-                    SizedBox(
-                      height: 42,
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: ProductConstants.categories.length,
-                        itemBuilder: (context, index) {
-                          final category = ProductConstants.categories[index];
-                          final isSelected = category == _selectedCategory;
-
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 4, vertical: 4),
-                            child: ChoiceChip(
-                              label: Text(
-                                category,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: isSelected
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                                  color: isSelected
-                                      ? Colors.white
-                                      : Colors.black87,
-                                ),
-                              ),
-                              selected: isSelected,
-                              selectedColor:
-                                  Theme.of(context).colorScheme.primary,
-                              onSelected: (_) {
-                                setState(() {
-                                  _selectedCategory = category;
-                                });
-                              },
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const Divider(height: 1),
-                    Expanded(child: subCategoryGrid),
-                  ],
-                )
-              : Row(
-                  children: [
-                    Container(
-                      width: 220,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade50,
-                        border: Border(
-                            right: BorderSide(color: Colors.grey.shade200)),
-                      ),
-                      child: categoryList,
-                    ),
-                    Expanded(child: subCategoryGrid),
-                  ],
-                ),
-        ),
-      ],
     );
   }
 }

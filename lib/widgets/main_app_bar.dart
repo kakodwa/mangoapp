@@ -131,7 +131,7 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
               ),
           actions: [
             if (isDesktop) ...[
-              // CATEGORIES TEXT BUTTON
+              // CATEGORIES TEXT BUTTON (DESKTOP ONLY)
               TextButton.icon(
                 icon: const Icon(Icons.category_rounded, size: 18),
                 label: const Text('Categories', style: TextStyle(fontWeight: FontWeight.w600)),
@@ -194,14 +194,7 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
                 ),
               ),
             ] else ...[
-              IconButton(
-                icon: const Icon(Icons.category_outlined),
-                tooltip: 'Categories',
-                onPressed: () {
-                  _analyticsService.logEvent('appbar_categories_click');
-                  _showCategoriesMegaMenu(context);
-                },
-              ),
+              // MOBILE VIEW (Categories icon is now removed from here)
               IconButton(
                 icon: const Icon(Icons.search_rounded),
                 tooltip: 'Search Platform',
