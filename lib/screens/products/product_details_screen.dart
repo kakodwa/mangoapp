@@ -794,6 +794,114 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
 
               buildVariantSelector(product.variants),
 
+              // DESKTOP ACTIONS BELOW OPTIONS
+              if (isDesktop) ...[
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 48,
+                        child: isOwner
+                            ? ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.mangoOrange,
+                                  foregroundColor: Colors.white,
+                                  elevation: 0,
+                                  shape: const StadiumBorder(),
+                                ),
+                                icon: const Icon(Icons.edit, size: 18),
+                                label: const Text(
+                                  "Edit Item",
+                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                ),
+                                onPressed: () {
+                                  analytics.logEvent('product_edit_click_${product.id}');
+                                  MainTabsScreen.of(context)?.navigateToEditProduct(product);
+                                },
+                              )
+                            : (product.isInStock
+                                ? ElevatedButton.icon(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.mangoOrange,
+                                      foregroundColor: Colors.white,
+                                      elevation: 0,
+                                      shape: const StadiumBorder(),
+                                    ),
+                                    icon: const Icon(Icons.shopping_cart_outlined, size: 20),
+                                    label: const Text(
+                                      "Add to Cart",
+                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                    ),
+                                    onPressed: () {
+                                      if (!isLoggedIn) {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(builder: (_) => const LoginScreen()),
+                                        );
+                                        return;
+                                      }
+
+                                      if (product.variants.isNotEmpty && _selectedVariant == null) {
+                                        AppToast.info(context, "Please select an option first");
+                                        return;
+                                      }
+
+                                      analytics.logEvent('product_add_to_cart_click_${product.id}');
+                                      ref.read(addToCartProvider).call(product, 1, _selectedVariant);
+                                      AppToast.success(context, "ADDED TO CART");
+                                    },
+                                  )
+                                : OutlinedButton(
+                                    style: OutlinedButton.styleFrom(
+                                      shape: const StadiumBorder(),
+                                    ),
+                                    onPressed: null,
+                                    child: const Text("Out of Stock"),
+                                  )),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: SizedBox(
+                        height: 48,
+                        child: OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFF25D366),
+                            side: const BorderSide(color: Color(0xFF25D366), width: 1.5),
+                            shape: const StadiumBorder(),
+                          ),
+                          icon: const FaIcon(FontAwesomeIcons.whatsapp, size: 20),
+                          label: const Text(
+                            "Chat on WhatsApp",
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                          ),
+                          onPressed: () {
+                            if (product.phoneNumber.isNotEmpty) {
+                              analytics.logEvent('product_whatsapp_click_${product.id}');
+                              _openWhatsApp(product.phoneNumber);
+                            } else {
+                              AppToast.info(context, "Shop phone number is unavailable");
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    IconButton(
+                      icon: const Icon(Icons.share_outlined, size: 22),
+                      tooltip: "Share Product",
+                      onPressed: () => _shareProduct(product, analytics),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.storefront_outlined, size: 22),
+                      tooltip: "View Shop",
+                      onPressed: () => _navigateToShop(product.shopId, analytics),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.lg),
+              ],
+
               AppCard(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 onTap: () => _navigateToShop(product.shopId, analytics),
@@ -1038,136 +1146,138 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
               ],
             ),
           ),
-          bottomNavigationBar: SafeArea(
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.xs,
-                vertical: 4.0,
-              ),
-              decoration: BoxDecoration(
-                color: Theme.of(context).scaffoldBackgroundColor,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 8,
-                    offset: const Offset(0, -4),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  if (!isOwner) ...[
-                    IconButton(
-                      visualDensity: VisualDensity.compact,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(minWidth: 38, minHeight: 38),
-                      icon: const Icon(Icons.favorite_border, size: 22),
-                      tooltip: "Favorite",
-                      onPressed: () {
-                        analytics.logEvent('product_fav_click_${product.id}');
-                        AppToast.success(context, "ADDED TO FAVORITES");
-                      },
+          bottomNavigationBar: isDesktop
+              ? const SizedBox.shrink()
+              : SafeArea(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.xs,
+                      vertical: 4.0,
                     ),
-                  ],
-                  IconButton(
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 38, minHeight: 38),
-                    icon: const FaIcon(FontAwesomeIcons.whatsapp, color: Color(0xFF25D366), size: 20),
-                    tooltip: "Chat on WhatsApp",
-                    onPressed: () {
-                      if (product.phoneNumber.isNotEmpty) {
-                        analytics.logEvent('product_whatsapp_click_${product.id}');
-                        _openWhatsApp(product.phoneNumber);
-                      } else {
-                        AppToast.info(context, "Shop phone number is unavailable");
-                      }
-                    },
-                  ),
-                  IconButton(
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 38, minHeight: 38),
-                    icon: const Icon(Icons.share_outlined, size: 22),
-                    tooltip: "Share Product",
-                    onPressed: () => _shareProduct(product, analytics),
-                  ),
-                  IconButton(
-                    visualDensity: VisualDensity.compact,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 38, minHeight: 38),
-                    icon: const Icon(Icons.storefront_outlined, size: 22),
-                    tooltip: "View Shop",
-                    onPressed: () => _navigateToShop(product.shopId, analytics),
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  Expanded(
-                    child: SizedBox(
-                      height: 42,
-                      child: isOwner
-                          ? ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.mangoOrange,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(horizontal: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              icon: const Icon(Icons.edit, size: 18),
-                              label: const Text(
-                                "Edit Item",
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                              ),
-                              onPressed: () {
-                                analytics.logEvent('product_edit_click_${product.id}');
-                                MainTabsScreen.of(context)?.navigateToEditProduct(product);
-                              },
-                            )
-                          : (product.isInStock
-                              ? ElevatedButton.icon(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: AppColors.mangoOrange,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 8,
+                          offset: const Offset(0, -4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        if (!isOwner) ...[
+                          IconButton(
+                            visualDensity: VisualDensity.compact,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(minWidth: 38, minHeight: 38),
+                            icon: const Icon(Icons.favorite_border, size: 22),
+                            tooltip: "Favorite",
+                            onPressed: () {
+                              analytics.logEvent('product_fav_click_${product.id}');
+                              AppToast.success(context, "ADDED TO FAVORITES");
+                            },
+                          ),
+                        ],
+                        IconButton(
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 38, minHeight: 38),
+                          icon: const FaIcon(FontAwesomeIcons.whatsapp, color: Color(0xFF25D366), size: 20),
+                          tooltip: "Chat on WhatsApp",
+                          onPressed: () {
+                            if (product.phoneNumber.isNotEmpty) {
+                              analytics.logEvent('product_whatsapp_click_${product.id}');
+                              _openWhatsApp(product.phoneNumber);
+                            } else {
+                              AppToast.info(context, "Shop phone number is unavailable");
+                            }
+                          },
+                        ),
+                        IconButton(
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 38, minHeight: 38),
+                          icon: const Icon(Icons.share_outlined, size: 22),
+                          tooltip: "Share Product",
+                          onPressed: () => _shareProduct(product, analytics),
+                        ),
+                        IconButton(
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 38, minHeight: 38),
+                          icon: const Icon(Icons.storefront_outlined, size: 22),
+                          tooltip: "View Shop",
+                          onPressed: () => _navigateToShop(product.shopId, analytics),
+                        ),
+                        const SizedBox(width: AppSpacing.xs),
+                        Expanded(
+                          child: SizedBox(
+                            height: 42,
+                            child: isOwner
+                                ? ElevatedButton.icon(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.mangoOrange,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
                                     ),
-                                  ),
-                                  icon: const Icon(Icons.shopping_cart, size: 18),
-                                  label: const Text(
-                                    "Add to Cart",
-                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                                  ),
-                                  onPressed: () {
-                                    if (!isLoggedIn) {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(builder: (_) => const LoginScreen()),
-                                      );
-                                      return;
-                                    }
+                                    icon: const Icon(Icons.edit, size: 18),
+                                    label: const Text(
+                                      "Edit Item",
+                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                    ),
+                                    onPressed: () {
+                                      analytics.logEvent('product_edit_click_${product.id}');
+                                      MainTabsScreen.of(context)?.navigateToEditProduct(product);
+                                    },
+                                  )
+                                : (product.isInStock
+                                    ? ElevatedButton.icon(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: AppColors.mangoOrange,
+                                          foregroundColor: Colors.white,
+                                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                        icon: const Icon(Icons.shopping_cart, size: 18),
+                                        label: const Text(
+                                          "Add to Cart",
+                                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                        ),
+                                        onPressed: () {
+                                          if (!isLoggedIn) {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(builder: (_) => const LoginScreen()),
+                                            );
+                                            return;
+                                          }
 
-                                    if (product.variants.isNotEmpty && _selectedVariant == null) {
-                                      AppToast.info(context, "Please select an option first");
-                                      return;
-                                    }
+                                          if (product.variants.isNotEmpty && _selectedVariant == null) {
+                                            AppToast.info(context, "Please select an option first");
+                                            return;
+                                          }
 
-                                    analytics.logEvent('product_add_to_cart_click_${product.id}');
-                                    ref.read(addToCartProvider).call(product, 1, _selectedVariant);
-                                    AppToast.success(context, "ADDED TO CART");
-                                  },
-                                )
-                              : const ElevatedButton(
-                                  onPressed: null,
-                                  child: Text("Out of Stock"),
-                                )),
+                                          analytics.logEvent('product_add_to_cart_click_${product.id}');
+                                          ref.read(addToCartProvider).call(product, 1, _selectedVariant);
+                                          AppToast.success(context, "ADDED TO CART");
+                                        },
+                                      )
+                                    : const ElevatedButton(
+                                        onPressed: null,
+                                        child: Text("Out of Stock"),
+                                      )),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
+                ),
         );
       },
     );

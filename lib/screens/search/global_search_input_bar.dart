@@ -1,9 +1,12 @@
+// lib/screens/search/global_search_input_bar.dart
+
 import 'package:flutter/material.dart';
 
 import '../../services/analytics_service.dart';
+import '../../theme/app_colors.dart';
 import '../main_tabs_screen.dart';
 
-class GlobalSearchInputBar extends StatelessWidget {
+class GlobalSearchInputBar extends StatefulWidget {
   final String hintText;
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
@@ -13,8 +16,6 @@ class GlobalSearchInputBar extends StatelessWidget {
   final double maxWidth;
   final String analyticsEventName;
   final int searchTabIndex;
-
-  static final AnalyticsService _analytics = AnalyticsService();
 
   const GlobalSearchInputBar({
     super.key,
@@ -29,8 +30,6 @@ class GlobalSearchInputBar extends StatelessWidget {
     this.searchTabIndex = 7,
   });
 
-  /// Factory helper to conveniently render directly inside a [CustomScrollView].
-  /// Automatically hides the search bar when rendered on desktop (width >= 900px).
   static Widget sliver({
     Key? key,
     String hintText = 'Search products, shops, lodges, properties...',
@@ -43,46 +42,54 @@ class GlobalSearchInputBar extends StatelessWidget {
     String analyticsEventName = 'home_search_submit',
     int searchTabIndex = 7,
   }) {
-    return Builder(
-      builder: (context) {
-        final bool isDesktop = MediaQuery.of(context).size.width >= 900;
-
-        if (isDesktop) {
-          return const SliverToBoxAdapter(
-            child: SizedBox.shrink(),
-          );
-        }
-
-        return SliverToBoxAdapter(
-          key: key,
-          child: GlobalSearchInputBar(
-            hintText: hintText,
-            controller: controller,
-            onChanged: onChanged,
-            onSubmitted: onSubmitted,
-            onClear: onClear,
-            suffixIcon: suffixIcon,
-            maxWidth: maxWidth,
-            analyticsEventName: analyticsEventName,
-            searchTabIndex: searchTabIndex,
-          ),
-        );
-      },
+    return SliverToBoxAdapter(
+      key: key,
+      child: GlobalSearchInputBar(
+        hintText: hintText,
+        controller: controller,
+        onChanged: onChanged,
+        onSubmitted: onSubmitted,
+        onClear: onClear,
+        suffixIcon: suffixIcon,
+        maxWidth: maxWidth,
+        analyticsEventName: analyticsEventName,
+        searchTabIndex: searchTabIndex,
+      ),
     );
+  }
+
+  @override
+  State<GlobalSearchInputBar> createState() => _GlobalSearchInputBarState();
+}
+
+class _GlobalSearchInputBarState extends State<GlobalSearchInputBar> {
+  late TextEditingController _effectiveController;
+  static final AnalyticsService _analytics = AnalyticsService();
+
+  @override
+  void initState() {
+    super.initState();
+    _effectiveController = widget.controller ?? TextEditingController();
+  }
+
+  @override
+  void didUpdateWidget(GlobalSearchInputBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.controller != oldWidget.controller) {
+      _effectiveController = widget.controller ?? TextEditingController();
+    }
   }
 
   void _handleSubmitted(BuildContext context, String query) {
     final trimmedQuery = query.trim();
     if (trimmedQuery.isNotEmpty) {
-      _analytics.logEvent(analyticsEventName);
+      _analytics.logEvent(widget.analyticsEventName);
 
-      // Execute custom callback if provided
-      if (onSubmitted != null) {
-        onSubmitted!(trimmedQuery);
+      if (widget.onSubmitted != null) {
+        widget.onSubmitted!(trimmedQuery);
       } else {
-        // Fallback default navigation behavior
         MainTabsScreen.of(context)?.setSelectedIndex(
-          searchTabIndex,
+          widget.searchTabIndex,
           searchQuery: trimmedQuery,
         );
       }
@@ -94,44 +101,91 @@ class GlobalSearchInputBar extends StatelessWidget {
     return Align(
       alignment: Alignment.topCenter,
       child: Container(
-        constraints: BoxConstraints(maxWidth: maxWidth),
+        constraints: BoxConstraints(maxWidth: widget.maxWidth),
         margin: const EdgeInsets.fromLTRB(12, 12, 12, 4),
-        child: TextField(
-          controller: controller,
-          onChanged: onChanged,
-          onSubmitted: (query) => _handleSubmitted(context, query),
-          decoration: InputDecoration(
-            hintText: hintText,
-            prefixIcon: const Icon(Icons.search, color: Colors.grey),
-            suffixIcon: suffixIcon ??
-                (controller != null && controller!.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear, color: Colors.grey),
-                        onPressed: () {
-                          controller!.clear();
-                          if (onClear != null) onClear!();
-                        },
-                      )
-                    : null),
-            filled: true,
-            fillColor: Colors.white,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: AppColors.mangoOrange,
+            width: 2.0,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.mangoOrange.withOpacity(0.12),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.primary,
-                width: 2,
+          ],
+        ),
+        padding: const EdgeInsets.only(left: 18, right: 6, top: 6, bottom: 6),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _effectiveController,
+                onChanged: (val) {
+                  setState(() {}); // Re-render for clear button visibility
+                  if (widget.onChanged != null) widget.onChanged!(val);
+                },
+                onSubmitted: (query) => _handleSubmitted(context, query),
+                style: TextStyle(fontSize: 15, color: AppColors.darkText),
+                decoration: InputDecoration(
+                  hintText: widget.hintText,
+                  hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                ),
               ),
             ),
-            contentPadding: const EdgeInsets.symmetric(vertical: 12),
-          ),
+
+            if (widget.suffixIcon != null)
+              widget.suffixIcon!
+            else if (_effectiveController.text.isNotEmpty)
+              IconButton(
+                icon: const Icon(Icons.clear, color: Colors.grey),
+                onPressed: () {
+                  _effectiveController.clear();
+                  setState(() {});
+                  if (widget.onClear != null) widget.onClear!();
+                },
+              ),
+
+            const SizedBox(width: 4),
+
+            InkWell(
+              onTap: () {
+                _handleSubmitted(context, _effectiveController.text);
+              },
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 11),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [AppColors.mangoLight, AppColors.mangoOrange],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  children: const [
+                    Icon(Icons.search_rounded, color: Colors.white, size: 18),
+                    SizedBox(width: 6),
+                    Text(
+                      'Search',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

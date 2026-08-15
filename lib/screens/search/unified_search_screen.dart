@@ -1,3 +1,5 @@
+// lib/screens/search/unified_search_screen.dart
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../providers/search_provider.dart';
@@ -23,7 +25,6 @@ import '../../screens/properties/property_card.dart';
 import '../../widgets/hospitality/lodge_card.dart';
 import '../../widgets/events/event_card.dart';
 import '../../widgets/web_footer.dart';
-
 
 class UnifiedSearchScreen extends StatefulWidget {
   final String? initialQuery;
@@ -53,20 +54,20 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
   String? _selectedBrand;
 
   final List<Map<String, String>> _types = [
-    {'key': 'all', 'label': 'All items'},
     {'key': 'product', 'label': 'Products'},
+    {'key': 'shop', 'label': 'Shops'},
+    {'key': 'all', 'label': 'All Items'},
     {'key': 'property', 'label': 'Properties'},
     {'key': 'lodge', 'label': 'Lodges'},
     {'key': 'event', 'label': 'Events'},
-    {'key': 'shop', 'label': 'Shops'},
   ];
 
   final List<String> _malawiDistricts = [
     'Balaka', 'Blantyre', 'Chikwawa', 'Chiradzulu', 'Chitipa', 'Dedza', 'Dowa',
     'Karonga', 'Kasungu', 'Likoma', 'Lilongwe', 'Machinga', 'Mangochi', 'Mchinji',
     'Mulanje', 'Mwanza', 'Mzimba', 'Nkhata Bay', 'Nkhotakota', 'Nsanje', 'Ntcheu',
-    'Ntchisi', 'Phalombe', 'Rumphi', 'Salima', 'Thyolo', 'Zomba','China','USA','Canada',
-    'Tanzania','South Africa','Other',
+    'Ntchisi', 'Phalombe', 'Rumphi', 'Salima', 'Thyolo', 'Zomba', 'China', 'USA', 'Canada',
+    'Tanzania', 'South Africa', 'Other',
   ];
 
   final List<Map<String, String>> _productCategories = [
@@ -129,8 +130,7 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
   void initState() {
     super.initState();
     _searchController = TextEditingController(text: widget.initialQuery ?? '');
-    
-    // Auto-populate subcategory state if initial query matches subcategory
+
     if (widget.initialQuery != null && widget.initialCategory != null) {
       final subMap = _categorySubCategoryBrands[widget.initialCategory];
       if (subMap != null && subMap.containsKey(widget.initialQuery)) {
@@ -143,7 +143,7 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
       type: widget.initialType ?? 'product',
       category: widget.initialCategory,
     );
-    
+
     _scrollController.addListener(_onScroll);
   }
 
@@ -151,6 +151,10 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
     if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
       _provider.fetchItems();
     }
+  }
+
+  void _onSearchSubmitted() {
+    _provider.updateFilters(query: _searchController.text.trim());
   }
 
   void _onSearchChanged(String query) {
@@ -252,26 +256,31 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
       builder: (context, child) {
         final double screenWidth = MediaQuery.of(context).size.width;
 
-        final isFilterActive = _provider.selectedDistrict != null || 
-                               _provider.selectedCategory != null || 
-                               _provider.selectedListingPurpose != null ||
-                               _selectedSubCategory != null ||
-                               _selectedBrand != null;
+        final isFilterActive = _provider.selectedDistrict != null ||
+            _provider.selectedCategory != null ||
+            _provider.selectedListingPurpose != null ||
+            _selectedSubCategory != null ||
+            _selectedBrand != null;
 
         final bool isProductTabOnly = _provider.selectedType == 'product';
 
-        final List<SearchResultItem> productItems = _provider.results.where((e) => e.resultType == 'product').toList();
-        final List<SearchResultItem> bannerItems = _provider.results.where((e) => e.resultType != 'product').toList();
+        final List<SearchResultItem> productItems =
+            _provider.results.where((e) => e.resultType == 'product').toList();
+        final List<SearchResultItem> bannerItems =
+            _provider.results.where((e) => e.resultType != 'product').toList();
 
         double cardAspectRatio = screenWidth >= 900 ? 0.72 : 0.62;
 
         int productColumns = 2;
-        if (screenWidth >= 1200) productColumns = 5;
-        else if (screenWidth >= 900) productColumns = 4;
+        if (screenWidth >= 1200)
+          productColumns = 5;
+        else if (screenWidth >= 900)
+          productColumns = 4;
         else if (screenWidth >= 600) productColumns = 3;
 
         int bannerColumns = 1;
-        if (screenWidth >= 1200) bannerColumns = 3;
+        if (screenWidth >= 1200)
+          bannerColumns = 3;
         else if (screenWidth >= 800) bannerColumns = 2;
 
         final typeWithSubFilters = _provider.selectedType == 'product' ||
@@ -281,104 +290,161 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
         final Map<String, List<String>>? subCategoryMap =
             _categorySubCategoryBrands[_provider.selectedCategory];
         final List<String> availableSubCategories = subCategoryMap?.keys.toList() ?? [];
-        final List<String> availableBrands = (_selectedSubCategory != null && subCategoryMap != null)
-            ? (subCategoryMap[_selectedSubCategory] ?? [])
-            : [];
+        final List<String> availableBrands =
+            (_selectedSubCategory != null && subCategoryMap != null)
+                ? (subCategoryMap[_selectedSubCategory] ?? [])
+                : [];
 
-        // Dynamic horizontal padding to align grid items to 1200px max-width container
-        final double gridHorizontalPadding = screenWidth > 1224 ? (screenWidth - 1200) / 2 : 12;
+        final double gridHorizontalPadding =
+            screenWidth > 1224 ? (screenWidth - 1200) / 2 : 12;
 
         return Scaffold(
+          backgroundColor: const Color(0xFFFAF8F5),
           body: SafeArea(
             child: Column(
               children: [
-                // SEARCH BAR SECTION (ALIGNED TO 1200px MAX-WIDTH)
+                // ================= ORANGE MARKETPLACE SEARCH CONTAINER =================
                 Align(
                   alignment: Alignment.topCenter,
                   child: Container(
-                    constraints: const BoxConstraints(maxWidth: 1200),
-                    padding: const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 8.0),
-                    child: Row(
+                    constraints: const BoxConstraints(maxWidth: 1000),
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _searchController,
-                            onChanged: _onSearchChanged,
-                            decoration: InputDecoration(
-                              hintText: 'Search matching items...',
-                              prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                              suffixIcon: _searchController.text.isNotEmpty
-                                  ? IconButton(
-                                      icon: const Icon(Icons.clear, color: Colors.grey),
-                                      onPressed: () {
-                                        _searchController.clear();
-                                        _provider.updateFilters(query: '');
-                                      },
-                                    )
-                                  : null,
-                              filled: true,
-                              fillColor: Colors.white,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: Colors.grey.shade300),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: Colors.grey.shade300),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: AppColors.primary(context), width: 2),
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                            ),
+                        // --- CATEGORY SEGMENT TABS ---
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: _types.map((type) {
+                              final isSelected = _provider.selectedType == type['key'];
+                              return InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    _selectedSubCategory = null;
+                                    _selectedBrand = null;
+                                  });
+                                  _provider.updateFilters(
+                                    type: type['key'],
+                                    district: SearchProvider.isUnchanged,
+                                    category: null,
+                                    listingPurpose: null,
+                                  );
+                                },
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        type['label']!,
+                                        style: TextStyle(
+                                          fontSize: 17,
+                                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                                          color: isSelected ? AppColors.mangoOrange : AppColors.darkText,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Container(
+                                        height: 3,
+                                        width: isSelected ? 32 : 0,
+                                        decoration: BoxDecoration(
+                                          color: AppColors.mangoOrange,
+                                          borderRadius: BorderRadius.circular(2),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }).toList(),
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        InkWell(
-                          onTap: () {
-                            setState(() {
-                              _isFilterPanelExpanded = !_isFilterPanelExpanded;
-                            });
-                          },
-                          borderRadius: BorderRadius.circular(12),
-                          child: Container(
-                            height: 48,
-                            padding: const EdgeInsets.symmetric(horizontal: 12),
-                            decoration: BoxDecoration(
-                              color: isFilterActive || _isFilterPanelExpanded
-                                  ? AppColors.mangoOrange.withOpacity(0.15)
-                                  : Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: isFilterActive || _isFilterPanelExpanded
-                                    ? AppColors.mangoOrange
-                                    : Colors.grey.shade300,
-                                width: isFilterActive || _isFilterPanelExpanded ? 1.6 : 1,
-                              ),
+                        const SizedBox(height: 12),
+
+                        // --- SEARCH FORM COMPONENT ---
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(24),
+                            border: Border.all(
+                              color: AppColors.mangoOrange,
+                              width: 2.0,
                             ),
-                            child: Row(
-                              children: [
-                                Icon(
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppColors.mangoOrange.withOpacity(0.12),
+                                blurRadius: 12,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.only(left: 18, right: 6, top: 6, bottom: 6),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  controller: _searchController,
+                                  onChanged: _onSearchChanged,
+                                  onSubmitted: (_) => _onSearchSubmitted(),
+                                  style: const TextStyle(fontSize: 15, color: AppColors.darkText),
+                                  decoration: InputDecoration(
+                                    hintText: 'Search products, shops, lodges, properties...',
+                                    hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                                    border: InputBorder.none,
+                                    isDense: true,
+                                    contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                                  ),
+                                ),
+                              ),
+
+                              // Filter Toggle Button
+                              IconButton(
+                                icon: Icon(
                                   Icons.tune_rounded,
                                   color: isFilterActive || _isFilterPanelExpanded
                                       ? AppColors.mangoOrange
-                                      : AppColors.darkText,
+                                      : Colors.grey.shade600,
                                 ),
-                                if (screenWidth >= 600) ...[
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Filters',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: isFilterActive || _isFilterPanelExpanded
-                                          ? AppColors.mangoOrange
-                                          : AppColors.darkText,
+                                onPressed: () {
+                                  setState(() {
+                                    _isFilterPanelExpanded = !_isFilterPanelExpanded;
+                                  });
+                                },
+                              ),
+                              const SizedBox(width: 4),
+
+                              // Orange Search Button
+                              InkWell(
+                                onTap: _onSearchSubmitted,
+                                borderRadius: BorderRadius.circular(20),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 11),
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [AppColors.mangoLight, AppColors.mangoOrange],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
                                     ),
+                                    borderRadius: BorderRadius.circular(20),
                                   ),
-                                ]
-                              ],
-                            ),
+                                  child: Row(
+                                    children: const [
+                                      Icon(Icons.search_rounded, color: Colors.white, size: 18),
+                                      SizedBox(width: 6),
+                                      Text(
+                                        'Search',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -386,51 +452,7 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
                   ),
                 ),
 
-                // TYPE CHIPS SECTION (ALIGNED TO 1200px MAX-WIDTH)
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: Container(
-                    constraints: const BoxConstraints(maxWidth: 1200),
-                    height: 40,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      itemCount: _types.length,
-                      itemBuilder: (context, index) {
-                        final type = _types[index];
-                        final isSelected = _provider.selectedType == type['key'];
-
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
-                          child: FilterChip(
-                            label: Text(type['label']!),
-                            selected: isSelected,
-                            selectedColor: AppColors.primary(context).withOpacity(0.2),
-                            checkmarkColor: AppColors.primary(context),
-                            labelStyle: TextStyle(
-                              color: isSelected ? AppColors.primary(context) : AppColors.darkText,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                            ),
-                            onSelected: (bool selected) {
-                              setState(() {
-                                _selectedSubCategory = null;
-                                _selectedBrand = null;
-                              });
-                              _provider.updateFilters(
-                                type: type['key'],
-                                district: SearchProvider.isUnchanged,
-                                category: null,
-                                listingPurpose: null,
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-
-                // EXPANDABLE FILTER PANEL (ALIGNED TO 1200px MAX-WIDTH)
+                // EXPANDABLE FILTER PANEL
                 Align(
                   alignment: Alignment.topCenter,
                   child: AnimatedContainer(
@@ -438,13 +460,13 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
                     height: _isFilterPanelExpanded ? null : 0,
                     child: _isFilterPanelExpanded
                         ? Container(
-                            constraints: const BoxConstraints(maxWidth: 1200),
+                            constraints: const BoxConstraints(maxWidth: 1000),
                             width: double.infinity,
-                            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade50,
-                              borderRadius: BorderRadius.circular(12),
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
                               border: Border.all(color: Colors.grey.shade300),
                             ),
                             child: Wrap(
@@ -624,7 +646,6 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
                                           ),
                                         ),
 
-                                      // Web/Desktop Footer
                                       const SliverToBoxAdapter(
                                         child: WebFooter(),
                                       ),
@@ -641,7 +662,7 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
   }
 
   Widget _buildDynamicFeedCard(SearchResultItem item) {
-    final String type = item.resultType ?? ''; 
+    final String type = item.resultType ?? '';
 
     switch (type) {
       case 'product':
@@ -650,7 +671,7 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
           id: item.id,
           ownerId: item.details['owner'],
           shopId: item.details['shop'] ?? 0,
-          shopName: item.details['shop_name'] ?? 'Market Shop', 
+          shopName: item.details['shop_name'] ?? 'Market Shop',
           shopDistrict: item.district,
           shopPhoneNumber: item.details['shop_phone_number']?.toString(),
           name: item.title,
@@ -658,11 +679,11 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
           description: item.subtitle,
           image: fallbackImage.isNotEmpty ? fallbackImage : null,
           category: item.details['category'] ?? '',
-          subCategory: item.details['sub_category'] ?? '', 
-          brand: item.details['brand'] ?? '',              
+          subCategory: item.details['sub_category'] ?? '',
+          brand: item.details['brand'] ?? '',
           price: double.tryParse(item.price?.toString() ?? '0') ?? 0.0,
-          originalPrice: item.details['original_price'] != null 
-              ? double.tryParse(item.details['original_price'].toString()) 
+          originalPrice: item.details['original_price'] != null
+              ? double.tryParse(item.details['original_price'].toString())
               : null,
           discountPercentage: item.details['discount_percentage'] ?? 0,
           stock: item.details['stock'] ?? 0,
@@ -697,14 +718,14 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
           rating: double.tryParse(item.details['rating']?.toString() ?? '0') ?? 0.0,
           totalReviews: item.details['total_reviews'] ?? 0,
           createdAt: DateTime.tryParse(item.details['created_at'] ?? '') ?? DateTime.now(),
-          productCount: item.details['product_count'], 
+          productCount: item.details['product_count'],
         );
         return ShopCard(shop: shop);
 
       case 'property':
         final String mainImage = item.imageUrl ?? item.details['image'] ?? '';
-        final propertyImages = mainImage.isNotEmpty 
-            ? [PropertyImage(id: 0, image: mainImage, isPrimary: true)] 
+        final propertyImages = mainImage.isNotEmpty
+            ? [PropertyImage(id: 0, image: mainImage, isPrimary: true)]
             : <PropertyImage>[];
 
         final property = Property(

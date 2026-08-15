@@ -1,3 +1,5 @@
+// lib/screens/home/home_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
@@ -340,8 +342,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         return CustomScrollView(
           controller: controller,
           slivers: [
-            /// 0. SEARCH BAR SECTION
-            GlobalSearchInputBar.sliver(),
+            /// 0. SEARCH BAR SECTION (VISIBLE ON ALL SCREEN SIZES INCLUDING DESKTOP)
+            const SliverToBoxAdapter(
+              child: GlobalSearchInputBar(),
+            ),
 
             /// 1. PROMO BANNER SECTION WITH LEFT CATEGORIES (DESKTOP)
             SliverToBoxAdapter(
@@ -492,105 +496,125 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               ),
             ),
 
-            /// 2. DOMAIN & QUICK CATEGORY CHIPS
+            /// 2. DOMAIN & QUICK CATEGORY CHIPS WITH SECTION TITLE
             SliverToBoxAdapter(
               child: Align(
                 alignment: Alignment.topCenter,
                 child: Container(
                   constraints: const BoxConstraints(maxWidth: 1200),
-                  height: 105,
                   margin: const EdgeInsets.symmetric(vertical: 8),
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    itemCount: _quickSearchTypes.length,
-                    itemBuilder: (context, index) {
-                      final type = _quickSearchTypes[index];
-                      final String imageUrl = type['image'] ?? 'https://www.malatrade.com/media/mobile/all.png';
-
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 16.0),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(35),
-                          onTap: () {
-                            final String key = type['key']!;
-                            final String label = type['label']!;
-
-                            _analytics.logEvent('click_home_chip_$key');
-                            
-                            const domainTypes = {
-                              'all',
-                              'product',
-                              'shop',
-                              'property',
-                              'lodge',
-                              'event'
-                            };
-
-                            if (domainTypes.contains(key)) {
-                              MainTabsScreen.of(context)?.setSelectedIndex(
-                                7,
-                                searchType: key,
-                                category: null,
-                              );
-                            } else {
-                              MainTabsScreen.of(context)?.setSelectedIndex(
-                                7,
-                                searchType: 'product',
-                                category: label,
-                              );
-                            }
-                          },
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                width: 65,
-                                height: 65,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.grey.shade100,
-                                  border: Border.all(
-                                    color: Colors.grey.shade300,
-                                    width: 1,
-                                  ),
-                                ),
-                                child: ClipOval(
-                                  child: Image.network(
-                                    imageUrl,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) => Icon(
-                                      Icons.category_outlined,
-                                      color: Theme.of(context).colorScheme.primary,
-                                      size: 30,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-                              SizedBox(
-                                width: 80,
-                                child: Text(
-                                  type['label']!,
-                                  textAlign: TextAlign.center,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w600,
-                                    color: Theme.of(context).colorScheme.primary,
-                                  ),
-                                ),
-                              ),
-                            ],
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                        child: Text(
+                          'Shop by Category',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      );
-                    },
+                      ),
+                      SizedBox(
+                        height: 105,
+                        child: ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          itemCount: _quickSearchTypes.length,
+                          itemBuilder: (context, index) {
+                            final type = _quickSearchTypes[index];
+                            final String imageUrl = type['image'] ?? 'https://www.malatrade.com/media/mobile/all.png';
+
+                            return Padding(
+                              padding: const EdgeInsets.only(right: 16.0),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(35),
+                                onTap: () {
+                                  final String key = type['key']!;
+                                  final String label = type['label']!;
+
+                                  _analytics.logEvent('click_home_chip_$key');
+                                  
+                                  const domainTypes = {
+                                    'all',
+                                    'product',
+                                    'shop',
+                                    'property',
+                                    'lodge',
+                                    'event'
+                                  };
+
+                                  if (domainTypes.contains(key)) {
+                                    MainTabsScreen.of(context)?.setSelectedIndex(
+                                      7,
+                                      searchType: key,
+                                      category: null,
+                                    );
+                                  } else {
+                                    MainTabsScreen.of(context)?.setSelectedIndex(
+                                      7,
+                                      searchType: 'product',
+                                      category: label,
+                                    );
+                                  }
+                                },
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      width: 65,
+                                      height: 65,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.grey.shade100,
+                                        border: Border.all(
+                                          color: Colors.grey.shade300,
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: ClipOval(
+                                        child: Image.network(
+                                          imageUrl,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (_, __, ___) => Icon(
+                                            Icons.category_outlined,
+                                            color: Theme.of(context).colorScheme.primary,
+                                            size: 30,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 6),
+                                    SizedBox(
+                                      width: 80,
+                                      child: Text(
+                                        type['label']!,
+                                        textAlign: TextAlign.center,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          color: Theme.of(context).colorScheme.primary,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                     
+                    ],
                   ),
                 ),
               ),
             ),
+
+            
 
             const SliverToBoxAdapter(
               child: SizedBox(

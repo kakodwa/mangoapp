@@ -152,9 +152,9 @@ class ApiClient {
 
   Future<Map<String, dynamic>> submitWithdrawalRequest({
     required double amount,
-    required String payoutMethod, // 'mobile_money' or 'bank_transfer'
+    required String payoutMethod,
     required String accountHolderName,
-    required String accountNumber, // Phone or Bank Acct string
+    required String accountNumber,
     String? bankName,
     String? bankUuid,
     String? bankBranch,
