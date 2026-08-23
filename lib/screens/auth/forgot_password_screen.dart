@@ -170,7 +170,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                         const SizedBox(height: AppSpacing.xs),
                         Text(
                           _isCodeSent
-                              ? 'Enter the recovery OTP sent to your mailbox along with your new password choice.'
+                              ? 'Enter the recovery OTP sent to your mailbox or SMS along with your new password choice.'
                               : 'Enter your email address below to receive an account verification code.',
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -194,6 +194,25 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                             onPressed: _isLoading ? null : _handleSendResetCode,
                             loading: _isLoading,
                             fullWidth: true,
+                          ),
+
+                          // 🌟 DIRECT SKIP TO OTP ENTRY (For Users Created via Admin/SMS)
+                          const SizedBox(height: AppSpacing.md),
+                          Center(
+                            child: TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  _isCodeSent = true;
+                                });
+                              },
+                              child: const Text(
+                                "Already have an SMS OTP code? Tap here",
+                                style: TextStyle(
+                                  color: AppColors.mangoOrange,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                           ),
                         ] else ...[
                           AppTextField(
@@ -241,11 +260,16 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                             fullWidth: true,
                           ),
                           const SizedBox(height: AppSpacing.md),
-                          TextButton(
-                            onPressed: () => setState(() => _isCodeSent = false),
-                            child: const Text(
-                              "Change recovery email",
-                              style: TextStyle(color: AppColors.mangoOrange, fontWeight: FontWeight.bold),
+                          Center(
+                            child: TextButton(
+                              onPressed: () => setState(() => _isCodeSent = false),
+                              child: const Text(
+                                "Go back / Request new code",
+                                style: TextStyle(
+                                  color: AppColors.mangoOrange,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
                           ),
                         ],

@@ -186,13 +186,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             
                             walletAsync.when(
                               data: (wallet) => Wrap(
-                                spacing: 24,
-                                runSpacing: 16,
+                                spacing: 16,
+                                runSpacing: 12,
                                 alignment: WrapAlignment.center,
                                 children: [
-                                  _miniStat("Balance", "${wallet.currency} ${wallet.balance}"),
-                                  _miniStat("Earnings", "${wallet.currency} ${wallet.totalEarnings}"),
-                                  _miniStat("Withdrawn", "${wallet.currency} ${wallet.totalWithdrawn}"),
+                                  _miniStat("Balance", "${wallet.currency} ${wallet.balance.toStringAsFixed(2)}"),
+                                  _miniStat("Escrow", "${wallet.currency} ${wallet.escrowBalance.toStringAsFixed(2)}"),
+                                  _miniStat("Earnings", "${wallet.currency} ${wallet.totalEarnings.toStringAsFixed(2)}"),
+                                  _miniStat("Withdrawn", "${wallet.currency} ${wallet.totalWithdrawn.toStringAsFixed(2)}"),
                                 ],
                               ),
                               loading: () => const SizedBox(
@@ -453,7 +454,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Widget _miniStat(String label, String value) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -462,7 +463,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             style: const TextStyle(
               color: Colors.white, 
               fontWeight: FontWeight.bold, 
-              fontSize: 15,
+              fontSize: 14,
               letterSpacing: -0.2,
             ),
           ),

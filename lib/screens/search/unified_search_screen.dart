@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 import '../../providers/search_provider.dart';
 import '../../models/search_result_item.dart';
 
@@ -47,6 +48,10 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
   final ScrollController _scrollController = ScrollController();
   late final TextEditingController _searchController;
   Timer? _debounce;
+
+  // Voice Search setup
+  final stt.SpeechToText _speech = stt.SpeechToText();
+  bool _isListening = false;
 
   bool _isFilterPanelExpanded = false;
 
@@ -164,11 +169,44 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
     });
   }
 
+  Future<void> _listenVoice() async {
+    if (!_isListening) {
+      bool available = await _speech.initialize(
+        onError: (val) => setState(() => _isListening = false),
+        onStatus: (val) {
+          if (val == 'done') setState(() => _isListening = false);
+        },
+      );
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          onResult: (val) {
+            setState(() {
+              _searchController.text = val.recognizedWords;
+              _searchController.selection = TextSelection.fromPosition(
+                TextPosition(offset: _searchController.text.length),
+              );
+            });
+            _onSearchChanged(val.recognizedWords);
+            if (val.finalResult) {
+              setState(() => _isListening = false);
+              _onSearchSubmitted();
+            }
+          },
+        );
+      }
+    } else {
+      setState(() => _isListening = false);
+      _speech.stop();
+    }
+  }
+
   @override
   void dispose() {
     _scrollController.dispose();
     _searchController.dispose();
     _debounce?.cancel();
+    _speech.stop();
     super.dispose();
   }
 
@@ -385,7 +423,10 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
                               Expanded(
                                 child: TextField(
                                   controller: _searchController,
-                                  onChanged: _onSearchChanged,
+                                  onChanged: (val) {
+                                    setState(() {});
+                                    _onSearchChanged(val);
+                                  },
                                   onSubmitted: (_) => _onSearchSubmitted(),
                                   style: const TextStyle(fontSize: 15, color: AppColors.darkText),
                                   decoration: InputDecoration(
@@ -397,6 +438,29 @@ class _UnifiedSearchScreenState extends State<UnifiedSearchScreen> {
                                   ),
                                 ),
                               ),
+
+                              // Voice Search Button
+                              if (_searchController.text.isEmpty)
+                                IconButton(
+                                  icon: Icon(
+                                    _isListening ? Icons.mic_rounded : Icons.mic_none_rounded,
+                                    color: _isListening ? AppColors.mangoOrange : Colors.grey.shade500,
+                                    size: 22,
+                                  ),
+                                  onPressed: _listenVoice,
+                                  tooltip: 'Voice Search',
+                                ),
+
+                              // Clear Text Button
+                              if (_searchController.text.isNotEmpty)
+                                IconButton(
+                                  icon: const Icon(Icons.cancel_rounded, color: Colors.grey, size: 20),
+                                  onPressed: () {
+                                    _searchController.clear();
+                                    setState(() {});
+                                    _onSearchChanged('');
+                                  },
+                                ),
 
                               // Filter Toggle Button
                               IconButton(

@@ -365,16 +365,28 @@ class _MainDrawerState extends ConsumerState<MainDrawer> {
               ),
             ),
 
-            // FOOTER
+            // DRAWER FOOTER: PAYMENT METHODS BANNER & VERSION
             Padding(
-              padding: const EdgeInsets.only(bottom: 12, top: 4),
-              child: Text(
-                "Version 1.0.0",
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: colorScheme.onSurface.withOpacity(0.4),
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                    ),
+              padding: const EdgeInsets.only(left: 16, right: 16, bottom: 12, top: 4),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.network(
+                    'https://www.malatrade.com/media/Payment_method.png',
+                    height: 32,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Version 1.0.0",
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: colorScheme.onSurface.withOpacity(0.4),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                        ),
+                  ),
+                ],
               ),
             ),
           ],

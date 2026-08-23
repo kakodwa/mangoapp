@@ -310,17 +310,20 @@ class WebFooter extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
-                    alignment: WrapAlignment.center,
-                    children: [
-                      _paymentLogo('assets/images/tnm.png', 'TNM Mpamba'),
-                      _paymentLogo('assets/images/airtel.png', 'Airtel Money'),
-                      _paymentLogo('assets/images/changu.png', 'Changu Pay'),
-                      _paymentLogo('assets/images/visa.png', 'Visa Card'),
-                    ],
+                  
+                  // UPDATED: High-Quality Anti-Aliased Payment Methods Banner
+                  Container(
+                    constraints: const BoxConstraints(maxWidth: 350),
+                    child: Image.network(
+                      'https://www.malatrade.com/media/Payment_method.png',
+                      height: 48,
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.high, // Enforces crisp bicubic sampling
+                      isAntiAlias: true,                 // Smooths font edges on web renders
+                      errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
+                    ),
                   ),
+
                   const SizedBox(height: 24),
                   const Text(
                     '© 2026 MalaTrade Marketplace. All rights reserved.',
@@ -383,32 +386,6 @@ class WebFooter extends ConsumerWidget {
               fontWeight: FontWeight.w400,
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  // ================= PAYMENT LOGO BUILDER =================
-  Widget _paymentLogo(String assetPath, String tooltip) {
-    return Tooltip(
-      message: tooltip,
-      child: Container(
-        width: 64,
-        height: 38,
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: Colors.white24, width: 1),
-        ),
-        child: Image.asset(
-          assetPath,
-          fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) {
-            return Center(
-              child: Icon(Icons.credit_card, size: 20, color: Colors.grey[400]),
-            );
-          },
         ),
       ),
     );

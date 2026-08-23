@@ -19,6 +19,7 @@ final walletProvider = FutureProvider.autoDispose<Wallet>((ref) async {
   if (authState.isLoading) {
     return Wallet(
       balance: 0.0,
+      escrowBalance: 0.0,
       currency: 'MWK',
       totalEarnings: 0.0,
       totalWithdrawn: 0.0,
@@ -28,6 +29,7 @@ final walletProvider = FutureProvider.autoDispose<Wallet>((ref) async {
   if (!authState.isAuthenticated) {
     return Wallet(
       balance: 0.0,
+      escrowBalance: 0.0,
       currency: 'MWK',
       totalEarnings: 0.0,
       totalWithdrawn: 0.0,

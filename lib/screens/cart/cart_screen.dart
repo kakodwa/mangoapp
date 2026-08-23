@@ -38,7 +38,13 @@ class CartScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cart = ref.watch(cartProvider);
-    final total = ref.watch(cartTotalProvider);
+    final subtotal = ref.watch(cartTotalProvider);
+
+    // ==========================================
+    // PAYCHANGU PROCESSING FEE (3% COLLECTION FEE)
+    // ==========================================
+    final double processingFee = subtotal * 0.03;
+    final double grandTotal = subtotal + processingFee;
 
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth >= 900;
@@ -114,7 +120,6 @@ class CartScreen extends ConsumerWidget {
                       data: (liveProduct) {
                         if (liveProduct.variants.isEmpty) return const SizedBox.shrink();
 
-                        // Filter variants to ensure they have valid attributes
                         final validVariants = liveProduct.variants.where((v) {
                           return _formatAttributes(v.attributes) != null;
                         }).toList();
@@ -123,7 +128,6 @@ class CartScreen extends ConsumerWidget {
 
                         final currentFormatted = _formatAttributes(item.variant?.attributes);
 
-                        // Find selected variant match
                         final selectedValue = validVariants.any(
                                 (v) => _formatAttributes(v.attributes) == currentFormatted)
                             ? validVariants.firstWhere(
@@ -154,7 +158,6 @@ class CartScreen extends ConsumerWidget {
                               ),
                               onChanged: (newVariant) {
                                 if (newVariant != null) {
-                                  // Remove existing cart item and add newly chosen variant
                                   ref.read(removeFromCartProvider).call(
                                         item.product.id,
                                         item.variant?.attributes,
@@ -277,7 +280,7 @@ class CartScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text("Items (${cart.length})", style: const TextStyle(fontWeight: FontWeight.w500)),
-                Text(formatWithCommas(total), style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(formatWithCommas(subtotal), style: const TextStyle(fontWeight: FontWeight.bold)),
               ],
             ),
             const SizedBox(height: 8),
@@ -288,18 +291,40 @@ class CartScreen extends ConsumerWidget {
                 Text("MWK 0.00"),
               ],
             ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text("Payment Processing (3%)"),
+                Text(formatWithCommas(processingFee)),
+              ],
+            ),
             const Divider(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text("Total", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 Text(
-                  formatWithCommas(total),
+                  formatWithCommas(grandTotal),
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            
+            // ==========================================
+            // PAYMENT METHOD BANNER INSIDE SUMMARY CARD
+            // ==========================================
+            const SizedBox(height: 16),
+            Center(
+              child: Image.network(
+                'https://www.malatrade.com/media/Payment_method.png',
+                height: 38,
+                fit: BoxFit.contain,
+                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+              ),
+            ),
+            const SizedBox(height: 16),
+
             AppButton(
               text: "Checkout",
               fullWidth: true,
@@ -307,11 +332,11 @@ class CartScreen extends ConsumerWidget {
                 final tabsScreen = MainTabsScreen.of(context);
                 
                 if (tabsScreen != null) {
-                  tabsScreen.navigateToCheckout(cart, total);
+                  tabsScreen.navigateToCheckout(cart, grandTotal);
                 } else {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => CheckoutScreen(items: cart, total: total),
+                      builder: (_) => CheckoutScreen(items: cart, total: grandTotal),
                     ),
                   );
                 }

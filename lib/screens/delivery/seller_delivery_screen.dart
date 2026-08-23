@@ -12,6 +12,7 @@ import '../../widgets/main_app_bar.dart';
 import '../../widgets/web_footer.dart';
 import '../../core/api/api_client.dart';
 import '../../providers/api_provider.dart';
+import '../../providers/wallet_provider.dart'; // IMPORTED: Wallet Provider
 import '../../models/delivery.dart';
 import '../../theme/app_colors.dart';
 import '../main_tabs_screen.dart';
@@ -350,7 +351,7 @@ class SellerDeliveryScreen extends ConsumerWidget {
   // =========================
   void _showStatusDialog(BuildContext context, WidgetRef ref, int deliveryId) {
     String selectedStatus = "in_transit";
-    final statuses = ["picked_up", "in_transit",];
+    final statuses = ["picked_up", "in_transit"];
 
     showDialog(
       context: context,
@@ -385,7 +386,11 @@ class SellerDeliveryScreen extends ConsumerWidget {
                   data: {"status": selectedStatus},
                   fromJson: (json) => json,
                 );
+                
+                // REFRESH DELIVERIES AND USER PROFILE WALLET BALANCE
                 ref.invalidate(sellerDeliveriesProvider);
+                ref.invalidate(walletProvider);
+                
                 Navigator.pop(context);
               },
               child: const Text("Save"),
@@ -496,7 +501,11 @@ class SellerDeliveryScreen extends ConsumerWidget {
                   },
                   fromJson: (json) => json,
                 );
+
+                // REFRESH DELIVERIES AND USER PROFILE WALLET BALANCE
                 ref.invalidate(sellerDeliveriesProvider);
+                ref.invalidate(walletProvider);
+
                 Navigator.pop(context);
               },
               child: const Text("Assign"),
