@@ -325,7 +325,7 @@ class _MangoHubScreenState extends State<MangoHubScreen> {
     return AppInfoBox(
       type: AppInfoType.info,
       icon: Icons.percent,
-      message: "MALATRADE COMMISSION: Platform standard takes a 10% cut structure for every completed pipeline transaction handled natively across all business verticals.",
+      message: "MALATRADE COMMISSION: Platform standard takes a 3.5% cut structure for every completed pipeline transaction handled natively across all business verticals.",
     );
   }
 
@@ -411,7 +411,7 @@ class _MangoHubScreenState extends State<MangoHubScreen> {
               children: [
                 const Text("For Support & Inquiries", style: AppTypography.titleSmall),
                 const SizedBox(height: AppSpacing.xxs),
-                Text("+265 993 344 56", style: AppTypography.headlineSmall.copyWith(color: AppColors.leafGreen)),
+                Text("+265 993 344 416", style: AppTypography.headlineSmall.copyWith(color: AppColors.leafGreen)),
               ],
             ),
           )

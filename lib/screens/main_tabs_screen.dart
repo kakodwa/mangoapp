@@ -1,3 +1,5 @@
+// lib/screens/main_tabs_screen.dart
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb; 
@@ -84,9 +86,12 @@ import 'orders/orders_screen.dart';
 import 'cart/cart_screen.dart'; 
 import 'cart/checkout_screen.dart'; 
 
+import 'chat/chat_screen.dart'; // 👈 Unified Chat Hub Screen
+
 import '../providers/products_provider.dart'; 
 import '../router/app_router.dart'; 
 import '../core/api/api_client.dart'; 
+import '../theme/app_colors.dart';
 
 class MainTabsScreen extends StatefulWidget {
   final int initialIndex;
@@ -121,6 +126,9 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
   EventModel? _activeEvent; 
   dynamic _activeTicket; 
   dynamic _activeRiderDelivery;
+
+  int? _activeChatRoomId;
+  String? _activeChatPeerName;
 
   int? _unlockPropertyId; 
   String? _unlockPropertyTitle; 
@@ -196,6 +204,7 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
       const DeliveryCodeScreen(),     
       const AboutScreen(),            
       const HelpSupportScreen(),      
+      const ChatScreen(roomId: 0, peerName: "Messages"), // 👈 Primary Chat Screen at index 12
     ];
   }
 
@@ -273,10 +282,10 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
 
   bool _isDetailScreen() {
     final detailIndices = {
-      8, 12, 13, 14, 15, 16, 
-      17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 
-      31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 
-      41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55 
+      8, 13, 14, 15, 16, 17, 
+      18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 
+      31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41,
+      42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57
     };
     return detailIndices.contains(_currentIndex);
   }
@@ -289,39 +298,52 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
     } else {
       setState(() {
         switch (_currentIndex) {
-          case 12: _currentIndex = 2; break; 
-          case 13: _currentIndex = 1; break; 
-          case 14: _currentIndex = 5; break; 
-          case 15: _currentIndex = 3; break; 
-          case 16: _currentIndex = 4; break; 
-          case 47: _currentIndex = 14; break; 
-          case 48: _currentIndex = 47; break; 
-          case 54: _currentIndex = 13; break; 
-          case 55: _currentIndex = 9; break;
+          case 13: _currentIndex = 2; break; 
+          case 14: _currentIndex = 1; break; 
+          case 15: _currentIndex = 5; break; 
+          case 16: _currentIndex = 3; break; 
+          case 17: _currentIndex = 4; break; 
+          case 48: _currentIndex = 15; break; 
+          case 49: _currentIndex = 48; break; 
+          case 55: _currentIndex = 14; break; 
+          case 56: _currentIndex = 9; break;
+          case 57: _currentIndex = 12; break; 
           default: _currentIndex = 0; 
         }
       });
     }
   }
 
+  void navigateToChatInbox() {
+    _changeTab(12);
+  }
+
+  void navigateToChatRoom(int roomId, String peerName) {
+    setState(() {
+      _activeChatRoomId = roomId;
+      _activeChatPeerName = peerName;
+      _changeTab(57);
+    });
+  }
+
   void navigateToRiderDelivery(dynamic delivery) {
     setState(() {
       _activeRiderDelivery = delivery;
-      _changeTab(55);
+      _changeTab(56);
     });
   }
 
   void navigateToProductDetails(int productId) {
     setState(() {
       _activeProductId = productId; 
-      _changeTab(12); 
+      _changeTab(13); 
     });
   }
 
   void navigateToShopDetails(int shopId) {
     setState(() {
       _activeShopId = shopId; 
-      _changeTab(13); 
+      _changeTab(14); 
     });
   }
 
@@ -329,35 +351,35 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
     setState(() {
       _shopMapLat = lat;
       _shopMapLng = lng;
-      _changeTab(54);
+      _changeTab(55);
     });
   }
 
   void navigateToLodgeDetails(Lodge lodge) {
     setState(() {
       _activeLodge = lodge; 
-      _changeTab(14); 
+      _changeTab(15); 
     });
   }
 
   void navigateToPropertyDetails(int propertyId) {
     setState(() {
       _activePropertyId = propertyId; 
-      _changeTab(15); 
+      _changeTab(16); 
     });
   }
 
   void navigateToEventDetails(EventModel event) {
     setState(() {
       _activeEvent = event; 
-      _changeTab(16); 
+      _changeTab(17); 
     });
   }
 
   void navigateToTicketDetails(dynamic ticket) {
     setState(() {
       _activeTicket = ticket; 
-      _changeTab(50); 
+      _changeTab(51); 
     });
   }
 
@@ -370,7 +392,7 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
       _unlockPropertyId = propertyId; 
       _unlockPropertyTitle = propertyTitle; 
       _unlockPropertyFee = unlockFee; 
-      _changeTab(46); 
+      _changeTab(47); 
     });
   }
 
@@ -378,21 +400,21 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
     setState(() {
       _activeRoom = room; 
       _activeRoomLodgeImages = lodgeImages; 
-      _changeTab(47); 
+      _changeTab(48); 
     });
   }
 
   void navigateToBookingCheckout(Room room) {
     setState(() {
       _checkoutBookingRoom = room; 
-      _changeTab(48); 
+      _changeTab(49); 
     });
   }
 
   void navigateToBuyTicket(EventModel event) {
     setState(() {
       _activeEvent = event; 
-      _changeTab(45); 
+      _changeTab(46); 
     });
   }
 
@@ -400,7 +422,7 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
     setState(() {
       _checkoutItems = items; 
       _checkoutTotal = total; 
-      _changeTab(41); 
+      _changeTab(42); 
     });
   }
 
@@ -417,7 +439,7 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
       _paymentPurpose = purpose; 
       _packageReferenceType = referenceType; 
       _paymentOnSuccess = onSuccess; 
-      _changeTab(42); 
+      _changeTab(43); 
     });
   }
 
@@ -453,86 +475,86 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
     });
   }
 
-  void navigateToAddProduct() { _changeTab(17); }
-  void navigateToMyShop() { _changeTab(18); }
-  void navigateToSellerDeliveries() { _changeTab(19); }
-  void navigateToWalletTransactions() { _changeTab(20); }
-  void navigateToPaymentHistory() { _changeTab(21); }
-  void navigateToWithdrawal() { _changeTab(22); }
-  void navigateToPayoutHistory() { _changeTab(23); }
-  void navigateToOrders() { _changeTab(24); }
-  void navigateToMyBookings() { _changeTab(25); }
-  void navigateToMyTickets() { _changeTab(26); }
-  void navigateToMyUnlockedProperties() { _changeTab(27); }
-  void navigateToMyProperties() { _changeTab(28); }
-  void navigateToManageEvents() { _changeTab(29); }
-  void navigateToLodgeDashboard() { _changeTab(30); }
+  void navigateToAddProduct() { _changeTab(18); }
+  void navigateToMyShop() { _changeTab(19); }
+  void navigateToSellerDeliveries() { _changeTab(20); }
+  void navigateToWalletTransactions() { _changeTab(21); }
+  void navigateToPaymentHistory() { _changeTab(22); }
+  void navigateToWithdrawal() { _changeTab(23); }
+  void navigateToPayoutHistory() { _changeTab(24); }
+  void navigateToOrders() { _changeTab(25); }
+  void navigateToMyBookings() { _changeTab(26); }
+  void navigateToMyTickets() { _changeTab(27); }
+  void navigateToMyUnlockedProperties() { _changeTab(28); }
+  void navigateToMyProperties() { _changeTab(29); }
+  void navigateToManageEvents() { _changeTab(30); }
+  void navigateToLodgeDashboard() { _changeTab(31); }
 
   Shop? _activeEditShop;
   void navigateToEditShop(Shop shop) {
     setState(() {
       _activeEditShop = shop; 
-      _changeTab(31);
+      _changeTab(32);
     });
   }
 
-  void navigateToCreateShop() { _changeTab(32); }
+  void navigateToCreateShop() { _changeTab(33); }
 
   Product? _activeEditProduct;
   void navigateToEditProduct(Product product) {
     setState(() {
       _activeEditProduct = product; 
-      _changeTab(33);
+      _changeTab(34);
     });
   }
 
-  void navigateToVerifyAddProperty() { _changeTab(34); }
+  void navigateToVerifyAddProperty() { _changeTab(35); }
   
   Property? _activeFormProperty;
   void navigateToPropertyForm(Property? property) {
     setState(() {
       _activeFormProperty = property; 
-      _changeTab(35);
+      _changeTab(36);
     });
   }
   
-  void navigateToCreateLodge() { _changeTab(36); }
+  void navigateToCreateLodge() { _changeTab(37); }
   
   Lodge? _activeEditLodge;
   void navigateToEditLodge(Lodge lodge) {
     setState(() {
       _activeEditLodge = lodge; 
-      _changeTab(37);
+      _changeTab(38);
     });
   }
   
-  void navigateToMyLodges() { _changeTab(38); }
+  void navigateToMyLodges() { _changeTab(39); }
   
   int? _activeLodgeRoomId;
   void navigateToAddRoom(int lodgeId) {
     setState(() {
       _activeLodgeRoomId = lodgeId; 
-      _changeTab(39);
+      _changeTab(40);
     });
   }
 
-  void navigateToMangoHubTour() { _changeTab(43); }
-  void navigateToCreateEvent() { _changeTab(40); }
+  void navigateToMangoHubTour() { _changeTab(44); }
+  void navigateToCreateEvent() { _changeTab(41); }
 
   void navigateToAvailabilityCalendar(int roomId) {
     setState(() {
       _calendarRoomId = roomId; 
-      _changeTab(49);
+      _changeTab(50);
     });
   }
 
-  void navigateToOwnerBookings() { _changeTab(51); }
-  void navigateToBookingScanner() { _changeTab(52); }
+  void navigateToOwnerBookings() { _changeTab(52); }
+  void navigateToBookingScanner() { _changeTab(53); }
 
   void navigateToEventTickets(EventModel event) {
     setState(() {
       _activeEvent = event; 
-      _changeTab(53);
+      _changeTab(54);
     });
   }
 
@@ -542,50 +564,52 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
         case 9: return "Delivery Rider";
         case 10: return "About App";
         case 11: return "Help";
-        case 12: return "Product Details";
-        case 13: return "Shop Details";
-        case 14: return "Lodge Details";
-        case 15: return "Property Details";
-        case 16: return "Event Details";
-        case 17: return "Add Product";
-        case 18: return "My Shop";
-        case 19: return "Seller Deliveries";
-        case 20: return "Wallet Activity";
-        case 21: return "Payment History";
-        case 22: return "Cashout Wallet";
-        case 23: return "Cashout History";
-        case 24: return "My Orders";
-        case 25: return "My Bookings";
-        case 26: return "My Tickets";
-        case 27: return "Unlocked Properties";
-        case 28: return "My Properties";
-        case 29: return "Manage Events";
-        case 30: return "Lodge Dashboard";
-        case 31: return "Edit Shop";
-        case 32: return "Create Shop";
-        case 33: return "Edit Product";
-        case 34: return "Post Property";
-        case 35: return "Edit Property";
-        case 36: return "Create Lodge";
-        case 37: return "Edit Lodge";
-        case 38: return "My Lodges";
-        case 39: return "Add Room";
-        case 40: return "Create Event";
-        case 41: return "Checkout";
-        case 42: return "Secure Payment";
-        case 43: return "MalaTrade Guide";
-        case 44: return "Scan Ticket Panel";
-        case 45: return "Select Tickets";
-        case 46: return "Unlock Property";
-        case 47: return _activeRoom != null ? "${_activeRoom!.roomNumber}" : "Room Details";
-        case 48: return "Booking Checkout";
-        case 49: return "Room Availability Calendar";
-        case 50: return "Ticket Details";
-        case 51: return "Owner Bookings";
-        case 52: return "Scan Booking QR";
-        case 53: return "Sold Tickets";
-        case 54: return "Shop Navigation";
-        case 55: return "Rider Delivery Details";
+        case 12: return "Messages";
+        case 13: return "Product Details";
+        case 14: return "Shop Details";
+        case 15: return "Lodge Details";
+        case 16: return "Property Details";
+        case 17: return "Event Details";
+        case 18: return "Add Product";
+        case 19: return "My Shop";
+        case 20: return "Seller Deliveries";
+        case 21: return "Wallet Activity";
+        case 22: return "Payment History";
+        case 23: return "Cashout Wallet";
+        case 24: return "Cashout History";
+        case 25: return "My Orders";
+        case 26: return "My Bookings";
+        case 27: return "My Tickets";
+        case 28: return "Unlocked Properties";
+        case 29: return "My Properties";
+        case 30: return "Manage Events";
+        case 31: return "Lodge Dashboard";
+        case 32: return "Edit Shop";
+        case 33: return "Create Shop";
+        case 34: return "Edit Product";
+        case 35: return "Post Property";
+        case 36: return "Edit Property";
+        case 37: return "Create Lodge";
+        case 38: return "Edit Lodge";
+        case 39: return "My Lodges";
+        case 40: return "Add Room";
+        case 41: return "Create Event";
+        case 42: return "Checkout";
+        case 43: return "Secure Payment";
+        case 44: return "MalaTrade Guide";
+        case 45: return "Scan Ticket Panel";
+        case 46: return "Select Tickets";
+        case 47: return "Unlock Property";
+        case 48: return _activeRoom != null ? "${_activeRoom!.roomNumber}" : "Room Details";
+        case 49: return "Booking Checkout";
+        case 50: return "Room Availability Calendar";
+        case 51: return "Ticket Details";
+        case 52: return "Owner Bookings";
+        case 53: return "Scan Booking QR";
+        case 54: return "Sold Tickets";
+        case 55: return "Shop Navigation";
+        case 56: return "Rider Delivery Details";
+        case 57: return _activeChatPeerName ?? "Chat";
         default: return "Post.Sell.Grow";
       }
     }
@@ -831,173 +855,204 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
   @override
   Widget build(BuildContext context) {
     int displayIndex = _currentIndex; 
-    if (_currentIndex == 12) displayIndex = 2; 
-    if (_currentIndex == 13) displayIndex = 1; 
-    if (_currentIndex == 14) displayIndex = 5; 
-    if (_currentIndex == 15) displayIndex = 3; 
-    if (_currentIndex == 16) displayIndex = 4; 
+    if (_currentIndex == 13) displayIndex = 2; 
+    if (_currentIndex == 14) displayIndex = 1; 
+    if (_currentIndex == 15) displayIndex = 5; 
+    if (_currentIndex == 16) displayIndex = 3; 
+    if (_currentIndex == 17) displayIndex = 4; 
     
-    if (_currentIndex >= 17 && _currentIndex <= 40) displayIndex = 6; 
-    if (_currentIndex == 41) displayIndex = 8; 
+    if (_currentIndex >= 18 && _currentIndex <= 41) displayIndex = 6; 
     if (_currentIndex == 42) displayIndex = 8; 
-    if (_currentIndex == 43) displayIndex = 0; 
-    if (_currentIndex == 44) displayIndex = 4;  
+    if (_currentIndex == 43) displayIndex = 8; 
+    if (_currentIndex == 44) displayIndex = 0; 
     if (_currentIndex == 45) displayIndex = 4;  
-    if (_currentIndex == 46) displayIndex = 3;  
+    if (_currentIndex == 46) displayIndex = 4;  
+    if (_currentIndex == 47) displayIndex = 3;  
 
-    if (_currentIndex == 47) displayIndex = 5;  
     if (_currentIndex == 48) displayIndex = 5;  
     if (_currentIndex == 49) displayIndex = 5;  
-    if (_currentIndex == 50) displayIndex = 4; 
-    if (_currentIndex == 51) displayIndex = 6;  
-    if (_currentIndex == 52) displayIndex = 6; 
-    if (_currentIndex == 53) displayIndex = 4; 
-    if (_currentIndex == 54) displayIndex = 1; 
-    if (_currentIndex == 55) displayIndex = 9;
+    if (_currentIndex == 50) displayIndex = 5;  
+    if (_currentIndex == 51) displayIndex = 4; 
+    if (_currentIndex == 52) displayIndex = 6;  
+    if (_currentIndex == 53) displayIndex = 6; 
+    if (_currentIndex == 54) displayIndex = 4; 
+    if (_currentIndex == 55) displayIndex = 1; 
+    if (_currentIndex == 56) displayIndex = 9;
+    if (_currentIndex == 57) displayIndex = 12; // Chat Screen maps to primary Messages tab
 
-    return AppScaffold(
-      currentIndex: displayIndex, 
-      onTabSelected: _changeTab, 
-      appBar: MainAppBar(
-        title: _getAppBarTitle(), 
-        onProfileTap: () => _changeTab(6), 
-        onSearchTap: () => _changeTab(7), 
-        onCartTap: () => _changeTab(8), 
-        leading: _isDetailScreen() 
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back_rounded),
-                tooltip: 'Back',
-                onPressed: _navigateBack,
-              )
-            : null,
-      ),
-      drawer: MainDrawer(
-        onAboutTap: () => _changeTab(10), 
-        onHelpTap: () => _changeTab(11), 
-      ),
-
-      body: Container(
-        width: double.infinity, 
-        height: double.infinity, 
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: NetworkImage('https://www.malatrade.com/media/mobile/app_background.png'), 
-            fit: BoxFit.cover, 
-          ),
-        ),
-        child: Container(
-          color: Colors.white.withOpacity(0.15),  
-          child: Column(
-            children: [
-              _buildUnifiedBackendBanner(context),  
-              const UpdatesTicker(), 
-              Expanded(
-                child: IndexedStack(
-                  index: _currentIndex, 
-                  children: [
-                    ...List.generate(_screens.length, (index) { 
-                      return LazyLoadTab(
-                        isSelected: _currentIndex == index, 
-                        child: _screens[index], 
-                      );
-                    }),
-
-                    _activeProductId != null ? ProductDetailsScreen(key: ValueKey('p_$_activeProductId'), productId: _activeProductId!) : const Center(child: Text("No product selected")), 
-                    _activeShopId != null ? ShopDetailsScreen(key: ValueKey('s_$_activeShopId'), shopId: _activeShopId!) : const Center(child: Text("No shop selected")), 
-                    _activeLodge != null ? LodgeDetailScreen(key: ValueKey('l_${_activeLodge!.id}'), lodge: _activeLodge!) : const Center(child: Text("No lodge selected")), 
-                    _activePropertyId != null ? PropertyDetailsScreen(key: ValueKey('prop_$_activePropertyId'), propertyId: _activePropertyId!) : const Center(child: Text("No property selected")), 
-                    _activeEvent != null ? EventDetailScreen(key: ValueKey('event__${_activeEvent!.id}'), event: _activeEvent!) : const Center(child: Text("No event selected")), 
-
-                    const AddProductScreen(), 
-                    const MyShopScreen(), 
-                    const SellerDeliveryScreen(), 
-                    const WalletTransactionsScreen(), 
-                    const PaymentHistoryScreen(), 
-                    const WithdrawalScreen(), 
-                    const PayoutHistoryScreen(), 
-                    const OrdersScreen(), 
-                    const MyBookingsScreen(), 
-                    const MyTicketsScreen(), 
-                    const MyUnlockedPropertiesScreen(), 
-                    const MyPropertiesScreen(), 
-                    const ManageEventsScreen(), 
-                    const LodgeOwnerDashboard(), 
-                    _activeEditShop != null ? EditShopScreen(key: ValueKey('edit_shop_${_activeEditShop!.id}'), shop: _activeEditShop!) : const Center(child: Text("No shop selected")), 
-                    const CreateShopScreen(), 
-                    _activeEditProduct != null ? EditProductScreen(key: ValueKey('edit_product_${_activeEditProduct!.id}'), product: _activeEditProduct!) : const Center(child: Text("No product selected")), 
-                    const AddPropertyScreen(), 
-                    PropertyFormScreen(key: ValueKey('prop_form_${_activeFormProperty?.id ?? 0}'), property: _activeFormProperty), 
-                    const CreateLodgeScreen(), 
-                    _activeEditLodge != null ? EditLodgeScreen(key: ValueKey('edit_lodge_${_activeEditLodge!.id}'), lodge: _activeEditLodge!) : const Center(child: Text("No lodge selected")), 
-                    const MyLodgesScreen(), 
-                    _activeLodgeRoomId != null ? AddRoomScreen(key: ValueKey('add_room_to_$_activeLodgeRoomId'), lodgeId: _activeLodgeRoomId!) : const Center(child: Text("No lodge selected for rooms modification")), 
-                    const AddEventScreen(), 
-
-                    _checkoutItems != null && _checkoutTotal != null ? CheckoutScreen(key: ValueKey('checkout_t_${_checkoutTotal.hashCode}'), items: _checkoutItems!, total: _checkoutTotal!) : const Center(child: Text("Checkout session inactive")), 
-                    _paymentTransactionId != null && _paymentAmount != null && _paymentPurpose != null && _packageReferenceType != null && _paymentOnSuccess != null ? PaymentCheckoutScreen(key: ValueKey('payment_view_tx_$_paymentTransactionId'), transactionId: _paymentTransactionId!, amount: _paymentAmount!, purpose: _paymentPurpose!, referenceType: _packageReferenceType!, onSuccess: _paymentOnSuccess!) : const Center(child: Text("Payment session inactive")), 
-                    
-                    const MangoHubScreen(), 
-                    const ScanTicketScreen(), 
-                    
-                    _activeEvent != null 
-                        ? BuyTicketScreen(key: ValueKey('buy_t_${_activeEvent!.id}'), event: _activeEvent!) 
-                        : const Center(child: Text("No active purchase pipeline session initialization coordinates found")), 
-
-                    _unlockPropertyId != null && _unlockPropertyTitle != null && _unlockPropertyFee != null 
-                        ? PropertyUnlockScreen( 
-                            key: ValueKey('unlock_prop_$_unlockPropertyId'), 
-                            propertyId: _unlockPropertyId!, 
-                            propertyTitle: _unlockPropertyTitle!, 
-                            unlockFee: _unlockPropertyFee!, 
-                          ) 
-                        : const Center(child: Text("No active property unlock request initialized")), 
-
-                    _activeRoom != null && _activeRoomLodgeImages != null 
-                        ? RoomDetailScreen( 
-                            key: ValueKey('room_dt_${_activeRoom!.id}'), 
-                            room: _activeRoom!, 
-                            lodgeImages: _activeRoomLodgeImages!, 
-                          ) 
-                        : const Center(child: Text("No active room detail view initialized")), 
-
-                    _checkoutBookingRoom != null 
-                        ? BookingCheckoutScreen( 
-                            key: ValueKey('book_room_${_checkoutBookingRoom!.id}'), 
-                            room: _checkoutBookingRoom!, 
-                          ) 
-                        : const Center(child: Text("No active booking checkout pipeline initialized")), 
-                    _calendarRoomId != null 
-                        ? AvailabilityCalendarScreen( 
-                            key: ValueKey('room_cal_$_calendarRoomId'), 
-                            roomId: _calendarRoomId!, 
-                          ) 
-                        : const Center(child: Text("No active calendar preview session initialized")), 
-
-                    _activeTicket != null ? TicketDetailScreen(key: ValueKey('ticket_${_activeTicket.id}'), ticket: _activeTicket!) : const Center(child: Text("No ticket selected")), 
-                    const OwnerBookingsScreen(), 
-                    const BookingQrScannerScreen(), 
-                    _activeEvent != null 
-                        ? EventTicketsScreen(key: ValueKey('ev_tickets_${_activeEvent!.id}'), event: _activeEvent!) 
-                        : const Center(child: Text("No active event selected for ticket viewing")), 
-                        
-                    _shopMapLat != null && _shopMapLng != null
-                        ? ShopMapModal(
-                            key: ValueKey('shop_map_${_shopMapLat}_$_shopMapLng'),
-                            shopLat: _shopMapLat!,
-                            shopLng: _shopMapLng!,
-                          )
-                        : const Center(child: Text("No shop location selected")),
-
-                    _activeRiderDelivery != null 
-                        ? RiderDeliveryScreen(
-                            key: ValueKey('rider_del_${_activeRiderDelivery.id}'), 
-                            delivery: _activeRiderDelivery!,
-                          ) 
-                        : const Center(child: Text("No active rider delivery selected")),
-                  ],
+    return Scaffold(
+      // 🌟 Compact Floating Chat Button
+      floatingActionButton: _isDetailScreen()
+          ? null
+          : Padding(
+              padding: const EdgeInsets.only(bottom: 35.0), // 👈 Shifts icon 24px higher up
+              child: SizedBox(
+                width: 44,
+                height: 44,
+                child: FloatingActionButton(
+                  backgroundColor: AppColors.mangoOrange,
+                  elevation: 3,
+                  tooltip: "Chat Messages",
+                  child: const Icon(Icons.chat_bubble_outline, color: Colors.white, size: 20),
+                  onPressed: () {
+                    _changeTab(12); // Directly navigates to primary ChatScreen hub
+                  },
                 ),
               ),
-            ],
+            ),
+      body: AppScaffold(
+        currentIndex: displayIndex, 
+        onTabSelected: _changeTab, 
+        appBar: MainAppBar(
+          title: _getAppBarTitle(), 
+          onProfileTap: () => _changeTab(6), 
+          onSearchTap: () => _changeTab(7), 
+          onCartTap: () => _changeTab(8), 
+          leading: _isDetailScreen() 
+              ? IconButton(
+                  icon: const Icon(Icons.arrow_back_rounded),
+                  tooltip: 'Back',
+                  onPressed: _navigateBack,
+                )
+              : null,
+        ),
+        drawer: MainDrawer(
+          onAboutTap: () => _changeTab(10), 
+          onHelpTap: () => _changeTab(11), 
+        ),
+
+        body: Container(
+          width: double.infinity, 
+          height: double.infinity, 
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: NetworkImage('https://www.malatrade.com/media/mobile/app_background.png'), 
+              fit: BoxFit.cover, 
+            ),
+          ),
+          child: Container(
+            color: Colors.white.withOpacity(0.15),  
+            child: Column(
+              children: [
+                _buildUnifiedBackendBanner(context),  
+                const UpdatesTicker(), 
+                Expanded(
+                  child: IndexedStack(
+                    index: _currentIndex, 
+                    children: [
+                      ...List.generate(_screens.length, (index) { 
+                        return LazyLoadTab(
+                          isSelected: _currentIndex == index, 
+                          child: _screens[index], 
+                        );
+                      }),
+
+                      _activeProductId != null ? ProductDetailsScreen(key: ValueKey('p_$_activeProductId'), productId: _activeProductId!) : const Center(child: Text("No product selected")), 
+                      _activeShopId != null ? ShopDetailsScreen(key: ValueKey('s_$_activeShopId'), shopId: _activeShopId!) : const Center(child: Text("No shop selected")), 
+                      _activeLodge != null ? LodgeDetailScreen(key: ValueKey('l_${_activeLodge!.id}'), lodge: _activeLodge!) : const Center(child: Text("No lodge selected")), 
+                      _activePropertyId != null ? PropertyDetailsScreen(key: ValueKey('prop_$_activePropertyId'), propertyId: _activePropertyId!) : const Center(child: Text("No property selected")), 
+                      _activeEvent != null ? EventDetailScreen(key: ValueKey('event__${_activeEvent!.id}'), event: _activeEvent!) : const Center(child: Text("No event selected")), 
+
+                      const AddProductScreen(), 
+                      const MyShopScreen(), 
+                      const SellerDeliveryScreen(), 
+                      const WalletTransactionsScreen(), 
+                      const PaymentHistoryScreen(), 
+                      const WithdrawalScreen(), 
+                      const PayoutHistoryScreen(), 
+                      const OrdersScreen(), 
+                      const MyBookingsScreen(), 
+                      const MyTicketsScreen(), 
+                      const MyUnlockedPropertiesScreen(), 
+                      const MyPropertiesScreen(), 
+                      const ManageEventsScreen(), 
+                      const LodgeOwnerDashboard(), 
+                      _activeEditShop != null ? EditShopScreen(key: ValueKey('edit_shop_${_activeEditShop!.id}'), shop: _activeEditShop!) : const Center(child: Text("No shop selected")), 
+                      const CreateShopScreen(), 
+                      _activeEditProduct != null ? EditProductScreen(key: ValueKey('edit_product_${_activeEditProduct!.id}'), product: _activeEditProduct!) : const Center(child: Text("No product selected")), 
+                      const AddPropertyScreen(), 
+                      PropertyFormScreen(key: ValueKey('prop_form_${_activeFormProperty?.id ?? 0}'), property: _activeFormProperty), 
+                      const CreateLodgeScreen(), 
+                      _activeEditLodge != null ? EditLodgeScreen(key: ValueKey('edit_lodge_${_activeEditLodge!.id}'), lodge: _activeEditLodge!) : const Center(child: Text("No lodge selected")), 
+                      const MyLodgesScreen(), 
+                      _activeLodgeRoomId != null ? AddRoomScreen(key: ValueKey('add_room_to_$_activeLodgeRoomId'), lodgeId: _activeLodgeRoomId!) : const Center(child: Text("No lodge selected for rooms modification")), 
+                      const AddEventScreen(), 
+
+                      _checkoutItems != null && _checkoutTotal != null ? CheckoutScreen(key: ValueKey('checkout_t_${_checkoutTotal.hashCode}'), items: _checkoutItems!, total: _checkoutTotal!) : const Center(child: Text("Checkout session inactive")), 
+                      _paymentTransactionId != null && _paymentAmount != null && _paymentPurpose != null && _packageReferenceType != null && _paymentOnSuccess != null ? PaymentCheckoutScreen(key: ValueKey('payment_view_tx_$_paymentTransactionId'), transactionId: _paymentTransactionId!, amount: _paymentAmount!, purpose: _paymentPurpose!, referenceType: _packageReferenceType!, onSuccess: _paymentOnSuccess!) : const Center(child: Text("Payment session inactive")), 
+                      
+                      const MangoHubScreen(), 
+                      const ScanTicketScreen(), 
+                      
+                      _activeEvent != null 
+                          ? BuyTicketScreen(key: ValueKey('buy_t_${_activeEvent!.id}'), event: _activeEvent!) 
+                          : const Center(child: Text("No active purchase pipeline session initialization coordinates found")), 
+
+                      _unlockPropertyId != null && _unlockPropertyTitle != null && _unlockPropertyFee != null 
+                          ? PropertyUnlockScreen( 
+                              key: ValueKey('unlock_prop_$_unlockPropertyId'), 
+                              propertyId: _unlockPropertyId!, 
+                              propertyTitle: _unlockPropertyTitle!, 
+                              unlockFee: _unlockPropertyFee!, 
+                            ) 
+                          : const Center(child: Text("No active property unlock request initialized")), 
+
+                      _activeRoom != null && _activeRoomLodgeImages != null 
+                          ? RoomDetailScreen( 
+                              key: ValueKey('room_dt_${_activeRoom!.id}'), 
+                              room: _activeRoom!, 
+                              lodgeImages: _activeRoomLodgeImages!, 
+                            ) 
+                          : const Center(child: Text("No active room detail view initialized")), 
+
+                      _checkoutBookingRoom != null 
+                          ? BookingCheckoutScreen( 
+                              key: ValueKey('book_room_${_checkoutBookingRoom!.id}'), 
+                              room: _checkoutBookingRoom!, 
+                            ) 
+                          : const Center(child: Text("No active booking checkout pipeline initialized")), 
+                      _calendarRoomId != null 
+                          ? AvailabilityCalendarScreen( 
+                              key: ValueKey('room_cal_$_calendarRoomId'), 
+                              roomId: _calendarRoomId!, 
+                            ) 
+                          : const Center(child: Text("No active calendar preview session initialized")), 
+
+                      _activeTicket != null ? TicketDetailScreen(key: ValueKey('ticket_${_activeTicket.id}'), ticket: _activeTicket!) : const Center(child: Text("No ticket selected")), 
+                      const OwnerBookingsScreen(), 
+                      const BookingQrScannerScreen(), 
+                      _activeEvent != null 
+                          ? EventTicketsScreen(key: ValueKey('ev_tickets_${_activeEvent!.id}'), event: _activeEvent!) 
+                          : const Center(child: Text("No active event selected for ticket viewing")), 
+                          
+                      _shopMapLat != null && _shopMapLng != null
+                          ? ShopMapModal(
+                              key: ValueKey('shop_map_${_shopMapLat}_$_shopMapLng'),
+                              shopLat: _shopMapLat!,
+                              shopLng: _shopMapLng!,
+                            )
+                          : const Center(child: Text("No shop location selected")),
+
+                      _activeRiderDelivery != null 
+                          ? RiderDeliveryScreen(
+                              key: ValueKey('rider_del_${_activeRiderDelivery.id}'), 
+                              delivery: _activeRiderDelivery!,
+                            ) 
+                          : const Center(child: Text("No active rider delivery selected")),
+
+                      // 🌟 Dynamic Chat Room integrated into Main Tabs Stack at index 57
+                      _activeChatRoomId != null && _activeChatPeerName != null
+                          ? ChatScreen(
+                              key: ValueKey('chat_room_$_activeChatRoomId'),
+                              roomId: _activeChatRoomId!,
+                              peerName: _activeChatPeerName!,
+                            )
+                          : const Center(child: Text("No chat session active")),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

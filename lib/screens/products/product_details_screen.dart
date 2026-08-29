@@ -4,27 +4,26 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
-// 1. Dart & Flutter Core Packages
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-// 2. Third-Party Packages
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-// 3. Project Imports
 import '../../providers/api_provider.dart' as api;
 import '../../providers/auth_provider.dart';
 import '../../providers/products_provider.dart';
 import '../../providers/shops_provider.dart';
+import '../../providers/chat_provider.dart';
 
 import '../../models/product_model.dart';
 import '../../models/product_variant_model.dart'; 
 
 import '../auth/login_screen.dart';
+import '../chat/chat_screen.dart';
 import '../main_tabs_screen.dart';
 import '../products/edit_product_screen.dart';
 import '../products/product_card.dart';
@@ -78,6 +77,42 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
 
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       AppToast.info(context, "Could not open WhatsApp");
+    }
+  }
+
+  Future<void> _startChatWithSeller(Product product) async {
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(child: CircularProgressIndicator()),
+      );
+
+      final room = await ref
+          .read(chatRoomActionsProvider)
+          .getOrCreateRoom(product.id);
+
+      if (!mounted) return;
+      Navigator.pop(context);
+
+      final mainTabs = MainTabsScreen.of(context);
+      if (mainTabs != null) {
+        mainTabs.navigateToChatRoom(room.id, product.shopName);
+      } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ChatScreen(
+              roomId: room.id,
+              peerName: product.shopName,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context);
+      AppToast.info(context, "Unable to initialize chat: ${e.toString()}");
     }
   }
 
@@ -747,7 +782,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
               ),
               const SizedBox(height: AppSpacing.sm),
 
-              // Hide global stock badge if variants exist to avoid confusing users
               if (product.variants.isEmpty) ...[
                 Row(
                   children: [
@@ -794,7 +828,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
 
               buildVariantSelector(product.variants),
 
-              // DESKTOP ACTIONS BELOW OPTIONS
               if (isDesktop) ...[
                 Row(
                   children: [
@@ -860,6 +893,38 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                                   )),
                       ),
                     ),
+                    if (!isOwner) ...[
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: SizedBox(
+                          height: 48,
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.mangoOrange,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: const StadiumBorder(),
+                            ),
+                            icon: const Icon(Icons.chat_bubble_outline, size: 20),
+                            label: const Text(
+                              "Chat with Seller",
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                            ),
+                            onPressed: () {
+                              if (!isLoggedIn) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                                );
+                                return;
+                              }
+                              analytics.logEvent('product_chat_click_${product.id}');
+                              _startChatWithSeller(product);
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
                     const SizedBox(width: 12),
                     Expanded(
                       child: SizedBox(
@@ -1024,7 +1089,6 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                       ),
                     ),
 
-                    // Left/Right Navigation Arrows for Desktop
                     if (isDesktop) ...[
                       Positioned(
                         left: 0,
@@ -1176,6 +1240,24 @@ class _ProductDetailsScreenState extends ConsumerState<ProductDetailsScreen> {
                             onPressed: () {
                               analytics.logEvent('product_fav_click_${product.id}');
                               AppToast.success(context, "ADDED TO FAVORITES");
+                            },
+                          ),
+                          IconButton(
+                            visualDensity: VisualDensity.compact,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(minWidth: 38, minHeight: 38),
+                            icon: const Icon(Icons.chat_bubble_outline, color: AppColors.mangoOrange, size: 22),
+                            tooltip: "Chat with Seller",
+                            onPressed: () {
+                              if (!isLoggedIn) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => const LoginScreen()),
+                                );
+                                return;
+                              }
+                              analytics.logEvent('product_chat_click_${product.id}');
+                              _startChatWithSeller(product);
                             },
                           ),
                         ],

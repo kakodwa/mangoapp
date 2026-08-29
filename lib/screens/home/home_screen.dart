@@ -164,11 +164,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     }
   }
 
-  Widget _buildLeftCategoriesWidget() {
+  Widget _buildLeftCategoriesWidget({double height = 380}) {
     if (_selectedHomeCategory == null) {
       return Container(
         width: 250,
-        height: 380,
+        height: height,
         margin: const EdgeInsets.only(right: 16),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -235,7 +235,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
 
     return Container(
       width: 250,
-      height: 380,
+      height: height,
       margin: const EdgeInsets.only(right: 16),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -324,6 +324,114 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
 
+  Widget _buildHorizontalFeatureItem({
+    required IconData icon,
+    required Color iconColor,
+    required String text,
+    required double screenWidth,
+  }) {
+    final double maxTextWidth = screenWidth >= 1200 ? 240 : (screenWidth >= 900 ? 200 : 180);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 2.0),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            size: screenWidth >= 900 ? 22 : 18,
+            color: iconColor,
+          ),
+          const SizedBox(width: 8),
+          ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxTextWidth),
+            child: Text(
+              text,
+              maxLines: 2,
+              softWrap: true,
+              style: TextStyle(
+                fontSize: screenWidth >= 900 ? 12 : 11,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+                height: 1.2,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFeatureDivider() {
+    return Container(
+      height: 20,
+      width: 1,
+      color: Colors.grey.shade300,
+    );
+  }
+
+  Widget _buildFeatureHighlightsBar(double screenWidth) {
+    return Container(
+      margin: const EdgeInsets.only(top: 12),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        child: Row(
+          children: [
+            _buildHorizontalFeatureItem(
+              icon: Icons.payment_outlined,
+              iconColor: Colors.orange.shade800,
+              text: '1. Pay',
+              screenWidth: screenWidth,
+            ),
+            _buildFeatureDivider(),
+            _buildHorizontalFeatureItem(
+              icon: Icons.shield_outlined,
+              iconColor: Colors.green,
+              text: '2. Money Protected',
+              screenWidth: screenWidth,
+            ),
+            _buildFeatureDivider(),
+            _buildHorizontalFeatureItem(
+              icon: Icons.local_shipping_outlined,
+              iconColor: Colors.orange.shade800,
+              text: '3. Seller Delivers',
+              screenWidth: screenWidth,
+            ),
+            _buildFeatureDivider(),
+            _buildHorizontalFeatureItem(
+              icon: Icons.thumb_up_alt_outlined,
+              iconColor: Colors.green,
+              text: '4. Buyer Confirms',
+              screenWidth: screenWidth,
+            ),
+            _buildFeatureDivider(),
+            _buildHorizontalFeatureItem(
+              icon: Icons.account_balance_wallet_outlined,
+              iconColor: Colors.orange.shade800,
+              text: '5. Seller Gets Paid',
+              screenWidth: screenWidth,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final feed = ref.watch(homeFeedProvider);
@@ -342,12 +450,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         return CustomScrollView(
           controller: controller,
           slivers: [
-            /// 0. SEARCH BAR SECTION (VISIBLE ON ALL SCREEN SIZES INCLUDING DESKTOP)
+            /// 0. SEARCH BAR SECTION
             const SliverToBoxAdapter(
               child: GlobalSearchInputBar(),
             ),
 
-            /// 1. PROMO BANNER SECTION WITH LEFT CATEGORIES (DESKTOP)
+            /// 1. PROMO BANNER SECTION WITH LEFT CATEGORIES & SPANNING FEATURE BAR
             SliverToBoxAdapter(
               child: bannersAsync.when(
                 data: (banners) {
@@ -467,22 +575,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           ? Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Left Categories Panel Beside Banner
-                                _buildLeftCategoriesWidget(),
+                                // Left Categories Panel
+                                _buildLeftCategoriesWidget(height: 445),
 
-                                // Center Main Banner Slider
-                                Expanded(child: bannerSlider),
-
-                                // Right Vertical Banner Column
-                                Container(
-                                  width: 260,
-                                  height: 380,
-                                  margin: const EdgeInsets.only(left: 16),
-                                  child: rightBannersList,
+                                // Main Banners & Fully Aligned Features Bar
+                                Expanded(
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Expanded(child: bannerSlider),
+                                          Container(
+                                            width: 260,
+                                            height: 380,
+                                            margin: const EdgeInsets.only(left: 16),
+                                            child: rightBannersList,
+                                          ),
+                                        ],
+                                      ),
+                                      _buildFeatureHighlightsBar(screenWidth),
+                                    ],
+                                  ),
                                 ),
                               ],
                             )
-                          : bannerSlider,
+                          : Column(
+                              children: [
+                                bannerSlider,
+                                _buildFeatureHighlightsBar(screenWidth),
+                              ],
+                            ),
                     ),
                   );
                 },
@@ -607,14 +730,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                           },
                         ),
                       ),
-                     
                     ],
                   ),
                 ),
               ),
             ),
-
-            
 
             const SliverToBoxAdapter(
               child: SizedBox(
