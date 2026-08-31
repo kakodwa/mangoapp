@@ -6,20 +6,22 @@ on:
       - main
 
 jobs:
-  # ----------------------------
-  # ANDROID BUILD JOB
-  # ----------------------------
+
+  # ============================================================
+  # ANDROID BUILD
+  # ============================================================
   build-android:
     name: Build Android (APK & AAB)
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Java JDK
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: '17'
 
       - name: Set up Flutter
@@ -31,33 +33,35 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Build APK (Release)
+      - name: Build APK
         run: flutter build apk --release
 
-      - name: Build App Bundle / AAB (Release)
+      - name: Build AAB
         run: flutter build appbundle --release
 
-      - name: Upload APK Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: android-apk-release
+          name: malatrade-android-apk
           path: build/app/outputs/flutter-apk/app-release.apk
 
-      - name: Upload AAB Artifact
+      - name: Upload AAB
         uses: actions/upload-artifact@v4
         with:
-          name: android-aab-release
+          name: malatrade-android-aab
           path: build/app/outputs/bundle/release/app-release.aab
 
-  # ----------------------------
-  # APPLE (iOS) BUILD JOB
-  # ----------------------------
+
+  # ============================================================
+  # iOS BUILD
+  # ============================================================
   build-ios:
-    name: Build iOS (No-Codesign)
+    name: Build iOS IPA
     runs-on: macos-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
@@ -68,16 +72,69 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Build iOS Application (Release)
-        run: flutter build ios --release --no-codesign
-
-      - name: Zip iOS Output
+      # --------------------------------------------------------
+      # Import Apple certificate
+      # --------------------------------------------------------
+      - name: Install Apple certificate
+        env:
+          IOS_CERTIFICATE_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
+          IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
         run: |
-          cd build/ios/iphoneos
-          zip -r Runner.app.zip Runner.app
+          CERTIFICATE_PATH="$RUNNER_TEMP/certificate.p12"
 
-      - name: Upload iOS App Artifact
+          echo "$IOS_CERTIFICATE_BASE64" | base64 --decode > "$CERTIFICATE_PATH"
+
+          security create-keychain \
+            -p "temporary" \
+            "$RUNNER_TEMP/build.keychain-db"
+
+          security default-keychain \
+            -s "$RUNNER_TEMP/build.keychain-db"
+
+          security unlock-keychain \
+            -p "temporary" \
+            "$RUNNER_TEMP/build.keychain-db"
+
+          security import "$CERTIFICATE_PATH" \
+            -P "$IOS_CERTIFICATE_PASSWORD" \
+            -A \
+            -t cert \
+            -f pkcs12 \
+            "$RUNNER_TEMP/build.keychain-db"
+
+          security set-key-partition-list \
+            -S apple-tool:,apple: \
+            -s \
+            -k "temporary" \
+            "$RUNNER_TEMP/build.keychain-db"
+
+      # --------------------------------------------------------
+      # Install provisioning profile
+      # --------------------------------------------------------
+      - name: Install provisioning profile
+        env:
+          IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          PROFILE_PATH="$RUNNER_TEMP/profile.mobileprovision"
+
+          echo "$IOS_PROVISIONING_PROFILE_BASE64" | base64 --decode > "$PROFILE_PATH"
+
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+
+          cp "$PROFILE_PATH" \
+            ~/Library/MobileDevice/Provisioning\ Profiles/
+
+      # --------------------------------------------------------
+      # Build signed IPA
+      # --------------------------------------------------------
+      - name: Build iOS IPA
+        run: flutter build ipa --release
+
+      # --------------------------------------------------------
+      # Upload IPA
+      # --------------------------------------------------------
+      - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
-          name: ios-runner-app
-          path: build/ios/iphoneos/Runner.app.zip
+          name: malatrade-ios-ipa
+          path: build/ios/ipa/*.ipa
