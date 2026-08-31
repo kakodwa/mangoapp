@@ -1,3 +1,5 @@
+// lib/widgets/main_app_bar.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,6 +19,7 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
   final VoidCallback? onDeliveryTap;
   final Widget? title;
   final Widget? leading;
+  final bool isHomePage; // Controls header search bar visibility
 
   static final AnalyticsService _analyticsService = AnalyticsService();
 
@@ -28,6 +31,7 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
     this.onCartTap,
     this.onDeliveryTap,
     this.leading,
+    this.isHomePage = false,
   });
 
   /// Reliable navigation helper to switch tabs on desktop and mobile
@@ -38,7 +42,6 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
     if (tabsState != null) {
       tabsState.setSelectedIndex(0);
     } else {
-      // Fallback: If inherited widget isn't found in tree, pop to root or push MainTabsScreen
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const MainTabsScreen()),
         (route) => false,
@@ -112,7 +115,6 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
           titleSpacing: 0,
           automaticallyImplyLeading: leading == null ? !isDesktop : false,
           leading: leading,
-          // GUARANTEED CLICKABLE LOGO FOR HOME NAVIGATION
           title: title ??
               MouseRegion(
                 cursor: SystemMouseCursors.click,
@@ -131,7 +133,6 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
               ),
           actions: [
             if (isDesktop) ...[
-              // CATEGORIES TEXT BUTTON (DESKTOP ONLY)
               TextButton.icon(
                 icon: const Icon(Icons.category_rounded, size: 18),
                 label: const Text('Categories', style: TextStyle(fontWeight: FontWeight.w600)),
@@ -166,43 +167,44 @@ class MainAppBar extends ConsumerWidget implements PreferredSizeWidget {
                 },
                 child: const Text('Help Center', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.black87)),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 8),
 
-              // SEARCH BAR
-              Container(
-                width: 240,
-                height: 38,
-                margin: const EdgeInsets.only(right: 12),
-                child: TextField(
-                  readOnly: true,
-                  onTap: () {
-                    _analyticsService.logEvent('appbar_search_click');
-                    onSearchTap?.call();
-                  },
-                  decoration: InputDecoration(
-                    hintText: 'Search platform...',
-                    hintStyle: const TextStyle(fontSize: 13),
-                    prefixIcon: const Icon(Icons.search, size: 18),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
-                    filled: true,
-                    fillColor: Colors.grey.shade100,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(24),
-                      borderSide: BorderSide.none,
+              // 💡 HIDES HEADER SEARCH ON HOME SCREEN (0) AND SEARCH SCREEN (7)
+              if (!isHomePage)
+                Container(
+                  width: 240,
+                  height: 38,
+                  margin: const EdgeInsets.only(right: 12),
+                  child: TextField(
+                    readOnly: true,
+                    onTap: () {
+                      _analyticsService.logEvent('appbar_search_click');
+                      onSearchTap?.call();
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'Search platform...',
+                      hintStyle: const TextStyle(fontSize: 12),
+                      prefixIcon: const Icon(Icons.search, size: 18),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                      filled: true,
+                      fillColor: Colors.grey.shade100,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(24),
+                        borderSide: BorderSide.none,
+                      ),
                     ),
                   ),
                 ),
-              ),
             ] else ...[
-              // MOBILE VIEW (Categories icon is now removed from here)
-              IconButton(
-                icon: const Icon(Icons.search_rounded),
-                tooltip: 'Search Platform',
-                onPressed: () {
-                  _analyticsService.logEvent('appbar_search_click');
-                  onSearchTap?.call();
-                },
-              ),
+              if (!isHomePage)
+                IconButton(
+                  icon: const Icon(Icons.search_rounded),
+                  tooltip: 'Search Platform',
+                  onPressed: () {
+                    _analyticsService.logEvent('appbar_search_click');
+                    onSearchTap?.call();
+                  },
+                ),
             ],
 
             // SHOPPING CART BUTTON
@@ -405,7 +407,6 @@ class _CategoryMegaMenuViewState extends ConsumerState<_CategoryMegaMenuView> {
 
     return Row(
       children: [
-        // LEFT NAVIGATION SIDEBAR
         Container(
           width: 280,
           decoration: BoxDecoration(
@@ -484,7 +485,6 @@ class _CategoryMegaMenuViewState extends ConsumerState<_CategoryMegaMenuView> {
           ),
         ),
 
-        // RIGHT SUBCATEGORIES GRID PANEL
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

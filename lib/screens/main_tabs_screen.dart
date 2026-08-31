@@ -903,19 +903,23 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
       body: AppScaffold(
         currentIndex: displayIndex, 
         onTabSelected: _changeTab, 
-        appBar: MainAppBar(
-          title: _getAppBarTitle(), 
-          onProfileTap: () => _changeTab(6), 
-          onSearchTap: () => _changeTab(7), 
-          onCartTap: () => _changeTab(8), 
-          leading: _isDetailScreen() 
-              ? IconButton(
-                  icon: const Icon(Icons.arrow_back_rounded),
-                  tooltip: 'Back',
-                  onPressed: _navigateBack,
-                )
-              : null,
-        ),
+        // lib/screens/main_tabs_screen.dart
+
+appBar: MainAppBar(
+  // 💡 Hides top app bar search when user is on Home (0) OR Search Page (7)
+  isHomePage: _currentIndex == 0 || _currentIndex == 7,
+  title: _getAppBarTitle(), 
+  onProfileTap: () => _changeTab(6), 
+  onSearchTap: () => _changeTab(7), 
+  onCartTap: () => _changeTab(8), 
+  leading: _isDetailScreen() 
+      ? IconButton(
+          icon: const Icon(Icons.arrow_back_rounded),
+          tooltip: 'Back',
+          onPressed: _navigateBack,
+        )
+      : null,
+),
         drawer: MainDrawer(
           onAboutTap: () => _changeTab(10), 
           onHelpTap: () => _changeTab(11), 
