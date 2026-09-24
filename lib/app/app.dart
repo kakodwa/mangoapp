@@ -7,7 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:universal_html/html.dart' as html; 
 
 import '../screens/main_tabs_screen.dart'; 
-import '../screens/splash_screen.dart'; 
 import '../theme/app_colors.dart';
 import '../providers/auth_provider.dart';
 import '../main.dart' show globalNavigatorKey; 
@@ -77,9 +76,7 @@ class _MyAppState extends ConsumerState<MyApp> {
           elevation: 0,
         ),
       ),
-      home: authState.isLoading
-          ? const SplashScreen()
-          : const MainTabsScreen(), 
+      home: const MainTabsScreen(), 
     );
   }
 }

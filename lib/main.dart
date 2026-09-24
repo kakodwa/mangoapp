@@ -7,7 +7,6 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 import 'app/app.dart';
 import 'router/app_router.dart';
-import 'screens/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/register_screen.dart';
 import 'screens/main_tabs_screen.dart';
@@ -84,9 +83,7 @@ class _MainAppState extends ConsumerState<MainApp> {
           ),
         ),
 
-        home: authState.isLoading
-            ? const SplashScreen()
-            : const MainTabsScreen(key: ValueKey('main-tabs')),
+ 
 
         routes: {
           '/login': (context) => const LoginScreen(),

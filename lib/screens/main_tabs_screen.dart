@@ -97,6 +97,8 @@ import '../router/app_router.dart';
 import '../core/api/api_client.dart'; 
 import '../theme/app_colors.dart';
 
+import '../core/services/app_update_service.dart';
+
 class MainTabsScreen extends ConsumerStatefulWidget {
   final int initialIndex;
 
@@ -118,6 +120,8 @@ class MainTabsScreen extends ConsumerStatefulWidget {
 }
 
 class MainTabsScreenState extends ConsumerState<MainTabsScreen> with AppRouterMixin {
+  bool _hasCheckedAppVersion = false;
+
   late int _currentIndex;
   String? _searchQuery;
   String? _searchType;
@@ -158,7 +162,9 @@ class MainTabsScreenState extends ConsumerState<MainTabsScreen> with AppRouterMi
   double? _shopMapLng; 
 
   static bool _hasBeenDismissedGlobal = false; 
-  static bool _hasShownOnboardingModal = false; 
+  
+  // Instance tracking variable to show modal once per application session
+  bool _hasShownOnboardingModal = false; 
   bool _showAdBanner = true; 
 
   List<Map<String, dynamic>> _allBackendAds = []; 
@@ -173,188 +179,263 @@ class MainTabsScreenState extends ConsumerState<MainTabsScreen> with AppRouterMi
 
   final List<int> _navigationHistory = [];
 
-  @override
-  void initState() {
-    super.initState();
-    _currentIndex = widget.initialIndex;
-    instance = this; 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      initializeRouting(); 
-      _fetchBackendAdvert(); 
+@override
+void initState() {
+  super.initState();
+
+  _currentIndex = widget.initialIndex;
+  instance = this;
+
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    initializeRouting();
+    _fetchBackendAdvert();
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        _evaluateAndShowOnboardingModal();
+        _checkAppVersion();
+      }
     });
+  });
 
-    if (_hasBeenDismissedGlobal) {
-      _showAdBanner = false; 
-    }
-
-    _buildScreensList();
+  if (_hasBeenDismissedGlobal) {
+    _showAdBanner = false;
   }
 
+  _buildScreensList();
+}
+
   // =========================================================
-  // 🌟 EXACT MATCH WITH UPDATES TICKER AUTH & SHOP EVALUATION
+  // APP VERSION CHECK
   // =========================================================
-  void _evaluateAndShowOnboardingModal() {
-    if (_hasShownOnboardingModal) return;
 
-    final authState = ref.read(authProvider);
+  Future<void> _checkAppVersion() async {
+  // Don't show app update popup on Web
+  if (kIsWeb) return;
 
-    // 🛑 DO NOT RUN IF AUTH STATE IS STILL INITIALIZING/LOADING FROM STORAGE
-    if (authState.isLoading) {
-      return;
-    }
+  if (!mounted) return;
 
-    final isAuthenticated = authState.isAuthenticated;
-    final hasShop = ref.read(hasShopProvider);
+  try {
+    final updateService = AppUpdateService(ApiClient());
 
-    String title = "";
-    String message = "";
-    IconData icon = Icons.storefront;
-    String buttonText = "";
-    VoidCallback onAction = () {};
+    await updateService.checkVersion(context);
+  } catch (e) {
+    debugPrint('❌ APP VERSION CHECK FAILED: $e');
+  }
+}
 
-    if (!isAuthenticated) {
-      // 🔴 CONDITION 1: NOT LOGGED IN -> CREATING AN ACCOUNT
-      _hasShownOnboardingModal = true;
-      title = "Welcome to MalaTrade!";
-      message = "Create an account to start listing, shopping, and tracking your orders!";
-      icon = Icons.person_add_alt_1_rounded;
-      buttonText = "Join / Create Account";
-      onAction = () {
-        Navigator.of(context).pop();
-        Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterScreen()));
-      };
-    } else if (!hasShop) {
-      // 🟡 CONDITION 2: LOGGED IN BUT NO SHOP -> CREATE A SHOP
-      _hasShownOnboardingModal = true;
-      title = "Start Selling Today!";
-      message = "Create a shop today to start listing your products and reaching customers!";
-      icon = Icons.add_business_outlined;
-      buttonText = "Create Shop";
-      onAction = () {
-        Navigator.of(context).pop();
-        navigateToCreateShop();
-      };
-    } else {
-      // 🟢 CONDITION 3: LOGGED IN AND HAS SHOP -> UPLOAD PRODUCTS
-      _hasShownOnboardingModal = true;
-      title = "Grow Your Business!";
-      message = "Start listing your products to reach more customers today!";
-      icon = Icons.add_box_outlined;
-      buttonText = "List Products";
-      onAction = () {
-        Navigator.of(context).pop();
-        navigateToAddProduct();
-      };
-    }
+  // =========================================================
+  // 🌟 ACCURATE & ASYNCHRONOUSLY SETTLED ONBOARDING EVALUATOR
+  // =========================================================
+
+
+void _evaluateAndShowOnboardingModal() {
+  if (_hasShownOnboardingModal) return;
+
+  final authState = ref.read(authProvider);
+
+  // Still loading authentication token
+  if (authState.isLoading) {
+    return;
+  }
+
+  // 1. UNAUTHENTICATED USER
+  if (!authState.isAuthenticated) {
+    _hasShownOnboardingModal = true;
 
     _showOnboardingDialog(
-      title: title,
-      message: message,
-      icon: icon,
-      buttonText: buttonText,
-      onAction: onAction,
-    );
-  }
-
-  void _showOnboardingDialog({
-    required String title,
-    required String message,
-    required IconData icon,
-    required String buttonText,
-    required VoidCallback onAction,
-  }) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 420),
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.mangoOrange.withOpacity(0.12),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    icon,
-                    size: 48,
-                    color: AppColors.mangoOrange,
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.darkText,
-                  ),
-                ),
-                const SizedBox(height: 8),
-
-                Text(
-                  message,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 13.5,
-                    color: Colors.grey.shade700,
-                    height: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.mangoOrange,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
-                    ),
-                    onPressed: onAction,
-                    child: Text(
-                      buttonText,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-
-                TextButton(
-                  onPressed: () => Navigator.of(dialogContext).pop(),
-                  child: Text(
-                    "Maybe Later",
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontSize: 13,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+      imageUrl: "https://www.malatrade.com/media/modal2.png", // 🖼️ Top Banner Image
+      title: "Welcome to MalaTrade!",
+      message: "Create an account to start listing, shopping, and tracking your orders!",
+      icon: Icons.person_add_alt_1_rounded,
+      buttonText: "Join",
+      onAction: () {
+        Navigator.of(context).pop();
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const RegisterScreen(),
           ),
         );
       },
     );
+
+    return;
   }
+
+  // 2. LOGGED IN - CHECK SHOP STATUS
+  final userShopsAsync = ref.read(userShopsProvider);
+
+  if (userShopsAsync.isLoading || !userShopsAsync.hasValue) {
+    return;
+  }
+
+  final shops = userShopsAsync.value;
+  final bool hasShop = shops != null && shops.isNotEmpty;
+
+  // 3. LOGGED IN + NO SHOP
+  if (!hasShop) {
+    _hasShownOnboardingModal = true;
+
+    _showOnboardingDialog(
+      imageUrl: "https://www.malatrade.com/media/modal2.png", // 🖼️ Top Banner Image
+      title: "Start Selling Today!",
+      message: "Create a shop today to start listing your products and reaching customers!",
+      icon: Icons.add_business_outlined,
+      buttonText: "Create Shop",
+      onAction: () {
+        Navigator.of(context).pop();
+        navigateToCreateShop();
+      },
+    );
+
+    return;
+  }
+
+  // 4. LOGGED IN + HAS SHOP
+  _hasShownOnboardingModal = true;
+
+  _showOnboardingDialog(
+    imageUrl: "https://www.malatrade.com/media/modal2.png", // 🖼️ Top Banner Image
+    title: "Grow Your Business!",
+    message: "Start listing your products to reach more customers today!",
+    icon: Icons.add_box_outlined,
+    buttonText: "List Products",
+    onAction: () {
+      Navigator.of(context).pop();
+      navigateToAddProduct();
+    },
+  );
+}
+
+// =========================================================
+// 🌟 UPDATED DIALOG WITH TOP IMAGE HEADER
+// =========================================================
+void _showOnboardingDialog({
+  String? imageUrl, // Optional image URL
+  required String title,
+  required String message,
+  required IconData icon,
+  required String buttonText,
+  required VoidCallback onAction,
+}) {
+  showDialog(
+    context: context,
+    builder: (dialogContext) {
+      return Dialog(
+        clipBehavior: Clip.antiAlias, // Clips top corners for the header image
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 420),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 🖼️ Top Banner Image
+              if (imageUrl != null && imageUrl.isNotEmpty)
+                SizedBox(
+                  width: double.infinity,
+                  height: 140,
+                  child: Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                  ),
+                ),
+
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  children: [
+                    // Icon Badge
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.mangoOrange.withOpacity(0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        icon,
+                        size: 40,
+                        color: AppColors.mangoOrange,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Title
+                    Text(
+                      title,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.darkText,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Message Body
+                    Text(
+                      message,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 13.5,
+                        color: Colors.grey.shade700,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Primary Button
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.mangoOrange,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
+                        onPressed: onAction,
+                        child: Text(
+                          buttonText,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Dismiss Button
+                    TextButton(
+                      onPressed: () => Navigator.of(dialogContext).pop(),
+                      child: Text(
+                        "Maybe Later",
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+  );
+}
+
 
   void _buildScreensList() {
     _screens = [
@@ -1025,19 +1106,26 @@ class MainTabsScreenState extends ConsumerState<MainTabsScreen> with AppRouterMi
 
   @override
   Widget build(BuildContext context) {
-    // 🌟 EVALUATES MODAL ONCE AUTH STATE INITIALIZATION FINISHES
-    ref.listen<AuthState>(authProvider, (previous, next) {
-      if (!next.isLoading) {
+    // Listeners to re-trigger onboarding check as soon as auth or shop data finishes loading
+   ref.listen<AuthState>(authProvider, (previous, next) {
+  if (!next.isLoading) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
         _evaluateAndShowOnboardingModal();
       }
     });
+  }
+});
 
-    // ALSO LISTEN TO USER SHOPS STATE IF AUTHENTICATED
-    ref.listen(userShopsProvider, (previous, next) {
-      if (next.hasValue) {
+ref.listen(userShopsProvider, (previous, next) {
+  if (next.hasValue) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
         _evaluateAndShowOnboardingModal();
       }
     });
+  }
+});
 
     int displayIndex = _currentIndex; 
     if (_currentIndex == 13) displayIndex = 2; 

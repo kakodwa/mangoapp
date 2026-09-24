@@ -23,8 +23,9 @@ class WebFooter extends ConsumerWidget {
     this.onDeliveryTap,
   });
 
-  Future<void> _launchUrl(String path) async {
-    final Uri uri = Uri.parse('https://www.malatrade.com/$path');
+  /// Launch external web links
+  Future<void> _launchExternalUrl(String fullUrl) async {
+    final Uri uri = Uri.parse(fullUrl);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
@@ -60,7 +61,7 @@ class WebFooter extends ConsumerWidget {
 
     return Container(
       width: double.infinity,
-      color: const Color(0xFF232F3E), // Amazon dark slate color background
+      color: const Color(0xFF232F3E), // Dark slate background
       padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
       child: Center(
         child: Container(
@@ -88,6 +89,14 @@ class WebFooter extends ConsumerWidget {
                         _footerLink('Platform Guide', () {
                           _analyticsService.logEvent('footer_guide_click');
                           MainTabsScreen.of(context)?.setSelectedIndex(43);
+                        }),
+                        _footerLink('Careers & Vacancies', () {
+                          _analyticsService.logEvent('footer_careers_click');
+                          _launchExternalUrl('https://www.malatrade.com/career/vacancy/');
+                        }),
+                        _footerLink('Download Mobile App', () {
+                          _analyticsService.logEvent('footer_download_app_click');
+                          _launchExternalUrl('https://www.malatrade.com/app/download/');
                         }),
                         _footerLink('Help & Support', () {
                           _analyticsService.logEvent('footer_help_click');
@@ -175,11 +184,11 @@ class WebFooter extends ConsumerWidget {
                         }),
                         _footerLink('Terms of Service', () {
                           _analyticsService.logEvent('footer_terms_click');
-                          _launchUrl('terms/');
+                          _launchExternalUrl('https://www.malatrade.com/terms/');
                         }),
                         _footerLink('Privacy Policy', () {
                           _analyticsService.logEvent('footer_privacy_click');
-                          _launchUrl('privacy/');
+                          _launchExternalUrl('https://www.malatrade.com/privacy/');
                         }),
                       ],
                     ),
@@ -203,6 +212,8 @@ class WebFooter extends ConsumerWidget {
                           }
                         }),
                         _footerLink('Platform Guide', () => MainTabsScreen.of(context)?.setSelectedIndex(43)),
+                        _footerLink('Careers & Vacancies', () => _launchExternalUrl('https://www.malatrade.com/career/vacancy/')),
+                        _footerLink('Download Mobile App', () => _launchExternalUrl('https://www.malatrade.com/app/download/')),
                         _footerLink('Help & Support', () {
                           if (onHelpTap != null) {
                             onHelpTap!();
@@ -272,8 +283,8 @@ class WebFooter extends ConsumerWidget {
                             MainTabsScreen.of(context)?.navigateToWalletTransactions();
                           });
                         }),
-                        _footerLink('Terms of Service', () => _launchUrl('terms/')),
-                        _footerLink('Privacy Policy', () => _launchUrl('privacy/')),
+                        _footerLink('Terms of Service', () => _launchExternalUrl('https://www.malatrade.com/terms/')),
+                        _footerLink('Privacy Policy', () => _launchExternalUrl('https://www.malatrade.com/privacy/')),
                       ],
                     ),
                   ],
@@ -311,15 +322,15 @@ class WebFooter extends ConsumerWidget {
                   ),
                   const SizedBox(height: 16),
                   
-                  // UPDATED: High-Quality Anti-Aliased Payment Methods Banner
+                  // Payment Methods Banner
                   Container(
                     constraints: const BoxConstraints(maxWidth: 350),
                     child: Image.network(
                       'https://www.malatrade.com/media/Payment_method.png',
                       height: 48,
                       fit: BoxFit.contain,
-                      filterQuality: FilterQuality.high, // Enforces crisp bicubic sampling
-                      isAntiAlias: true,                 // Smooths font edges on web renders
+                      filterQuality: FilterQuality.high,
+                      isAntiAlias: true,
                       errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
                     ),
                   ),

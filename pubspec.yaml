@@ -138,6 +138,7 @@ flutter:
 
   assets:
     - assets/images/logo.png
+    - assets/images/app_icon.png
     - assets/images/logo3.png
     - assets/images/tnm.png
     - assets/images/airtel.png
