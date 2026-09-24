@@ -1,4 +1,5 @@
 // lib/screens/shops/shop_details_screen.dart
+
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
@@ -22,7 +23,6 @@ import '../../widgets/shop_map_modal.dart';
 import '../../widgets/app_fab.dart';
 import '../../widgets/reviews/review_section_widget.dart';
 import '../../widgets/web_footer.dart';
-
 
 import '../auth/login_screen.dart';
 import '../products/product_card.dart';
@@ -267,6 +267,111 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
     );
   }
 
+  Widget _buildMainTabBody(Shop shop, AsyncValue<List<Product>> productsAsync, bool isLoggedIn, double screenWidth) {
+    if (_selectedTabIndex == 0) {
+      return productsAsync.when(
+        loading: () => const Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator())), 
+        error: (e, _) => Padding(padding: const EdgeInsets.all(16), child: Text("Error: $e")), 
+        data: (baseProducts) {
+          final List<Product> combinedList = [...baseProducts, ..._extendedProducts];
+
+          if (combinedList.isEmpty) {
+            return const Center(child: Padding(padding: EdgeInsets.all(40), child: Text("No products available from this vendor.")));
+          }
+
+          return Column(
+            children: [
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: combinedList.length,
+                itemBuilder: (context, i) => ProductCard(product: combinedList[i]),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: _getResponsiveCrossAxisCount(screenWidth), 
+                  childAspectRatio: 0.62, 
+                  crossAxisSpacing: 12, 
+                  mainAxisSpacing: 12, 
+                ),
+              ),
+              if (_isLoadingMore)
+                const Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator())),
+            ],
+          );
+        },
+      );
+    } else if (_selectedTabIndex == 1) {
+      return Padding(
+        padding: const EdgeInsets.all(AppSpacing.md), 
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start, 
+          children: [
+            const Text("About Store", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)), 
+            const SizedBox(height: AppSpacing.xs), 
+            Text(shop.description, style: TextStyle(color: Colors.grey.shade700, height: 1.4)), 
+          ],
+        ),
+      );
+    } else if (_selectedTabIndex == 2) {
+      return Padding(
+        padding: const EdgeInsets.all(AppSpacing.md), 
+        child: AppCard(
+          padding: const EdgeInsets.all(AppSpacing.md), 
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start, 
+            children: [
+              const Text("Contact Business", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)), 
+              const SizedBox(height: AppSpacing.sm), 
+              Row(
+                children: [
+                  const Icon(Icons.phone, color: AppColors.mangoOrange), 
+                  const SizedBox(width: 10), 
+                  Expanded(child: Text(shop.phoneNumber)), 
+                  IconButton(
+                    icon: const Icon(Icons.call, color: AppColors.leafGreen), 
+                    onPressed: () => _callPhone(shop.phoneNumber), 
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  const Icon(Icons.email, color: AppColors.mangoOrange), 
+                  const SizedBox(width: 10), 
+                  Expanded(child: Text(shop.email)), 
+                  IconButton(
+                    icon: const Icon(Icons.send, color: AppColors.leafGreen), 
+                    onPressed: () => _sendEmail(shop.email), 
+                  ),
+                ],
+              ),
+              Row(
+                children: [
+                  const FaIcon(FontAwesomeIcons.whatsapp, color: AppColors.mangoOrange), 
+                  const SizedBox(width: 10), 
+                  const Expanded(child: Text("WhatsApp Chat")), 
+                  IconButton(
+                    icon: const Icon(Icons.message, color: AppColors.leafGreen), 
+                    onPressed: () {
+                      if (!isLoggedIn) { 
+                        Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen())); 
+                        return;
+                      }
+                      _openWhatsApp(context, shop.phoneNumber); 
+                    },
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    } else {
+      return Padding(
+        padding: const EdgeInsets.all(AppSpacing.md), 
+        child: ReviewSectionWidget(targetType: 'shop', targetId: shop.id, isOwner: false), 
+      );
+    }
+  }
+
   @override
   void dispose() {
     _scrollController.removeListener(_onScroll);
@@ -282,6 +387,7 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
     final isLoggedIn = auth.isAuthenticated; 
     
     final double screenWidth = MediaQuery.of(context).size.width; 
+    final bool isDesktop = screenWidth >= 900;
 
     return DefaultTabController(
       length: 4, 
@@ -296,96 +402,149 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
               _hasLoggedView = true; 
             }
 
+            final List<Map<String, dynamic>> tabList = [
+              {"title": "Products", "icon": Icons.grid_view_rounded},
+              {"title": "About Shop", "icon": Icons.info_outline_rounded},
+              {"title": "Contact", "icon": Icons.call_outlined},
+              {"title": "Review", "icon": Icons.star_outline_rounded},
+            ];
+
             return Stack(
               children: [
                 CustomScrollView(
                   controller: _scrollController, 
                   slivers: [
+                    // ================= BANNER & LOGO HEADER =================
                     SliverToBoxAdapter(
-                      child: SizedBox(
-                        height: 240, 
-                        child: Stack(
-                          fit: StackFit.expand, 
-                          children: [
-                            shop.banner != null && shop.banner!.isNotEmpty 
-                                ? Image.network(shop.banner!, fit: BoxFit.cover) 
-                                : Container(color: Colors.grey.shade300), 
-                            Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topCenter, 
-                                  end: Alignment.bottomCenter, 
-                                  colors: [
-                                    Colors.black.withOpacity(0.1), 
-                                    Colors.black.withOpacity(0.4), 
-                                    Colors.black.withOpacity(0.8), 
-                                  ],
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              // Full Banner Container
+                              Container(
+                                height: 180,
+                                width: double.infinity,
+                                color: Theme.of(context).colorScheme.outline.withOpacity(0.38),
+                                child: (shop.banner != null && shop.banner!.isNotEmpty)
+                                    ? Image.network(
+                                        shop.banner!,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return const Center(child: Icon(Icons.store, size: 60));
+                                        },
+                                      )
+                                    : const Center(child: Icon(Icons.store, size: 60)),
+                              ),
+
+                              // Gradient overlay
+                              Container(
+                                height: 180,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Colors.black.withOpacity(0.1),
+                                      Colors.black.withOpacity(0.3),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                            Positioned(
-                              top: AppSpacing.md, 
-                              left: AppSpacing.md, 
-                              child: _GlassTag(text: shop.category), 
-                            ),
-                            Positioned(
-                              top: AppSpacing.md, 
-                              right: AppSpacing.md, 
-                              child: AppBadge(
-                                text: shop.status == 'approved' ? "Verified" : "Pending", 
-                                type: shop.status == 'approved' ? BadgeType.success : BadgeType.warning, 
+
+                              // Top Category Tag
+                              Positioned(
+                                top: AppSpacing.md,
+                                left: AppSpacing.md,
+                                child: _GlassTag(text: shop.category),
                               ),
-                            ),
-                            Positioned(
-                              bottom: AppSpacing.md, 
-                              left: AppSpacing.md, 
-                              right: AppSpacing.md, 
-                              child: Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.all(2), 
-                                    decoration: const BoxDecoration(shape: BoxShape.circle, color: Colors.white), 
-                                    child: CircleAvatar(
-                                      radius: 30, 
-                                      backgroundImage: shop.logo.isNotEmpty ? NetworkImage(shop.logo) : null, 
-                                      child: shop.logo.isEmpty ? const Icon(Icons.store) : null, 
-                                    ),
-                                  ),
-                                  const SizedBox(width: AppSpacing.sm), 
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start, 
-                                      mainAxisSize: MainAxisSize.min, 
-                                      children: [
-                                        Text(
-                                          shop.name, 
-                                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white), 
-                                        ),
-                                        Row(
-                                          children: [
-                                            const Icon(Icons.location_on, size: 14, color: Colors.white70), 
-                                            const SizedBox(width: 4), 
-                                            Text(shop.district, style: const TextStyle(color: Colors.white70)), 
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
+
+                              // Top Status Badge
+                              Positioned(
+                                top: AppSpacing.md,
+                                right: AppSpacing.md,
+                                child: AppBadge(
+                                  text: shop.status == 'approved' ? "Verified" : "Pending",
+                                  type: shop.status == 'approved' ? BadgeType.success : BadgeType.warning,
+                                ),
                               ),
+
+                              // Floating Circle Logo Overlay
+                              Positioned(
+                                bottom: -30,
+                                left: AppSpacing.md,
+                                child: CircleAvatar(
+                                  radius: 35,
+                                  backgroundColor: Theme.of(context).colorScheme.surface,
+                                  child: (shop.logo.isNotEmpty)
+                                      ? ClipOval(
+                                          child: Image.network(
+                                            shop.logo,
+                                            width: 64,
+                                            height: 64,
+                                            fit: BoxFit.cover,
+                                            errorBuilder: (context, error, stackTrace) => const Icon(Icons.store, size: 30),
+                                          ),
+                                        )
+                                      : const Icon(Icons.store, size: 30),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 40),
+
+                          // Shop Title & District Line
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  shop.name,
+                                  style: AppTypography.displaySmall.copyWith(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Icon(Icons.location_on, size: 16, color: Colors.grey.shade600),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      shop.district,
+                                      style: TextStyle(
+                                        color: Colors.grey.shade700,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
 
+                    // 🌟 TRANSPARENT ORANGE CARD FOR PRODUCTS, RATING, REVIEWS
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.only(top: AppSpacing.md, left: AppSpacing.md, right: AppSpacing.md), 
-                        child: AppCard(
-                          padding: const EdgeInsets.all(AppSpacing.md), 
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        child: Container(
+                          padding: const EdgeInsets.all(AppSpacing.md),
+                          decoration: BoxDecoration(
+                            color: AppColors.mangoOrange.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: AppColors.mangoOrange.withOpacity(0.25),
+                              width: 1.5,
+                            ),
+                          ),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround, 
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               _StatItem(title: "Products", value: "${shop.productCount ?? 0}"), 
                               _StatItem(title: "Rating", value: "${shop.rating}"), 
@@ -396,145 +555,101 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
                       ),
                     ),
 
-                    SliverPersistentHeader(
-                      pinned: true, 
-                      delegate: _SliverAppBarDelegate(
-                        TabBar(
-                          labelColor: AppColors.mangoOrange, 
-                          unselectedLabelColor: Colors.grey.shade600, 
-                          indicatorColor: AppColors.mangoOrange, 
-                          dividerColor: Colors.transparent, 
-                          indicatorWeight: 3, 
-                          onTap: (index) {
-                            setState(() {
-                              _selectedTabIndex = index; 
-                            });
-                          },
-                          tabs: const [
-                            Tab(text: "Products"), 
-                            Tab(text: "About Shop"), 
-                            Tab(text: "Contact"), 
-                            Tab(text: "Review"), 
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    if (_selectedTabIndex == 0) ...[
-                      productsAsync.when(
-                        loading: () => const SliverToBoxAdapter(
-                          child: Center(child: Padding(padding: EdgeInsets.all(20), child: CircularProgressIndicator())), 
-                        ),
-                        error: (e, _) => SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.all(16), child: Text("Error: $e"))), 
-                        data: (baseProducts) {
-                          final List<Product> combinedList = [...baseProducts, ..._extendedProducts];
-
-                          if (combinedList.isEmpty) {
-                            return const SliverToBoxAdapter(
-                              child: Center(child: Padding(padding: EdgeInsets.all(40), child: Text("No products available from this vendor."))), 
-                            );
-                          }
-
-                          return SliverPadding(
-                            padding: const EdgeInsets.only(left: AppSpacing.md, right: AppSpacing.md, top: AppSpacing.md), 
-                            sliver: SliverMainAxisGroup(
-                              slivers: [
-                                SliverGrid(
-                                  delegate: SliverChildBuilderDelegate(
-                                    (context, i) => ProductCard(product: combinedList[i]), 
-                                    childCount: combinedList.length,
-                                  ),
-                                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: _getResponsiveCrossAxisCount(screenWidth), 
-                                    childAspectRatio: 0.62, 
-                                    crossAxisSpacing: 12, 
-                                    mainAxisSpacing: 12, 
-                                  ),
-                                ),
-                                if (_isLoadingMore)
-                                  const SliverToBoxAdapter(
-                                    child: Center(child: Padding(padding: EdgeInsets.all(16), child: CircularProgressIndicator())),
-                                  ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ] else if (_selectedTabIndex == 1) ...[
+                    // ================= RESPONSIVE LAYOUT SWITCH =================
+                    if (isDesktop) ...[
+                      // 💻 DESKTOP: SIDEBAR NAVIGATION + CONTENT PANE
                       SliverToBoxAdapter(
                         child: Padding(
-                          padding: const EdgeInsets.all(AppSpacing.md), 
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start, 
+                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text("About Store", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)), 
-                              const SizedBox(height: AppSpacing.xs), 
-                              Text(shop.description, style: TextStyle(color: Colors.grey.shade700, height: 1.4)), 
+                              // LEFT SIDEBAR MENU
+                              Container(
+                                width: 220,
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(color: Colors.grey.shade200),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.03),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: Column(
+                                  children: List.generate(tabList.length, (index) {
+                                    final isSelected = _selectedTabIndex == index;
+                                    return Container(
+                                      margin: const EdgeInsets.only(bottom: 4),
+                                      child: ListTile(
+                                        dense: true,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                        tileColor: isSelected ? AppColors.mangoOrange.withOpacity(0.12) : Colors.transparent,
+                                        leading: Icon(
+                                          tabList[index]["icon"] as IconData,
+                                          size: 20,
+                                          color: isSelected ? AppColors.mangoOrange : Colors.grey.shade600,
+                                        ),
+                                        title: Text(
+                                          tabList[index]["title"] as String,
+                                          style: TextStyle(
+                                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                            color: isSelected ? AppColors.mangoOrange : Colors.grey.shade800,
+                                          ),
+                                        ),
+                                        onTap: () {
+                                          setState(() {
+                                            _selectedTabIndex = index;
+                                          });
+                                        },
+                                      ),
+                                    );
+                                  }),
+                                ),
+                              ),
+
+                              const SizedBox(width: AppSpacing.md),
+
+                              // RIGHT DETAIL PANE
+                              Expanded(
+                                child: _buildMainTabBody(shop, productsAsync, isLoggedIn, screenWidth),
+                              ),
                             ],
                           ),
                         ),
                       ),
-                    ] else if (_selectedTabIndex == 2) ...[
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.all(AppSpacing.md), 
-                          child: AppCard(
-                            padding: const EdgeInsets.all(AppSpacing.md), 
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start, 
-                              children: [
-                                const Text("Contact Business", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)), 
-                                const SizedBox(height: AppSpacing.sm), 
-                                Row(
-                                  children: [
-                                    const Icon(Icons.phone, color: AppColors.mangoOrange), 
-                                    const SizedBox(width: 10), 
-                                    Expanded(child: Text(shop.phoneNumber)), 
-                                    IconButton(
-                                      icon: const Icon(Icons.call, color: AppColors.leafGreen), 
-                                      onPressed: () => _callPhone(shop.phoneNumber), 
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    const Icon(Icons.email, color: AppColors.mangoOrange), 
-                                    const SizedBox(width: 10), 
-                                    Expanded(child: Text(shop.email)), 
-                                    IconButton(
-                                      icon: const Icon(Icons.send, color: AppColors.leafGreen), 
-                                      onPressed: () => _sendEmail(shop.email), 
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  children: [
-                                    const FaIcon(FontAwesomeIcons.whatsapp, color: AppColors.mangoOrange), 
-                                    const SizedBox(width: 10), 
-                                    const Expanded(child: Text("WhatsApp Chat")), 
-                                    IconButton(
-                                      icon: const Icon(Icons.message, color: AppColors.leafGreen), 
-                                      onPressed: () {
-                                        if (!isLoggedIn) { 
-                                          Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen())); 
-                                          return;
-                                        }
-                                        _openWhatsApp(context, shop.phoneNumber); 
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
+                    ] else ...[
+                      // 📱 MOBILE: TOP TAB BAR
+                      SliverPersistentHeader(
+                        pinned: true, 
+                        delegate: _SliverAppBarDelegate(
+                          TabBar(
+                            labelColor: AppColors.mangoOrange, 
+                            unselectedLabelColor: Colors.grey.shade600, 
+                            indicatorColor: AppColors.mangoOrange, 
+                            dividerColor: Colors.transparent, 
+                            indicatorWeight: 3, 
+                            onTap: (index) {
+                              setState(() {
+                                _selectedTabIndex = index; 
+                              });
+                            },
+                            tabs: const [
+                              Tab(text: "Products"), 
+                              Tab(text: "About Shop"), 
+                              Tab(text: "Contact"), 
+                              Tab(text: "Review"), 
+                            ],
                           ),
                         ),
                       ),
-                    ] else if (_selectedTabIndex == 3) ...[
+
                       SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.all(AppSpacing.md), 
-                          child: ReviewSectionWidget(targetType: 'shop', targetId: shop.id, isOwner: false), 
-                        ),
+                        child: _buildMainTabBody(shop, productsAsync, isLoggedIn, screenWidth),
                       ),
                     ],
 
@@ -588,9 +703,9 @@ class _ShopDetailsScreenState extends ConsumerState<ShopDetailsScreen> {
                               : "https://malatrade.com/shop/${widget.shopId}";
 
                           final String shareMessage =
-                              "🏪 ${shop.name}\n"
-                              "📍 Category: ${shop.category}\n"
-                              "📌 Location: ${shop.district}, Malawi\n\n"
+                              "🛍️ ${shop.name}\n"
+                              "📂 Category: ${shop.category}\n"
+                              "📍 Location: ${shop.district}, Malawi\n\n"
                               "Browse this shop on MalaTrade:\n$shopUrl";
 
                           final box = context.findRenderObject() as RenderBox?;

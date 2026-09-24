@@ -7,6 +7,7 @@ import '../../theme/design_system/app_text_field.dart';
 import '../../theme/design_system/app_spacing.dart';
 import '../../theme/design_system/app_button.dart';
 import '../../theme/app_colors.dart';
+import '../main_tabs_screen.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -101,9 +102,27 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
       final state = ref.read(authProvider);
 
-      if (state.isAuthenticated) {
-        Navigator.pushReplacementNamed(context, "/home");
-      } else {
+if (state.isAuthenticated) {
+  final tabsState = MainTabsScreen.of(context);
+
+  if (tabsState != null) {
+    // 1. Pop the RegisterScreen back to MainTabsScreen
+    Navigator.of(context).pop();
+
+    // 2. Trigger the direct helper method after the frame renders
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      tabsState.navigateToCreateShop();
+    });
+  } else {
+    // 3. Fallback if mounted standalone
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (_) => const MainTabsScreen(initialIndex: 33),
+      ),
+      (route) => false,
+    );
+  }
+} else {
         _showError(state.error ?? "Registration failed");
       }
     } catch (e) {

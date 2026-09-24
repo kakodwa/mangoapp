@@ -60,15 +60,24 @@ jobs:
     runs-on: macos-latest
 
     steps:
+      # --------------------------------------------------------
+      # Checkout repository
+      # --------------------------------------------------------
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # --------------------------------------------------------
+      # Set up Flutter
+      # --------------------------------------------------------
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: 3.41.7
           cache: true
 
+      # --------------------------------------------------------
+      # Get dependencies
+      # --------------------------------------------------------
       - name: Get dependencies
         run: flutter pub get
 
@@ -81,32 +90,57 @@ jobs:
           IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
         run: |
           CERTIFICATE_PATH="$RUNNER_TEMP/certificate.p12"
+          KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain-db"
 
-          echo "$IOS_CERTIFICATE_BASE64" | base64 --decode > "$CERTIFICATE_PATH"
+          echo "Decoding Apple certificate..."
+
+          printf '%s' "$IOS_CERTIFICATE_BASE64" | base64 --decode > "$CERTIFICATE_PATH"
+
+          echo "Checking certificate file..."
+          ls -lh "$CERTIFICATE_PATH"
+          file "$CERTIFICATE_PATH"
+
+          echo "Testing PKCS12 certificate..."
+
+          openssl pkcs12 \
+            -in "$CERTIFICATE_PATH" \
+            -info \
+            -noout \
+            -passin pass:"$IOS_CERTIFICATE_PASSWORD"
+
+          echo "Creating temporary keychain..."
 
           security create-keychain \
             -p "temporary" \
-            "$RUNNER_TEMP/build.keychain-db"
+            "$KEYCHAIN_PATH"
 
-          security default-keychain \
-            -s "$RUNNER_TEMP/build.keychain-db"
+          security set-keychain-settings \
+            -lut 21600 \
+            "$KEYCHAIN_PATH"
 
           security unlock-keychain \
             -p "temporary" \
-            "$RUNNER_TEMP/build.keychain-db"
+            "$KEYCHAIN_PATH"
 
           security import "$CERTIFICATE_PATH" \
             -P "$IOS_CERTIFICATE_PASSWORD" \
             -A \
             -t cert \
             -f pkcs12 \
-            "$RUNNER_TEMP/build.keychain-db"
+            -k "$KEYCHAIN_PATH"
 
           security set-key-partition-list \
             -S apple-tool:,apple: \
             -s \
             -k "temporary" \
-            "$RUNNER_TEMP/build.keychain-db"
+            "$KEYCHAIN_PATH"
+
+          security list-keychain \
+            -d user \
+            -s "$KEYCHAIN_PATH"
+
+          echo "Apple certificate imported successfully."
+
 
       # --------------------------------------------------------
       # Install provisioning profile
@@ -117,18 +151,48 @@ jobs:
         run: |
           PROFILE_PATH="$RUNNER_TEMP/profile.mobileprovision"
 
-          echo "$IOS_PROVISIONING_PROFILE_BASE64" | base64 --decode > "$PROFILE_PATH"
+          echo "Decoding provisioning profile..."
 
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          printf '%s' "$IOS_PROVISIONING_PROFILE_BASE64" | base64 --decode > "$PROFILE_PATH"
+
+          echo "Checking provisioning profile..."
+          ls -lh "$PROFILE_PATH"
+          file "$PROFILE_PATH"
+
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
 
           cp "$PROFILE_PATH" \
-            ~/Library/MobileDevice/Provisioning\ Profiles/
+            "$HOME/Library/MobileDevice/Provisioning Profiles/"
+
+          echo "Provisioning profile installed successfully."
+
+
+      # --------------------------------------------------------
+      # Check Xcode signing identities
+      # --------------------------------------------------------
+      - name: Check signing identities
+        run: |
+          echo "Available signing identities:"
+          security find-identity -v -p codesigning \
+            "$RUNNER_TEMP/build.keychain-db"
+
 
       # --------------------------------------------------------
       # Build signed IPA
       # --------------------------------------------------------
       - name: Build iOS IPA
-        run: flutter build ipa --release
+        run: |
+          flutter build ipa --release
+
+
+      # --------------------------------------------------------
+      # Check generated IPA
+      # --------------------------------------------------------
+      - name: Check IPA
+        run: |
+          echo "Generated IPA files:"
+          ls -lh build/ios/ipa/
+
 
       # --------------------------------------------------------
       # Upload IPA

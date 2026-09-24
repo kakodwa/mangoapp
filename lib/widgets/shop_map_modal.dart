@@ -32,6 +32,7 @@ class _ShopMapModalState extends State<ShopMapModal> {
 
   bool mapReady = false;
   bool followUser = true;
+  bool _isSatellite = false; // 🛰️ Controls Satellite vs Street view
 
   LatLng? userLocation;
   List<LatLng> routePoints = [];
@@ -164,6 +165,7 @@ class _ShopMapModalState extends State<ShopMapModal> {
             options: MapOptions(
               initialCenter: userLocation ?? shop,
               initialZoom: 16,
+              maxZoom: 18, // 🛑 Prevents zooming past available imagery resolution
               onMapReady: () {
                 mapReady = true;
               },
@@ -175,11 +177,12 @@ class _ShopMapModalState extends State<ShopMapModal> {
               },
             ),
             children: [
+              // Dynamic TileLayer switching between Street & Google Hybrid Satellite Imagery
               TileLayer(
-                urlTemplate: kIsWeb
-                    ? 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
-                    : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                subdomains: kIsWeb ? const ['a', 'b', 'c', 'd'] : const [],
+                urlTemplate: _isSatellite
+                    ? 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}'
+                    : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=cb1_3tux_1_a437ee9aa2a4868d762ed346',
+                subdomains: _isSatellite ? const [] : const ['a', 'b', 'c', 'd'],
                 userAgentPackageName: 'com.example.mangochi_marketplace',
               ),
               PolylineLayer(
@@ -187,7 +190,7 @@ class _ShopMapModalState extends State<ShopMapModal> {
                   Polyline(
                     points: routePoints,
                     strokeWidth: 5,
-                    color: AppColors.primary(context),
+                    color: _isSatellite ? Colors.amber : AppColors.primary(context),
                   ),
                 ],
               ),
@@ -202,7 +205,7 @@ class _ShopMapModalState extends State<ShopMapModal> {
                         angle: _heading * (pi / 180),
                         child: Icon(
                           Icons.navigation,
-                          color: AppColors.primary(context),
+                          color: _isSatellite ? Colors.amber : AppColors.primary(context),
                           size: 32,
                         ),
                       ),
@@ -213,7 +216,7 @@ class _ShopMapModalState extends State<ShopMapModal> {
                     height: 60,
                     child: const Icon(
                       Icons.storefront,
-                      color: Colors.green,
+                      color: Colors.greenAccent,
                       size: 40,
                     ),
                   ),
@@ -260,6 +263,24 @@ class _ShopMapModalState extends State<ShopMapModal> {
                     ? _expandedCard()
                     : _collapsedCard(),
               ),
+            ),
+          ),
+
+          // ================= SATELLITE / STREET VIEW SWITCHER =================
+          Positioned(
+            bottom: 175,
+            right: 18,
+            child: FloatingActionButton(
+              heroTag: "layer_toggle",
+              backgroundColor: _isSatellite ? Colors.amber : Colors.white,
+              foregroundColor: _isSatellite ? Colors.black : Colors.black87,
+              tooltip: _isSatellite ? "Switch to Street View" : "Switch to Satellite View",
+              child: Icon(_isSatellite ? Icons.map_outlined : Icons.satellite_alt_outlined),
+              onPressed: () {
+                setState(() {
+                  _isSatellite = !_isSatellite;
+                });
+              },
             ),
           ),
 

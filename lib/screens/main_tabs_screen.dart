@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb; 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart'; 
 
 import '../widgets/app_scaffold.dart'; 
@@ -86,14 +87,17 @@ import 'orders/orders_screen.dart';
 import 'cart/cart_screen.dart'; 
 import 'cart/checkout_screen.dart'; 
 
-import 'chat/chat_screen.dart'; // 👈 Unified Chat Hub Screen
+import 'chat/chat_screen.dart'; 
+import 'auth/register_screen.dart';
 
 import '../providers/products_provider.dart'; 
+import '../providers/auth_provider.dart';
+import '../providers/shops_provider.dart';
 import '../router/app_router.dart'; 
 import '../core/api/api_client.dart'; 
 import '../theme/app_colors.dart';
 
-class MainTabsScreen extends StatefulWidget {
+class MainTabsScreen extends ConsumerStatefulWidget {
   final int initialIndex;
 
   const MainTabsScreen({
@@ -110,10 +114,10 @@ class MainTabsScreen extends StatefulWidget {
   }
 
   @override
-  State<MainTabsScreen> createState() => MainTabsScreenState();
+  ConsumerState<MainTabsScreen> createState() => MainTabsScreenState();
 }
 
-class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
+class MainTabsScreenState extends ConsumerState<MainTabsScreen> with AppRouterMixin {
   late int _currentIndex;
   String? _searchQuery;
   String? _searchType;
@@ -154,6 +158,7 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
   double? _shopMapLng; 
 
   static bool _hasBeenDismissedGlobal = false; 
+  static bool _hasShownOnboardingModal = false; 
   bool _showAdBanner = true; 
 
   List<Map<String, dynamic>> _allBackendAds = []; 
@@ -185,6 +190,172 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
     _buildScreensList();
   }
 
+  // =========================================================
+  // 🌟 EXACT MATCH WITH UPDATES TICKER AUTH & SHOP EVALUATION
+  // =========================================================
+  void _evaluateAndShowOnboardingModal() {
+    if (_hasShownOnboardingModal) return;
+
+    final authState = ref.read(authProvider);
+
+    // 🛑 DO NOT RUN IF AUTH STATE IS STILL INITIALIZING/LOADING FROM STORAGE
+    if (authState.isLoading) {
+      return;
+    }
+
+    final isAuthenticated = authState.isAuthenticated;
+    final hasShop = ref.read(hasShopProvider);
+
+    String title = "";
+    String message = "";
+    IconData icon = Icons.storefront;
+    String buttonText = "";
+    VoidCallback onAction = () {};
+
+    if (!isAuthenticated) {
+      // 🔴 CONDITION 1: NOT LOGGED IN -> CREATING AN ACCOUNT
+      _hasShownOnboardingModal = true;
+      title = "Welcome to MalaTrade!";
+      message = "Create an account to start listing, shopping, and tracking your orders!";
+      icon = Icons.person_add_alt_1_rounded;
+      buttonText = "Join / Create Account";
+      onAction = () {
+        Navigator.of(context).pop();
+        Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterScreen()));
+      };
+    } else if (!hasShop) {
+      // 🟡 CONDITION 2: LOGGED IN BUT NO SHOP -> CREATE A SHOP
+      _hasShownOnboardingModal = true;
+      title = "Start Selling Today!";
+      message = "Create a shop today to start listing your products and reaching customers!";
+      icon = Icons.add_business_outlined;
+      buttonText = "Create Shop";
+      onAction = () {
+        Navigator.of(context).pop();
+        navigateToCreateShop();
+      };
+    } else {
+      // 🟢 CONDITION 3: LOGGED IN AND HAS SHOP -> UPLOAD PRODUCTS
+      _hasShownOnboardingModal = true;
+      title = "Grow Your Business!";
+      message = "Start listing your products to reach more customers today!";
+      icon = Icons.add_box_outlined;
+      buttonText = "List Products";
+      onAction = () {
+        Navigator.of(context).pop();
+        navigateToAddProduct();
+      };
+    }
+
+    _showOnboardingDialog(
+      title: title,
+      message: message,
+      icon: icon,
+      buttonText: buttonText,
+      onAction: onAction,
+    );
+  }
+
+  void _showOnboardingDialog({
+    required String title,
+    required String message,
+    required IconData icon,
+    required String buttonText,
+    required VoidCallback onAction,
+  }) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 420),
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.mangoOrange.withOpacity(0.12),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    icon,
+                    size: 48,
+                    color: AppColors.mangoOrange,
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.darkText,
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13.5,
+                    color: Colors.grey.shade700,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.mangoOrange,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    onPressed: onAction,
+                    child: Text(
+                      buttonText,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: Text(
+                    "Maybe Later",
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _buildScreensList() {
     _screens = [
       HomeScreen(onDeliveryTap: () => _changeTab(9)), 
@@ -204,7 +375,7 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
       const DeliveryCodeScreen(),     
       const AboutScreen(),            
       const HelpSupportScreen(),      
-      const ChatScreen(roomId: 0, peerName: "Messages"), // 👈 Primary Chat Screen at index 12
+      const ChatScreen(roomId: 0, peerName: "Messages"), 
     ];
   }
 
@@ -854,6 +1025,20 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
 
   @override
   Widget build(BuildContext context) {
+    // 🌟 EVALUATES MODAL ONCE AUTH STATE INITIALIZATION FINISHES
+    ref.listen<AuthState>(authProvider, (previous, next) {
+      if (!next.isLoading) {
+        _evaluateAndShowOnboardingModal();
+      }
+    });
+
+    // ALSO LISTEN TO USER SHOPS STATE IF AUTHENTICATED
+    ref.listen(userShopsProvider, (previous, next) {
+      if (next.hasValue) {
+        _evaluateAndShowOnboardingModal();
+      }
+    });
+
     int displayIndex = _currentIndex; 
     if (_currentIndex == 13) displayIndex = 2; 
     if (_currentIndex == 14) displayIndex = 1; 
@@ -878,14 +1063,13 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
     if (_currentIndex == 54) displayIndex = 4; 
     if (_currentIndex == 55) displayIndex = 1; 
     if (_currentIndex == 56) displayIndex = 9;
-    if (_currentIndex == 57) displayIndex = 12; // Chat Screen maps to primary Messages tab
+    if (_currentIndex == 57) displayIndex = 12;
 
     return Scaffold(
-      // 🌟 Compact Floating Chat Button
       floatingActionButton: _isDetailScreen()
           ? null
           : Padding(
-              padding: const EdgeInsets.only(bottom: 35.0), // 👈 Shifts icon 24px higher up
+              padding: const EdgeInsets.only(bottom: 35.0), 
               child: SizedBox(
                 width: 44,
                 height: 44,
@@ -895,7 +1079,7 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
                   tooltip: "Chat Messages",
                   child: const Icon(Icons.chat_bubble_outline, color: Colors.white, size: 20),
                   onPressed: () {
-                    _changeTab(12); // Directly navigates to primary ChatScreen hub
+                    _changeTab(12); 
                   },
                 ),
               ),
@@ -903,23 +1087,20 @@ class MainTabsScreenState extends State<MainTabsScreen> with AppRouterMixin {
       body: AppScaffold(
         currentIndex: displayIndex, 
         onTabSelected: _changeTab, 
-        // lib/screens/main_tabs_screen.dart
-
-appBar: MainAppBar(
-  // 💡 Hides top app bar search when user is on Home (0) OR Search Page (7)
-  isHomePage: _currentIndex == 0 || _currentIndex == 7,
-  title: _getAppBarTitle(), 
-  onProfileTap: () => _changeTab(6), 
-  onSearchTap: () => _changeTab(7), 
-  onCartTap: () => _changeTab(8), 
-  leading: _isDetailScreen() 
-      ? IconButton(
-          icon: const Icon(Icons.arrow_back_rounded),
-          tooltip: 'Back',
-          onPressed: _navigateBack,
-        )
-      : null,
-),
+        appBar: MainAppBar(
+          isHomePage: _currentIndex == 0 || _currentIndex == 7,
+          title: _getAppBarTitle(), 
+          onProfileTap: () => _changeTab(6), 
+          onSearchTap: () => _changeTab(7), 
+          onCartTap: () => _changeTab(8), 
+          leading: _isDetailScreen() 
+              ? IconButton(
+                  icon: const Icon(Icons.arrow_back_rounded),
+                  tooltip: 'Back',
+                  onPressed: _navigateBack,
+                )
+              : null,
+        ),
         drawer: MainDrawer(
           onAboutTap: () => _changeTab(10), 
           onHelpTap: () => _changeTab(11), 
@@ -1044,7 +1225,6 @@ appBar: MainAppBar(
                             ) 
                           : const Center(child: Text("No active rider delivery selected")),
 
-                      // 🌟 Dynamic Chat Room integrated into Main Tabs Stack at index 57
                       _activeChatRoomId != null && _activeChatPeerName != null
                           ? ChatScreen(
                               key: ValueKey('chat_room_$_activeChatRoomId'),

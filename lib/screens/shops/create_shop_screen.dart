@@ -1,5 +1,6 @@
-import 'package:flutter/foundation.dart';
+// lib/screens/shops/create_shop_screen.dart
 
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,11 +11,11 @@ import '../../theme/design_system/app_text_field.dart';
 import '../../theme/design_system/app_spacing.dart';
 
 import '../../providers/shops_provider.dart';
+import '../../providers/auth_provider.dart';
 import '../main_tabs_screen.dart'; 
 import '../../utils/app_toast.dart';
 import '../../widgets/image_crop_picker.dart';
 import '../../widgets/web_footer.dart';
-
 
 class CreateShopScreen extends ConsumerStatefulWidget {
   const CreateShopScreen({super.key});
@@ -55,6 +56,7 @@ class _CreateShopScreenState extends ConsumerState<CreateShopScreen> {
 
   bool loading = false;
   bool gettingLocation = false;
+  bool _hasAutofilled = false; // Flag to prevent overwriting user edits
 
   double? latitude;
   double? longitude;
@@ -97,6 +99,22 @@ class _CreateShopScreenState extends ConsumerState<CreateShopScreen> {
     'Industrial Equipment',
   ];
 
+  void _autofillWithUser(dynamic user) {
+    if (user == null || _hasAutofilled) return;
+
+    if (emailController.text.isEmpty && user.email != null && user.email.isNotEmpty) {
+      emailController.text = user.email;
+    }
+    if (phoneController.text.isEmpty && user.phoneNumber != null && user.phoneNumber!.isNotEmpty) {
+      phoneController.text = user.phoneNumber!;
+    }
+    if (selectedDistrict == null && user.district != null && districts.contains(user.district)) {
+      selectedDistrict = user.district;
+    }
+
+    _hasAutofilled = true;
+  }
+
   // ======================
   // LOCATION
   // ======================
@@ -106,7 +124,7 @@ class _CreateShopScreenState extends ConsumerState<CreateShopScreen> {
     try {
       final enabled = await Geolocator.isLocationServiceEnabled();
       if (!enabled) {
-        AppToast.error(context, 'Enable location services');
+        AppToast.error(context, 'Please turn on Location (GPS) on your device');
         return;
       }
 
@@ -129,7 +147,7 @@ class _CreateShopScreenState extends ConsumerState<CreateShopScreen> {
         AppToast.success(context, 'Location captured successfully');
       }
     } catch (_) {
-      AppToast.error(context, 'Failed to get location');
+      AppToast.error(context, 'Failed to get location. Make sure GPS is enabled');
     } finally {
       if (mounted) setState(() => gettingLocation = false);
     }
@@ -142,7 +160,7 @@ class _CreateShopScreenState extends ConsumerState<CreateShopScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     if (latitude == null || longitude == null) {
-      AppToast.error(context, 'Please capture shop location');
+      AppToast.error(context, 'Please capture shop GPS coordinates');
       return;
     }
 
@@ -213,6 +231,16 @@ class _CreateShopScreenState extends ConsumerState<CreateShopScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // ⚡ Listen to authProvider to perform auto-fill reliably when user data resolves
+    final authState = ref.watch(authProvider);
+    if (!_hasAutofilled && authState.user != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          _autofillWithUser(authState.user);
+        });
+      });
+    }
+
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth > 800;
     
@@ -230,6 +258,59 @@ class _CreateShopScreenState extends ConsumerState<CreateShopScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  // 🌟 WELCOMING HEADER BANNER
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    margin: const EdgeInsets.only(bottom: AppSpacing.lg),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.primary,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.storefront_rounded,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Create Your Online Shop",
+                                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
+                                    ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                "Please complete the form to create your own online shop and start selling. Contact details have been pre-filled from your account.",
+                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      color: Colors.grey.shade700,
+                                      fontSize: 13,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
                   // Split into side-by-side forms on desktop/web screens
                   Flex(
                     direction: isDesktop ? Axis.horizontal : Axis.vertical,
@@ -341,6 +422,27 @@ class _CreateShopScreenState extends ConsumerState<CreateShopScreen> {
                                 padding: const EdgeInsets.all(AppSpacing.md),
                                 child: Column(
                                   children: [
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.info_outline_rounded,
+                                          size: 16,
+                                          color: Colors.amber,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Expanded(
+                                          child: Text(
+                                            "Make sure Location (GPS) is turned ON on your device.",
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.grey.shade800,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: AppSpacing.sm),
                                     ElevatedButton.icon(
                                       onPressed: gettingLocation ? null : getLocation,
                                       style: ElevatedButton.styleFrom(

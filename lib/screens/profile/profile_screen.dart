@@ -1,3 +1,5 @@
+// lib/screens/profile/profile_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -33,7 +35,6 @@ import '../../theme/design_system/app_spacing.dart';
 import '../../services/analytics_service.dart';
 import '../../widgets/web_footer.dart';
 
-
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
@@ -42,11 +43,12 @@ class ProfileScreen extends ConsumerStatefulWidget {
 }
 
 class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  // 🌟 Expanded "shop" section first by default
   final Map<String, bool> _expanded = {
-    "payments": true,
+    "shop": true,
+    "payments": false,
     "activity": false,
     "management": false,
-    "shop": false,
     "account": false,
   };
   
@@ -58,42 +60,6 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       _expanded.updateAll((k, v) => false);
       _expanded[key] = !isCurrentlyOpen;
     });
-  }
-
-  void _showFeatureUnderDevelopmentDialog(String featureName) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: Row(
-            children: [
-              const Icon(Icons.construction, color: AppColors.mangoOrange),
-              const SizedBox(width: 10),
-              Text(
-                featureName,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          content: const Text(
-            "This feature is currently still under development and is strictly limited to special users who apply for it.",
-            style: TextStyle(fontSize: 14, height: 1.4),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text(
-                "Got it",
-                style: TextStyle(color: AppColors.leafGreen, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -142,7 +108,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     children: [
                       Container(
                         width: double.infinity,
-                        margin: EdgeInsets.all(AppSpacing.md),
+                        margin: const EdgeInsets.all(AppSpacing.md),
                         padding: const EdgeInsets.fromLTRB(24, 65, 24, 24),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
@@ -231,121 +197,204 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Column(
                       children: [
-                        _sectionCard(
-                          key: "payments",
-                          title: "Payments & Wallet",
-                          crossAxisCount: crossAxisCount,
-                          children: [
-                            _gridCard(Icons.account_balance_wallet_outlined, "Wallet", () {
-                              analytics.logEvent('profile_click_wallet');
-                              MainTabsScreen.of(context)?.navigateToWalletTransactions();
-                            }),
-                            _gridCard(Icons.payment_outlined, "Payments", () {
-                              analytics.logEvent('profile_click_payment_history');
-                              MainTabsScreen.of(context)?.navigateToPaymentHistory();
-                            }),
-                            _gridCard(Icons.outbox_outlined, "Withdraw Money", () {
-                              analytics.logEvent('profile_click_withdraw_request');
-                              MainTabsScreen.of(context)?.navigateToWithdrawal();
-                            }),
-                            _gridCard(Icons.history_outlined, "Cashout History", () {
-                              analytics.logEvent('profile_click_payout_history');
-                              MainTabsScreen.of(context)?.navigateToPayoutHistory();
-                            }),
-                          ],
-                        ),
-
-                        _sectionCard(
-                          key: "activity",
-                          title: "My Activity",
-                          crossAxisCount: crossAxisCount,
-                          children: [
-                            _gridCard(Icons.shopping_bag_outlined, "Orders", () {
-                              analytics.logEvent('profile_click_orders');
-                              MainTabsScreen.of(context)?.navigateToOrders();
-                            }),
-                            _gridCard(Icons.hotel_outlined, "Bookings", () {
-                              analytics.logEvent('profile_click_bookings');
-                              MainTabsScreen.of(context)?.navigateToMyBookings();
-                            }),
-                            _gridCard(Icons.confirmation_number_outlined, "Tickets", () {
-                              analytics.logEvent('profile_click_tickets');
-                              MainTabsScreen.of(context)?.navigateToMyTickets();
-                            }),
-                            _gridCard(Icons.lock_open_outlined, "Unlocked Properties", () {
-                              analytics.logEvent('profile_click_unlocked_properties');
-                              MainTabsScreen.of(context)?.navigateToMyUnlockedProperties();
-                            }),
-                          ],
-                        ),
-
-                        _sectionCard(
-                          key: "management",
-                          title: "Management",
-                          crossAxisCount: crossAxisCount,
-                          children: [
-                            _gridCard(Icons.dashboard_outlined, "Lodge", () {
-                              analytics.logEvent('profile_click_lodge_dashboard');
-                              MainTabsScreen.of(context)?.navigateToLodgeDashboard();
-                            }),
-                            _gridCard(Icons.home_work_outlined, "Properties", () {
-                              analytics.logEvent('profile_click_properties');
-                              MainTabsScreen.of(context)?.navigateToMyProperties();
-                            }),
-                            _gridCard(Icons.event_outlined, "Events", () {
-                              analytics.logEvent('profile_click_manage_events');
-                              MainTabsScreen.of(context)?.navigateToManageEvents();
-                            }),
-                          ],
-                        ),
-
+                        // 1. SHOP MANAGEMENT TAB (FIRST)
                         if (isLoggedIn)
                           _sectionCard(
                             key: "shop",
                             title: "Shop Management",
+                            descriptionEn: "Create and manage your online shop, upload products, and track customer orders.",
+                            descriptionNy: "Tsegulani ndi kusamalira shop yanu, ikani katundu, komanso onani zooda za makasitomala anu.",
                             crossAxisCount: crossAxisCount,
                             children: !hasShop
                                 ? [
-                                    _gridCard(Icons.add_business_outlined, "Create Shop", () {
-                                      analytics.logEvent('profile_click_create_shop');
-                                      MainTabsScreen.of(context)?.navigateToCreateShop();
-                                    }),
+                                    _gridCard(
+                                      Icons.add_business_outlined, 
+                                      "Create Shop", 
+                                      () {
+                                        analytics.logEvent('profile_click_create_shop');
+                                        MainTabsScreen.of(context)?.navigateToCreateShop();
+                                      },
+                                    ),
                                   ]
                                 : [
-                                    _gridCard(Icons.store_outlined, "My Shop", () {
-                                      analytics.logEvent('profile_click_my_shop');
-                                      MainTabsScreen.of(context)?.navigateToMyShop();
-                                    }),
-                                    _gridCard(Icons.add_box_outlined, "Add Product", () {
-                                      analytics.logEvent('profile_click_add_product');
-                                      MainTabsScreen.of(context)?.navigateToAddProduct();
-                                    }),
-                                    _gridCard(Icons.local_shipping_outlined, "Deliveries & Orders", () {
-                                      analytics.logEvent('profile_click_deliveries');
-                                      MainTabsScreen.of(context)?.navigateToSellerDeliveries();
-                                    }),
+                                    _gridCard(
+                                      Icons.store_outlined, 
+                                      "My Shop", 
+                                      () {
+                                        analytics.logEvent('profile_click_my_shop');
+                                        MainTabsScreen.of(context)?.navigateToMyShop();
+                                      },
+                                    ),
+                                    _gridCard(
+                                      Icons.add_box_outlined, 
+                                      "Add Product", 
+                                      () {
+                                        analytics.logEvent('profile_click_add_product');
+                                        MainTabsScreen.of(context)?.navigateToAddProduct();
+                                      },
+                                    ),
+                                    _gridCard(
+                                      Icons.local_shipping_outlined, 
+                                      "Deliveries & Orders", 
+                                      () {
+                                        analytics.logEvent('profile_click_deliveries');
+                                        MainTabsScreen.of(context)?.navigateToSellerDeliveries();
+                                      },
+                                    ),
                                   ],
                           ),
 
+                        // 2. PAYMENTS & WALLET TAB
+                        _sectionCard(
+                          key: "payments",
+                          title: "Payments & Wallet",
+                          descriptionEn: "View your wallet balance, check payment history, request cashouts, and view payout records.",
+                          descriptionNy: "Onani ndalama zanu zotsala, mbiri yolipira, tulutsani ndalama zanu, komanso mbiri yazotulutsidwa.",
+                          crossAxisCount: crossAxisCount,
+                          children: [
+                            _gridCard(
+                              Icons.account_balance_wallet_outlined, 
+                              "Wallet", 
+                              () {
+                                analytics.logEvent('profile_click_wallet');
+                                MainTabsScreen.of(context)?.navigateToWalletTransactions();
+                              },
+                            ),
+                            _gridCard(
+                              Icons.payment_outlined, 
+                              "Payments", 
+                              () {
+                                analytics.logEvent('profile_click_payment_history');
+                                MainTabsScreen.of(context)?.navigateToPaymentHistory();
+                              },
+                            ),
+                            _gridCard(
+                              Icons.outbox_outlined, 
+                              "Withdraw Money", 
+                              () {
+                                analytics.logEvent('profile_click_withdraw_request');
+                                MainTabsScreen.of(context)?.navigateToWithdrawal();
+                              },
+                            ),
+                            _gridCard(
+                              Icons.history_outlined, 
+                              "Cashout History", 
+                              () {
+                                analytics.logEvent('profile_click_payout_history');
+                                MainTabsScreen.of(context)?.navigateToPayoutHistory();
+                              },
+                            ),
+                          ],
+                        ),
+
+                        // 3. MY ACTIVITY TAB
+                        _sectionCard(
+                          key: "activity",
+                          title: "My Activity",
+                          descriptionEn: "Track your personal orders, lodge bookings, event tickets, and unlocked properties.",
+                          descriptionNy: "Onani katundu amene mwagula, booked lodge, matikiti amisonkhano, ndi malo ogulidwa.",
+                          crossAxisCount: crossAxisCount,
+                          children: [
+                            _gridCard(
+                              Icons.shopping_bag_outlined, 
+                              "Orders", 
+                              () {
+                                analytics.logEvent('profile_click_orders');
+                                MainTabsScreen.of(context)?.navigateToOrders();
+                              },
+                            ),
+                            _gridCard(
+                              Icons.hotel_outlined, 
+                              "Bookings", 
+                              () {
+                                analytics.logEvent('profile_click_bookings');
+                                MainTabsScreen.of(context)?.navigateToMyBookings();
+                              },
+                            ),
+                            _gridCard(
+                              Icons.confirmation_number_outlined, 
+                              "Tickets", 
+                              () {
+                                analytics.logEvent('profile_click_tickets');
+                                MainTabsScreen.of(context)?.navigateToMyTickets();
+                              },
+                            ),
+                            _gridCard(
+                              Icons.lock_open_outlined, 
+                              "Unlocked Properties", 
+                              () {
+                                analytics.logEvent('profile_click_unlocked_properties');
+                                MainTabsScreen.of(context)?.navigateToMyUnlockedProperties();
+                              },
+                            ),
+                          ],
+                        ),
+
+                        // 4. MANAGEMENT TAB
+                        _sectionCard(
+                          key: "management",
+                          title: "Lodge, Properties & Events Management ",
+                          descriptionEn: "Manage your listed lodges, real estate properties, and organized event shows.",
+                          descriptionNy: "Yendetsani malo ogona (lodge), nyumba kapena malo ogulitsa, ndi misonkhano kapena zochitika zanu.",
+                          crossAxisCount: crossAxisCount,
+                          children: [
+                            _gridCard(
+                              Icons.dashboard_outlined, 
+                              "Lodge", 
+                              () {
+                                analytics.logEvent('profile_click_lodge_dashboard');
+                                MainTabsScreen.of(context)?.navigateToLodgeDashboard();
+                              },
+                            ),
+                            _gridCard(
+                              Icons.home_work_outlined, 
+                              "Properties", 
+                              () {
+                                analytics.logEvent('profile_click_properties');
+                                MainTabsScreen.of(context)?.navigateToMyProperties();
+                              },
+                            ),
+                            _gridCard(
+                              Icons.event_outlined, 
+                              "Events", 
+                              () {
+                                analytics.logEvent('profile_click_manage_events');
+                                MainTabsScreen.of(context)?.navigateToManageEvents();
+                              },
+                            ),
+                          ],
+                        ),
+
+                        // 5. ACCOUNT TAB
                         _sectionCard(
                           key: "account",
                           title: "Account",
+                          descriptionEn: "Adjust app settings or safely sign out from your user account.",
+                          descriptionNy: "Konzani zinthu zina za account yanu kapena tulukani bwinobwino mu account yanu.",
                           crossAxisCount: crossAxisCount,
                           children: [
-                            _gridCard(Icons.settings_outlined, "Settings", () {
-                              analytics.logEvent('profile_click_settings');
-                            }),
-                            _gridCard(Icons.logout_rounded, "Logout", () async {
-                              analytics.logEvent('profile_explicit_logout');
-                              await ref.read(authProvider.notifier).logout();
-                              if (context.mounted) {
-                                Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(builder: (_) => const LoginScreen()),
-                                  (route) => false,
-                                );
-                              }
-                            }),
+                            _gridCard(
+                              Icons.settings_outlined, 
+                              "Settings", 
+                              () {
+                                analytics.logEvent('profile_click_settings');
+                              },
+                            ),
+                            _gridCard(
+                              Icons.logout_rounded, 
+                              "Logout", 
+                              () async {
+                                analytics.logEvent('profile_explicit_logout');
+                                await ref.read(authProvider.notifier).logout();
+                                if (context.mounted) {
+                                  Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                                    (route) => false,
+                                  );
+                                }
+                              },
+                            ),
                           ],
                         ),
                       ],
@@ -368,6 +417,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget _sectionCard({
     required String key,
     required String title,
+    required String descriptionEn,
+    required String descriptionNy,
     required List<Widget> children,
     required int crossAxisCount,
   }) {
@@ -399,15 +450,57 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             duration: const Duration(milliseconds: 200),
             crossFadeState: isOpen ? CrossFadeState.showFirst : CrossFadeState.showSecond,
             firstChild: Container(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-              child: GridView.count(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisCount: crossAxisCount,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 1.4,
-                children: children,
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // 🌟 EXPANDED HEADER DESCRIPTION BANNER (ENGLISH + CHICHEWA)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 14),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: AppColors.mangoOrange.withOpacity(0.06),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: AppColors.mangoOrange.withOpacity(0.18),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          descriptionEn,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade800,
+                            height: 1.3,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          descriptionNy,
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            fontStyle: FontStyle.italic,
+                            color: Colors.grey.shade600,
+                            height: 1.3,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  GridView.count(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisCount: crossAxisCount,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
+                    childAspectRatio: 1.4,
+                    children: children,
+                  ),
+                ],
               ),
             ),
             secondChild: const SizedBox(width: double.infinity),
@@ -505,12 +598,14 @@ class MakeActionInkWell extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 15, 
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF212529),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 15, 
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF212529),
+                ),
               ),
             ),
             Icon(

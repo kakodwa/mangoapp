@@ -10,6 +10,7 @@ import '../../providers/shops_provider.dart';
 import '../../theme/app_colors.dart';
 import 'register_screen.dart';
 import 'forgot_password_screen.dart';
+import '../main_tabs_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -84,13 +85,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
       final authState = ref.read(authProvider);
 
-      if (authState.isAuthenticated) {
-        ref.invalidate(userShopsProvider);
-        ref.invalidate(shopsProvider);
-        ref.invalidate(productsProvider);
+if (authState.isAuthenticated) {
+  ref.invalidate(userShopsProvider);
+  ref.invalidate(shopsProvider);
+  ref.invalidate(productsProvider);
 
-        Navigator.of(context).pushReplacementNamed('/home');
-      } else {
+  // Check if MainTabsScreen is in the ancestor tree
+  final tabsState = MainTabsScreen.of(context);
+  
+  if (tabsState != null) {
+    // Switch tab directly to Profile (index 6)
+    tabsState.setSelectedIndex(6);
+    // Remove the login screen from the top of the navigation stack
+    Navigator.of(context).pop();
+  } else {
+    // If mounted standalone, push MainTabsScreen freshly with initialIndex 6
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (_) => const MainTabsScreen(initialIndex: 6),
+      ),
+      (route) => false,
+    );
+  }
+} else {
         _showError(
           authState.error ?? 'Login failed. Please try again',
         );
