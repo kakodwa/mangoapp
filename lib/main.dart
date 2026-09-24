@@ -28,7 +28,6 @@ import 'providers/auth_provider.dart';
 final GlobalKey<NavigatorState> globalNavigatorKey = GlobalKey<NavigatorState>();
 final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
-
 void main(){
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -45,7 +44,8 @@ void main(){
 }
 
 class MainApp extends ConsumerStatefulWidget {
-  const MainApp({Key? key}) : super(key: key);
+  // 🌟 FIX: Updated super key constructor to use super.key standard notation
+  const MainApp({super.key});
 
   @override
   ConsumerState<MainApp> createState() => _MainAppState();
@@ -65,6 +65,9 @@ class _MainAppState extends ConsumerState<MainApp> {
         debugShowCheckedModeBanner: false,
         title: 'MalaTrade',
 
+        // 🌟 DEFAULT ROOT SCREEN (Fixes missing "/" route generator error)
+        home: const MainTabsScreen(),
+
         theme: ThemeData(
           useMaterial3: true,
           scaffoldBackgroundColor: Colors.white,
@@ -83,8 +86,6 @@ class _MainAppState extends ConsumerState<MainApp> {
           ),
         ),
 
- 
-
         routes: {
           '/login': (context) => const LoginScreen(),
           '/register': (context) => const RegisterScreen(),
@@ -102,7 +103,7 @@ class _MainAppState extends ConsumerState<MainApp> {
 
 class LodgeDeepLinkBridge extends StatefulWidget {
   final int lodgeId;
-  const LodgeDeepLinkBridge({Key? key, required this.lodgeId}) : super(key: key);
+  const LodgeDeepLinkBridge({super.key, required this.lodgeId});
 
   @override
   State<LodgeDeepLinkBridge> createState() => _LodgeDeepLinkBridgeState();
@@ -154,7 +155,7 @@ class _LodgeDeepLinkBridgeState extends State<LodgeDeepLinkBridge> {
 
 class EventDeepLinkBridge extends StatefulWidget {
   final int eventId;
-  const EventDeepLinkBridge({Key? key, required this.eventId}) : super(key: key);
+  const EventDeepLinkBridge({super.key, required this.eventId});
 
   @override
   State<EventDeepLinkBridge> createState() => _EventDeepLinkBridgeState();
