@@ -1,4 +1,5 @@
-package com.example.mangochi_marketplace
+
+package com.mangochi.marketplace
 
 import io.flutter.embedding.android.FlutterActivity
 
