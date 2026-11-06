@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "138498324914",
-    "project_id": "mamgohub",
-    "storage_bucket": "mamgohub.firebasestorage.app"
+    "project_number": "313770036959",
+    "project_id": "malatrade",
+    "storage_bucket": "malatrade.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:138498324914:android:62d64937327c9bae9e0cab",
+        "mobilesdk_app_id": "1:313770036959:android:3e33b76cac2ee30ad2a36a",
         "android_client_info": {
           "package_name": "com.mangochi.marketplace"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAE1poAFPUF-PqI-ikHe6d9qJ4I1JSfcLw"
+          "current_key": "AIzaSyBqOk_X6puCLrMdMbwK1oYUzH55_xrsMjw"
         }
       ],
       "services": {
