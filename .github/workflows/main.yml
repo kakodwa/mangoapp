@@ -1,3 +1,4 @@
+
 name: Flutter Multi-Platform Build
 
 on:
@@ -33,18 +34,68 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
+      # --------------------------------------------------------
+      # Configure Android Release Signing
+      # --------------------------------------------------------
+      - name: Configure Android release signing
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -e
+
+          test -n "$KEYSTORE_BASE64" || (echo "Missing keystore" && exit 1)
+          test -n "$KEYSTORE_PASSWORD" || (echo "Missing keystore password" && exit 1)
+          test -n "$KEY_ALIAS" || (echo "Missing key alias" && exit 1)
+          test -n "$KEY_PASSWORD" || (echo "Missing key password" && exit 1)
+
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > android/app/malatrade-release.jks
+
+          test -s android/app/malatrade-release.jks
+
+          cat > android/key.properties <<EOF
+          storePassword=$KEYSTORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=malatrade-release.jks
+          EOF
+
+          echo "Android release signing configured successfully."
+
+      # --------------------------------------------------------
+      # Build APK
+      # --------------------------------------------------------
       - name: Build APK
         run: flutter build apk --release
 
+      # --------------------------------------------------------
+      # Build AAB
+      # --------------------------------------------------------
       - name: Build AAB
         run: flutter build appbundle --release
 
+      # --------------------------------------------------------
+      # Verify Android builds
+      # --------------------------------------------------------
+      - name: Verify Android release files
+        run: |
+          ls -lh build/app/outputs/flutter-apk/app-release.apk
+          ls -lh build/app/outputs/bundle/release/app-release.aab
+
+      # --------------------------------------------------------
+      # Upload APK
+      # --------------------------------------------------------
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: malatrade-android-apk
           path: build/app/outputs/flutter-apk/app-release.apk
 
+      # --------------------------------------------------------
+      # Upload AAB
+      # --------------------------------------------------------
       - name: Upload AAB
         uses: actions/upload-artifact@v4
         with:
@@ -60,24 +111,15 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      # --------------------------------------------------------
-      # Checkout repository
-      # --------------------------------------------------------
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # --------------------------------------------------------
-      # Set up Flutter
-      # --------------------------------------------------------
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: 3.41.7
           cache: true
 
-      # --------------------------------------------------------
-      # Get dependencies
-      # --------------------------------------------------------
       - name: Get dependencies
         run: flutter pub get
 
@@ -92,15 +134,7 @@ jobs:
           CERTIFICATE_PATH="$RUNNER_TEMP/certificate.p12"
           KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain-db"
 
-          echo "Decoding Apple certificate..."
-
           printf '%s' "$IOS_CERTIFICATE_BASE64" | base64 --decode > "$CERTIFICATE_PATH"
-
-          echo "Checking certificate file..."
-          ls -lh "$CERTIFICATE_PATH"
-          file "$CERTIFICATE_PATH"
-
-          echo "Testing PKCS12 certificate..."
 
           openssl pkcs12 \
             -in "$CERTIFICATE_PATH" \
@@ -108,39 +142,22 @@ jobs:
             -noout \
             -passin pass:"$IOS_CERTIFICATE_PASSWORD"
 
-          echo "Creating temporary keychain..."
+          security create-keychain -p "temporary" "$KEYCHAIN_PATH"
 
-          security create-keychain \
-            -p "temporary" \
-            "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
 
-          security set-keychain-settings \
-            -lut 21600 \
-            "$KEYCHAIN_PATH"
-
-          security unlock-keychain \
-            -p "temporary" \
-            "$KEYCHAIN_PATH"
+          security unlock-keychain -p "temporary" "$KEYCHAIN_PATH"
 
           security import "$CERTIFICATE_PATH" \
             -P "$IOS_CERTIFICATE_PASSWORD" \
-            -A \
-            -t cert \
-            -f pkcs12 \
+            -A -t cert -f pkcs12 \
             -k "$KEYCHAIN_PATH"
 
           security set-key-partition-list \
             -S apple-tool:,apple: \
-            -s \
-            -k "temporary" \
-            "$KEYCHAIN_PATH"
+            -s -k "temporary" "$KEYCHAIN_PATH"
 
-          security list-keychain \
-            -d user \
-            -s "$KEYCHAIN_PATH"
-
-          echo "Apple certificate imported successfully."
-
+          security list-keychain -d user -s "$KEYCHAIN_PATH"
 
       # --------------------------------------------------------
       # Install provisioning profile
@@ -151,48 +168,32 @@ jobs:
         run: |
           PROFILE_PATH="$RUNNER_TEMP/profile.mobileprovision"
 
-          echo "Decoding provisioning profile..."
-
           printf '%s' "$IOS_PROVISIONING_PROFILE_BASE64" | base64 --decode > "$PROFILE_PATH"
-
-          echo "Checking provisioning profile..."
-          ls -lh "$PROFILE_PATH"
-          file "$PROFILE_PATH"
 
           mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
 
           cp "$PROFILE_PATH" \
             "$HOME/Library/MobileDevice/Provisioning Profiles/"
 
-          echo "Provisioning profile installed successfully."
-
-
       # --------------------------------------------------------
       # Check Xcode signing identities
       # --------------------------------------------------------
       - name: Check signing identities
         run: |
-          echo "Available signing identities:"
           security find-identity -v -p codesigning \
             "$RUNNER_TEMP/build.keychain-db"
-
 
       # --------------------------------------------------------
       # Build signed IPA
       # --------------------------------------------------------
       - name: Build iOS IPA
-        run: |
-          flutter build ipa --release
-
+        run: flutter build ipa --release
 
       # --------------------------------------------------------
       # Check generated IPA
       # --------------------------------------------------------
       - name: Check IPA
-        run: |
-          echo "Generated IPA files:"
-          ls -lh build/ios/ipa/
-
+        run: ls -lh build/ios/ipa/
 
       # --------------------------------------------------------
       # Upload IPA

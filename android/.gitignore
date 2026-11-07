@@ -1,11 +1,20 @@
-/.gradle
+# Gradle
+.gradle/
+**/build/
+
+# Captures
 /captures/
+
+# Android local configuration
 /local.properties
 GeneratedPluginRegistrant.java
 .cxx/
 
-# Remember to never publicly share your keystore.
-# See https://flutter.dev/to/reference-keystore
-key.properties
+# Android release signing - never commit these files
+/android/key.properties
+/android/app/malatrade-release.jks
 **/*.keystore
 **/*.jks
+
+# General signing files
+key.properties
