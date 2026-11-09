@@ -2,7 +2,7 @@ name: mangochi_marketplace
 description: "A comprehensive multi-vendor marketplace app for Mangochi, Malawi with e-commerce, real estate, and wallet features."
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ^3.0.0

@@ -6,6 +6,8 @@ on:
     branches:
       - main
 
+  workflow_dispatch:
+
 jobs:
 
   # ============================================================
@@ -14,23 +16,42 @@ jobs:
   build-android:
     name: Build Android (APK & AAB)
     runs-on: ubuntu-latest
+    timeout-minutes: 60
 
     steps:
+      # --------------------------------------------------------
+      # Checkout repository
+      # --------------------------------------------------------
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # --------------------------------------------------------
+      # Set up Java
+      # --------------------------------------------------------
       - name: Set up Java JDK
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
+      # --------------------------------------------------------
+      # Set up Gradle caching
+      # --------------------------------------------------------
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      # --------------------------------------------------------
+      # Set up Flutter
+      # --------------------------------------------------------
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: 3.41.7
           cache: true
 
+      # --------------------------------------------------------
+      # Get Flutter dependencies
+      # --------------------------------------------------------
       - name: Get dependencies
         run: flutter pub get
 
@@ -46,7 +67,7 @@ jobs:
         run: |
           set -e
 
-          test -n "$KEYSTORE_BASE64" || (echo "Missing keystore" && exit 1)
+          test -n "$KEYSTORE_BASE64" || (echo "Missing keystore secret" && exit 1)
           test -n "$KEYSTORE_PASSWORD" || (echo "Missing keystore password" && exit 1)
           test -n "$KEY_ALIAS" || (echo "Missing key alias" && exit 1)
           test -n "$KEY_PASSWORD" || (echo "Missing key password" && exit 1)
@@ -65,33 +86,71 @@ jobs:
           echo "Android release signing configured successfully."
 
       # --------------------------------------------------------
-      # Build APK
+      # Build AAB with retry
       # --------------------------------------------------------
-      - name: Build APK
-        run: flutter build apk --release
+      - name: Build Android App Bundle (AAB)
+        run: |
+          set -e
+
+          for attempt in 1 2 3; do
+            echo "========================================"
+            echo "AAB BUILD ATTEMPT $attempt OF 3"
+            echo "========================================"
+
+            if flutter build appbundle --release --no-pub; then
+              echo "AAB build completed successfully."
+              exit 0
+            fi
+
+            if [ "$attempt" -lt 3 ]; then
+              echo "AAB build failed. Waiting 60 seconds before retry..."
+              sleep 60
+            fi
+          done
+
+          echo "AAB build failed after 3 attempts."
+          exit 1
 
       # --------------------------------------------------------
-      # Build AAB
+      # Build APK with retry
       # --------------------------------------------------------
-      - name: Build AAB
-        run: flutter build appbundle --release
+      - name: Build Android APK
+        run: |
+          set -e
+
+          for attempt in 1 2 3; do
+            echo "========================================"
+            echo "APK BUILD ATTEMPT $attempt OF 3"
+            echo "========================================"
+
+            if flutter build apk --release --no-pub; then
+              echo "APK build completed successfully."
+              exit 0
+            fi
+
+            if [ "$attempt" -lt 3 ]; then
+              echo "APK build failed. Waiting 60 seconds before retry..."
+              sleep 60
+            fi
+          done
+
+          echo "APK build failed after 3 attempts."
+          exit 1
 
       # --------------------------------------------------------
-      # Verify Android builds
+      # Verify Android release files
       # --------------------------------------------------------
       - name: Verify Android release files
         run: |
-          ls -lh build/app/outputs/flutter-apk/app-release.apk
-          ls -lh build/app/outputs/bundle/release/app-release.aab
+          set -e
 
-      # --------------------------------------------------------
-      # Upload APK
-      # --------------------------------------------------------
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: malatrade-android-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          test -s build/app/outputs/bundle/release/app-release.aab
+          test -s build/app/outputs/flutter-apk/app-release.apk
+
+          echo "Android release files generated successfully."
+
+          ls -lh build/app/outputs/bundle/release/app-release.aab
+          ls -lh build/app/outputs/flutter-apk/app-release.apk
 
       # --------------------------------------------------------
       # Upload AAB
@@ -101,6 +160,19 @@ jobs:
         with:
           name: malatrade-android-aab
           path: build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 30
+
+      # --------------------------------------------------------
+      # Upload APK
+      # --------------------------------------------------------
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: malatrade-android-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 30
 
 
   # ============================================================
@@ -109,32 +181,49 @@ jobs:
   build-ios:
     name: Build iOS IPA
     runs-on: macos-latest
+    timeout-minutes: 60
 
     steps:
+      # --------------------------------------------------------
+      # Checkout repository
+      # --------------------------------------------------------
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # --------------------------------------------------------
+      # Set up Flutter
+      # --------------------------------------------------------
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: 3.41.7
           cache: true
 
+      # --------------------------------------------------------
+      # Get dependencies
+      # --------------------------------------------------------
       - name: Get dependencies
         run: flutter pub get
 
       # --------------------------------------------------------
-      # Import Apple certificate
+      # Install Apple certificate
       # --------------------------------------------------------
       - name: Install Apple certificate
         env:
           IOS_CERTIFICATE_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
           IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
         run: |
+          set -e
+
+          test -n "$IOS_CERTIFICATE_BASE64" || (echo "Missing iOS certificate" && exit 1)
+          test -n "$IOS_CERTIFICATE_PASSWORD" || (echo "Missing iOS certificate password" && exit 1)
+
           CERTIFICATE_PATH="$RUNNER_TEMP/certificate.p12"
           KEYCHAIN_PATH="$RUNNER_TEMP/build.keychain-db"
 
           printf '%s' "$IOS_CERTIFICATE_BASE64" | base64 --decode > "$CERTIFICATE_PATH"
+
+          test -s "$CERTIFICATE_PATH"
 
           openssl pkcs12 \
             -in "$CERTIFICATE_PATH" \
@@ -159,6 +248,8 @@ jobs:
 
           security list-keychain -d user -s "$KEYCHAIN_PATH"
 
+          echo "Apple certificate installed."
+
       # --------------------------------------------------------
       # Install provisioning profile
       # --------------------------------------------------------
@@ -166,14 +257,22 @@ jobs:
         env:
           IOS_PROVISIONING_PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE_BASE64 }}
         run: |
+          set -e
+
+          test -n "$IOS_PROVISIONING_PROFILE_BASE64" || (echo "Missing provisioning profile" && exit 1)
+
           PROFILE_PATH="$RUNNER_TEMP/profile.mobileprovision"
 
           printf '%s' "$IOS_PROVISIONING_PROFILE_BASE64" | base64 --decode > "$PROFILE_PATH"
+
+          test -s "$PROFILE_PATH"
 
           mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
 
           cp "$PROFILE_PATH" \
             "$HOME/Library/MobileDevice/Provisioning Profiles/"
+
+          echo "Provisioning profile installed."
 
       # --------------------------------------------------------
       # Check Xcode signing identities
@@ -190,10 +289,13 @@ jobs:
         run: flutter build ipa --release
 
       # --------------------------------------------------------
-      # Check generated IPA
+      # Verify generated IPA
       # --------------------------------------------------------
       - name: Check IPA
-        run: ls -lh build/ios/ipa/
+        run: |
+          set -e
+          ls -lh build/ios/ipa/
+          test -n "$(find build/ios/ipa -name '*.ipa' -type f)"
 
       # --------------------------------------------------------
       # Upload IPA
@@ -203,3 +305,5 @@ jobs:
         with:
           name: malatrade-ios-ipa
           path: build/ios/ipa/*.ipa
+          if-no-files-found: error
+          retention-days: 30
