@@ -111,3 +111,17 @@ Payment successful → payments@malatrade.com
 Vendor approved → vendors@malatrade.com
 General contact ("Contact Us") → info@malatrade.com
 Promotional newsletters → no-reply@malatrade.com
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# MAKE APP IN RELEASE MODE - REQUIREMENTS
+
+ANDROID_KEYSTORE_PASSWORD
+ANDROID_KEY_PASSWORD
+ANDROID_KEYSTORE_BASE64
+ANDROID_KEY_ALIAS
+
+KEYSTORE CONVERT TO BYTES TO ADD TO GIT HUB UNDER PASS NAME 'ANDROID_KEYSTORE_BASE64'
+
+malatrade-release.jks DOWNLOADED IN GITHUB UNDER ARFACTS
+
+[Convert]::ToBase64String([IO.File]::ReadAllBytes("malatrade-release.jks")) | Set-Content -NoNewline keystore-base64.txt
