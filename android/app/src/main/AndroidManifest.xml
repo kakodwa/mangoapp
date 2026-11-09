@@ -17,6 +17,9 @@
         android:maxSdkVersion="28"
         tools:node="remove" />
 
+    <!-- Block advertising ID if you answered 'No' -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove" />
+
 
     <application
         android:label="MalaTrade"
@@ -48,7 +51,14 @@
                 android:resource="@style/NormalTheme"/>
 
 
-            <!-- Primary MalaTrade domain -->
+            <!-- 1. LAUNCHER INTENT: Tells Android to show MalaTrade on the home screen & app drawer -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+
+
+            <!-- 2. Primary MalaTrade domain deep link -->
             <intent-filter android:autoVerify="true">
 
                 <action android:name="android.intent.action.VIEW"/>
@@ -64,7 +74,7 @@
             </intent-filter>
 
 
-            <!-- Keep www for old shared links -->
+            <!-- 3. Keep www for old shared links -->
             <intent-filter android:autoVerify="true">
 
                 <action android:name="android.intent.action.VIEW"/>
