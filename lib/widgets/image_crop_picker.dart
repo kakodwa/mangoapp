@@ -1,3 +1,5 @@
+// lib/widgets/image_crop_picker.dart
+
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -110,213 +112,215 @@ class _ImageCropPickerState extends State<ImageCropPicker> {
   }
 
   // =========================
-  // CROPPER DIALOG WITH PINCH & ZOOM
+  // CROPPER DIALOG WITH DIRECT CLICKABLE ZOOM BUTTONS (+ / -)
   // =========================
-// =========================
-// CROPPER DIALOG WITH DIRECT CLICKABLE ZOOM BUTTONS (+ / -)
-// =========================
-Future<void> _showCropDialog() async {
-  if (_rawImage == null) return;
+  Future<void> _showCropDialog() async {
+    if (_rawImage == null) return;
 
-  setState(() {
-    _isProcessingCrop = false;
-  });
+    setState(() {
+      _isProcessingCrop = false;
+    });
 
-  // Controller to programmatically control the + and - zoom actions
-  final TransformationController transformController = TransformationController();
-  double currentScale = 1.0;
+    final TransformationController transformController = TransformationController();
+    double currentScale = 1.0;
 
-  void zoom(double step) {
-    // Calculate new target scale (bounded between 1.0x and 3.0x)
-    final double targetScale = (currentScale + step).clamp(1.0, 3.0);
-    if (targetScale == currentScale) return;
+    void zoom(double step) {
+      final double targetScale = (currentScale + step).clamp(1.0, 3.0);
+      if (targetScale == currentScale) return;
 
-    currentScale = targetScale;
-    
-    // Programmatically set the scale matrix
-    transformController.value = Matrix4.identity()..scale(targetScale);
-  }
+      currentScale = targetScale;
+      transformController.value = Matrix4.identity()..scale(targetScale);
+    }
 
-  await showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (dialogContext) {
-      return StatefulBuilder(
-        builder: (context, setDialogState) {
-          return Dialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            child: SizedBox(
-              width: 440,
-              height: 560,
-              child: Column(
-                children: [
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(16),
-                        topRight: Radius.circular(16),
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              child: SizedBox(
+                width: 440,
+                height: 560,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(16),
+                          topRight: Radius.circular(16),
+                        ),
+                        child: Stack(
+                          children: [
+                            InteractiveViewer(
+                              transformationController: transformController,
+                              minScale: 1.0,
+                              maxScale: 3.0,
+                              panEnabled: true,
+                              scaleEnabled: true,
+                              child: Crop(
+                                image: _rawImage!,
+                                controller: _cropController,
+                                interactive: false,
+                                fixCropRect: false,
+                                aspectRatio: widget.cropType == CropShapeType.square ? 1 : 4 / 3,
+                                onCropped: (croppedData) {
+                                  WidgetsBinding.instance.addPostFrameCallback((_) async {
+                                    if (Navigator.canPop(dialogContext)) {
+                                      Navigator.pop(dialogContext);
+                                    }
+                                    await _addCroppedImage(croppedData);
+                                  });
+                                },
+                              ),
+                            ),
+
+                            // Floating instruction badge
+                            Positioned(
+                              top: 12,
+                              left: 12,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.7),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.touch_app, color: Colors.white, size: 14),
+                                    SizedBox(width: 6),
+                                    Text(
+                                      "Use + / - buttons or drag to align",
+                                      style: TextStyle(color: Colors.white, fontSize: 11),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      child: Stack(
+                    ),
+
+                    // CLICKABLE ZOOM CONTROLS
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      color: Colors.grey.shade100,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          // 🔍 InteractiveViewer provides programmatic zoom control
-                          InteractiveViewer(
-                            transformationController: transformController,
-                            minScale: 1.0,
-                            maxScale: 3.0,
-                            panEnabled: true, // Click & drag to pan around
-                            scaleEnabled: true, // Allows mouse wheel / pinch zoom as well
-                            child: Crop(
-                              image: _rawImage!,
-                              controller: _cropController,
-                              interactive: false, // Gesture handling managed by InteractiveViewer
-                              fixCropRect: false,
-                              aspectRatio: widget.cropType == CropShapeType.square ? 1 : 4 / 3,
-                              onCropped: (croppedData) {
-                                WidgetsBinding.instance.addPostFrameCallback((_) {
-                                  if (Navigator.canPop(dialogContext)) {
-                                    Navigator.pop(dialogContext);
-                                  }
-                                  _addCroppedImage(croppedData);
-                                });
-                              },
-                            ),
+                          IconButton.filledTonal(
+                            icon: const Icon(Icons.remove),
+                            tooltip: "Zoom Out",
+                            onPressed: () {
+                              setDialogState(() {
+                                zoom(-0.25);
+                              });
+                            },
                           ),
-                          
-                          // Floating instruction badge
-                          Positioned(
-                            top: 12,
-                            left: 12,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.7),
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: const Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.touch_app, color: Colors.white, size: 14),
-                                  SizedBox(width: 6),
-                                  Text(
-                                    "Use + / - buttons or drag to align",
-                                    style: TextStyle(color: Colors.white, fontSize: 11),
-                                  ),
-                                ],
-                              ),
-                            ),
+                          const SizedBox(width: 16),
+                          Text(
+                            "${(currentScale * 100).toInt()}%",
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                          ),
+                          const SizedBox(width: 16),
+                          IconButton.filledTonal(
+                            icon: const Icon(Icons.add),
+                            tooltip: "Zoom In",
+                            onPressed: () {
+                              setDialogState(() {
+                                zoom(0.25);
+                              });
+                            },
+                          ),
+                          const SizedBox(width: 20),
+                          TextButton.icon(
+                            icon: const Icon(Icons.restart_alt, size: 18),
+                            label: const Text("Reset"),
+                            onPressed: () {
+                              setDialogState(() {
+                                currentScale = 1.0;
+                                transformController.value = Matrix4.identity();
+                              });
+                            },
                           ),
                         ],
                       ),
                     ),
-                  ),
 
-                  // ➕ / ➖ CLICKABLE ZOOM CONTROLS
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                    color: Colors.grey.shade100,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Zoom Out (-) Button
-                        IconButton.filledTonal(
-                          icon: const Icon(Icons.remove),
-                          tooltip: "Zoom Out",
-                          onPressed: () {
-                            setDialogState(() {
-                              zoom(-0.25); // Scale down by 0.25x
-                            });
-                          },
-                        ),
-                        const SizedBox(width: 16),
-                        
-                        // Current Scale Indicator Text
-                        Text(
-                          "${(currentScale * 100).toInt()}%",
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                        ),
-                        
-                        const SizedBox(width: 16),
-                        
-                        // Zoom In (+) Button
-                        IconButton.filledTonal(
-                          icon: const Icon(Icons.add),
-                          tooltip: "Zoom In",
-                          onPressed: () {
-                            setDialogState(() {
-                              zoom(0.25); // Scale up by 0.25x
-                            });
-                          },
-                        ),
-                        
-                        const SizedBox(width: 20),
-                        
-                        // Reset Zoom Button
-                        TextButton.icon(
-                          icon: const Icon(Icons.restart_alt, size: 18),
-                          label: const Text("Reset"),
-                          onPressed: () {
-                            setDialogState(() {
-                              currentScale = 1.0;
-                              transformController.value = Matrix4.identity();
-                            });
-                          },
-                        ),
-                      ],
+                    // Action Buttons (Cancel / Crop)
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          TextButton(
+                            onPressed: () {
+                              if (!_isProcessingCrop) Navigator.pop(dialogContext);
+                            },
+                            child: const Text("Cancel"),
+                          ),
+                          ElevatedButton(
+                            onPressed: _isProcessingCrop
+                                ? null
+                                : () {
+                                    setDialogState(() => _isProcessingCrop = true);
+                                    setState(() => _isProcessingCrop = true);
+
+                                    Future.delayed(const Duration(milliseconds: 60), () {
+                                      _cropController.crop();
+                                    });
+                                  },
+                            child: _isProcessingCrop
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                : const Text("Crop"),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-
-                  // Action Buttons (Cancel / Crop)
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        TextButton(
-                          onPressed: () {
-                            if (!_isProcessingCrop) Navigator.pop(dialogContext);
-                          },
-                          child: const Text("Cancel"),
-                        ),
-                        ElevatedButton(
-                          onPressed: _isProcessingCrop
-                              ? null
-                              : () {
-                                  setDialogState(() => _isProcessingCrop = true);
-                                  setState(() => _isProcessingCrop = true);
-
-                                  Future.delayed(const Duration(milliseconds: 60), () {
-                                    _cropController.crop();
-                                  });
-                                },
-                          child: _isProcessingCrop
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : const Text("Crop"),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
-        },
-      );
-    },
-  );
-}
+            );
+          },
+        );
+      },
+    );
+  }
 
-  void _addCroppedImage(Uint8List cropped) {
+  Future<void> _addCroppedImage(Uint8List cropped) async {
     if (_pendingFile == null || !mounted) return;
 
-    final file = XFile.fromData(
-      cropped,
-      name: _pendingFile!.name,
-      mimeType: 'image/jpeg',
-    );
+    final fileName = _pendingFile!.name.isNotEmpty
+        ? _pendingFile!.name
+        : 'cropped_${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+    XFile file;
+    if (kIsWeb) {
+      file = XFile.fromData(
+        cropped,
+        name: fileName,
+        mimeType: 'image/jpeg',
+      );
+    } else {
+      final tempFile = File(
+        '${Directory.systemTemp.path}/crop_${DateTime.now().millisecondsSinceEpoch}_$fileName',
+      );
+      await tempFile.writeAsBytes(cropped, flush: true);
+      file = XFile(
+        tempFile.path,
+        name: fileName,
+        mimeType: 'image/jpeg',
+      );
+    }
+
+    if (!mounted) return;
 
     setState(() {
       images.add(CroppedImageContainer(file: file, bytes: cropped));
